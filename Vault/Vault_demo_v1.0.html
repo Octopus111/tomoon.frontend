@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1400, initial-scale=0.25, maximum-scale=3, user-scalable=yes">
+    <title>ToMoon Vault</title>
+    <style>
+        :root {
+            --bg-dark: #0f1115;
+            --bg-card: #161b22;
+            --bg-card-hover: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #2f81f7;
+            --accent-purple: #8957e5;
+            --accent-green: #238636;
+            --border: #30363d;
+            --border-hover: #8b949e;
+            --grid-gap: 20px;
+        }
+
+        /* Hide Scrollbars */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Main Content Area matches sidebar padding */
+        .main-content {
+            margin-left: 240px; /* Width of sidebar */
+            margin-top: 60px; /* Height of topbar */
+            padding: 30px;
+            flex: 1;
+            max-width: 1600px;
+            box-sizing: border-box;
+        }
+
+        /* Vault Header */
+        .vault-header {
+            margin-bottom: 30px;
+        }
+
+        .vault-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0 0 20px 0;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input-wrapper svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px 12px 12px 40px;
+            color: var(--text-primary);
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .action-btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn.secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+        }
+
+        /* Grid Layout */
+        .vault-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .left-col {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Initial Quick Capture */
+        .quick-capture-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .capture-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            min-height: 40px;
+        }
+
+        /* Collections */
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .collection-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .collection-card:hover {
+            border-color: var(--text-muted);
+            transform: translateY(-2px);
+        }
+
+        .collection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .collection-icon {
+            color: var(--accent-purple);
+        }
+
+        .collection-menu {
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .collection-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .collection-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .collection-preview {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 36px;
+            margin-bottom: 15px;
+        }
+
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .btn-sm:hover {
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+        }
+
+        /* Recent Activity */
+        .activity-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2px;
+        }
+
+        .filter-tab {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-muted);
+            position: relative;
+        }
+
+        .filter-tab.active {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .filter-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-blue);
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: var(--bg-card);
+            border-radius: 0;
+            transition: background 0.2s;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+        }
+
+        .activity-item:first-child { border-top-left-radius: 8px; border-top-right-radius: 8px; }
+        .activity-item:last-child { border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; border-bottom: none; }
+
+        .activity-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .item-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tag-pill {
+            background: rgba(48, 54, 61, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        /* Right Sidebar */
+        .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .highlight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .highlight-quote {
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--accent-purple);
+            padding-left: 15px;
+        }
+
+        .highlight-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .highlight-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .mini-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .mini-title {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .mini-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Icons */
+        .folder-icon { color: #8b949e; }
+        .note-icon { color: #8957e5; }
+        .idea-icon { color: #faa356; }
+        .journal-icon { color: #2f81f7; }
+
+        /* View Management */
+        .view-section {
+            display: none;
+        }
+        .view-section.active {
+            display: block;
+        }
+
+        /* Collection View Layout */
+        .collection-layout {
+            display: grid;
+            grid-template-columns: 240px 320px 1fr 280px;
+            gap: 0;
+            height: calc(100vh - 40px); /* Adjust for margins */
+            margin: -30px; /* Counteract main-content padding */
+            max-width: none;
+        }
+
+        .cl-sidebar {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cl-notes-list {
+            background: var(--bg-dark);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .cl-main {
+            padding: 30px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .cl-right {
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cl-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Note List Column Styles */
+        .list-header {
+            margin-bottom: 20px;
+        }
+        
+        .list-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .note-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .note-card:hover, .note-card.active {
+            border-color: var(--text-muted);
+            background: var(--bg-card-hover);
+        }
+
+        .note-card.active {
+            border-color: var(--accent-blue);
+        }
+
+        .nc-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .nc-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .cl-nav-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .cl-nav-item:hover, .cl-nav-item.active {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+        }
+
+        .cl-nav-item.active {
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .note-header {
+            margin-bottom: 20px;
+        }
+
+        .note-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            width: 100%;
+            outline: none;
+        }
+
+        .note-meta {
+            display: flex;
+            gap: 15px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .note-content {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .note-content h3 {
+            font-size: 18px;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        .note-content ul {
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        .note-content li {
+            margin-bottom: 8px;
+        }
+
+        /* Right sidebar widgets */
+        .widget-box {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .widget-header {
+            background: rgba(30, 36, 45, 0.5);
+            padding: 10px 15px;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .widget-content {
+            padding: 15px;
+        }
+
+        .backlink-item {
+            display: flex;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+            font-size: 13px;
+        }
+        
+        .backlink-item:last-child { border-bottom: none; }
+
+        .backlink-icon { color: var(--accent-purple); }
+
+        /* Dropdown Menu Styles */
+        .dropdown-menu {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 0;
+            min-width: 160px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            z-index: 9000;
+            animation: fadeIn 0.15s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .dropdown-item.danger {
+            color: #ef4444;
+        }
+
+        .dropdown-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 6px 0;
+        }
+
+        /* Modal Styles */
+        .vault-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .vault-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.25s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .vault-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .vault-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .vault-modal-body {
+            padding: 20px;
+        }
+
+        .vault-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 15px 20px;
+            border-top: 1px solid var(--border);
+            background: rgba(30, 36, 45, 0.3);
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Collection Card Hover Improvements */
+        .collection-card:hover .collection-menu {
+            opacity: 1;
+        }
+
+        .collection-menu {
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        /* Mini Card Improvements */
+        .mini-card {
+            transition: all 0.2s;
+        }
+
+        .mini-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--text-muted);
+        }
+
+        /* Activity Item Menu Button */
+        .activity-item .collection-menu {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .activity-item .collection-menu:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        /* Luna Button Styles */
+        .luna-btn {
+            background: rgba(139, 92, 246, 0.1) !important;
+            border-color: rgba(139, 92, 246, 0.3) !important;
+            color: #a78bfa !important;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .luna-btn:hover {
+            background: rgba(139, 92, 246, 0.2) !important;
+            border-color: rgba(139, 92, 246, 0.5) !important;
+            color: #c4b5fd !important;
+        }
+
+        /* Note Title Input */
+        .note-title {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Luna Action Buttons */
+        .luna-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .luna-action-btn:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
+        }
+
+        .luna-action-btn svg {
+            flex-shrink: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar & Topbar scripts -->
+    <aside class="sidebar" id="sidebar"></aside>
+    <script src="../shared/sidebar.js"></script>
+    <script src="../shared/topbar.js"></script>
+    <script>
+        // Init navigation
+        initSidebar('vault', null, { title: 'Vault', basePath: '..' }); // 激活Vault高亮
+    </script>
+
+    <main class="main-content">
+        
+        <!-- View: HUB (Default) -->
+        <div id="view-hub" class="view-section active">
+            <!-- Header -->
+            <div class="vault-header">
+            <p style="color: var(--text-muted); margin: 0 0 20px 0;">Save what matters. Review it later.</p>
+            
+            <div class="search-row">
+                <div class="search-input-wrapper">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" class="search-input" placeholder="Search notes & highlights...">
+                </div>
+                <button class="action-btn" onclick="saveQuickCapture()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Save Note
+                </button>
+                <button class="action-btn secondary" style="padding: 0 10px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="vault-grid">
+            <!-- Left Main Column -->
+            <div class="left-col">
+                
+                <!-- Quick Capture -->
+                <div class="quick-capture-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            Quick Capture
+                        </div>
+                        <svg style="color: var(--text-muted); cursor: pointer;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    </div>
+                    <textarea class="capture-input" placeholder="Write a thought... paste a screenshot..."></textarea>
+                </div>
+
+                <!-- Collections -->
+                <div>
+                    <div class="section-header">
+                        <div class="section-title">Collections</div>
+                    </div>
+                    <div class="collections-grid">
+                        <!-- Card 1 -->
+                        <div class="collection-card" onclick="openCollection('weekly')">
+                            <div class="collection-header">
+                                <div class="collection-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                                </div>
+                                <button class="collection-menu" onclick="event.stopPropagation(); showCollectionMenu('weekly', this)">...</button>
+                            </div>
+                            <div class="collection-title">Weekly Reviews</div>
+                            <div class="collection-meta">0 Unsorted • Today</div>
+                            <div class="collection-preview">Week 50 - Reviewed NQ, ES price action patterns...</div>
+                            <button class="btn-sm" style="width: 100%;" onclick="event.stopPropagation(); openCollection('weekly')">Open</button>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="collection-card" onclick="openCollection('market')">
+                            <div class="collection-header">
+                                <div class="collection-icon" style="color: #faa356;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path><path d="M9 21h6"></path></svg>
+                                </div>
+                                <button class="collection-menu" onclick="event.stopPropagation(); showCollectionMenu('market', this)">...</button>
+                            </div>
+                            <div class="collection-title">Market Thoughts</div>
+                            <div class="collection-meta">3 Unsorted</div>
+                            <div class="collection-preview">Position sizing in range-bound markets...</div>
+                            <button class="btn-sm" style="width: 100%;" onclick="event.stopPropagation(); openCollection('market')">Open</button>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="collection-card" onclick="openCollection('strategy')">
+                            <div class="collection-header">
+                                <div class="collection-icon" style="color: #2f81f7;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                                </div>
+                                <button class="collection-menu" onclick="event.stopPropagation(); showCollectionMenu('strategy', this)">...</button>
+                            </div>
+                            <div class="collection-title">Strategy Ideas</div>
+                            <div class="collection-meta">2 Unsorted</div>
+                            <div class="collection-preview">Gold 1-hour chart gap fill setup Today</div>
+                            <button class="btn-sm" style="width: 100%;" onclick="event.stopPropagation(); openCollection('strategy')">Open</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity List -->
+                <div>
+                    <div class="section-header">
+                        <div class="section-title">Recent Activity</div>
+                        <div class="activity-filters" style="border: none; margin: 0;">
+                            <div class="filter-tab active" style="padding: 0 10px; padding-bottom: 2px; cursor: pointer;" onclick="setActivityFilter('all', this)">All</div>
+                            <div class="filter-tab" style="padding: 0 10px; padding-bottom: 2px; cursor: pointer;" onclick="setActivityFilter('notes', this)">Notes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-list">
+                        <!-- Item 1 -->
+                        <div class="activity-item" onclick="openActivityItem('weekly-review-50')">
+                            <div class="item-icon folder-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                            </div>
+                            <div class="item-content">
+                                <div class="item-title">Weekly Review - Week 50</div>
+                                <div class="item-meta">Weekly Review · Today</div>
+                            </div>
+                            <button class="collection-menu" onclick="event.stopPropagation(); showActivityMenu('weekly-review-50', this)">...</button>
+                        </div>
+                        
+                        <!-- Item 2 -->
+                        <div class="activity-item" onclick="switchView('collection')">
+                            <div class="item-icon note-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </div>
+                            <div class="item-content">
+                                <div class="item-title">Market Thoughts: NQ Volatility</div>
+                                <div class="item-meta">Market Thoughts · 2 days ago</div>
+                            </div>
+                            <button class="collection-menu" onclick="event.stopPropagation(); showActivityMenu('nq-volatility', this)">...</button>
+                        </div>
+
+                        <!-- Item 3 -->
+                        <div class="activity-item" onclick="openActivityItem('note-created')">
+                            <div class="item-icon idea-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </div>
+                            <div class="item-content">
+                                <div class="item-title">created note: Market Thoughts: NQ Volatility</div>
+                                <div class="item-meta">Yesterday</div>
+                            </div>
+                            <button class="collection-menu" onclick="event.stopPropagation(); showActivityMenu('note-created', this)">...</button>
+                        </div>
+
+                         <!-- Item 4 -->
+                         <div class="activity-item" onclick="openActivityItem('highlight-extracted')">
+                            <div class="item-icon journal-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            </div>
+                            <div class="item-content">
+                                <div class="item-title">Extracted highlight to note: Strategic Idea: Gap Fill Setup</div>
+                                <div class="item-meta">Yesterday</div>
+                            </div>
+                            <button class="collection-menu" onclick="event.stopPropagation(); showActivityMenu('highlight-extracted', this)">...</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Sidebar Column -->
+            <div class="right-col">
+                <div class="highlight-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #faa356;"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path></svg>
+                            Highlights
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px; cursor: pointer;" onclick="viewHighlight(1)">
+                        <div class="mini-meta" style="margin-bottom: 10px;">Today's Highlight</div>
+                        <div class="highlight-quote">
+                            Avoid overthinking the loss – stick to the process...
+                        </div>
+                        <div class="highlight-meta">
+                            <span>Psychology · Apr 10, 2024</span>
+                            <span style="color: var(--accent-blue); cursor: pointer;" onclick="event.stopPropagation(); markHighlightReviewed(1)">Reviewed</span>
+                        </div>
+                    </div>
+
+                    <div class="section-header" style="margin-top: 30px; margin-bottom: 10px;">
+                        <span class="mini-meta">New Highlights</span>
+                    </div>
+
+                    <div class="highlight-list">
+                        <div class="mini-card" onclick="viewHighlight(2)" style="cursor: pointer;">
+                            <div class="mini-title">Remember: when in range-bound market, scalps are...</div>
+                            <div class="mini-meta">Session (Esention) · Apr 2024</div>
+                        </div>
+                        <div class="mini-card" onclick="viewHighlight(3)" style="cursor: pointer;">
+                            <div class="mini-title">Always reduce size in the middle of high volatility...</div>
+                            <div class="mini-meta">Session (Today) · Apr 10, 2024</div>
+                        </div>
+                    </div>
+
+                    <div class="mini-card" style="margin-top: 20px; text-align: center; border-style: dashed; background: rgba(30, 41, 59, 0.5); cursor: pointer;" onclick="openHighlightReview()">
+                        <div class="highlight-meta" style="justify-content: center; margin-bottom: 10px;">
+                            2 sessions have extractable highlights
+                        </div>
+                        <button class="btn-sm" style="background: var(--bg-card); color: var(--text-primary);" onclick="event.stopPropagation(); openHighlightReview()">Review New (3)</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        </div> <!-- End of view-hub -->
+
+        <!-- View: COLLECTION (Detail) -->
+        <div id="view-collection" class="view-section">
+            <div class="collection-layout">
+                
+                <!-- Inner Sidebar -->
+                <div class="cl-sidebar">
+                    <div class="cl-header">
+                        <button class="btn-sm" onclick="switchView('hub')" style="margin-bottom: 15px;">← Back to Hub</button>
+                        <h3 style="margin: 0;">Vault / Notes</h3>
+                    </div>
+                    
+                    <div style="padding: 10px 0;">
+                        <div class="cl-nav-item" onclick="switchView('hub')" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> All Notes</div>
+                        <div class="cl-nav-item active" onclick="selectCollection('Gold Market', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Gold Market</div>
+                        <div class="cl-nav-item" onclick="selectCollection('My Rules', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> My Rules</div>
+                        <div class="cl-nav-item" onclick="selectCollection('Psychology', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Psychology</div>
+                        <div class="cl-nav-item" onclick="selectCollection('Strategy Ideas', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Strategy Ideas</div>
+                    </div>
+
+                    <div style="padding: 20px;">
+                        <button onclick="createNewCollection()" style="width: 100%; border: 1px dashed var(--border); background: transparent; color: var(--text-muted); padding: 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--text-secondary)'; this.style.color='var(--text-secondary)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            New Collection
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notes List Column (New) -->
+                <div class="cl-notes-list">
+                    <div class="list-header">
+                        <div class="list-title">
+                            Gold Market
+                            <button class="btn-sm" onclick="createNewNote()">+ New Note</button>
+                        </div>
+                        <div class="list-filters">
+                            <span style="cursor: pointer;" onclick="setSmartFilter('type')">Type: All</span> · <span>Tags: All</span> · <span>Sort: Last Modified ▼</span>
+                        </div>
+                        <input type="text" placeholder="Search notes..." style="width: 100%; padding: 8px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); border-radius: 4px; margin-top: 10px; font-size: 13px; outline: none;" oninput="filterNotesLocal(this.value)">
+                    </div>
+
+                    <div style="flex: 1; overflow-y: auto;" id="notes-list-container">
+                        <div class="note-card active" onclick="selectNote(1)">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <div style="color: #faa356; font-size: 11px;">💡 Gold Market</div>
+                                <button onclick="event.stopPropagation(); toggleNoteMenu(1)" style="color: var(--text-muted); background: none; border: none; cursor: pointer;">...</button>
+                            </div>
+                            <div class="nc-title">Market Thoughts: NQ Volatility</div>
+                            <div class="nc-meta">Market · Linked · Apr 22, 2024</div>
+                        </div>
+
+                        <div class="note-card" onclick="selectNote(2)">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <div style="color: #faa356; font-size: 11px;">💡 Gold Market</div>
+                                <span style="color: #faa356;">📌</span>
+                            </div>
+                            <div class="nc-title">Gold Price Drivers - Macro & Micro</div>
+                            <div class="nc-meta">Market · Linked · Apr 18, 2024</div>
+                        </div>
+
+                        <div class="note-card" onclick="selectNote(3)">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <div style="color: #faa356; font-size: 11px;">💡 Gold Market</div>
+                                <span style="color: #faa356;">📌</span>
+                            </div>
+                            <div class="nc-title">Mental Checklist for Gold Trades</div>
+                            <div class="nc-meta">Checklist · Apr 18, 2024</div>
+                        </div>
+
+                        <div class="note-card" onclick="selectNote(4)">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <div style="color: #faa356; font-size: 11px;">💡 Gold Market</div>
+                                <button onclick="event.stopPropagation(); toggleNoteMenu(4)" style="color: var(--text-muted); background: none; border: none; cursor: pointer;">...</button>
+                            </div>
+                            <div class="nc-title">Strategic Idea: Breakout Strategy</div>
+                            <div class="nc-meta">Strategy · Linked · Apr 10, 2024</div>
+                        </div>
+                        
+                        <div style="margin-top: 20px; font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📌 Pinned (2)</div>
+                    </div>
+                </div>
+
+                <!-- Main Note Area -->
+                <div class="cl-main">
+                    <div class="note-header">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                            <input type="text" class="note-title" value="Market Thoughts: NQ Volatility">
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn-sm luna-btn" onclick="askLunaAboutNote()" title="Ask Luna AI">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #8b5cf6;"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                                    Ask Luna
+                                </button>
+                                <button class="btn-sm" onclick="togglePinNote()" title="Pin Note">📌</button>
+                                <button class="btn-sm" onclick="showNoteOptions(event)" title="More Options">⋯</button>
+                            </div>
+                        </div>
+                        <div class="note-meta">
+                            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 2 hours ago</span>
+                            <span>Linked to: TradingView, Weekend Review</span>
+                        </div>
+                    </div>
+
+                    <div class="note-content">
+                        <p>NQ is showing increased volatility as it approaches a critical resistance level at 15,350:</p>
+                        <ul>
+                            <li>VIX has spiked from 12 to 18 in the last 1 trading sessions.</li>
+                            <li>Increased wicks and larger candles around the key level indicate hesitation.</li>
+                            <li>Big tech earnings upcoming could lead to increased price swings.</li>
+                        </ul>
+
+                        <h3>Potential Scenarios</h3>
+                        <ul>
+                            <li>Test and reject off 15,350 leads to pullback to 15,000 level.</li>
+                            <li>Strong breakout above 15,350 sets next target at 15,600.</li>
+                            <li>Revising position size accordingly, currently reducing trades by 25%.</li>
+                        </ul>
+
+                        <div style="margin-top: 20px; padding: 15px; background: #000; border-radius: 4px; border: 1px solid var(--border);">
+                            <div style="font-size: 12px; color: var(--text-muted); text-align: center;">[Chart Snapshot: NQ 1H Gap Fill]</div>
+                            <svg width="100%" height="200" viewBox="0 0 400 200" style="margin-top: 10px;">
+                                <path d="M0,150 L50,140 L80,160 L120,100 L150,110 L200,80 L250,90 L300,50 L350,60 L400,20" fill="none" stroke="#238636" stroke-width="2"></path>
+                            </svg>
+                        </div>
+
+                        <p style="margin-top: 20px;">
+                            Watching PA closely around the resistance. Looking for a rejection with a tight stop above resistance or a clean ...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar Context -->
+                <div class="cl-right">
+                    
+                    <div class="widget-box">
+                        <div class="widget-header">Attach <span style="font-weight: normal; color: var(--text-muted);">(drag files here)</span></div>
+                        <div class="widget-content">
+                            <div id="attachments-list">
+                                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                    <div style="width: 30px; height: 30px; background: #2f81f7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 10px;">TV</div>
+                                    <div>
+                                        <div style="font-size: 13px; font-weight: 500;">TradingView</div>
+                                        <div style="font-size: 11px; color: var(--text-muted);">NQ1! Nasdaq 100 E-mini</div>
+                                    </div>
+                                    <button onclick="removeAttachment(this)" style="margin-left: auto; background: none; border: none; color: var(--text-muted); cursor: pointer;">×</button>
+                                </div>
+                            </div>
+
+                            <div id="drop-zone" style="border: 2px dashed var(--border); border-radius: 6px; padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px; cursor: pointer; transition: all 0.2s;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 5px; opacity: 0.5;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                <div style="margin-bottom: 4px;">Drag & Drop or Click</div>
+                                <div style="font-size: 11px; opacity: 0.7;">Images, PDFs, Screenshots</div>
+                            </div>
+                            <input type="file" id="file-input" style="display: none;" accept="image/*,.pdf,.doc,.docx">
+                        </div>
+                    </div>
+
+                    <div class="widget-box">
+                        <div class="widget-header">Smart Views</div>
+                        <div class="widget-content" style="padding: 0;">
+                            <div style="padding: 10px 15px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-secondary); cursor: pointer;" onclick="setSmartFilter('all')" onmouseover="this.style.background='var(--bg-card-hover)'" onmouseout="this.style.background='transparent'">Show All Notes</div>
+                            <div id="filter-linked" style="padding: 10px 15px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;" onclick="setSmartFilter('linked')" onmouseover="if(!currentFilter.linked) this.style.background='var(--bg-card-hover)'" onmouseout="if(!currentFilter.linked) this.style.background='transparent'">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                    Linked
+                                </div>
+                                <span style="background: rgba(47, 129, 247, 0.1); color: var(--accent-blue); padding: 2px 6px; border-radius: 4px; font-size: 11px;">3</span>
+                            </div>
+                            <div id="filter-pinned" style="padding: 10px 15px; font-size: 13px; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;" onclick="setSmartFilter('pinned')" onmouseover="if(!currentFilter.pinned) this.style.background='var(--bg-card-hover)'" onmouseout="if(!currentFilter.pinned) this.style.background='transparent'">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#faa356" stroke-width="2"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4a2 2 0 0 0-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42z"></path><circle cx="6.5" cy="6.5" r="1.5" fill="#faa356"></circle></svg>
+                                    Pinned
+                                </div>
+                                <span style="background: rgba(250, 163, 86, 0.1); color: #faa356; padding: 2px 6px; border-radius: 4px; font-size: 11px;">2</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="widget-box">
+                        <div class="widget-header">Backlinks</div>
+                        <div class="widget-content" style="padding: 0 15px;">
+                            <div class="backlink-item">
+                                <span class="backlink-icon">★</span>
+                                <div>
+                                    <div style="font-weight: 500; margin-bottom: 2px;">Weekend Review • Week 49</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">2d ago</div>
+                                </div>
+                            </div>
+                            <div class="backlink-item">
+                                <span class="backlink-icon">💡</span>
+                                <div>
+                                    <div style="font-weight: 500; margin-bottom: 2px;">Session Review: 8/16/2023</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">3d ago</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Highlight Button -->
+    <button id="highlight-btn" style="
+        position: absolute; 
+        display: none; 
+        background: var(--bg-card); 
+        border: 1px solid var(--border); 
+        padding: 5px 10px; 
+        border-radius: 6px; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
+        z-index: 1000; 
+        cursor: pointer; 
+        color: var(--text-primary); 
+        font-size: 13px;
+        align-items: center;
+        gap: 6px;
+        transition: transform 0.2s, opacity 0.2s;
+    ">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#faa356" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+        Highlight
+    </button>
+
+    <!-- Toast Notification -->
+    <div id="vault-toast" style="
+        position: fixed; 
+        bottom: 30px; 
+        left: 50%; 
+        transform: translateX(-50%) translateY(100px); 
+        background: var(--bg-card); 
+        border: 1px solid var(--success); 
+        padding: 10px 20px; 
+        border-radius: 6px; 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+        z-index: 2000; 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        opacity: 0; 
+        transition: all 0.3s;
+    ">
+        <div style="color: var(--success);">✓</div>
+        <div id="vault-toast-msg" style="font-size: 14px;">Action Completed</div>
+    </div>
+
+    <script>
+        // ========== DATA MODELS ==========
+        const notesData = [
+            { id: 1, title: 'Market Thoughts: NQ Volatility', collection: 'Gold Market', type: 'Market', linked: true, pinned: false, date: 'Apr 22, 2024', content: `<p>NQ is showing increased volatility as it approaches a critical resistance level at 15,350:</p>
+                <ul>
+                    <li>VIX has spiked from 12 to 18 in the last 1 trading sessions.</li>
+                    <li>Increased wicks and larger candles around the key level indicate hesitation.</li>
+                    <li>Big tech earnings upcoming could lead to increased price swings.</li>
+                </ul>
+                <h3>Potential Scenarios</h3>
+                <ul>
+                    <li>Test and reject off 15,350 leads to pullback to 15,000 level.</li>
+                    <li>Strong breakout above 15,350 sets next target at 15,600.</li>
+                    <li>Revising position size accordingly, currently reducing trades by 25%.</li>
+                </ul>
+                <div style="margin-top: 20px; padding: 15px; background: #000; border-radius: 4px; border: 1px solid var(--border);">
+                    <div style="font-size: 12px; color: var(--text-muted); text-align: center;">[Chart Snapshot: NQ 1H Gap Fill]</div>
+                    <svg width="100%" height="200" viewBox="0 0 400 200" style="margin-top: 10px;">
+                        <path d="M0,150 L50,140 L80,160 L120,100 L150,110 L200,80 L250,90 L300,50 L350,60 L400,20" fill="none" stroke="#238636" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <p style="margin-top: 20px;">Watching PA closely around the resistance. Looking for a rejection with a tight stop above resistance or a clean breakout...</p>`,
+                backlinks: [
+                    { icon: '★', title: 'Weekend Review • Week 49', time: '2d ago' },
+                    { icon: '💡', title: 'Session Review: 8/16/2023', time: '3d ago' }
+                ],
+                attachments: [{ type: 'TV', name: 'TradingView', detail: 'NQ1! Nasdaq 100 E-mini' }]
+            },
+            { id: 2, title: 'Gold Price Drivers - Macro & Micro', collection: 'Gold Market', type: 'Market', linked: true, pinned: true, date: 'Apr 18, 2024', content: `<p>Key factors driving Gold prices:</p>
+                <h3>Macro Drivers</h3>
+                <ul>
+                    <li>Federal Reserve interest rate policy</li>
+                    <li>US Dollar strength (inverse correlation)</li>
+                    <li>Geopolitical tensions and risk-off sentiment</li>
+                    <li>Inflation expectations</li>
+                </ul>
+                <h3>Micro Drivers</h3>
+                <ul>
+                    <li>Technical support/resistance levels</li>
+                    <li>Seasonal patterns (wedding season in India)</li>
+                    <li>Central bank buying activity</li>
+                </ul>`,
+                backlinks: [{ icon: '📊', title: 'Gold Trading Blueprint', time: '5d ago' }],
+                attachments: []
+            },
+            { id: 3, title: 'Mental Checklist for Gold Trades', collection: 'Gold Market', type: 'Checklist', linked: false, pinned: true, date: 'Apr 18, 2024', content: `<p>Before entering any Gold trade, verify:</p>
+                <ul>
+                    <li>✅ Check DXY trend direction</li>
+                    <li>✅ Review economic calendar for USD events</li>
+                    <li>✅ Confirm technical setup on H4/D1</li>
+                    <li>✅ Set proper position size (max 2% risk)</li>
+                    <li>✅ Define clear stop loss level</li>
+                    <li>✅ Identify take profit targets (1:2 min RR)</li>
+                </ul>`,
+                backlinks: [],
+                attachments: []
+            },
+            { id: 4, title: 'Strategic Idea: Breakout Strategy', collection: 'Gold Market', type: 'Strategy', linked: true, pinned: false, date: 'Apr 10, 2024', content: `<p>Breakout strategy for ranging markets:</p>
+                <h3>Setup Criteria</h3>
+                <ul>
+                    <li>Price consolidating for 3+ sessions</li>
+                    <li>Volume declining during consolidation</li>
+                    <li>Clear support/resistance boundaries</li>
+                </ul>
+                <h3>Entry Rules</h3>
+                <ul>
+                    <li>Enter on candle close above/below range</li>
+                    <li>Confirm with volume spike (1.5x average)</li>
+                    <li>Stop loss: opposite side of range</li>
+                </ul>`,
+                backlinks: [{ icon: '⚡', title: 'Session: Apr 10 AM', time: '1w ago' }],
+                attachments: [{ type: 'IMG', name: 'Breakout Chart', detail: 'breakout_example.png' }]
+            },
+            { id: 5, title: 'Weekly Review - Week 50', collection: 'Weekly Reviews', type: 'Review', linked: false, pinned: false, date: 'Apr 24, 2024', content: `<p>Week 50 recap highlights:</p>
+                <ul>
+                    <li>Focused on patience around key levels.</li>
+                    <li>Reduced overtrading during low volatility sessions.</li>
+                    <li>Noted improvement in entry timing.</li>
+                </ul>
+                <p>Action: Keep pre-market checklist visible during sessions.</p>`,
+                backlinks: [],
+                attachments: []
+            },
+            { id: 6, title: 'Market Thoughts: NQ Volatility', collection: 'Market Thoughts', type: 'Market', linked: true, pinned: false, date: 'Apr 22, 2024', content: `<p>Key takeaways on current volatility:</p>
+                <ul>
+                    <li>Watch reactions at 15,350 resistance.</li>
+                    <li>Consider reduced size during earnings week.</li>
+                    <li>Plan for both rejection and breakout scenarios.</li>
+                </ul>`,
+                backlinks: [],
+                attachments: []
+            },
+            { id: 7, title: 'Strategy Idea: Pullback Continuation', collection: 'Strategy Ideas', type: 'Strategy', linked: false, pinned: false, date: 'Apr 12, 2024', content: `<p>Pullback continuation setup:</p>
+                <ul>
+                    <li>Trend confirmed on H1 and H4.</li>
+                    <li>Wait for 38.2%–50% retrace.</li>
+                    <li>Enter on rejection candle with volume confirmation.</li>
+                </ul>`,
+                backlinks: [],
+                attachments: []
+            }
+        ];
+
+        const collectionsData = [
+            { id: 'weekly', name: 'Weekly Reviews', icon: 'book', color: '#8957e5', unsorted: 0, preview: 'Week 50 - Reviewed NQ, ES price action patterns...' },
+            { id: 'market', name: 'Market Thoughts', icon: 'idea', color: '#faa356', unsorted: 3, preview: 'Position sizing in range-bound markets...' },
+            { id: 'strategy', name: 'Strategy Ideas', icon: 'chart', color: '#2f81f7', unsorted: 2, preview: 'Gold 1-hour chart gap fill setup Today' }
+        ];
+
+        const highlightsData = [
+            { id: 1, text: 'Avoid overthinking the loss – stick to the process...', source: 'Psychology', date: 'Apr 10, 2024', reviewed: true },
+            { id: 2, text: 'Remember: when in range-bound market, scalps are...', source: 'Session (Esention)', date: 'Apr 2024', reviewed: false },
+            { id: 3, text: 'Always reduce size in the middle of high volatility...', source: 'Session (Today)', date: 'Apr 10, 2024', reviewed: false }
+        ];
+
+        // State
+        let currentNoteId = 1;
+        let currentCollection = 'Gold Market';
+        let currentFilter = { type: 'All', linked: false, pinned: false };
+        let activityFilter = 'all';
+
+        // ========== SEARCH FUNCTIONALITY ==========
+        const searchInput = document.querySelector('.search-input');
+        if(searchInput) {
+            searchInput.addEventListener('focus', () => {
+                searchInput.parentElement.style.boxShadow = '0 0 0 2px rgba(47, 129, 247, 0.4)';
+            });
+            searchInput.addEventListener('blur', () => {
+                searchInput.parentElement.style.boxShadow = 'none';
+            });
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                filterActivityList(query);
+            });
+        }
+
+        function filterActivityList(query) {
+            const items = document.querySelectorAll('#view-hub .activity-item');
+            items.forEach(item => {
+                const title = item.querySelector('.item-title')?.textContent.toLowerCase() || '';
+                if (query === '' || title.includes(query)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // ========== QUICK CAPTURE ==========
+        function saveQuickCapture() {
+            const textarea = document.querySelector('.capture-input');
+            const text = textarea.value.trim();
+            if (text) {
+                showVaultToast('Quick note saved to Inbox');
+                textarea.value = '';
+                // In real app, save to backend
+                console.log('Quick Capture:', text);
+            }
+        }
+
+        // Add save on Ctrl+Enter
+        document.querySelector('.capture-input')?.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                saveQuickCapture();
+            }
+        });
+
+        // ========== ACTIVITY FILTER TABS ==========
+        function setActivityFilter(filter, el) {
+            document.querySelectorAll('#view-hub .filter-tab').forEach(tab => tab.classList.remove('active'));
+            el.classList.add('active');
+            activityFilter = filter;
+            
+            const items = document.querySelectorAll('#view-hub .activity-item');
+            items.forEach(item => {
+                const isNote = item.querySelector('.note-icon') !== null;
+                if (filter === 'all' || (filter === 'notes' && isNote)) {
+                    item.style.display = 'flex';
+                } else if (filter === 'notes' && !isNote) {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // ========== NOTE SELECTION ==========
+        function selectNote(noteId) {
+            currentNoteId = noteId;
+            const note = notesData.find(n => n.id === noteId);
+            if (!note) return;
+
+            // Update note cards active state
+            document.querySelectorAll('.cl-notes-list .note-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Update main note area
+            document.querySelector('.note-title').value = note.title;
+            document.querySelector('.note-content').innerHTML = note.content;
+            
+            // Update meta
+            const metaEl = document.querySelector('.note-meta');
+            metaEl.innerHTML = `
+                <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${note.date}</span>
+                <span>${note.linked ? 'Linked' : ''} ${note.pinned ? '• Pinned' : ''}</span>
+            `;
+
+            // Update backlinks
+            renderBacklinks(note.backlinks);
+
+            // Update attachments
+            renderAttachments(note.attachments);
+        }
+
+        function renderBacklinks(backlinks) {
+            const container = document.querySelector('.cl-right .widget-box:last-child .widget-content');
+            if (!container) return;
+            
+            if (backlinks.length === 0) {
+                container.innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 13px;">No backlinks yet</div>';
+                return;
+            }
+
+            container.innerHTML = backlinks.map(link => `
+                <div class="backlink-item">
+                    <span class="backlink-icon">${link.icon}</span>
+                    <div>
+                        <div style="font-weight: 500; margin-bottom: 2px;">${link.title}</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">${link.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAttachments(attachments) {
+            const container = document.getElementById('attachments-list');
+            if (!container) return;
+            
+            container.innerHTML = attachments.map(att => `
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <div style="width: 30px; height: 30px; background: ${att.type === 'TV' ? '#2f81f7' : '#238636'}; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 10px;">${att.type}</div>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 500;">${att.name}</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">${att.detail}</div>
+                    </div>
+                    <button onclick="removeAttachment(this)" style="margin-left: auto; background: none; border: none; color: var(--text-muted); cursor: pointer;">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removeAttachment(btn) {
+            btn.parentElement.remove();
+            showVaultToast('Attachment removed');
+        }
+
+        // ========== NOTES LIST RENDERING ==========
+        function renderNotesList() {
+            const container = document.querySelector('.cl-notes-list > div:last-child');
+            if (!container) return;
+
+            let filtered = notesData.filter(n => n.collection === currentCollection);
+            
+            // Apply filters
+            if (currentFilter.type !== 'All') {
+                filtered = filtered.filter(n => n.type === currentFilter.type);
+            }
+            if (currentFilter.linked) {
+                filtered = filtered.filter(n => n.linked);
+            }
+            if (currentFilter.pinned) {
+                filtered = filtered.filter(n => n.pinned);
+            }
+
+            // Separate pinned and unpinned
+            const pinned = filtered.filter(n => n.pinned);
+            const unpinned = filtered.filter(n => !n.pinned);
+
+            let html = '';
+            
+            // Regular notes
+            unpinned.forEach(note => {
+                html += renderNoteCard(note);
+            });
+
+            // Pinned section
+            if (pinned.length > 0) {
+                html += `<div style="margin-top: 20px; font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📌 Pinned</div>`;
+                pinned.forEach(note => {
+                    html += renderNoteCard(note);
+                });
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderNoteCard(note) {
+            const isActive = note.id === currentNoteId ? 'active' : '';
+            return `
+                <div class="note-card ${isActive}" onclick="selectNote(${note.id})">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <div style="color: #faa356; font-size: 11px;">💡 ${note.collection}</div>
+                        <div style="display: flex; gap: 5px;">
+                            ${note.pinned ? '<span style="color: #faa356;">📌</span>' : ''}
+                            <button onclick="event.stopPropagation(); toggleNoteMenu(${note.id})" style="color: var(--text-muted); background: none; border: none; cursor: pointer;">...</button>
+                        </div>
+                    </div>
+                    <div class="nc-title">${note.title}</div>
+                    <div class="nc-meta">${note.type} ${note.linked ? '· Linked' : ''} · ${note.date}</div>
+                </div>
+            `;
+        }
+
+        function toggleNoteMenu(noteId) {
+            const note = notesData.find(n => n.id === noteId);
+            if (!note) return;
+            
+            // Toggle pin
+            note.pinned = !note.pinned;
+            renderNotesList();
+            showVaultToast(note.pinned ? 'Note pinned' : 'Note unpinned');
+        }
+
+        // ========== SMART VIEWS FILTER ==========
+        function setSmartFilter(type) {
+            if (type === 'linked') {
+                currentFilter.linked = !currentFilter.linked;
+                currentFilter.pinned = false;
+            } else if (type === 'pinned') {
+                currentFilter.pinned = !currentFilter.pinned;
+                currentFilter.linked = false;
+            } else {
+                currentFilter = { type: 'All', linked: false, pinned: false };
+            }
+            renderNotesList();
+            updateSmartViewsUI();
+        }
+
+        function updateSmartViewsUI() {
+            const linkedEl = document.getElementById('filter-linked');
+            const pinnedEl = document.getElementById('filter-pinned');
+            
+            if (linkedEl) {
+                linkedEl.style.background = currentFilter.linked ? 'rgba(47, 129, 247, 0.1)' : 'transparent';
+            }
+            if (pinnedEl) {
+                pinnedEl.style.background = currentFilter.pinned ? 'rgba(250, 163, 86, 0.1)' : 'transparent';
+            }
+        }
+
+        // ========== DRAG & DROP UPLOAD ==========
+        function initDragDrop() {
+            const dropZone = document.getElementById('drop-zone');
+            if (!dropZone) return;
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.style.borderColor = 'var(--accent-blue)';
+                    dropZone.style.background = 'rgba(47, 129, 247, 0.05)';
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.style.borderColor = 'var(--border)';
+                    dropZone.style.background = 'transparent';
+                });
+            });
+
+            dropZone.addEventListener('drop', handleDrop);
+            dropZone.addEventListener('click', () => {
+                document.getElementById('file-input').click();
+            });
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                const type = file.type.startsWith('image') ? 'IMG' : 'FILE';
+                
+                // Add to current note attachments
+                const note = notesData.find(n => n.id === currentNoteId);
+                if (note) {
+                    note.attachments.push({ type: type, name: file.name, detail: `${(file.size / 1024).toFixed(1)} KB` });
+                    renderAttachments(note.attachments);
+                }
+                
+                showVaultToast(`Uploaded: ${file.name}`);
+            }
+        }
+
+        // ========== NEW NOTE ==========
+        function createNewNote() {
+            const newId = Math.max(...notesData.map(n => n.id)) + 1;
+            const newNote = {
+                id: newId,
+                title: 'Untitled Note',
+                collection: currentCollection,
+                type: 'Note',
+                linked: false,
+                pinned: false,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                content: '<p>Start writing...</p>',
+                backlinks: [],
+                attachments: []
+            };
+            notesData.unshift(newNote);
+            currentNoteId = newId;
+            renderNotesList();
+            
+            // Focus on title
+            setTimeout(() => {
+                const titleInput = document.querySelector('.note-title');
+                if (titleInput) {
+                    titleInput.focus();
+                    titleInput.select();
+                }
+            }, 100);
+            
+            showVaultToast('New note created');
+        }
+
+        // ========== COLLECTION NAVIGATION ==========
+        function selectCollection(collectionName, el) {
+            currentCollection = collectionName;
+            document.querySelectorAll('.cl-nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+            
+            // Update list title
+            document.querySelector('.list-title').innerHTML = `${collectionName} <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
+            
+            renderNotesList();
+        }
+
+        // ========== OPEN COLLECTION (FROM HUB CARDS) ==========
+        function openCollection(collectionId) {
+            const collection = collectionsData.find(c => c.id === collectionId);
+            if (collection) {
+                currentCollection = collection.name;
+                switchView('collection');
+                setTimeout(() => {
+                    // Update sidebar selection
+                    document.querySelector('.list-title').innerHTML = `${collection.name} <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
+                    renderNotesList();
+                    showVaultToast(`Opened: ${collection.name}`);
+                }, 100);
+            }
+        }
+
+        // ========== COLLECTION MENU ==========
+        let activeMenu = null;
+        
+        function showCollectionMenu(collectionId, btn) {
+            closeActiveMenu();
+            
+            const collection = collectionsData.find(c => c.id === collectionId);
+            if (!collection) return;
+            
+            const menu = document.createElement('div');
+            menu.className = 'dropdown-menu';
+            menu.innerHTML = `
+                <div class="dropdown-item" onclick="renameCollection('${collectionId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    Rename
+                </div>
+                <div class="dropdown-item" onclick="duplicateCollection('${collectionId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Duplicate
+                </div>
+                <div class="dropdown-item" onclick="archiveCollection('${collectionId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                    Archive
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item danger" onclick="deleteCollection('${collectionId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Delete
+                </div>
+            `;
+            
+            const rect = btn.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.top = `${rect.bottom + 5}px`;
+            menu.style.left = `${rect.left - 120}px`;
+            
+            document.body.appendChild(menu);
+            activeMenu = menu;
+            
+            // Close on outside click
+            setTimeout(() => {
+                document.addEventListener('click', closeMenuOnOutsideClick);
+            }, 10);
+        }
+
+        function closeActiveMenu() {
+            if (activeMenu) {
+                activeMenu.remove();
+                activeMenu = null;
+                document.removeEventListener('click', closeMenuOnOutsideClick);
+            }
+        }
+
+        function closeMenuOnOutsideClick(e) {
+            if (activeMenu && !activeMenu.contains(e.target)) {
+                closeActiveMenu();
+            }
+        }
+
+        // Collection Actions
+        function renameCollection(id) {
+            const collection = collectionsData.find(c => c.id === id);
+            if (collection) {
+                const newName = prompt('Enter new name:', collection.name);
+                if (newName && newName.trim()) {
+                    collection.name = newName.trim();
+                    showVaultToast('Collection renamed');
+                }
+            }
+            closeActiveMenu();
+        }
+
+        function duplicateCollection(id) {
+            const collection = collectionsData.find(c => c.id === id);
+            if (collection) {
+                collectionsData.push({
+                    ...collection,
+                    id: collection.id + '-copy',
+                    name: collection.name + ' (Copy)'
+                });
+                showVaultToast('Collection duplicated');
+            }
+            closeActiveMenu();
+        }
+
+        function archiveCollection(id) {
+            showVaultToast('Collection archived');
+            closeActiveMenu();
+        }
+
+        function deleteCollection(id) {
+            if (confirm('Are you sure you want to delete this collection?')) {
+                const index = collectionsData.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    collectionsData.splice(index, 1);
+                    showVaultToast('Collection deleted');
+                }
+            }
+            closeActiveMenu();
+        }
+
+        // ========== ACTIVITY MENU ==========
+        function showActivityMenu(itemId, btn) {
+            closeActiveMenu();
+            
+            const menu = document.createElement('div');
+            menu.className = 'dropdown-menu';
+            menu.innerHTML = `
+                <div class="dropdown-item" onclick="openActivityItem('${itemId}'); closeActiveMenu();">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    Open
+                </div>
+                <div class="dropdown-item" onclick="pinActivityItem('${itemId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4a2 2 0 0 0-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42z"></path></svg>
+                    Pin to Top
+                </div>
+                <div class="dropdown-item" onclick="hideActivityItem('${itemId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                    Hide
+                </div>
+            `;
+            
+            const rect = btn.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.top = `${rect.bottom + 5}px`;
+            menu.style.left = `${rect.left - 100}px`;
+            
+            document.body.appendChild(menu);
+            activeMenu = menu;
+            
+            setTimeout(() => {
+                document.addEventListener('click', closeMenuOnOutsideClick);
+            }, 10);
+        }
+
+        function openActivityItem(itemId) {
+            closeActiveMenu();
+            switchView('collection');
+            showVaultToast('Opened from activity');
+        }
+
+        function pinActivityItem(itemId) {
+            closeActiveMenu();
+            showVaultToast('Pinned to top');
+        }
+
+        function hideActivityItem(itemId) {
+            closeActiveMenu();
+            showVaultToast('Hidden from activity');
+        }
+
+        // ========== HIGHLIGHT FUNCTIONS ==========
+        function viewHighlight(id) {
+            const highlight = highlightsData.find(h => h.id === id);
+            if (!highlight) return;
+            
+            // Show highlight modal
+            showHighlightModal(highlight);
+        }
+
+        function showHighlightModal(highlight) {
+            const modal = document.createElement('div');
+            modal.className = 'vault-modal-overlay';
+            modal.innerHTML = `
+                <div class="vault-modal">
+                    <div class="vault-modal-header">
+                        <h3>Highlight</h3>
+                        <button onclick="this.closest('.vault-modal-overlay').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px;">×</button>
+                    </div>
+                    <div class="vault-modal-body">
+                        <div class="highlight-quote" style="font-size: 16px; margin-bottom: 20px;">
+                            "${highlight.text}"
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 13px;">
+                            <span>Source: ${highlight.source}</span>
+                            <span>${highlight.date}</span>
+                        </div>
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                            <label style="display: block; margin-bottom: 10px; color: var(--text-secondary);">Add to note:</label>
+                            <select style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); border-radius: 6px;">
+                                ${notesData.map(n => `<option value="${n.id}">${n.title}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="vault-modal-footer">
+                        <button class="btn-sm" onclick="this.closest('.vault-modal-overlay').remove()">Close</button>
+                        <button class="btn-sm" style="background: var(--accent-blue);" onclick="addHighlightToNote(${highlight.id}); this.closest('.vault-modal-overlay').remove();">Add to Note</button>
+                    </div>
+                </div>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        }
+
+        function addHighlightToNote(highlightId) {
+            showVaultToast('Highlight added to note');
+        }
+
+        function openHighlightReview() {
+            const unreviewed = highlightsData.filter(h => !h.reviewed);
+            
+            const modal = document.createElement('div');
+            modal.className = 'vault-modal-overlay';
+            modal.innerHTML = `
+                <div class="vault-modal" style="max-width: 600px;">
+                    <div class="vault-modal-header">
+                        <h3>Review Highlights (${unreviewed.length})</h3>
+                        <button onclick="this.closest('.vault-modal-overlay').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px;">×</button>
+                    </div>
+                    <div class="vault-modal-body" style="max-height: 400px; overflow-y: auto;">
+                        ${unreviewed.length === 0 ? '<p style="color: var(--text-muted);">All highlights reviewed!</p>' : 
+                        unreviewed.map(h => `
+                            <div class="review-card" style="padding: 15px; background: var(--bg-card); border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border);">
+                                <div class="highlight-quote" style="margin-bottom: 10px;">"${h.text}"</div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: var(--text-muted); font-size: 12px;">${h.source} · ${h.date}</span>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn-sm" onclick="markHighlightReviewed(${h.id}); this.closest('.review-card').style.opacity='0.5';">✓ Done</button>
+                                        <button class="btn-sm" style="background: var(--accent-blue);" onclick="addHighlightToNote(${h.id}); markHighlightReviewed(${h.id}); this.closest('.review-card').style.opacity='0.5';">Add to Note</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="vault-modal-footer">
+                        <button class="btn-sm" onclick="this.closest('.vault-modal-overlay').remove()">Close</button>
+                        <button class="btn-sm" style="background: var(--accent-green);" onclick="markAllReviewed(); this.closest('.vault-modal-overlay').remove();">Mark All Reviewed</button>
+                    </div>
+                </div>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        }
+
+        function markAllReviewed() {
+            highlightsData.forEach(h => h.reviewed = true);
+            showVaultToast('All highlights marked as reviewed');
+        }
+
+        // ========== LUNA AI INTEGRATION ==========
+        function askLunaAboutNote() {
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (note) {
+                // Check if Luna is available
+                if (typeof Luna !== 'undefined' && Luna.openChatMode) {
+                    // Open Luna chat and show note context
+                    Luna.openChatWithContext(
+                        'Analyzing note...',
+                        `I can help you with "${note.title}". What would you like me to do? I can summarize, extract key points, suggest improvements, or find related notes.`
+                    );
+                } else {
+                    // Fallback to local modal
+                    showLunaSuggestionModal(note);
+                }
+            }
+        }
+
+        function showLunaSuggestionModal(note) {
+            const modal = document.createElement('div');
+            modal.className = 'vault-modal-overlay';
+            modal.innerHTML = `
+                <div class="vault-modal" style="max-width: 500px;">
+                    <div class="vault-modal-header">
+                        <h3 style="display: flex; align-items: center; gap: 10px;">
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: rgba(139, 92, 246, 0.2); border-radius: 50%; color: #a78bfa;">🌙</span>
+                            Luna AI Assistant
+                        </h3>
+                        <button onclick="this.closest('.vault-modal-overlay').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px;">×</button>
+                    </div>
+                    <div class="vault-modal-body">
+                        <p style="color: var(--text-secondary); margin-bottom: 20px;">What would you like me to help with for "<strong>${note.title}</strong>"?</p>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button class="luna-action-btn" onclick="lunaAction('summarize'); this.closest('.vault-modal-overlay').remove();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
+                                Summarize this note
+                            </button>
+                            <button class="luna-action-btn" onclick="lunaAction('improve'); this.closest('.vault-modal-overlay').remove();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                Suggest improvements
+                            </button>
+                            <button class="luna-action-btn" onclick="lunaAction('key-points'); this.closest('.vault-modal-overlay').remove();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                Extract key points
+                            </button>
+                            <button class="luna-action-btn" onclick="lunaAction('related'); this.closest('.vault-modal-overlay').remove();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                Find related notes
+                            </button>
+                            <button class="luna-action-btn" onclick="lunaAction('question'); this.closest('.vault-modal-overlay').remove();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                Ask me a question
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        }
+
+        function lunaAction(action) {
+            const actionMessages = {
+                'summarize': 'Luna is summarizing your note...',
+                'improve': 'Luna is analyzing for improvements...',
+                'key-points': 'Luna is extracting key points...',
+                'related': 'Luna is finding related notes...',
+                'question': 'Ask Luna anything about this note!'
+            };
+            showVaultToast(actionMessages[action] || 'Luna is working...');
+            
+            // Simulate Luna response after delay
+            setTimeout(() => {
+                if (action === 'summarize') {
+                    showLunaResponse('Summary', 'This note discusses NQ volatility approaching the 15,350 resistance level. Key points: VIX increase, hesitation signals, and a recommendation to reduce position size by 25%.');
+                } else if (action === 'key-points') {
+                    showLunaResponse('Key Points', '• VIX spiked from 12 to 18\n• Critical resistance at 15,350\n• Two scenarios: rejection to 15,000 or breakout to 15,600\n• Reduced trade size by 25%');
+                } else if (action === 'related') {
+                    showLunaResponse('Related Notes', 'Found 3 related notes:\n• Gold Price Drivers - Macro & Micro\n• Weekly Review - Week 49\n• Strategic Idea: Breakout Strategy');
+                }
+            }, 1500);
+        }
+
+        function showLunaResponse(title, message) {
+            const modal = document.createElement('div');
+            modal.className = 'vault-modal-overlay';
+            modal.innerHTML = `
+                <div class="vault-modal" style="max-width: 500px;">
+                    <div class="vault-modal-header">
+                        <h3 style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #a78bfa;">🌙</span>
+                            Luna: ${title}
+                        </h3>
+                        <button onclick="this.closest('.vault-modal-overlay').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px;">×</button>
+                    </div>
+                    <div class="vault-modal-body">
+                        <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 8px; padding: 15px; white-space: pre-line; color: var(--text-secondary); line-height: 1.6;">
+                            ${message}
+                        </div>
+                    </div>
+                    <div class="vault-modal-footer">
+                        <button class="btn-sm" onclick="copyToClipboard('${message.replace(/'/g, "\\'")}'); showVaultToast('Copied!');">Copy</button>
+                        <button class="btn-sm" style="background: var(--accent-blue);" onclick="this.closest('.vault-modal-overlay').remove();">Done</button>
+                    </div>
+                </div>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+        }
+
+        function askLunaToSummarize() {
+            if (typeof setLunaState === 'function') {
+                setLunaState('active');
+                setTimeout(() => {
+                    showVaultToast('Luna: I can summarize your notes! Click me to start.');
+                }, 500);
+            }
+        }
+
+        // ========== NOTE HEADER ACTIONS ==========
+        function togglePinNote() {
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (note) {
+                note.pinned = !note.pinned;
+                renderNotesList();
+                showVaultToast(note.pinned ? 'Note pinned' : 'Note unpinned');
+            }
+        }
+
+        function showNoteOptions(e) {
+            e.stopPropagation();
+            closeActiveMenu();
+            
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (!note) return;
+            
+            const menu = document.createElement('div');
+            menu.className = 'dropdown-menu';
+            menu.innerHTML = `
+                <div class="dropdown-item" onclick="duplicateNote()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Duplicate Note
+                </div>
+                <div class="dropdown-item" onclick="moveNoteToCollection()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    Move to...
+                </div>
+                <div class="dropdown-item" onclick="linkNote()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    Link to...
+                </div>
+                <div class="dropdown-item" onclick="exportNote()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Export
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item danger" onclick="deleteNote()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Delete Note
+                </div>
+            `;
+            
+            const rect = e.target.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.top = `${rect.bottom + 5}px`;
+            menu.style.right = `${window.innerWidth - rect.right}px`;
+            menu.style.left = 'auto';
+            
+            document.body.appendChild(menu);
+            activeMenu = menu;
+            
+            setTimeout(() => {
+                document.addEventListener('click', closeMenuOnOutsideClick);
+            }, 10);
+        }
+
+        function duplicateNote() {
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (note) {
+                const newNote = { ...note, id: Math.max(...notesData.map(n => n.id)) + 1, title: note.title + ' (Copy)' };
+                notesData.push(newNote);
+                renderNotesList();
+                showVaultToast('Note duplicated');
+            }
+            closeActiveMenu();
+        }
+
+        function moveNoteToCollection() {
+            showVaultToast('Move to collection...');
+            closeActiveMenu();
+        }
+
+        function linkNote() {
+            showVaultToast('Link to note/session...');
+            closeActiveMenu();
+        }
+
+        function exportNote() {
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (note) {
+                // Create downloadable text
+                const content = note.title + '\n\n' + note.content.replace(/<[^>]+>/g, '');
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = note.title.replace(/[^a-z0-9]/gi, '_') + '.txt';
+                a.click();
+                showVaultToast('Note exported');
+            }
+            closeActiveMenu();
+        }
+
+        function deleteNote() {
+            if (confirm('Are you sure you want to delete this note?')) {
+                const index = notesData.findIndex(n => n.id === currentNoteId);
+                if (index !== -1) {
+                    notesData.splice(index, 1);
+                    if (notesData.length > 0) {
+                        currentNoteId = notesData[0].id;
+                    }
+                    renderNotesList();
+                    showVaultToast('Note deleted');
+                }
+            }
+            closeActiveMenu();
+        }
+
+        // ========== HIGHLIGHT LOGIC ==========
+        const highlightBtn = document.getElementById('highlight-btn');
+        
+        document.addEventListener('mouseup', (e) => {
+            const noteContent = document.querySelector('.note-content');
+            if (!noteContent || !highlightBtn) return;
+            
+            const selection = window.getSelection();
+            
+            // Check if selection is inside note content and not empty
+            if (!selection.isCollapsed && noteContent.contains(selection.anchorNode)) {
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+
+                highlightBtn.style.top = `${rect.top + scrollTop - 40}px`;
+                highlightBtn.style.left = `${rect.left + scrollLeft + (rect.width / 2) - 50}px`;
+                highlightBtn.style.display = 'flex';
+            } else if (!highlightBtn.contains(e.target)) {
+                highlightBtn.style.display = 'none';
+            }
+        });
+        
+        highlightBtn?.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+        });
+
+        highlightBtn?.addEventListener('click', () => {
+            const selection = window.getSelection();
+            if (!selection.isCollapsed) {
+                const range = selection.getRangeAt(0);
+                const text = selection.toString();
+                
+                // Visual Highlight
+                const span = document.createElement('span');
+                span.style.background = 'rgba(250, 163, 86, 0.2)';
+                span.style.color = '#faa356';
+                span.style.borderRadius = '2px';
+                span.style.padding = '0 2px';
+                
+                try {
+                    range.surroundContents(span);
+                } catch(e) {
+                    // Fallback for complex selections
+                    span.textContent = text;
+                    range.deleteContents();
+                    range.insertNode(span);
+                }
+                
+                // Add to highlights
+                highlightsData.push({
+                    id: highlightsData.length + 1,
+                    text: text.substring(0, 60) + (text.length > 60 ? '...' : ''),
+                    source: notesData.find(n => n.id === currentNoteId)?.title || 'Note',
+                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                    reviewed: false
+                });
+                
+                showVaultToast('Text added to Highlights');
+                highlightBtn.style.display = 'none';
+                window.getSelection().removeAllRanges();
+                
+                console.log('Highlighted:', text);
+            }
+        });
+
+        // ========== TOAST ==========
+        function showVaultToast(msg, type = 'success') {
+            const toast = document.getElementById('vault-toast');
+            const toastMsg = document.getElementById('vault-toast-msg');
+            toastMsg.textContent = msg;
+            
+            const iconEl = toast.querySelector('div:first-child');
+            if (type === 'success') {
+                iconEl.style.color = 'var(--accent-green)';
+                iconEl.textContent = '✓';
+                toast.style.borderColor = 'var(--accent-green)';
+            } else {
+                iconEl.style.color = 'var(--accent-blue)';
+                iconEl.textContent = 'ℹ';
+                toast.style.borderColor = 'var(--accent-blue)';
+            }
+            
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+            toast.style.opacity = '1';
+            
+            setTimeout(() => {
+                toast.style.transform = 'translateX(-50%) translateY(100px)';
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        // ========== VIEW SWITCHING ==========
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewName).classList.add('active');
+            
+            // Update URL params without reload
+            const url = new URL(window.location);
+            url.searchParams.set('view', viewName);
+            window.history.pushState({}, '', url);
+
+            // Initialize collection view
+            if (viewName === 'collection') {
+                setTimeout(() => {
+                    renderNotesList();
+                    initDragDrop();
+                }, 100);
+            }
+        }
+
+        // ========== HIGHLIGHT REVIEW ==========
+        function markHighlightReviewed(id) {
+            const highlight = highlightsData.find(h => h.id === id);
+            if (highlight) {
+                highlight.reviewed = true;
+                showVaultToast('Marked as reviewed');
+            }
+        }
+
+        // ========== INIT ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            // Init view from URL
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('view') === 'collection') {
+                switchView('collection');
+            }
+
+            // Init file input handler
+            const fileInput = document.getElementById('file-input');
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    handleFiles(e.target.files);
+                });
+            }
+        });
+
+        // ========== LOCAL NOTES FILTER ==========
+        function filterNotesLocal(query) {
+            const q = query.toLowerCase();
+            document.querySelectorAll('#notes-list-container .note-card').forEach(card => {
+                const title = card.querySelector('.nc-title')?.textContent.toLowerCase() || '';
+                card.style.display = title.includes(q) ? 'block' : 'none';
+            });
+        }
+
+        // ========== NEW COLLECTION ==========
+        function createNewCollection() {
+            const name = prompt('Enter collection name:');
+            if (name && name.trim()) {
+                collectionsData.push({
+                    id: name.toLowerCase().replace(/\s+/g, '-'),
+                    name: name.trim(),
+                    icon: 'folder',
+                    color: '#8b949e',
+                    unsorted: 0,
+                    preview: 'New collection...'
+                });
+                showVaultToast('Collection created: ' + name);
+            }
+        }
+
+        // ========== PASTE IMAGE SUPPORT ==========
+        document.addEventListener('paste', (e) => {
+            const noteContent = document.querySelector('.note-content');
+            if (!noteContent || !document.activeElement.closest('.cl-main')) return;
+            
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        // Add image to note
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.style.maxWidth = '100%';
+                        img.style.borderRadius = '4px';
+                        img.style.marginTop = '10px';
+                        noteContent.appendChild(img);
+                        showVaultToast('Image pasted');
+                    };
+                    reader.readAsDataURL(blob);
+                    e.preventDefault();
+                }
+            }
+        });
+
+        // ========== KEYBOARD SHORTCUTS ==========
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+N: New Note (when in collection view)
+            if (e.ctrlKey && e.key === 'n' && document.getElementById('view-collection').classList.contains('active')) {
+                e.preventDefault();
+                createNewNote();
+            }
+            // Escape: Close modals or go back
+            if (e.key === 'Escape') {
+                if (document.getElementById('view-collection').classList.contains('active')) {
+                    switchView('hub');
+                }
+            }
+        });
+    </script>
+
+    <!-- ================= AI SYSTEM COMPONENTS (LUNA) ================= -->
+    <script src="../shared/luna.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if(typeof Luna !== 'undefined') {
+                Luna.init();
+            }
+        });
+    </script>
+</body>
+</html>

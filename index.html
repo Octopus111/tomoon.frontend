@@ -1,0 +1,2964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1400, initial-scale=0.25, maximum-scale=3, user-scalable=yes">
+    <title>ToMoon Dashboard</title>
+    <style>
+        :root {
+            --bg-dark: #0f1115;
+            --bg-card: #1a1d24;
+            --bg-panel: #232730;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .brand { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: white; display: flex; align-items: center; gap: 10px; }
+        
+        .nav-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav-item {
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
+        .nav-item.active { background: rgba(59, 130, 246, 0.1); color: var(--primary); font-weight: 600; }
+        
+        /* Nested Nav */
+        .nav-sub-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding-left: 12px;
+            margin-bottom: 5px;
+            position: relative;
+        }
+        .nav-sub-group::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: var(--border);
+            opacity: 0.5;
+        }
+
+        .nav-sub-item {
+            padding: 8px 15px 8px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 13px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+        .nav-sub-item:hover {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.03);
+        }
+        .nav-sub-item.active {
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+            font-weight: 500;
+        }
+        .nav-sub-item.active::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        /* Sync Animation */
+        .sync-icon {
+            display: inline-block;
+            font-size: 14px;
+            animation: rotate 2s linear infinite paused;
+        }
+        .sync-icon.syncing {
+            animation-play-state: running;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- Edit Mode Banner --- */
+        .edit-mode-banner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            color: white;
+            padding: 12px 30px;
+            z-index: 999;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            pointer-events: auto;
+        }
+        .edit-mode-banner.active { display: flex; }
+        .edit-mode-banner .btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; }
+        .edit-mode-banner .btn:hover { background: rgba(255,255,255,0.3); }
+        .edit-mode-banner .btn-primary { background: white; color: var(--primary); border-color: white; }
+
+        /* --- Main Layout --- */
+        .main-content {
+            flex: 1;
+            padding: 25px 20px; /* Reduced horizontal padding */
+            overflow-y: auto;
+            overflow-x: hidden; /* Prevent horizontal scroll during resize */
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Slightly reduced gap */
+            transition: padding-top 0.3s;
+            position: relative;
+            z-index: 1; /* Ensure content is below drawer but above background */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+            margin-top: 60px; /* Space for fixed topbar */
+        }
+        .main-content::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+        body.edit-mode .main-content {
+            padding-top: 65px; /* Adjusted for banner */
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        /* --- Components --- */
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 15px; flex-wrap: wrap; } /* Added gap and wrap */
+        .card { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            padding: 18px; /* Reduced from 20px */
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            transition: box-shadow 0.2s, border-color 0.2s; 
+            overflow: visible;
+            min-height: 120px; /* Prevent over-shrinking */
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+        .card-content-scroll {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 5px;
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: var(--border) transparent; /* Firefox */
+            margin-left: -2px; /* Compensate for any edge overflow */
+            margin-right: -2px;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+        .card-content-scroll::-webkit-scrollbar { 
+            height: 6px; 
+        }
+        .card-content-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .card-content-scroll::-webkit-scrollbar-thumb { 
+            background: var(--border); 
+            border-radius: 3px;
+        }
+        .card-content-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Dragging State */
+        .card.dragging { 
+            opacity: 0.7; 
+            z-index: 1000; 
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4);
+            pointer-events: none; /* Critical: prevent self-triggering events */
+        }
+        .card.resizing { z-index: 99; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; cursor: default; }
+        .card-title { font-size: 16px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .card-subtitle { font-size: 12px; color: var(--text-muted); }
+        
+        /* Resize Handle */
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            cursor: nwse-resize;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 5;
+        }
+        .resize-handle::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 10px;
+            height: 10px;
+            border-right: 2px solid var(--text-muted);
+            border-bottom: 2px solid var(--text-muted);
+        }
+        body.edit-mode .card:hover .resize-handle { opacity: 0.7; }
+        body.edit-mode .resize-handle:hover { opacity: 1 !important; }
+        body.edit-mode .resize-handle::after { border-color: var(--primary); }
+        
+        /* Edit mode card header cursor */
+        body.edit-mode .card-header { cursor: move; }
+        body.edit-mode .card-header:active { cursor: grabbing; }
+        
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 13px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+        .text-green { color: var(--success); }
+        .text-red { color: var(--danger); }
+        .text-warning { color: var(--warning); }
+        .text-muted { color: var(--text-muted); }
+
+        /* --- Grid Layouts --- */
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: repeat(12, 1fr); 
+            gap: 16px; /* Reduced from 20px */
+            padding-bottom: 40px;
+            align-items: start;
+            width: 100%; /* Ensure it respects parent width */
+            box-sizing: border-box;
+        }
+        
+        /* Column Spans */
+        .col-span-3 { grid-column: span 3; min-width: 0; }
+        .col-span-4 { grid-column: span 4; min-width: 0; }
+        .col-span-6 { grid-column: span 6; min-width: 0; }
+        .col-span-8 { grid-column: span 8; min-width: 0; }
+        .col-span-9 { grid-column: span 9; min-width: 0; }
+        .col-span-12 { grid-column: span 12; min-width: 0; }
+        
+        /* Row Spans */
+        .row-span-2 { grid-row: span 2; }
+        .row-span-3 { grid-row: span 3; }
+
+        /* Internal Grids */
+        .overview-grid { 
+            display: grid; 
+            /* Columns set dynamically by JavaScript based on metric count */
+            gap: 12px; /* Reduced from 15px */
+            min-width: 0; /* Allow shrinking */
+            width: 100%;
+        }
+        /* Dynamic grid templates for different metric counts */
+        .overview-grid[data-count="1"] { grid-template-columns: 1fr; }
+        .overview-grid[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
+        .overview-grid[data-count="3"] { grid-template-columns: repeat(3, 1fr); }
+        .overview-grid[data-count="4"] { grid-template-columns: repeat(4, 1fr); }
+        .overview-grid[data-count="5"] { grid-template-columns: repeat(5, 1fr); }
+        .calendar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, minmax(30px, 1fr)) 80px; /* Reduced width */
+            gap: 4px; /* Reduced from 5px */
+            margin-top: 12px;
+            min-width: 0; /* Allow shrinking */
+            width: 100%;
+        }
+        /* Calendar header row */
+        .cal-header {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 6px 0;
+            font-weight: 500;
+        }
+        /* Force weekly summary to always be in column 8 */
+        .cal-day.weekly-summary {
+            grid-column: 8;
+            background: rgba(255, 255, 255, 0.08); /* Highlighted background */
+            border: 1px solid rgba(255, 255, 255, 0.15); /* More visible border */
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+        /* Heatmap grid */
+        .heatmap-mini {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(18px, 1fr)); /* Reduced from 20px */
+            gap: 3px; /* Reduced from 4px */
+            margin-top: 10px;
+            min-width: 0;
+            width: 100%;
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .col-span-3 { grid-column: span 6; }
+            .col-span-4 { grid-column: span 6; }
+            /* .overview-grid { grid-template-columns: repeat(3, 1fr); } Removed to keep 5 cols consistent or scrollable */
+        }
+        @media (max-width: 1000px) {
+            .col-span-6 { grid-column: span 12; }
+            .col-span-8 { grid-column: span 12; }
+            .col-span-9 { grid-column: span 12; }
+            /* .overview-grid { grid-template-columns: repeat(2, 1fr); } */
+        }
+        
+        /* Metrics Modal */
+        .metrics-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; }
+        .metrics-modal.active { display: flex; }
+        .metrics-content { background: var(--bg-card); width: 700px; max-height: 80vh; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .metrics-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .metrics-body { padding: 20px; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .metrics-footer { padding: 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+        .metric-option { padding: 15px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.2s; background: var(--bg-panel); display: flex; flex-direction: column; gap: 5px; }
+        .metric-option:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .metric-option.selected { background: rgba(59, 130, 246, 0.1); border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+        .metric-option h4 { margin: 0; font-size: 14px; color: var(--text-main); }
+        .metric-option p { margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+        /* KPI Dragging */
+        .kpi-box[draggable="true"] { cursor: move; }
+        .kpi-box.dragging { opacity: 0.5; border: 2px dashed var(--primary); }
+
+        .card.dragging {
+            opacity: 0.5;
+        }
+        .grid-placeholder {
+            background: rgba(59, 130, 246, 0.08);
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            pointer-events: none;
+            min-height: 100px;
+        }
+        .card.resizing-active {
+            z-index: 100;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            position: relative;
+            transition: none !important;
+        }
+        /* Prevent content collapse during resize */
+        .card.resizing-active * {
+            white-space: nowrap;
+        }
+
+        /* Edit Only Elements */
+        .edit-only { display: none; }
+        body.edit-mode .edit-only { display: inline-block; }
+
+        /* Fixed Position Widget */
+        .widget-fixed {
+            order: -1; /* Always first in grid */
+        }
+        body.edit-mode .widget-fixed {
+            cursor: default !important;
+            border-style: solid !important;
+            opacity: 0.95;
+        }
+        body.edit-mode .widget-fixed .card-header {
+            cursor: default !important;
+        }
+        body.edit-mode .widget-fixed .resize-handle {
+            display: none !important;
+        }
+        body.edit-mode .widget-fixed .card-close-btn {
+            display: none !important;
+        }
+
+        /* --- Performance Cards --- */
+        .kpi-box { 
+            background: var(--bg-panel); 
+            padding: 15px; /* Better spacing for wider boxes */
+            border-radius: 8px; 
+            min-width: 0; /* Allow full flexibility */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .kpi-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; white-space: nowrap; text-align: center; }
+        .kpi-value { font-size: 24px; font-weight: 700; white-space: nowrap; text-align: center; margin-bottom: 8px; }
+        .kpi-trend { font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; }
+        
+        /* Scale up metrics when there are fewer of them */
+        .overview-grid[data-count="1"] .kpi-value,
+        .overview-grid[data-count="2"] .kpi-value { font-size: 32px; }
+        .overview-grid[data-count="1"] .kpi-label,
+        .overview-grid[data-count="2"] .kpi-label { font-size: 14px; margin-bottom: 10px; }
+        .overview-grid[data-count="1"] .kpi-trend,
+        .overview-grid[data-count="2"] .kpi-trend { font-size: 13px; }
+        .overview-grid[data-count="1"] .kpi-box,
+        .overview-grid[data-count="2"] .kpi-box { padding: 20px; }
+
+        /* --- DMI Card --- */
+        .dmi-score { font-size: 36px; font-weight: 800; color: var(--text-main); line-height: 1; }
+        .dmi-status { font-size: 13px; padding: 4px 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); color: var(--success); display: inline-block; margin-top: 5px; }
+        .mini-chart { height: 60px; width: 100%; margin-top: 15px; opacity: 0.7; }
+
+        /* --- Risk Guard --- */
+        .risk-bar-container { margin-top: 15px; }
+        .risk-info { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: var(--text-muted); }
+        .progress-track { height: 6px; background: var(--bg-panel); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--success); width: 25%; }
+        .risk-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; background: var(--bg-panel); color: var(--text-muted); }
+        .risk-badge.active { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+
+        /* --- Risk Guard Overview (Multi-Account Grid) --- */
+        .risk-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .risk-overview-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 3px solid var(--success);
+            transition: all 0.2s;
+        }
+        .risk-overview-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .risk-overview-card.status-caution { border-left-color: var(--warning); }
+        .risk-overview-card.status-danger { border-left-color: var(--danger); }
+        
+        .rg-compact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .rg-compact-account { flex: 1; }
+        .rg-compact-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 2px;
+        }
+        .rg-compact-balance {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        .rg-compact-status {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .rg-compact-status.safe { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .rg-compact-status.caution { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .rg-compact-status.pressure { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        .rg-compact-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .rg-compact-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .rg-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+        .rg-bar-track {
+            height: 3px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .rg-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* --- Journal Card --- */
+        .journal-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .journal-item:last-child { border-bottom: none; }
+        .journal-time { color: var(--text-muted); font-size: 11px; min-width: 50px; }
+
+        /* --- Heatmap Mini --- */
+        .hm-cell { height: 25px; min-width: 20px; border-radius: 3px; background: var(--bg-panel); }
+
+        /* --- Calendar Widget --- */
+        .cal-day { 
+            background: var(--bg-panel); 
+            border-radius: 6px; 
+            min-height: 110px; 
+            padding: 8px;
+            position: relative; 
+            border: 1px solid transparent; 
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+            align-items: center; /* Center content horizontally */
+        }
+        .cal-day:hover { 
+            border-color: var(--primary); 
+            background: rgba(59, 130, 246, 0.03); /* Subtle hover bg */
+            transform: translateY(-2px); /* Slight lift */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .cal-day.weekly-summary {
+            background: rgba(59, 130, 246, 0.12); /* Increased opacity */
+            border: 1px solid rgba(59, 130, 246, 0.4); /* clearer border */
+            min-width: 75px;
+            /* Keep centered layout from base class */
+        }
+        .cal-day.weekly-summary:hover {
+            background: rgba(59, 130, 246, 0.2);
+            box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+        .weekly-label {
+            font-size: 12px; /* Larger label */
+            color: var(--primary); /* Primary color */
+            font-weight: 800; /* Bolder */
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .weekly-value {
+            font-size: 20px; /* Big value */
+            font-weight: 800;
+            line-height: 1.1;
+        }
+        .weekly-trades {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            font-weight: 500;
+        }
+        .cal-date { 
+            font-size: 12px; 
+            color: var(--text-muted); 
+            position: absolute; /* Fix to top-left corner */
+            top: 10px;
+            left: 10px;
+            font-weight: 500;
+        }
+        .cal-val { 
+            font-size: 16px; /* Larger font to fill space */
+            font-weight: 700; 
+            margin-bottom: 2px;
+        }
+        .cal-percent {
+            font-size: 11px !important;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+        .cal-dot { width: 4px; height: 4px; border-radius: 50%; position: absolute; bottom: 6px; right: 6px; }
+        
+        /* --- Tooltips with Info Icon --- */
+        .kpi-box {
+            position: relative;
+            overflow: visible;
+        }
+        .kpi-info-icon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            transition: all 0.2s;
+            opacity: 0.5;
+        }
+        .kpi-info-icon:hover {
+            opacity: 1;
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary);
+        }
+        .kpi-tooltip {
+            visibility: hidden;
+            width: 180px;
+            background-color: var(--bg-panel);
+            color: var(--text-main);
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 9999;
+            bottom: calc(100% + 4px);
+            right: 0;
+            transform: translateY(0);
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            font-size: 11px;
+            font-weight: normal;
+            pointer-events: none;
+            line-height: 1.4;
+            white-space: normal;
+        }
+        .kpi-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            right: 12px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--border) transparent transparent transparent;
+        }
+        .kpi-info-icon:hover + .kpi-tooltip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(-3px);
+        }
+
+        /* Calendar Tooltip Specifics */
+        .cal-tooltip {
+            visibility: hidden;
+            width: 260px;
+            background-color: var(--bg-panel);
+            color: var(--text-main);
+            text-align: left;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 1000;
+            top: 100%; /* Position below */
+            left: 50%;
+            transform: translateX(-50%) translateY(5px);
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            font-size: 11px;
+            font-weight: normal;
+            pointer-events: none;
+            line-height: 1.4;
+            white-space: normal;
+            margin-top: 12px;
+        }
+        /* Arrow pointing up */
+        .cal-tooltip::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent var(--border) transparent;
+        }
+        .kpi-info-icon:hover + .cal-tooltip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Ensure overview-grid doesn't clip tooltips */
+        .overview-grid {
+            overflow: visible;
+        }
+        .card-content-scroll {
+            overflow: visible;
+        }
+        #card-performance .card-content-scroll {
+            overflow: visible;
+        }
+
+        /* --- Calendar Compact Mode --- */
+        .calendar-grid.compact-mode {
+            grid-template-columns: repeat(7, 1fr) !important;
+        }
+        .calendar-grid.compact-mode .weekly-summary,
+        .calendar-grid.compact-mode .cal-header:nth-child(8) {
+            display: none;
+        }
+        .calendar-grid.compact-mode .cal-val {
+            display: none;
+        }
+        .calendar-grid.compact-mode .cal-date {
+            font-size: 10px;
+            text-align: center;
+            margin-bottom: 0;
+        }
+        .calendar-grid.compact-mode .cal-day {
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+        }
+        .cal-dot-indicator {
+            display: none;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .calendar-grid.compact-mode .cal-dot-indicator {
+            display: block;
+        }
+
+        /* Calendar Navigation */
+        .cal-nav-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            padding: 0;
+            line-height: 1;
+            position: relative;
+            z-index: 10;
+            user-select: none;
+        }
+        .cal-nav-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.15);
+        }
+        .cal-nav-btn:active {
+            transform: scale(0.9);
+            background: rgba(59, 130, 246, 0.25);
+        }
+
+        /* --- Customize Modal --- */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-box { width: 800px; max-height: 90vh; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
+        
+        /* Widget Grid */
+        .widget-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .widget-card { 
+            background: var(--bg-panel); 
+            border: 2px solid var(--border); 
+            border-radius: 10px; 
+            padding: 15px; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            position: relative;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+        }
+        .widget-card:hover { transform: translateY(-2px); border-color: var(--primary); }
+        .widget-card.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.08); }
+        .widget-card.inactive { opacity: 0.5; border-style: dashed; }
+        
+        .widget-icon { font-size: 24px; margin-bottom: 8px; }
+        .widget-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text-main); }
+        .widget-desc { font-size: 11px; color: var(--text-muted); line-height: 1.3; }
+        
+        .widget-status { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            width: 20px; 
+            height: 20px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 12px;
+            background: var(--bg-dark);
+        }
+        .widget-status.on { color: var(--success); }
+        .widget-status.off { color: var(--text-muted); }
+
+        /* Edit Mode Styles */
+        body.edit-mode .card {
+            border: 2px dashed var(--primary) !important;
+            cursor: move;
+        }
+        body.edit-mode .card:hover {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        body.edit-mode .card .card-close-btn {
+            display: flex;
+        }
+        body.edit-mode .resize-handle {
+            opacity: 1 !important;
+        }
+        
+        .card-close-btn {
+            display: none;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--danger);
+            color: white;
+            border: 2px solid var(--bg-dark);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10;
+            transition: transform 0.2s;
+        }
+        .card-close-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Widget Drawer */
+        .widget-drawer {
+            position: fixed;
+            top: 60px;
+            right: -350px; /* Move further off-screen */
+            width: 300px;
+            height: calc(100vh - 60px);
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            z-index: 998;
+            transition: right 0.3s ease;
+            padding: 20px;
+            overflow-y: auto;
+            pointer-events: none; /* Don't block clicks when hidden */
+            visibility: hidden; /* Completely hide when not in edit mode */
+            display: none; /* Extra safety: don't render at all when hidden */
+        }
+        body.edit-mode .widget-drawer {
+            pointer-events: none; /* Still no pointer events until opened */
+            visibility: visible;
+            display: block; /* Allow rendering in edit mode */
+        }
+        body.edit-mode .widget-drawer.open {
+            right: 0;
+            pointer-events: auto; /* Only accept clicks when actually open */
+        }
+        .drawer-widget {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-panel);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .drawer-widget:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .drawer-widget.hidden-widget {
+            opacity: 0.5;
+            border-style: dashed;
+        }
+        .drawer-widget-icon { font-size: 20px; }
+        .drawer-widget-info { flex: 1; }
+        .drawer-widget-name { font-size: 13px; font-weight: 600; }
+        .drawer-widget-status { font-size: 11px; color: var(--text-muted); }
+
+        /* --- Empty State Styles --- */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px 20px;
+            min-height: 120px;
+        }
+        .empty-state-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.6;
+        }
+        .empty-state-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+        .empty-state-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            max-width: 280px;
+            margin-bottom: 16px;
+        }
+        .empty-state-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 12px;
+            transition: 0.2s;
+            background: var(--primary);
+            color: white;
+        }
+        .empty-state-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        .empty-state-btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+        .empty-state-btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        /* Welcome Banner for New Users */
+        .welcome-banner {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 24px 30px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+        .welcome-banner-icon {
+            font-size: 48px;
+            flex-shrink: 0;
+        }
+        .welcome-banner-content {
+            flex: 1;
+        }
+        .welcome-banner-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+        .welcome-banner-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .welcome-banner-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .welcome-banner-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        .welcome-banner-close:hover {
+            opacity: 1;
+        }
+
+        /* Onboarding Checklist */
+        .onboarding-checklist {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+        @media (max-width: 1200px) {
+            .onboarding-checklist {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .onboarding-checklist {
+                grid-template-columns: 1fr;
+            }
+        }
+        .onboarding-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--bg-panel);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .onboarding-item:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .onboarding-item.completed {
+            opacity: 0.6;
+        }
+        .onboarding-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .onboarding-item.completed .onboarding-check {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .onboarding-item:not(.completed):hover .onboarding-check {
+            border-color: var(--primary);
+        }
+        .onboarding-text {
+            flex: 1;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .onboarding-item.completed .onboarding-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+        .onboarding-arrow {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Empty Performance Grid */
+        .empty-kpi-box {
+            background: var(--bg-panel);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+            border: 1px dashed var(--border);
+        }
+        .empty-kpi-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .empty-kpi-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Calendar Empty Day */
+        .cal-day.empty-day {
+            opacity: 0.5;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Sidebar (由共享模块生成) -->
+<aside class="sidebar" id="sidebar"></aside>
+<script src="shared/sidebar.js"></script>
+<script src="shared/topbar.js"></script>
+<script>
+    // 初始化侧边栏 - Dashboard页面
+    initSidebar('dashboard', null, { title: 'Dashboard', isRoot: true });
+    // 初始化顶部栏
+    initTopbar({ title: 'Dashboard', basePath: '.' });
+</script>
+
+<!-- Edit Mode Banner -->
+<div class="edit-mode-banner" id="edit-banner">
+    <div>
+        <strong>📐 Edit Mode Active</strong> - Drag cards to move, resize from corners, click ✕ to hide widgets
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <button class="btn btn-outline btn-sm" onclick="toggleWidgetDrawer()">📦 Widgets</button>
+        <button class="btn btn-outline btn-sm" onclick="resetLayout()">Reset Layout</button>
+        <button class="btn btn-primary btn-sm" onclick="exitEditMode()">✓ Done</button>
+    </div>
+</div>
+
+<!-- Widget Drawer (Side Panel) -->
+<div class="widget-drawer" id="widget-drawer">
+    <h3 style="margin: 0 0 15px 0; font-size: 16px;">Available Widgets</h3>
+    <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 15px 0;">Click to show/hide widgets</p>
+    
+    <div class="drawer-widget" id="drawer-performance" onclick="toggleWidgetVisibility('card-performance')">
+        <span class="drawer-widget-icon">📊</span>
+        <div class="drawer-widget-info">
+            <div class="drawer-widget-name">Performance Overview</div>
+            <div class="drawer-widget-status" id="status-performance">Visible</div>
+        </div>
+    </div>
+    
+    <div class="drawer-widget" id="drawer-dmi" onclick="toggleWidgetVisibility('card-dmi')">
+        <span class="drawer-widget-icon">🧠</span>
+        <div class="drawer-widget-info">
+            <div class="drawer-widget-name">DMI Score</div>
+            <div class="drawer-widget-status" id="status-dmi">Visible</div>
+        </div>
+    </div>
+    
+    <div class="drawer-widget" id="drawer-risk" onclick="toggleWidgetVisibility('card-risk')">
+        <span class="drawer-widget-icon">🛡️</span>
+        <div class="drawer-widget-info">
+            <div class="drawer-widget-name">Risk Guard</div>
+            <div class="drawer-widget-status" id="status-risk">Visible</div>
+        </div>
+    </div>
+    
+    <div class="drawer-widget" id="drawer-journal" onclick="toggleWidgetVisibility('card-journal')">
+        <span class="drawer-widget-icon">📝</span>
+        <div class="drawer-widget-info">
+            <div class="drawer-widget-name">Journal Quick View</div>
+            <div class="drawer-widget-status" id="status-journal">Visible</div>
+        </div>
+    </div>
+    
+    <div class="drawer-widget" id="drawer-calendar" onclick="toggleWidgetVisibility('card-calendar')">
+        <span class="drawer-widget-icon">📅</span>
+        <div class="drawer-widget-info">
+            <div class="drawer-widget-name">Trading Calendar</div>
+            <div class="drawer-widget-status" id="status-calendar">Visible</div>
+        </div>
+    </div>
+    
+    <div class="drawer-widget" id="drawer-emotion" onclick="toggleWidgetVisibility('card-emotion')">
+        <span class="drawer-widget-icon">💭</span>
+        <div class="drawer-widget-info">
+            <div class="drawer-widget-name">Emotion Lab</div>
+            <div class="drawer-widget-status" id="status-emotion">Visible</div>
+        </div>
+    </div>
+    
+    <div class="drawer-widget" id="drawer-heatmap" onclick="toggleWidgetVisibility('card-heatmap')">
+        <span class="drawer-widget-icon">🔥</span>
+        <div class="drawer-widget-info">
+            <div class="drawer-widget-name">Strategy Heatmap</div>
+            <div class="drawer-widget-status" id="status-heatmap">Visible</div>
+        </div>
+    </div>
+    
+    <hr style="border: none; border-top: 1px solid var(--border); margin: 15px 0;">
+    
+    <div class="drawer-widget" onclick="toggleNewUserMode()" style="background: rgba(245, 158, 11, 0.1); border-color: var(--warning);">
+        <span class="drawer-widget-icon">🧪</span>
+        <div class="drawer-widget-info">
+            <div class="drawer-widget-name">Toggle Empty State</div>
+            <div class="drawer-widget-status" id="status-empty-mode">Demo Mode</div>
+        </div>
+    </div>
+</div>
+
+<main class="main-content">
+    
+    <div class="header-row" id="header-row">
+        <div id="welcome-text">
+            <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Welcome back, Eddie. Here is your trading overview.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-outline" style="border-color: var(--warning); color: var(--warning);" onclick="toggleNewUserMode()">🧪 Toggle Empty State</button>
+            <button class="btn btn-outline" onclick="enterEditMode()">⚙ Customize</button>
+            <button class="btn btn-primary" onclick="window.location.href='Moonlog/Moonlog.html?view=tradelog'">+ New Trade</button>
+        </div>
+    </div>
+
+    <!-- Welcome Banner for New Users (hidden by default) -->
+    <div class="welcome-banner" id="welcome-banner" style="display: none; position: relative;">
+        <button class="welcome-banner-close" onclick="dismissWelcomeBanner()">✕</button>
+        <div class="welcome-banner-icon">🚀</div>
+        <div class="welcome-banner-content">
+            <div class="welcome-banner-title">Welcome to ToMoon!</div>
+            <div class="welcome-banner-desc">
+                Your trading journal is ready. Connect your broker account or import your first trades to unlock powerful insights and analytics.
+            </div>
+            <div class="welcome-banner-actions">
+                <button class="btn btn-primary" onclick="window.location.href='Settings/Settings_demo_v1.2.html?tab=accounts'">🔗 Connect Broker</button>
+                <button class="btn btn-outline" style="border: none; color: var(--text-muted);" onclick="loadDemoData()">View Demo Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onboarding Progress Card (hidden by default) -->
+    <div class="card" id="onboarding-card" style="display: none; margin-bottom: 20px;">
+        <div class="card-header">
+            <h3 class="card-title">🎯 Getting Started</h3>
+            <span id="onboarding-progress" style="font-size: 12px; color: var(--text-muted);">0/4 completed</span>
+        </div>
+        <div class="onboarding-checklist" id="onboarding-checklist">
+            <div class="onboarding-item" onclick="window.location.href='Settings/Settings_demo_v1.2.html?tab=accounts'">
+                <div class="onboarding-check">✓</div>
+                <span class="onboarding-text">Connect your trading account</span>
+                <span class="onboarding-arrow">→</span>
+            </div>
+            <div class="onboarding-item" onclick="window.location.href='Strategy/Strategy_demo_v1.5.html?view=library'">
+                <div class="onboarding-check">✓</div>
+                <span class="onboarding-text">Create your first strategy blueprint</span>
+                <span class="onboarding-arrow">→</span>
+            </div>
+            <div class="onboarding-item" onclick="window.location.href='Moonlog/Moonlog.html?view=tradelog'">
+                <div class="onboarding-check">✓</div>
+                <span class="onboarding-text">Log your first trade</span>
+                <span class="onboarding-arrow">→</span>
+            </div>
+            <div class="onboarding-item" onclick="window.location.href='Moonlog/Moonlog.html?view=sessionlog'">
+                <div class="onboarding-check">✓</div>
+                <span class="onboarding-text">Complete a trading session review</span>
+                <span class="onboarding-arrow">→</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid" id="dashboard-grid">
+
+        <!-- Section 1: Performance Overview -->
+        <div class="card col-span-12 widget-fixed" id="card-performance">
+            <button class="card-close-btn" onclick="hideWidget('card-performance')">✕</button>
+            <div class="resize-handle"></div>
+            <div class="card-header">
+                <div style="display: flex; align-items: baseline; gap: 10px;">
+                    <h3 class="card-title" style="margin: 0;">Performance Overview</h3>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <span id="sync-time">Last sync: Dec 21, 10:30 PM</span>
+                        <button id="sync-btn" onclick="syncData()" style="background: none; border: none; padding: 0; color: var(--primary); text-decoration: underline; cursor: pointer; font-size: 13px; margin-left: 5px; font-weight: 600;">
+                            Resync
+                        </button>
+                        <svg id="sync-icon" class="sync-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px; vertical-align: middle; color: var(--text-muted);">
+                            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                            <path d="M3 3v5h5"></path>
+                            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                            <path d="M16 21h5v-5"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-outline btn-sm edit-only" onclick="openMetricsModal()">⚙ Configure</button>
+                    <button class="btn btn-outline btn-sm">View Report</button>
+                </div>
+            </div>
+            <div class="card-content-scroll">
+                <div class="overview-grid" id="performance-grid">
+                    <!-- Content injected by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 
+        LAYOUT ROW 2: Calendar (Left 8, spans 3 rows) | DMI, Risk Guard, Emotion (Right Stacked) 
+        -->
+
+        <!-- Calendar Module (Tall, Left Side) -->
+        <div class="card col-span-8 row-span-3" id="card-calendar">
+            <div class="card-header cal-header-row">
+                <h3 class="card-title">📅 Trading Calendar</h3>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div class="cal-nav-btn" id="cal-prev-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </div>
+                    <span id="calendar-month-label" style="font-size: 14px; font-weight: 600; min-width: 140px; width: auto; text-align: center;">December 2025</span>
+                    <div class="cal-nav-btn" id="cal-next-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                    <button class="card-close-btn" onclick="hideWidget('card-calendar')" style="margin-left: 10px;">×</button>
+                </div>
+            </div>
+            <div id="dashboard-calendar-grid" class="calendar-grid">
+                <!-- Grid content generated by JS -->
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event)"></div>
+        </div>
+
+        <!-- DMI Summary (Right Top) -->
+        <div class="card col-span-4" id="card-dmi" style="cursor: pointer;" onclick="window.location.href='Insight/Insight_demo_v1.4-fix.html?view=dmi'">
+            <button class="card-close-btn" onclick="event.stopPropagation(); hideWidget('card-dmi')">✕</button>
+            <div class="resize-handle"></div>
+            <div class="card-header">
+                <h3 class="card-title">🧠 DMI Insight</h3>
+                <span style="font-size: 11px; color: var(--text-muted);">View →</span>
+            </div>
+            
+            <!-- Mini Insight Thumbnail -->
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                    <div style="font-size: 20px; font-weight: 800; color: var(--success);">Strong</div>
+                    <div style="font-size: 10px; color: var(--text-muted);">Stable (12 trades)</div>
+                </div>
+
+                <!-- Mini Zone Spectrum -->
+                <div style="position: relative; height: 6px; background: #333; border-radius: 3px; display: flex; overflow: hidden;">
+                    <div style="width: 45%; background: rgba(239, 68, 68, 0.3);"></div>
+                    <div style="width: 15%; background: rgba(249, 115, 22, 0.3);"></div>
+                    <div style="width: 15%; background: rgba(245, 158, 11, 0.3);"></div>
+                    <div style="width: 25%; background: rgba(16, 185, 129, 0.3);"></div>
+                    
+                    <!-- Marker -->
+                    <div style="position: absolute; top: -2px; bottom: -2px; left: 82%; width: 2px; background: white; box-shadow: 0 0 4px white;"></div>
+                </div>
+                
+                <div style="font-size: 9px; color: var(--text-muted); display: flex; justify-content: space-between;">
+                    <span>Risky</span>
+                    <span>Strong</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Guard Overview (Right Middle) -->
+        <div class="card col-span-4" id="card-risk">
+            <button class="card-close-btn" onclick="hideWidget('card-risk')">✕</button>
+            <div class="resize-handle"></div>
+            <div class="card-header">
+                <h3 class="card-title">🛡️ Risk Guard</h3>
+                <button class="btn btn-outline btn-sm" onclick="window.location.href='../Strategy/Strategy_demo_v1.5.html'">Details →</button>
+            </div>
+            
+            <div class="risk-overview-grid" id="risk-overview-grid" style="grid-template-columns: 1fr;">
+                <!-- Dynamically rendered by renderRiskOverview() -->
+            </div>
+        </div>
+
+        <!-- Emotion Lab Preview (Right Bottom) -->
+        <div class="card col-span-4" id="card-emotion">
+            <div class="card-header">
+                <h3 class="card-title">💭 Emotion Lab</h3>
+                <div class="card-actions">
+                    <button class="card-close-btn" onclick="hideWidget('card-emotion')">×</button>
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <!-- CSS Pie Chart -->
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: conic-gradient(var(--primary) 0% 30%, var(--success) 30% 50%, var(--warning) 50% 65%, var(--danger) 65% 80%, #8b5cf6 80% 90%, #64748b 90% 100%); flex-shrink: 0;"></div>
+                
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 4px 0; font-size: 12px;">Dominant: <span style="color: var(--primary);">Calm (30%)</span></h4>
+                    <p style="font-size: 10px; color: var(--text-muted); margin: 0; line-height: 1.3;">
+                        Performance +20% when Calm.
+                    </p>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event)"></div>
+        </div>
+
+        <!-- 
+        LAYOUT ROW 3: Heatmap (Full Width) 
+        -->
+
+        <!-- Heatmap Preview -->
+        <div class="card col-span-12" id="card-heatmap">
+            <div class="card-header">
+                <h3 class="card-title">🔥 Strategy Heatmap</h3>
+                <div class="card-actions">
+                    <a href="Insight/Insight_demo_v1.4-fix.html?view=behavior" style="font-size: 11px; color: var(--primary); text-decoration: none; margin-right: 10px;">View Full Analysis →</a>
+                    <button class="card-close-btn" onclick="hideWidget('card-heatmap')">×</button>
+                </div>
+            </div>
+            <p style="margin: 0 0 10px 0; font-size: 12px; color: var(--text-muted);">Win rate by hour of day (UTC)</p>
+            <div class="card-content-scroll" style="flex: 1;">
+                <div class="heatmap-mini" style="grid-template-columns: repeat(12, 1fr);">
+                    <!-- Row 1: Hours 0-11 -->
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.1);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.2);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.3);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.5);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.6);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.8);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.9);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.7);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.4);"></div>
+                    <div class="hm-cell" style="background: rgba(239, 68, 68, 0.2);"></div>
+                    <div class="hm-cell" style="background: rgba(239, 68, 68, 0.3);"></div>
+                    <div class="hm-cell" style="background: rgba(239, 68, 68, 0.4);"></div>
+                    <!-- Row 2: Hours 12-23 -->
+                    <div class="hm-cell" style="background: rgba(239, 68, 68, 0.5);"></div>
+                    <div class="hm-cell" style="background: rgba(239, 68, 68, 0.3);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.2);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.4);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.6);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.5);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.3);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.2);"></div>
+                    <div class="hm-cell" style="background: rgba(239, 68, 68, 0.2);"></div>
+                    <div class="hm-cell" style="background: rgba(239, 68, 68, 0.1);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.1);"></div>
+                    <div class="hm-cell" style="background: rgba(16, 185, 129, 0.1);"></div>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event)"></div>
+        </div>
+
+    </div>
+
+</main>
+
+<!-- Metrics Configuration Modal -->
+<div class="metrics-modal" id="metrics-modal">
+    <div class="metrics-content">
+        <div class="metrics-header">
+            <h3 style="margin:0;">Select Metrics (Max 5)</h3>
+            <button class="btn btn-outline btn-sm" onclick="closeMetricsModal()">✕</button>
+        </div>
+        <div class="metrics-body" id="metrics-options">
+            <!-- Options injected by JS -->
+        </div>
+        <div class="metrics-footer">
+            <button class="btn btn-outline" onclick="closeMetricsModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveMetrics()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== Empty State / Demo Mode Configuration ==========
+    // Set to true to simulate new user experience with no data
+    // Set to false to show normal dashboard with mock data
+    let isNewUser = false; // Toggle this to test empty states
+    
+    // Onboarding progress (persisted in localStorage)
+    const onboardingSteps = {
+        'connect-account': false,
+        'create-blueprint': false,
+        'log-trade': false,
+        'session-review': false
+    };
+
+    // Load onboarding state from localStorage
+    function loadOnboardingState() {
+        const saved = localStorage.getItem('tomoon_onboarding');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            Object.assign(onboardingSteps, parsed);
+        }
+    }
+
+    // Save onboarding state
+    function saveOnboardingState() {
+        localStorage.setItem('tomoon_onboarding', JSON.stringify(onboardingSteps));
+    }
+
+    // Check if user has completed onboarding
+    function isOnboardingComplete() {
+        return Object.values(onboardingSteps).every(v => v);
+    }
+
+    // Mark step as complete
+    function completeOnboardingStep(step) {
+        onboardingSteps[step] = true;
+        saveOnboardingState();
+        updateOnboardingUI();
+    }
+
+    // Update onboarding UI
+    function updateOnboardingUI() {
+        const items = document.querySelectorAll('.onboarding-item');
+        const steps = ['connect-account', 'create-blueprint', 'log-trade', 'session-review'];
+        let completed = 0;
+        
+        items.forEach((item, i) => {
+            if (onboardingSteps[steps[i]]) {
+                item.classList.add('completed');
+                completed++;
+            } else {
+                item.classList.remove('completed');
+            }
+        });
+        
+        const progressEl = document.getElementById('onboarding-progress');
+        if (progressEl) {
+            progressEl.textContent = `${completed}/4 completed`;
+        }
+        
+        // Hide onboarding card if all complete
+        const card = document.getElementById('onboarding-card');
+        if (card && isOnboardingComplete()) {
+            card.style.display = 'none';
+        }
+    }
+
+    // Dismiss welcome banner
+    function dismissWelcomeBanner() {
+        const banner = document.getElementById('welcome-banner');
+        if (banner) {
+            banner.style.display = 'none';
+            localStorage.setItem('tomoon_welcome_dismissed', 'true');
+        }
+    }
+
+    // Load demo data (switch to normal view)
+    function loadDemoData() {
+        isNewUser = false;
+        localStorage.setItem('tomoon_demo_mode', 'false');
+        localStorage.removeItem('tomoon_welcome_dismissed'); // Reset welcome dismissal
+        initDashboardState();
+        dismissWelcomeBanner();
+    }
+
+    // Toggle new user mode (for testing)
+    function toggleNewUserMode() {
+        isNewUser = !isNewUser;
+        localStorage.setItem('tomoon_demo_mode', isNewUser ? 'true' : 'false');
+        
+        // Reset welcome banner dismissal when switching to new user mode
+        if (isNewUser) {
+            localStorage.removeItem('tomoon_welcome_dismissed');
+        }
+        
+        // Update status text in drawer
+        const statusEl = document.getElementById('status-empty-mode');
+        if (statusEl) {
+            statusEl.textContent = isNewUser ? 'Empty State Mode' : 'Demo Mode';
+        }
+        
+        initDashboardState();
+    }
+
+    // Initialize dashboard based on user state
+    function initDashboardState() {
+        const welcomeBanner = document.getElementById('welcome-banner');
+        const onboardingCard = document.getElementById('onboarding-card');
+        const welcomeText = document.getElementById('welcome-text');
+        
+        // Update drawer status
+        const statusEl = document.getElementById('status-empty-mode');
+        if (statusEl) {
+            statusEl.textContent = isNewUser ? 'Empty State Mode' : 'Demo Mode';
+        }
+        
+        if (isNewUser) {
+            // Show welcome banner if not dismissed
+            const dismissed = localStorage.getItem('tomoon_welcome_dismissed');
+            if (welcomeBanner && !dismissed) {
+                welcomeBanner.style.display = 'flex';
+            }
+            
+            // Show onboarding card if not complete
+            if (onboardingCard && !isOnboardingComplete()) {
+                onboardingCard.style.display = 'block';
+            }
+            
+            // Update welcome text
+            if (welcomeText) {
+                welcomeText.innerHTML = `<p style="margin: 0; font-size: 13px; color: var(--text-muted);">Welcome! Let's set up your trading journal.</p>`;
+            }
+            
+            // Render empty states for widgets
+            renderEmptyStates();
+        } else {
+            // Hide onboarding elements
+            if (welcomeBanner) welcomeBanner.style.display = 'none';
+            if (onboardingCard) onboardingCard.style.display = 'none';
+            
+            // Update welcome text
+            if (welcomeText) {
+                welcomeText.innerHTML = `<p style="margin: 0; font-size: 13px; color: var(--text-muted);">Welcome back, Eddie. Here is your trading overview.</p>`;
+            }
+            
+            // Render normal data
+            renderPerformanceMetrics();
+            renderRiskOverview();
+            calendarRender();
+            restoreDMI();
+            restoreJournal();
+            restoreEmotionLab();
+            restoreHeatmap();
+        }
+        
+        updateOnboardingUI();
+    }
+
+    // Render empty states for all widgets
+    function renderEmptyStates() {
+        renderEmptyPerformanceMetrics();
+        renderEmptyDMI();
+        renderEmptyRiskGuard();
+        renderEmptyJournal();
+        renderEmptyCalendar();
+        renderEmptyEmotionLab();
+        renderEmptyHeatmap();
+    }
+
+    // ========== Restore Functions (for switching back from empty state) ==========
+    function restoreDMI() {
+        const card = document.getElementById('card-dmi');
+        if (!card) return;
+        
+        const content = card.querySelector('div[style*="flex-direction: column"]');
+        if (content) {
+            content.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                    <div style="font-size: 24px; font-weight: 800; color: var(--success);">Strong</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Stable (12 trades)</div>
+                </div>
+                <div style="position: relative; height: 8px; background: #333; border-radius: 4px; display: flex; overflow: hidden;">
+                    <div style="width: 45%; background: rgba(239, 68, 68, 0.3);"></div>
+                    <div style="width: 15%; background: rgba(249, 115, 22, 0.3);"></div>
+                    <div style="width: 15%; background: rgba(245, 158, 11, 0.3);"></div>
+                    <div style="width: 25%; background: rgba(16, 185, 129, 0.3);"></div>
+                    <div style="position: absolute; top: -2px; bottom: -2px; left: 82%; width: 2px; background: white; box-shadow: 0 0 4px white;"></div>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between;">
+                    <span>Risky</span>
+                    <span>Strong</span>
+                </div>
+            `;
+        }
+    }
+
+    function restoreJournal() {
+        const card = document.getElementById('card-journal');
+        if (!card) return;
+        
+        const content = card.querySelector('div[style*="flex: 1"]');
+        if (content) {
+            content.innerHTML = `
+                <div class="journal-item">
+                    <span class="journal-time">10:45</span>
+                    <div>
+                        <div style="font-weight: 500;">NQ Long Scalp</div>
+                        <div style="color: var(--text-muted); font-size: 11px;">Followed plan, good exit.</div>
+                    </div>
+                </div>
+                <div class="journal-item">
+                    <span class="journal-time">09:30</span>
+                    <div>
+                        <div style="font-weight: 500;">ES Breakout</div>
+                        <div style="color: var(--text-muted); font-size: 11px;">Hesitated on entry, missed 5 pts.</div>
+                    </div>
+                </div>
+                <div style="margin-top: auto; padding-top: 10px; text-align: center;">
+                    <a href="Moonlog/Moonlog.html?view=sessionlog" style="font-size: 12px; color: var(--primary); text-decoration: none;">View all 5 entries →</a>
+                </div>
+            `;
+        }
+    }
+
+    function restoreEmotionLab() {
+        const card = document.getElementById('card-emotion');
+        if (!card) return;
+        
+        const content = card.querySelector('div[style*="display: flex; gap: 30px"]');
+        if (content) {
+            content.innerHTML = `
+                <div style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(var(--primary) 0% 30%, var(--success) 30% 50%, var(--warning) 50% 65%, var(--danger) 65% 80%, #8b5cf6 80% 90%, #64748b 90% 100%); flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 14px;">Dominant Emotion: <span style="color: var(--primary);">Calm (30%)</span></h4>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5;">
+                        You are trading with a clear head today. Performance is 20% better when in "Calm" state compared to your monthly average.
+                    </p>
+                </div>
+            `;
+        }
+    }
+
+    function restoreHeatmap() {
+        const card = document.getElementById('card-heatmap');
+        if (!card) return;
+        
+        const desc = card.querySelector('p[style*="margin: 0 0 10px"]');
+        if (desc) desc.style.display = 'block';
+        
+        const scrollContent = card.querySelector('.card-content-scroll');
+        if (scrollContent) {
+            scrollContent.innerHTML = `
+                <div class="heatmap-mini">
+                    <div class="hm-cell" style="background: #065f46;"></div>
+                    <div class="hm-cell" style="background: #10b981;"></div>
+                    <div class="hm-cell" style="background: #34d399;"></div>
+                    <div class="hm-cell" style="background: #065f46;"></div>
+                    <div class="hm-cell" style="background: #ef4444;"></div>
+                    <div class="hm-cell" style="background: #064e3b;"></div>
+                    <div class="hm-cell" style="background: #059669;"></div>
+                    <div class="hm-cell" style="background: #f59e0b;"></div>
+                    <div class="hm-cell" style="background: #10b981;"></div>
+                    <div class="hm-cell" style="background: #b91c1c;"></div>
+                    <div class="hm-cell" style="background: #047857;"></div>
+                    <div class="hm-cell" style="background: #34d399;"></div>
+                    <div class="hm-cell" style="background: #fbbf24;"></div>
+                    <div class="hm-cell" style="background: #059669;"></div>
+                    <div class="hm-cell" style="background: #ef4444;"></div>
+                </div>
+            `;
+        }
+        
+        const viewLink = card.querySelector('div[style*="text-align: right"]');
+        if (viewLink) viewLink.style.display = 'block';
+    }
+
+    // Empty Performance Metrics
+    function renderEmptyPerformanceMetrics() {
+        const container = document.getElementById('performance-grid');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="empty-kpi-box">
+                <div class="empty-kpi-label">Net P&L</div>
+                <div class="empty-kpi-value">--</div>
+            </div>
+            <div class="empty-kpi-box">
+                <div class="empty-kpi-label">Win Rate</div>
+                <div class="empty-kpi-value">--</div>
+            </div>
+            <div class="empty-kpi-box">
+                <div class="empty-kpi-label">Profit Factor</div>
+                <div class="empty-kpi-value">--</div>
+            </div>
+            <div class="empty-kpi-box">
+                <div class="empty-kpi-label">Avg R:R</div>
+                <div class="empty-kpi-value">--</div>
+            </div>
+            <div class="empty-kpi-box">
+                <div class="empty-kpi-label">Balance</div>
+                <div class="empty-kpi-value">--</div>
+            </div>
+        `;
+        container.setAttribute('data-count', '5');
+    }
+
+    // Empty DMI
+    function renderEmptyDMI() {
+        const card = document.getElementById('card-dmi');
+        if (!card) return;
+        
+        const content = card.querySelector('div[style*="flex-direction: column"]');
+        if (content) {
+            content.innerHTML = `
+                <div class="empty-state" style="padding: 15px 0;">
+                    <div style="font-size: 28px; opacity: 0.4; margin-bottom: 10px;">🧠</div>
+                    <div style="font-size: 13px; color: var(--text-muted); text-align: center;">
+                        Complete at least 10 trades to unlock DMI insights
+                    </div>
+                    <div style="margin-top: 12px; font-size: 11px; color: var(--text-muted);">
+                        0/10 trades
+                    </div>
+                    <div style="width: 100%; height: 4px; background: var(--bg-panel); border-radius: 2px; margin-top: 8px; overflow: hidden;">
+                        <div style="width: 0%; height: 100%; background: var(--primary);"></div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // Empty Risk Guard
+    function renderEmptyRiskGuard() {
+        const grid = document.getElementById('risk-overview-grid');
+        if (!grid) return;
+        
+        grid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <div class="empty-state-icon">🛡️</div>
+                <div class="empty-state-title">No Risk Rules Set</div>
+                <div class="empty-state-desc">
+                    Connect a trading account and set up risk limits to monitor your daily and weekly exposure.
+                </div>
+                <button class="empty-state-btn" onclick="window.location.href='Settings/Settings_demo_v1.2.html?tab=accounts'">
+                    Connect Account
+                </button>
+            </div>
+        `;
+    }
+
+    // Empty Journal
+    function renderEmptyJournal() {
+        const card = document.getElementById('card-journal');
+        if (!card) return;
+        
+        const content = card.querySelector('div[style*="flex: 1"]');
+        if (content) {
+            content.innerHTML = `
+                <div class="empty-state" style="flex: 1;">
+                    <div style="font-size: 32px; opacity: 0.4; margin-bottom: 8px;">📝</div>
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+                        No journal entries yet
+                    </div>
+                    <button class="empty-state-btn-outline empty-state-btn" onclick="window.location.href='Moonlog/Moonlog.html?view=sessionlog'">
+                        Write First Entry
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // Empty Calendar (still shows structure but no P&L data)
+    function renderEmptyCalendar() {
+        // Calendar will render normally but with no trading data
+        // We'll modify calendarRender to handle empty state
+        calendarRender();
+    }
+
+    // Empty Emotion Lab
+    function renderEmptyEmotionLab() {
+        const card = document.getElementById('card-emotion');
+        if (!card) return;
+        
+        const content = card.querySelector('div[style*="display: flex; gap: 30px"]');
+        if (content) {
+            content.innerHTML = `
+                <div class="empty-state" style="width: 100%;">
+                    <div style="font-size: 32px; opacity: 0.4; margin-bottom: 8px;">💭</div>
+                    <div class="empty-state-title">Track Your Trading Emotions</div>
+                    <div class="empty-state-desc">
+                        Log how you feel during trades to discover emotional patterns that affect your performance.
+                    </div>
+                    <button class="empty-state-btn-outline empty-state-btn" onclick="window.location.href='Moonlog/Moonlog.html?view=tradelog'">
+                        Log a Trade
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // Empty Heatmap
+    function renderEmptyHeatmap() {
+        const card = document.getElementById('card-heatmap');
+        if (!card) return;
+        
+        const scrollContent = card.querySelector('.card-content-scroll');
+        const desc = card.querySelector('p[style*="margin: 0 0 10px"]');
+        
+        if (desc) desc.style.display = 'none';
+        
+        if (scrollContent) {
+            scrollContent.innerHTML = `
+                <div class="empty-state">
+                    <div style="font-size: 32px; opacity: 0.4; margin-bottom: 8px;">🔥</div>
+                    <div class="empty-state-title">Strategy Heatmap</div>
+                    <div class="empty-state-desc">
+                        See which strategies work best with different emotional states. Requires trade data.
+                    </div>
+                </div>
+            `;
+        }
+        
+        const viewLink = card.querySelector('div[style*="text-align: right"]');
+        if (viewLink) viewLink.style.display = 'none';
+    }
+
+    // ========== Account Data Model ==========
+    const accounts = {
+        'acc1': { 
+            name: 'Ironbeam-Live-01', 
+            displayName: 'Main Account', // Maps to topbar
+            balance: '$50,000',
+            balanceNum: 50000,
+            currentBalance: 51240,
+            dailyLimit: 2000,
+            currentDaily: 450,
+            weeklyLimit: 5000,
+            currentWeekly: 1200,
+            source: 'MT5'
+        },
+        'acc2': { 
+            name: 'Apex-Demo-04', 
+            displayName: 'Trading Account A',
+            balance: '$25,000',
+            balanceNum: 25000,
+            currentBalance: 24500,
+            dailyLimit: 1000,
+            currentDaily: 650,
+            weeklyLimit: 3000,
+            currentWeekly: 1800,
+            source: 'MT5'
+        },
+        'acc3': { 
+            name: 'Topstep-Funded', 
+            displayName: 'Trading Account B',
+            balance: '$150,000',
+            balanceNum: 150000,
+            currentBalance: 148500,
+            dailyLimit: 3000,
+            currentDaily: 2600,
+            weeklyLimit: 8000,
+            currentWeekly: 6500,
+            source: 'ATAS'
+        }
+    };
+
+    // Track currently selected accounts from topbar
+    let selectedAccounts = ['Main Account', 'Trading Account A', 'Trading Account B'];
+
+    /**
+     * Get accounts filtered by topbar selection
+     */
+    function getFilteredAccounts() {
+        return Object.entries(accounts).filter(([id, acc]) => 
+            selectedAccounts.includes(acc.displayName)
+        );
+    }
+
+    // Widget visibility state
+    const widgetState = {
+        'card-performance': true,
+        'card-dmi': true,
+        'card-risk': true,
+        'card-journal': true,
+        'card-calendar': true,
+        'card-emotion': true,
+        'card-heatmap': true
+    };
+
+    let editMode = false;
+    let drawerOpen = false;
+    let draggedItem = null;
+    let placeholder = null;
+    let resizedElement = null;
+    let startX, startWidth;
+    let rafId = null; // Request Animation Frame ID
+    let lastPlaceholderPosition = null; // Track placeholder position to prevent flicker
+
+    // ========== Edit Mode Functions ==========
+    function enterEditMode() {
+        editMode = true;
+        document.body.classList.add('edit-mode');
+        document.getElementById('edit-banner').classList.add('active');
+        enableDragAndResize();
+        enableKpiDrag();
+    }
+
+    function exitEditMode() {
+        editMode = false;
+        document.body.classList.remove('edit-mode');
+        document.getElementById('edit-banner').classList.remove('active');
+        document.getElementById('widget-drawer').classList.remove('open');
+        drawerOpen = false;
+        disableDragAndResize();
+        disableKpiDrag();
+    }
+
+    function toggleWidgetDrawer() {
+        drawerOpen = !drawerOpen;
+        const drawer = document.getElementById('widget-drawer');
+        if (drawerOpen) {
+            drawer.classList.add('open');
+        } else {
+            drawer.classList.remove('open');
+        }
+    }
+
+    // ========== Drag & Drop (Sorting with Placeholder) ==========
+    function enableDragAndResize() {
+        const cards = document.querySelectorAll('.card');
+        const container = document.getElementById('dashboard-grid');
+        
+        // Enable Drag
+        cards.forEach(card => {
+            // Skip fixed widgets
+            if (card.classList.contains('widget-fixed')) return;
+            
+            card.setAttribute('draggable', 'true');
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+            
+            // Enable Resize
+            const resizeHandle = card.querySelector('.resize-handle');
+            if (resizeHandle) {
+                resizeHandle.addEventListener('mousedown', startResize);
+            }
+        });
+        
+        container.addEventListener('dragover', handleDragOver);
+        container.addEventListener('drop', handleDrop);
+    }
+
+    function disableDragAndResize() {
+        const cards = document.querySelectorAll('.card');
+        const container = document.getElementById('dashboard-grid');
+        
+        cards.forEach(card => {
+            card.setAttribute('draggable', 'false');
+            card.removeEventListener('dragstart', handleDragStart);
+            card.removeEventListener('dragend', handleDragEnd);
+            
+            const resizeHandle = card.querySelector('.resize-handle');
+            if (resizeHandle) {
+                resizeHandle.removeEventListener('mousedown', startResize);
+            }
+        });
+        
+        container.removeEventListener('dragover', handleDragOver);
+        container.removeEventListener('drop', handleDrop);
+    }
+
+    function handleDragStart(e) {
+        if (!editMode) {
+            e.preventDefault();
+            return;
+        }
+        draggedItem = this;
+        lastPlaceholderPosition = null; // Reset position tracking
+        
+        // Create placeholder with fixed dimensions
+        placeholder = document.createElement('div');
+        const spanClass = Array.from(draggedItem.classList).find(c => c.startsWith('col-span-')) || 'col-span-3';
+        placeholder.className = 'grid-placeholder ' + spanClass;
+        placeholder.style.height = draggedItem.offsetHeight + 'px';
+        placeholder.style.minHeight = '100px';
+        
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', draggedItem.id); // Simple data
+        
+        // Use requestAnimationFrame for smoother visual update
+        requestAnimationFrame(() => {
+            draggedItem.classList.add('dragging');
+            if (draggedItem.parentNode) {
+                draggedItem.parentNode.insertBefore(placeholder, draggedItem.nextSibling);
+            }
+        });
+    }
+
+    function handleDragEnd(e) {
+        if (!draggedItem) return;
+        
+        draggedItem.classList.remove('dragging');
+        
+        if (placeholder && placeholder.parentNode) {
+            placeholder.parentNode.insertBefore(draggedItem, placeholder);
+            placeholder.remove();
+        }
+        
+        placeholder = null;
+        draggedItem = null;
+        lastPlaceholderPosition = null;
+        
+        if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+        }
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
+        if (!placeholder || !draggedItem) return;
+        
+        // Throttle with RAF + position stability check
+        if (rafId) return;
+        
+        rafId = requestAnimationFrame(() => {
+            const container = document.getElementById('dashboard-grid');
+            const afterElement = getDragAfterElement(container, e.clientX, e.clientY);
+            
+            // Only move placeholder if position actually changed (prevents flicker)
+            const newPosition = afterElement ? afterElement.id : 'end';
+            if (newPosition !== lastPlaceholderPosition) {
+                lastPlaceholderPosition = newPosition;
+                
+                if (afterElement == null) {
+                    container.appendChild(placeholder);
+                } else if (afterElement !== placeholder.nextSibling) {
+                    container.insertBefore(placeholder, afterElement);
+                }
+            }
+            rafId = null;
+        });
+    }
+    
+    function handleDrop(e) {
+        e.stopPropagation();
+        return false;
+    }
+
+    // Helper to find insertion point using vertical position primarily
+    function getDragAfterElement(container, x, y) {
+        // Get visible cards excluding the dragged one and fixed widgets
+        const draggableElements = [...container.querySelectorAll('.card:not(.dragging):not(.widget-fixed)')].filter(el => el.style.display !== 'none');
+        
+        // Find element to insert before based on cursor position
+        let closestElement = null;
+        let closestOffset = Number.POSITIVE_INFINITY;
+        
+        for (const child of draggableElements) {
+            const box = child.getBoundingClientRect();
+            // Calculate offset from top-left of element (insertion point)
+            const offsetY = y - box.top;
+            const offsetX = x - box.left;
+            
+            // Only consider elements below/right of cursor for insertion
+            if (offsetY < box.height / 2 || (offsetY < box.height && offsetX < box.width / 2)) {
+                const dist = Math.abs(offsetY) + Math.abs(offsetX) * 0.3; // Weight Y more
+                if (dist < closestOffset) {
+                    closestOffset = dist;
+                    closestElement = child;
+                }
+            }
+        }
+        
+        return closestElement;
+    }
+
+    // ========== Resize Functions (Deferred Update) ==========
+    function startResize(e) {
+        if (!editMode) return;
+        e.preventDefault();
+        e.stopPropagation();
+        
+        resizedElement = this.closest('.card');
+        resizedElement.classList.add('resizing-active');
+        
+        startX = e.clientX;
+        startWidth = resizedElement.offsetWidth;
+        
+        document.addEventListener('mousemove', doResize);
+        document.addEventListener('mouseup', stopResize);
+    }
+
+    function doResize(e) {
+        if (!resizedElement) return;
+        
+        const container = document.getElementById('dashboard-grid');
+        const maxWidth = container.clientWidth - 40;
+        
+        const dx = e.clientX - startX;
+        // Use larger minimum width to prevent content squeezing
+        // Determine minimum based on current span class
+        let minWidth = 280;
+        if (resizedElement.classList.contains('col-span-6')) minWidth = 480;
+        if (resizedElement.classList.contains('col-span-8')) minWidth = 640;
+        if (resizedElement.classList.contains('col-span-9')) minWidth = 720;
+        
+        let newWidth = Math.max(minWidth, startWidth + dx);
+        newWidth = Math.min(newWidth, maxWidth);
+        
+        // Update visual width
+        resizedElement.style.width = newWidth + 'px';
+        resizedElement.style.minWidth = newWidth + 'px'; // Lock minimum during resize
+    }
+
+    function stopResize() {
+        if (resizedElement) {
+            const container = document.getElementById('dashboard-grid');
+            const gridWidth = container.offsetWidth;
+            const gap = 20;
+            const colWidth = (gridWidth - (11 * gap)) / 12;
+            
+            const finalWidth = resizedElement.offsetWidth;
+            let newSpan = Math.round((finalWidth + gap) / (colWidth + gap));
+            
+            // Enforce stricter size limits for visual consistency
+            // Small widgets: 3-4 cols, Medium: 6 cols, Large: 8-9 cols, Full: 12 cols
+            if (newSpan < 3) newSpan = 3;
+            if (newSpan === 5 || newSpan === 7) newSpan = 6; // Snap to standard sizes
+            if (newSpan === 10 || newSpan === 11) newSpan = 12;
+            if (newSpan > 12) newSpan = 12;
+            
+            // Clean up inline styles
+            resizedElement.style.width = '';
+            resizedElement.style.minWidth = '';
+            
+            // Apply final grid class
+            resizedElement.className = resizedElement.className.replace(/col-span-\d+/g, '');
+            resizedElement.classList.add(`col-span-${newSpan}`);
+            
+            resizedElement.classList.remove('resizing-active');
+            resizedElement = null;
+        }
+        document.removeEventListener('mousemove', doResize);
+        document.removeEventListener('mouseup', stopResize);
+    }
+
+    // ========== Widget Visibility Functions ==========
+    function hideWidget(cardId) {
+        if (!editMode) return;
+        
+        // Prevent hiding Performance Overview (fixed widget)
+        if (cardId === 'card-performance') {
+            alert('Performance Overview is a core widget and cannot be hidden.');
+            return;
+        }
+        
+        widgetState[cardId] = false;
+        document.getElementById(cardId).style.display = 'none';
+        updateDrawerState();
+    }
+
+    function toggleWidgetVisibility(cardId) {
+        // Prevent toggling Performance Overview
+        if (cardId === 'card-performance') {
+            alert('Performance Overview is a core widget and must remain visible.');
+            return;
+        }
+        
+        widgetState[cardId] = !widgetState[cardId];
+        
+        const card = document.getElementById(cardId);
+        if (widgetState[cardId]) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+        updateDrawerState();
+    }
+
+    function updateDrawerState() {
+        Object.keys(widgetState).forEach(cardId => {
+            const widgetName = cardId.replace('card-', '');
+            const drawerWidget = document.getElementById('drawer-' + widgetName);
+            const statusEl = document.getElementById('status-' + widgetName);
+            
+            if (drawerWidget && statusEl) {
+                if (widgetState[cardId]) {
+                    drawerWidget.classList.remove('hidden-widget');
+                    statusEl.textContent = 'Visible';
+                    statusEl.style.color = 'var(--success)';
+                } else {
+                    drawerWidget.classList.add('hidden-widget');
+                    statusEl.textContent = 'Hidden';
+                    statusEl.style.color = 'var(--text-muted)';
+                }
+            }
+        });
+    }
+
+    function resetLayout() {
+        // Reset visibility
+        Object.keys(widgetState).forEach(cardId => {
+            widgetState[cardId] = true;
+            const card = document.getElementById(cardId);
+            card.style.display = 'flex';
+            
+            // Reset spans to defaults
+            card.className = card.className.replace(/col-span-\d+/g, '');
+            
+            // Apply defaults based on ID
+            if (cardId === 'card-performance' || cardId === 'card-calendar') {
+                card.classList.add('col-span-12');
+            } else if (cardId === 'card-risk' || cardId === 'card-emotion' || cardId === 'card-heatmap') {
+                card.classList.add('col-span-6');
+            } else {
+                card.classList.add('col-span-3');
+            }
+        });
+        
+        // Reset Order (Append in default order, Performance Overview always first)
+        const container = document.getElementById('dashboard-grid');
+        const order = ['card-performance', 'card-dmi', 'card-risk', 'card-journal', 'card-calendar', 'card-emotion', 'card-heatmap'];
+        order.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                container.appendChild(el);
+                // Ensure Performance Overview has fixed class
+                if (id === 'card-performance') {
+                    el.classList.add('widget-fixed');
+                }
+            }
+        });
+        
+        updateDrawerState();
+    }
+
+    // Initialize drawer state on load
+    updateDrawerState();
+
+    // --- Performance Metrics Logic ---
+    const availableMetrics = [
+        { id: 'net_pl', label: 'Net P&L', value: '+$1,240.50', trend: '▲ 12% vs yesterday', trendClass: 'text-green', desc: 'Total profit/loss for the selected period.' },
+        { id: 'win_rate', label: 'Win Rate', value: '68%', trend: '17 Trades', trendClass: 'text-muted', desc: 'Percentage of winning trades.' },
+        { id: 'profit_factor', label: 'Profit Factor', value: '2.45', trend: '▲ Optimal', trendClass: 'text-green', desc: 'Gross Profit / Gross Loss.' },
+        { id: 'avg_rr', label: 'Avg R:R', value: '1 : 2.1', trend: '▼ Below target', trendClass: 'text-warning', desc: 'Average Risk to Reward ratio.' },
+        { id: 'account_balance', label: 'Account Balance', value: '$52,450.00', trend: '+$1,240 (Today)', trendClass: 'text-green', desc: 'Current balance + closed P&L.' },
+        { id: 'day_win_percent', label: 'Day Win %', value: '80%', trend: '4/5 Days', trendClass: 'text-green', desc: '% of winning trading days.' },
+        { id: 'avg_win_loss', label: 'Avg Win/Loss', value: '+$150 / -$85', trend: 'Ratio: 1.76', trendClass: 'text-muted', desc: 'Avg profit on winners vs avg loss on losers.' },
+        { id: 'trade_expectancy', label: 'Trade Expectancy', value: '+$45.20', trend: 'Per Trade', trendClass: 'text-green', desc: 'Avg expected return per trade.' },
+        { id: 'current_streak', label: 'Current Streak', value: '3 Days', trend: 'High Confidence', trendClass: 'text-green', desc: 'Consecutive winning days.' },
+        { id: 'max_drawdown', label: 'Max Drawdown', value: '-$1,200', trend: '2.3% of Balance', trendClass: 'text-red', desc: 'Largest peak-to-valley drop.' }
+    ];
+
+    // Default selected metrics (first 5)
+    let selectedMetricIds = ['net_pl', 'win_rate', 'profit_factor', 'avg_rr', 'account_balance'];
+
+    function renderPerformanceMetrics() {
+        const container = document.getElementById('performance-grid');
+        container.innerHTML = '';
+        
+        // Set dynamic grid columns based on number of metrics
+        const metricCount = selectedMetricIds.length;
+        container.setAttribute('data-count', metricCount);
+        
+        selectedMetricIds.forEach(id => {
+            const metric = availableMetrics.find(m => m.id === id);
+            if (metric) {
+                const div = document.createElement('div');
+                div.className = 'kpi-box';
+                div.dataset.id = metric.id;
+                div.innerHTML = `
+                    <div class="kpi-info-icon">?</div>
+                    <div class="kpi-tooltip">${metric.desc}</div>
+                    <div class="kpi-label">${metric.label}</div>
+                    <div class="kpi-value ${metric.trendClass.includes('green') || metric.trendClass.includes('red') ? metric.trendClass : ''}">${metric.value}</div>
+                    <div class="kpi-trend ${metric.trendClass}">${metric.trend}</div>
+                `;
+                container.appendChild(div);
+            }
+        });
+
+        if (editMode) enableKpiDrag();
+    }
+
+    let tempSelectedIds = [];
+
+    function openMetricsModal() {
+        tempSelectedIds = [...selectedMetricIds]; // Copy
+        const modal = document.getElementById('metrics-modal');
+        const container = document.getElementById('metrics-options');
+        container.innerHTML = '';
+        
+        availableMetrics.forEach(metric => {
+            const isSelected = tempSelectedIds.includes(metric.id);
+            const div = document.createElement('div');
+            div.className = `metric-option ${isSelected ? 'selected' : ''}`;
+            div.dataset.id = metric.id;
+            div.onclick = () => {
+                if (tempSelectedIds.includes(metric.id)) {
+                    tempSelectedIds = tempSelectedIds.filter(i => i !== metric.id);
+                    div.classList.remove('selected');
+                } else {
+                    if (tempSelectedIds.length >= 5) {
+                        alert('Max 5 metrics allowed.');
+                        return;
+                    }
+                    tempSelectedIds.push(metric.id);
+                    div.classList.add('selected');
+                }
+            };
+            div.innerHTML = `
+                <h4>${metric.label}</h4>
+                <p>${metric.desc}</p>
+            `;
+            container.appendChild(div);
+        });
+        
+        modal.classList.add('active');
+    }
+
+    function closeMetricsModal() {
+        document.getElementById('metrics-modal').classList.remove('active');
+    }
+
+    function saveMetrics() {
+        selectedMetricIds = [...tempSelectedIds];
+        renderPerformanceMetrics();
+        closeMetricsModal();
+    }
+
+    // ========== KPI Drag & Drop ==========
+    let draggedKpi = null;
+
+    function enableKpiDrag() {
+        const kpis = document.querySelectorAll('#performance-grid .kpi-box');
+        kpis.forEach(kpi => {
+            kpi.setAttribute('draggable', 'true');
+            kpi.addEventListener('dragstart', handleKpiDragStart);
+            kpi.addEventListener('dragend', handleKpiDragEnd);
+            kpi.addEventListener('dragover', handleKpiDragOver);
+            kpi.addEventListener('drop', handleKpiDrop);
+        });
+    }
+
+    function disableKpiDrag() {
+        const kpis = document.querySelectorAll('#performance-grid .kpi-box');
+        kpis.forEach(kpi => {
+            kpi.setAttribute('draggable', 'false');
+            kpi.removeEventListener('dragstart', handleKpiDragStart);
+            kpi.removeEventListener('dragend', handleKpiDragEnd);
+            kpi.removeEventListener('dragover', handleKpiDragOver);
+            kpi.removeEventListener('drop', handleKpiDrop);
+        });
+    }
+
+    function handleKpiDragStart(e) {
+        draggedKpi = this;
+        this.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', ''); // Firefox requirement
+        e.stopPropagation(); // Prevent card drag start
+    }
+
+    function handleKpiDragEnd(e) {
+        this.classList.remove('dragging');
+        draggedKpi = null;
+        e.stopPropagation();
+    }
+
+    function handleKpiDragOver(e) {
+        if (e.preventDefault) e.preventDefault(); // Necessary for drop
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+
+    function handleKpiDrop(e) {
+        e.stopPropagation(); // Stop bubbling to card drop
+        
+        if (draggedKpi && draggedKpi !== this) {
+            const container = document.getElementById('performance-grid');
+            // Get all kpi boxes
+            const items = [...container.querySelectorAll('.kpi-box')];
+            const currIndex = items.indexOf(draggedKpi);
+            const targetIndex = items.indexOf(this);
+            
+            if (currIndex < targetIndex) {
+                this.after(draggedKpi);
+            } else {
+                this.before(draggedKpi);
+            }
+            
+            // Update state
+            updateSelectedMetricsOrder();
+        }
+        return false;
+    }
+
+    function updateSelectedMetricsOrder() {
+        const container = document.getElementById('performance-grid');
+        const items = container.querySelectorAll('.kpi-box');
+        const newOrder = [];
+        
+        items.forEach(item => {
+            if (item.dataset.id) {
+                newOrder.push(item.dataset.id);
+            }
+        });
+        
+        selectedMetricIds = newOrder;
+    }
+
+    // Note: renderPerformanceMetrics() is called by initDashboardState()
+
+    // ========== Calendar Logic ==========
+    // Mock trading data for demonstration
+    const tradingData = {
+        '2025-12': {
+            1: { pnl: 450, trades: 3, wins: 3 },
+            2: { pnl: -120, trades: 2, wins: 0 },
+            3: { pnl: 890, trades: 4, wins: 4 },
+            5: { pnl: 210, trades: 2, wins: 1 },
+            8: { pnl: 320, trades: 1, wins: 1 },
+            9: { pnl: -150, trades: 2, wins: 0 },
+            10: { pnl: 550, trades: 3, wins: 2 },
+            12: { pnl: 120, trades: 1, wins: 1 },
+            15: { pnl: -200, trades: 2, wins: 0 },
+            16: { pnl: 400, trades: 2, wins: 2 },
+            17: { pnl: 150, trades: 1, wins: 1 },
+            18: { pnl: -50, trades: 1, wins: 0 },
+            19: { pnl: 300, trades: 2, wins: 2 },
+            22: { pnl: 100, trades: 1, wins: 1 },
+            24: { pnl: 250, trades: 2, wins: 2 },
+            26: { pnl: 180, trades: 1, wins: 1 },
+            29: { pnl: 220, trades: 2, wins: 2 },
+            30: { pnl: -80, trades: 1, wins: 0 }
+        },
+        '2025-11': {
+            3: { pnl: 280, trades: 2, wins: 2 },
+            4: { pnl: 320, trades: 2, wins: 2 },
+            5: { pnl: -100, trades: 1, wins: 0 },
+            6: { pnl: 450, trades: 3, wins: 3 },
+            7: { pnl: 180, trades: 1, wins: 1 },
+            10: { pnl: -80, trades: 1, wins: 0 },
+            11: { pnl: 200, trades: 2, wins: 2 },
+            12: { pnl: -50, trades: 1, wins: 0 },
+            13: { pnl: 380, trades: 2, wins: 2 },
+            14: { pnl: 220, trades: 2, wins: 2 },
+            17: { pnl: 350, trades: 3, wins: 3 },
+            18: { pnl: 150, trades: 1, wins: 1 },
+            19: { pnl: 280, trades: 2, wins: 2 },
+            20: { pnl: -120, trades: 1, wins: 0 },
+            21: { pnl: 190, trades: 1, wins: 1 },
+            24: { pnl: -60, trades: 1, wins: 0 },
+            25: { pnl: 500, trades: 3, wins: 3 },
+            26: { pnl: 180, trades: 2, wins: 2 },
+            28: { pnl: 240, trades: 2, wins: 2 }
+        }
+        // Note: January 2026 has no data yet - it's in the future
+    };
+
+    const holidays = {
+        '2025-12-25': 'Holiday',
+        '2026-01-01': 'New Year'
+    };
+
+    // Global Timezone Configuration (UTC)
+    const APP_TIMEZONE = 'UTC';
+    
+    // Initialize with UTC date
+    let currentCalendarDate = new Date(Date.UTC(2025, 11, 1)); // December 2025 (UTC)
+    let calendarResizeObserver = null;
+
+    function calendarRender() {
+        try {
+            const grid = document.getElementById('dashboard-calendar-grid');
+            const label = document.getElementById('calendar-month-label');
+            
+            if (!grid) return;
+            if (!label) return;
+
+            // Use UTC methods for consistent rendering across timezones
+            const year = currentCalendarDate.getUTCFullYear();
+            const month = currentCalendarDate.getUTCMonth();
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            // Add UTC indicator to label
+            label.innerHTML = `
+                <div style="display: inline-flex; align-items: center; justify-content: center; position: relative;">
+                    ${monthNames[month]} ${year} <span style="font-size: 12px; color: var(--text-muted); margin-left: 4px;">(UTC)</span>
+                    <div class="kpi-info-icon" style="position: relative; top: 0; right: 0; margin-left: 6px; width: 14px; height: 14px; font-size: 10px; cursor: help;">i</div>
+                    <div class="cal-tooltip">
+                        <div style="margin-bottom: 6px;"><strong style="color: var(--primary);">UTC Time Standard</strong></div>
+                        <div style="color: var(--text-muted); margin-bottom: 8px;">
+                            This calendar aggregates trading data based on <strong>Coordinated Universal Time (UTC)</strong> days (00:00 - 23:59).
+                        </div>
+                        <div style="background: rgba(245, 158, 11, 0.1); padding: 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.2);">
+                            <span style="color: var(--warning); font-weight: 600;">⚠️ Timezone Note</span><br>
+                            If your broker uses a different timezone (e.g. EST, GMT+2), your daily P&L might appear shifted or split across two days compared to your broker statements.
+                        </div>
+                    </div>
+                </div>`;
+        
+            // Get first day of month and total days (UTC-based)
+            const firstDay = new Date(Date.UTC(year, month, 1)).getUTCDay(); // 0=Sun
+            const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+            const daysInPrevMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+        
+            // Data key - if isNewUser, use empty data
+            const dataKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+            const monthData = isNewUser ? {} : (tradingData[dataKey] || {});
+        
+            let html = '';
+        
+            // Header row
+            const headers = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Weekly'];
+            headers.forEach(h => {
+                html += `<div class="cal-header">${h}</div>`;
+            });
+        
+            // Calculate weeks
+            let currentDay = 1;
+            let weekNum = 1;
+            const today = new Date();
+            
+            // Fill calendar (max 5 weeks as requested)
+            for (let week = 0; week < 5; week++) {
+                // if (currentDay > daysInMonth) break; // Removed to ensure full grid rendering
+                
+                let weekPnl = 0;
+                let weekTrades = 0;
+                
+                // Days in week
+                for (let dow = 0; dow < 7; dow++) {
+                    if (week === 0 && dow < firstDay) {
+                        // Previous month days
+                        const prevDay = daysInPrevMonth - (firstDay - dow - 1);
+                        const prevMonth = month === 0 ? 11 : month - 1;
+                        const prevYear = month === 0 ? year - 1 : year;
+                        const prevMonthName = monthNames[prevMonth].slice(0, 3);
+                        html += `<div class="cal-day" style="opacity: 0.3;"><span class="cal-date">${prevDay} ${prevMonthName}</span></div>`;
+                    } else if (currentDay > daysInMonth) {
+                        // Next month days
+                        const nextDay = currentDay - daysInMonth;
+                        const nextMonth = month === 11 ? 0 : month + 1;
+                        const nextMonthName = monthNames[nextMonth].slice(0, 3);
+                        html += `<div class="cal-day" style="opacity: 0.3;"><span class="cal-date">${nextDay} ${nextMonthName}</span></div>`;
+                        currentDay++;
+                    } else {
+                        // Current month days
+                        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
+                        const isWeekend = dow === 0 || dow === 6;
+                        
+                        // UTC-based Today Check
+                        const isToday = year === today.getUTCFullYear() && 
+                                      month === today.getUTCMonth() && 
+                                      currentDay === today.getUTCDate();
+                                      
+                        const dayData = monthData[currentDay];
+                        const holiday = holidays[dateKey];
+                        
+                        let bgStyle = isWeekend ? 'background: rgba(255,255,255,0.02);' : '';
+                        let borderStyle = isToday ? 'border-color: var(--primary); background: rgba(59, 130, 246, 0.05);' : '';
+                        
+                        let valHtml = '';
+                        let dotColor = '';
+                        
+                        if (holiday) {
+                            valHtml = `<span class="cal-val" style="color:var(--text-muted)">${holiday}</span>`;
+                        } else if (dayData) {
+                            const pnl = dayData.pnl;
+                            // Calculate precise Win Rate: (Wins / Total Trades) * 100, rounded to integer
+                            const winRate = dayData.trades > 0 && dayData.wins !== undefined 
+                                ? Math.round((dayData.wins / dayData.trades) * 100) 
+                                : (dayData.percent || 0);
+                            
+                            weekPnl += pnl;
+                            weekTrades += dayData.trades;
+                            const colorClass = pnl >= 0 ? 'text-green' : 'text-red';
+                            const sign = pnl >= 0 ? '+' : '-';
+                            valHtml = `
+                                <span class="cal-val ${colorClass}" style="display:block;">${sign}$${Math.abs(pnl).toLocaleString()}</span>
+                                <span class="cal-percent ${colorClass}" style="display:block; font-size:9px; margin-top:2px;">${winRate}%</span>
+                            `;
+                            dotColor = pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+                        } else if (!isWeekend) {
+                            valHtml = `<span class="cal-val" style="color:var(--text-muted)">-</span>`;
+                        }
+                        
+                        const dayLabel = currentDay === 1 ? `${currentDay} ${monthNames[month].slice(0, 3)}` : currentDay;
+                        const dotHtml = dotColor ? `<div class="cal-dot-indicator" style="background-color: ${dotColor};"></div>` : '';
+                        
+                        // Add click navigation to Moonlog Trades
+                        html += `<div class="cal-day" style="${bgStyle}${borderStyle} cursor: pointer;" onclick="window.location.href='Moonlog/Moonlog.html?view=tradelog&date=${dateKey}'">
+                            <span class="cal-date">${dayLabel}</span>
+                            ${valHtml}
+                            ${dotHtml}
+                        </div>`;
+                        currentDay++;
+                    }
+                }
+                
+                // Weekly summary
+                const weekColorClass = weekPnl >= 0 ? 'text-green' : 'text-red';
+                const weekSign = weekPnl >= 0 ? '+' : '-';
+                html += `<div class="cal-day weekly-summary">
+                    <span class="weekly-label">Week ${weekNum}</span>
+                    <span class="weekly-value ${weekColorClass}">${weekSign}$${Math.abs(weekPnl).toLocaleString()}</span>
+                    <span class="weekly-trades">${weekTrades} trades</span>
+                </div>`;
+                weekNum++;
+            }
+        
+            grid.innerHTML = html;
+            
+            // Setup resize observer for compact mode
+            setupCalendarResize();
+        } catch (err) {
+            console.error('[Calendar] calendarRender error:', err);
+        }
+    }
+
+    function calendarChangeMonth(delta) {
+        // Create a new date to avoid mutation issues
+        const newYear = currentCalendarDate.getUTCFullYear();
+        const newMonth = currentCalendarDate.getUTCMonth() + delta;
+        currentCalendarDate = new Date(Date.UTC(newYear, newMonth, 1));
+        
+        try {
+            calendarRender();
+        } catch (err) {
+            console.error('[Calendar] calendarRender threw:', err);
+        }
+    }
+
+    // Bind calendar navigation buttons
+    let calendarNavBound = false;
+
+    function handleCalendarNavClick(e) {
+        try {
+            const prev = e && e.target && e.target.closest ? e.target.closest('#cal-prev-btn') : null;
+            const next = e && e.target && e.target.closest ? e.target.closest('#cal-next-btn') : null;
+
+            if (!prev && !next) return;
+
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
+            if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+
+            const delta = prev ? -1 : 1;
+            calendarChangeMonth(delta);
+        } catch (err) {
+            console.error('[Calendar] nav handler error:', err);
+        }
+    }
+
+    function initCalendarNavigation() {
+        if (calendarNavBound) return;
+        calendarNavBound = true;
+
+        const prevBtn = document.getElementById('cal-prev-btn');
+        const nextBtn = document.getElementById('cal-next-btn');
+
+        // Direct bindings (best case)
+        if (prevBtn) prevBtn.addEventListener('click', handleCalendarNavClick);
+        if (nextBtn) nextBtn.addEventListener('click', handleCalendarNavClick);
+
+        // Delegated binding (capture phase) to survive bubbling issues / DOM changes
+        document.addEventListener('click', handleCalendarNavClick, true);
+    }
+
+    function setupCalendarResize() {
+        const calendarCard = document.getElementById('card-calendar');
+        const calendarGrid = document.getElementById('dashboard-calendar-grid');
+
+        if (!calendarCard || !calendarGrid) return;
+
+        // Some environments (older browsers / embedded webviews) don't support ResizeObserver.
+        // If we throw here, the rest of the script (including month navigation binding) won't run.
+        if (typeof ResizeObserver === 'undefined') return;
+
+        // Only create once; renderCalendar() may call this repeatedly.
+        if (calendarResizeObserver) return;
+
+        calendarResizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (entry.contentRect.width < 600) {
+                    calendarGrid.classList.add('compact-mode');
+                } else {
+                    calendarGrid.classList.remove('compact-mode');
+                }
+            }
+        });
+        calendarResizeObserver.observe(calendarCard);
+    }
+
+    // Initialize calendar navigation (bind nav first so it still works even if render hits an error)
+    initCalendarNavigation();
+    // Note: calendarRender() is now called by initDashboardState()
+
+    // ========== Risk Guard Overview ==========
+    function renderRiskOverview() {
+        const grid = document.getElementById('risk-overview-grid');
+        if (!grid) return;
+        
+        const filteredAccounts = getFilteredAccounts();
+        
+        if (filteredAccounts.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: var(--text-muted);">
+                    <div style="font-size: 24px; margin-bottom: 8px;">🔍</div>
+                    <p style="margin: 0; font-size: 13px;">No accounts selected</p>
+                    <p style="margin: 4px 0 0; font-size: 12px; opacity: 0.7;">Select accounts from the top bar to view risk status</p>
+                </div>
+            `;
+            return;
+        }
+        
+        grid.innerHTML = filteredAccounts.map(([accId, acc]) => {
+            const dailyPct = Math.round((acc.currentDaily / acc.dailyLimit) * 100);
+            const weeklyPct = Math.round((acc.currentWeekly / acc.weeklyLimit) * 100);
+            
+            // Determine status
+            let statusClass = '';
+            let statusBadge = 'safe';
+            let statusText = 'Safe';
+            
+            if (dailyPct >= 80 || weeklyPct >= 80) {
+                statusClass = 'status-danger';
+                statusBadge = 'pressure';
+                statusText = 'Pressure';
+            } else if (dailyPct >= 60 || weeklyPct >= 60) {
+                statusClass = 'status-caution';
+                statusBadge = 'caution';
+                statusText = 'Caution';
+            }
+            
+            const dailyBarColor = dailyPct >= 80 ? 'var(--danger)' : (dailyPct >= 60 ? 'var(--warning)' : 'var(--success)');
+            const weeklyBarColor = weeklyPct >= 80 ? 'var(--danger)' : (weeklyPct >= 60 ? 'var(--warning)' : 'var(--success)');
+            
+            return `
+                <div class="risk-overview-card ${statusClass}">
+                    <div class="rg-compact-header">
+                        <div class="rg-compact-account">
+                            <div class="rg-compact-name">${acc.name}</div>
+                            <div class="rg-compact-balance">$${acc.currentBalance.toLocaleString()} / $${acc.balanceNum.toLocaleString()}</div>
+                        </div>
+                        <div class="rg-compact-status ${statusBadge}">${statusText}</div>
+                    </div>
+                    <div class="rg-compact-bars">
+                        <div class="rg-compact-bar">
+                            <div class="rg-bar-label">
+                                <span>Daily Loss</span>
+                                <span>$${acc.currentDaily} / $${acc.dailyLimit}</span>
+                            </div>
+                            <div class="rg-bar-track">
+                                <div class="rg-bar-fill" style="width: ${dailyPct}%; background: ${dailyBarColor};"></div>
+                            </div>
+                        </div>
+                        <div class="rg-compact-bar">
+                            <div class="rg-bar-label">
+                                <span>Weekly Loss</span>
+                                <span>$${acc.currentWeekly} / $${acc.weeklyLimit}</span>
+                            </div>
+                            <div class="rg-bar-track">
+                                <div class="rg-bar-fill" style="width: ${weeklyPct}%; background: ${weeklyBarColor};"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ========== Account Filter Event Listener ==========
+    function onAccountFilterChanged(accounts) {
+        selectedAccounts = accounts;
+        if (!isNewUser) {
+            renderRiskOverview();
+        }
+    }
+
+    // Listen for topbar account changes
+    document.addEventListener('accountChanged', function(e) {
+        if (e.detail && e.detail.accounts) {
+            onAccountFilterChanged(e.detail.accounts);
+        }
+    });
+
+    // Listen for date range changes
+    document.addEventListener('dateRangeChanged', function(e) {
+        if (e.detail && e.detail.start) {
+            // Sync calendar widget to selected start date
+            currentCalendarDate = new Date(e.detail.start);
+            // Ensure we are viewing the month of the start date
+            calendarRender();
+        }
+    });
+
+    // Listen for advanced filters changes
+    document.addEventListener('filtersChanged', function(e) {
+        console.log('Filters applied:', e.detail);
+        // In a full implementation, this would filter the data passed to widgets
+        // For this demo, we acknowledge the event
+    });
+
+    // Initialize Dashboard
+    (function initDashboard() {
+        // Load onboarding state
+        loadOnboardingState();
+        
+        // Check if demo mode is saved
+        const savedDemoMode = localStorage.getItem('tomoon_demo_mode');
+        if (savedDemoMode === 'true') {
+            isNewUser = true;
+        }
+        
+        // Check if topbar has already set accounts (from sessionStorage)
+        const storedAccounts = sessionStorage.getItem('selectedAccounts');
+        if (storedAccounts) {
+            try {
+                const parsed = JSON.parse(storedAccounts);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    selectedAccounts = parsed;
+                }
+            } catch (e) {
+                console.log('Could not parse stored accounts');
+            }
+        }
+        
+        // Initialize based on user state
+        initDashboardState();
+    })();
+
+    // ========== Sync Data Function ==========
+    function syncData() {
+        const btn = document.getElementById('sync-btn');
+        const icon = document.getElementById('sync-icon');
+        const timeEl = document.getElementById('sync-time');
+        
+        if (!btn || !icon) return;
+
+        // Disable button and start animation
+        btn.disabled = true;
+        icon.classList.add('syncing');
+        
+        // Simulate sync process
+        setTimeout(() => {
+            // Update last sync time
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric', 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            };
+            const timeString = now.toLocaleString('en-US', options);
+            if (timeEl) timeEl.textContent = `Last sync: ${timeString}`;
+            
+            // Re-enable button
+            btn.disabled = false;
+            icon.classList.remove('syncing');
+            
+            console.log('Data synced successfully!');
+        }, 2000);
+    }
+</script>
+
+    <!-- ================= AI SYSTEM COMPONENTS (LUNA) ================= -->
+    <script src="shared/luna.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if(typeof Luna !== 'undefined') {
+                Luna.init();
+            }
+        });
+    </script>
+</body>
+</html>

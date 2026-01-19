@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luna Hover Effect Concepts</title>
+    <style>
+        body {
+            background-color: #0f1115;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px;
+            gap: 40px;
+        }
+
+        h1 { margin-bottom: 10px; }
+        p { color: #94a3b8; margin-bottom: 40px; margin-top: 0; }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .demo-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            height: 200px;
+            justify-content: center;
+        }
+
+        .demo-label {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- Base Luna Styles (Replicated) --- */
+        .luna-widget-base {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 17, 21, 0.85); 
+            border-radius: 50px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            position: relative;
+            /* No Text Expansion in these demos */
+            transition: all 0.3s ease;
+        }
+        
+        .luna-avatar-base {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .moon-shape-base {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            box-shadow: inset -3px -1px 0 0 white;
+            transform: rotate(-45deg);
+            transition: all 0.5s ease;
+        }
+
+        /* State Calm (Default) */
+        .luna-state-calm {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            /* animation: breathe-calm 4s infinite ease-in-out; */ /* Disabled for clarity of hover */
+        }
+
+
+        /* --- OPTION A: Energy Surge (Intensify) --- */
+        .design-a:hover {
+            border-color: rgba(56, 189, 248, 0.6); /* Shift to Cyan border */
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+        }
+        .design-a:hover .luna-avatar-base {
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+            border-color: rgba(56, 189, 248, 0.8);
+        }
+        .design-a:hover .moon-shape-base {
+            transform: rotate(0deg) scale(1.1);
+            background-color: rgba(255,255,255,0.9); /* Fill moon */
+            box-shadow: none;
+        }
+
+        /* --- OPTION B: Orbital Spin (Tech Ring) --- */
+        .design-b::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1px dashed rgba(139, 92, 246, 0.6);
+            opacity: 0;
+            transition: 0.3s;
+            transform: scale(0.8);
+        }
+        .design-b:hover::before {
+            opacity: 1;
+            transform: scale(1);
+            animation: spin-ring 4s linear infinite;
+        }
+        @keyframes spin-ring { 100% { transform: scale(1) rotate(360deg); } }
+        
+        .design-b:hover .luna-avatar-base {
+            transform: scale(0.9); /* Slight shrink to emphasize ring */
+        }
+        .design-b:hover .moon-shape-base {
+            transform: rotate(-225deg); /* Spin moon */
+        }
+
+        /* --- OPTION C: Jelly Bounce (Playful) --- */
+        .design-c:hover {
+            animation: jelly 0.6s both;
+            border-color: #fff;
+            background: rgba(139, 92, 246, 0.1);
+        }
+        @keyframes jelly {
+            0% { transform: scale(1, 1); }
+            30% { transform: scale(1.25, 0.75); }
+            40% { transform: scale(0.75, 1.25); }
+            50% { transform: scale(1.15, 0.85); }
+            65% { transform: scale(0.95, 1.05); }
+            75% { transform: scale(1.05, 0.95); }
+            100% { transform: scale(1, 1); }
+        }
+        .design-c:hover .moon-shape-base {
+            /* Wiggle */
+            animation: wiggle 0.4s ease-in-out infinite alternate;
+        }
+        @keyframes wiggle { from{transform: rotate(-35deg);} to{transform: rotate(-55deg);} }
+
+        /* --- OPTION D: Holographic Glitch (Cyberpunk) --- */
+        .design-d:hover {
+            box-shadow: 2px 0 blue, -2px 0 red;
+            animation: glitch-box 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .design-d:hover .moon-shape-base {
+             opacity: 0.8;
+             animation: glitch-moon 0.2s infinite;
+        }
+        @keyframes glitch-box {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Luna Hover Effect Concepts</h1>
+    <p>Hover over the widgets below to test different interaction feedbacks.</p>
+
+    <div class="demo-grid">
+        
+        <!-- Design A -->
+        <div class="demo-card">
+            <span class="demo-label">A. Energy Surge</span>
+            <div class="luna-widget-base design-a">
+                <div class="luna-avatar-base luna-state-calm">
+                    <div class="moon-shape-base"></div>
+                </div>
+            </div>
+            <p style="font-size:12px; margin:0; text-align:center;">Glow intensifies, moon fills up.<br>Feels active & ready.</p>
+        </div>
+
+        <!-- Design B -->
+        <div class="demo-card">
+            <span class="demo-label">B. Orbital Scan</span>
+            <div class="luna-widget-base design-b">
+                <div class="luna-avatar-base luna-state-calm">
+                    <div class="moon-shape-base"></div>
+                </div>
+            </div>
+            <p style="font-size:12px; margin:0; text-align:center;">Tech ring appears & spins.<br>Feels robotic & precise.</p>
+        </div>
+
+        <!-- Design C -->
+        <div class="demo-card">
+            <span class="demo-label">C. Jelly Bounce</span>
+            <div class="luna-widget-base design-c">
+                <div class="luna-avatar-base luna-state-calm">
+                    <div class="moon-shape-base"></div>
+                </div>
+            </div>
+            <p style="font-size:12px; margin:0; text-align:center;">Squishy physics scale.<br>Feels friendly & playful.</p>
+        </div>
+
+        <!-- Design D -->
+        <div class="demo-card">
+            <span class="demo-label">D. Cyber Glitch</span>
+            <div class="luna-widget-base design-d">
+                <div class="luna-avatar-base luna-state-calm">
+                    <div class="moon-shape-base"></div>
+                </div>
+            </div>
+            <p style="font-size:12px; margin:0; text-align:center;">RGB Shift vibration.<br>Feels alert & urgent.</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

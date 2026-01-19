@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
+    <title>ToMoon AI Intelligence Report (Combined)</title>
+    <style>
+        /* --- 全局样式变量 (Based on Ver 1.3) --- */
+        :root {
+            --primary-color: #3b82f6; /* 核心蓝 */
+            --secondary-color: #1e3a8a; /* 深蓝标题 */
+            --bg-color: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-main: #333;
+            --text-sub: #6b7280;
+            --border-color: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --highlight-bg: #eff6ff;
+            --neutral-bg: #f3f4f6;
+            
+            /* Added from Ver 1.2 for compatibility */
+            --success-bg: #d1fae5;
+            --success-text: #065f46;
+            --warning-bg: #fef3c7;
+            --warning-text: #92400e;
+            --danger-bg: #fee2e2;
+            --danger-text: #b91c1c;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- 报告容器 --- */
+        .report-view {
+            max-width: 960px;
+            margin: 0 auto 30px auto;
+            background: var(--card-bg);
+            padding: 40px 50px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-top: 6px solid var(--primary-color);
+            display: none; /* 默认隐藏，通过JS控制显示 */
+        }
+
+        .report-view.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 排版样式 --- */
+        h1 {
+            color: var(--secondary-color);
+            font-size: 26px;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+        }
+        
+        .header-meta {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            margin-top: 35px;
+            margin-bottom: 15px;
+            padding-left: 12px;
+            border-left: 4px solid #60a5fa;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        /* --- 表格样式 --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--highlight-bg);
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        /* --- 组件样式 --- */
+        .summary-box {
+            background-color: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            color: #1e40af;
+            font-size: 14px;
+            line-height: 1.7;
+            position: relative;
+        }
+        
+        .summary-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .insight-text {
+            font-style: italic;
+            color: #4b5563;
+            background: #fffbeb;
+            border-left: 4px solid #fcd34d;
+            padding: 10px 15px;
+            margin-top: 10px;
+            font-size: 13px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .tag-success { background: #d1fae5; color: #065f46; }
+        .tag-warning { background: #fef3c7; color: #92400e; }
+        .tag-danger { background: #fee2e2; color: #b91c1c; }
+        .tag-neutral { background: #e5e7eb; color: #374151; }
+
+        .diff-pos { color: var(--success); font-weight: bold; }
+        .diff-neg { color: var(--danger); font-weight: bold; }
+
+        /* --- 图表占位 --- */
+        .chart-placeholder {
+            background-color: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            color: #94a3b8;
+            text-align: center;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
+        }
+
+        /* --- 顶部控制栏 --- */
+        .control-panel {
+            max-width: 960px;
+            margin: 0 auto 20px auto;
+            padding: 15px 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .btn-group { display: flex; gap: 10px; }
+        
+        button {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: var(--text-sub);
+        }
+
+        button:hover { background: #f3f4f6; }
+        
+        button.active-tab {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        select {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        /* --- 自定义进度条 (用于复盘率) --- */
+        .progress-bar {
+            width: 100%;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            height: 8px;
+            margin-top: 5px;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background-color: var(--primary-color);
+        }
+
+        @media print {
+            .control-panel { display: none; }
+            .report-view { box-shadow: none; border: none; margin: 0; padding: 0; }
+            body { background: #fff; }
+        }
+
+        /* ========== Mobile Responsive ========== */
+        @media (max-width: 1000px) {
+            .report-view {
+                max-width: 100%;
+                margin: 15px;
+                padding: 30px 20px;
+            }
+            
+            .control-panel {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn-group button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .report-view {
+                margin: 10px;
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 20px !important;
+            }
+            
+            h2 {
+                font-size: 16px !important;
+            }
+            
+            h3 {
+                font-size: 14px !important;
+            }
+            
+            .data-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .data-item {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .report-view {
+                margin: 5px;
+                padding: 15px 10px;
+            }
+            
+            .control-panel {
+                padding: 10px;
+                flex-direction: column;
+            }
+            
+            .btn-group {
+                width: 100%;
+                flex-direction: column;
+            }
+            
+            .btn-group button {
+                width: 100%;
+            }
+            
+            button {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            
+            /* Make tables scrollable on mobile */
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+            
+            .header-meta {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="control-panel">
+        <div class="btn-group">
+            <button onclick="switchTab('professional')" id="btn-prof" class="active-tab">客户/投资人评估报告</button>
+            <button onclick="switchTab('personal')" id="btn-pers">个人/教练行为报告</button>
+        </div>
+        <div>
+            <label style="font-size:13px; color:#666; margin-right:5px;">报告周期:</label>
+            <select>
+                <option>本周 (2025.10.20 - 10.27)</option>
+                <option>上周 (2025.10.13 - 10.20)</option>
+                <option>本月 (2025.10)</option>
+                <option>自定义范围...</option>
+            </select>
+            <button style="margin-left: 10px;">导出 PDF</button>
+        </div>
+    </div>
+
+    <!-- PROFESSIONAL REPORT (Combined) -->
+    <div id="professional-report" class="report-view active">
+        <h1>ToMoon AI Professional Trading Assessment</h1>
+        <div class="header-meta">
+            <span><strong>Generated by:</strong> Luna AI Engine</span>
+            <span><strong>Account:</strong> ToMoon-Live-00312</span>
+            <span><strong>Period:</strong> 2025.10.20 – 2025.10.27</span>
+        </div>
+
+        <h3>Luna AI Executive Summary</h3>
+        <div class="summary-box">
+            <strong>AI FACTUAL ANALYSIS</strong>
+            本周期内，账户处于 <b>Expansion Phase (扩张期)</b>。相比上一周期，净盈亏增长主要由持仓时间延长 (Time in Trade +15%) 及胜率提升贡献。
+            风险指标方面，Sharpe Ratio 从 2.5 提升至 3.1，表明单位风险收益效率优化。
+            <br><br>
+            <b>综合评级：</b> A- (Professional Stability 观察期)。虽然未触发硬性风控限制，但记录到一次手动调整止损行为，需注意纪律一致性。
+        </div>
+
+        <!-- Section 1: Trend Analysis (From Ver 1.3) -->
+        <h3>Performance Trend (vs Last Period)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>核心指标</th>
+                    <th>本周期数值</th>
+                    <th>上一周期数值</th>
+                    <th>变动 / 状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Net P/L (净盈亏)</td>
+                    <td><b>+$485.00</b></td>
+                    <td>+$310.00</td>
+                    <td><span class="diff-pos">+56.4%</span></td>
+                </tr>
+                <tr>
+                    <td>Win Rate (胜率)</td>
+                    <td>61.2%</td>
+                    <td>58.0%</td>
+                    <td><span class="diff-pos">+3.2%</span></td>
+                </tr>
+                <tr>
+                    <td>Sharpe Ratio</td>
+                    <td>3.1</td>
+                    <td>2.5</td>
+                    <td><span class="tag tag-success">Optimized</span></td>
+                </tr>
+                <tr>
+                    <td>Max Drawdown</td>
+                    <td>-2.4%</td>
+                    <td>-4.7%</td>
+                    <td><span class="diff-pos">Improved</span></td>
+                </tr>
+                <tr>
+                    <td>Avg Risk / Trade</td>
+                    <td>0.55%</td>
+                    <td>0.62%</td>
+                    <td><span class="tag tag-neutral">Stable</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Section 2: Benchmark Analysis (From Ver 1.2) -->
+        <h3>Industry Benchmark (vs Standards)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th width="25%">核心指标</th>
+                    <th width="25%">当前数值</th>
+                    <th width="25%">基准/目标 (Benchmark)</th>
+                    <th width="25%">评估结果</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Net P/L (净盈亏)</strong></td>
+                    <td><span style="color:var(--success); font-weight:bold;">+$485.00</span></td>
+                    <td>目标: +$300.00</td>
+                    <td><span class="tag tag-success">超额达成</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Sharpe Ratio</strong></td>
+                    <td><strong>3.1</strong></td>
+                    <td>行业平均: 1.2 - 1.5</td>
+                    <td><span class="tag tag-success">Top 5%</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Max Drawdown</strong></td>
+                    <td><strong>-2.4%</strong></td>
+                    <td>限制红线: -5.0%</td>
+                    <td><span class="tag tag-success">合规</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Profit Factor</strong></td>
+                    <td><strong>2.85</strong></td>
+                    <td>优秀标准: > 2.0</td>
+                    <td><span class="tag tag-success">优秀</span></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="chart-placeholder">
+            [Chart: Cumulative Net P/L Comparison (Current Week vs Last Week vs Benchmark)]
+        </div>
+
+        <h3>Risk & Compliance Audit</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="background:#f3f4f6">合规检查项</th>
+                    <th style="background:#f3f4f6">检测结果</th>
+                    <th style="background:#f3f4f6">对比上周</th>
+                    <th style="background:#f3f4f6">详细说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Max Daily Loss Hit</td>
+                    <td><span class="tag tag-success">Passed</span> (0次)</td>
+                    <td>无变化</td>
+                    <td>日内亏损峰值 $145 (限额 $280)</td>
+                </tr>
+                <tr>
+                    <td>Risk Override Events</td>
+                    <td><span class="tag tag-warning">1 Warning</span></td>
+                    <td>减少 2 次</td>
+                    <td>检测到 1 次手动修改止损 (Ticket #8992)</td>
+                </tr>
+                <tr>
+                    <td>Strategy Consistency</td>
+                    <td>92% Match</td>
+                    <td>提升 5%</td>
+                    <td>交易行为与预设策略蓝图高度一致</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Execution Efficiency Metrics</h3>
+        <table>
+            <tr>
+                <td style="width:25%"><strong>Avg Slippage</strong></td>
+                <td style="width:25%">-0.45 ticks</td>
+                <td style="width:25%"><strong>Execution Latency</strong></td>
+                <td style="width:25%">0.42s (Stable)</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="font-size:12px; color:#666;">
+                    注：滑点较上周平均值 (-0.30 ticks) 略有增加，主要集中在新闻发布时段。
+                </td>
+            </tr>
+        </table>
+        
+        <p style="font-size: 12px; color: #999; margin-top: 30px; text-align: center;">
+            * Report Data Source: ToMoon RiskGuard Engine. Unaudited.
+        </p>
+    </div>
+
+    <!-- PERSONAL REPORT (Based on Ver 1.3 with Ver 1.2 insights) -->
+    <div id="personal-report" class="report-view">
+        <h1>ToMoon AI Behavioral Coaching Report</h1>
+        <div class="header-meta">
+            <span><strong>Target:</strong> Self-Improvement</span>
+            <span><strong>Trader:</strong> You (Live-00312)</span>
+            <span><strong>Period:</strong> 2025.10.20 – 10.27</span>
+        </div>
+
+        <h3>Behavior & Discipline Dynamics</h3>
+        <p style="margin-bottom: 15px;">你的纪律动能指数 (DMI) 当前为 <strong>79.6</strong>，整体呈现上升趋势。</p>
+        
+        <div style="display: flex; gap: 20px;">
+            <div class="chart-placeholder" style="flex: 2;">
+                [Chart: Discipline Momentum Index Trend]
+                <br>EMA14 Trend vs Baseline
+            </div>
+            <div style="flex: 1;">
+                <table style="font-size: 13px;">
+                    <tr>
+                        <td><strong>Early Exit</strong></td>
+                        <td class="diff-pos">26% (↓5%)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stop Move</strong></td>
+                        <td class="diff-pos">3次 (↓2次)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TP Hit</strong></td>
+                        <td class="diff-pos">58% (↑4%)</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="insight-text">
+            <strong>Luna Feedback:</strong> 纪律性显著提升。数据显示冲动平仓 (Early Exit) 行为减少，这直接提升了盈亏比。目前的风险点在于周三出现的单次手动干预止损，建议在复盘中注明原因。
+        </div>
+
+        <h3>Self-Regulation & Journaling Integrity</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>自我管理指标</th>
+                    <th>当前表现</th>
+                    <th>状态评估</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>Moonlog Completion Rate</strong>
+                        <div style="font-size:12px; color:#666;">交易日志填写率</div>
+                    </td>
+                    <td>
+                        19 / 20 Trades (95%)
+                        <div class="progress-bar"><div class="progress-fill" style="width: 95%"></div></div>
+                    </td>
+                    <td><span class="tag tag-success">Excellent</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Review Latency</strong>
+                        <div style="font-size:12px; color:#666;">平均复盘延迟时间</div>
+                    </td>
+                    <td>3.5 Hours</td>
+                    <td><span class="tag tag-success">Within Day</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Deviation Awareness</strong>
+                        <div style="font-size:12px; color:#666;">违规行为主动标记率</div>
+                    </td>
+                    <td>100% (1/1 Detected)</td>
+                    <td><span class="tag tag-success">High Awareness</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="font-size: 13px; color: #555;">
+            <strong>Missing Log:</strong> 仅 Ticket #8823 未关联复盘日志。
+        </p>
+
+        <h3>Emotion & Cognitive Analysis</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <strong>Emotion Distribution</strong>
+                <div class="chart-placeholder" style="height: 150px;">
+                    [Chart: Emotion Ring]
+                    <br>Calm: 38% | FOMO: 15% | Fear: 10%
+                </div>
+            </div>
+            <div>
+                <strong>Impact Heatmap</strong>
+                <div class="chart-placeholder" style="height: 150px;">
+                    [Chart: Heatmap]
+                    <br>High Impact: Tuesday PM (FOMO)
+                </div>
+            </div>
+        </div>
+        <p class="insight-text" style="border-left-color: #f59e0b;">
+            <strong>风险提示:</strong> 本周主要的负面影响来自 FOMO。数据显示，在错失第一波行情后，你倾向于在非 setup 区域强行入场。建议启用"错失行情冷静期"功能。
+        </p>
+
+        <h3>Strategy Stability & Patterns</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="background:#fff">识别模式</th>
+                    <th style="background:#fff">行为特征描述</th>
+                    <th style="background:#fff">AI 建议</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Stable Executor</strong></td>
+                    <td>持仓时间与计划一致，无多余微操</td>
+                    <td><span class="tag tag-success">Keep</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Impulse Trigger</strong></td>
+                    <td>连亏第 3 笔交易时，平均下单速度加快 40%</td>
+                    <td><span class="tag tag-warning">Delay Entry</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Next Step: Luna AI Coaching</h3>
+        <div style="background: #fff; border: 2px solid #e5e7eb; border-radius: 8px; padding: 15px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <strong>Weekly Training Goals</strong>
+                <span style="color:var(--primary-color); font-weight:bold;">Reward: Trust +5</span>
+            </div>
+            <ul style="margin: 0; padding-left: 20px; color: #555;">
+                <li><strong>Log Integrity:</strong> 补全 Ticket #8823 的交易日志。</li>
+                <li><strong>Discipline Challenge:</strong> 连续 3 笔交易完全遵守止损，不进行任何下移操作。</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.report-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.btn-group button').forEach(el => el.classList.remove('active-tab'));
+            
+            document.getElementById(tabId + '-report').classList.add('active');
+            
+            if(tabId === 'professional') {
+                document.getElementById('btn-prof').classList.add('active-tab');
+            } else {
+                document.getElementById('btn-pers').classList.add('active-tab');
+            }
+        }
+    </script>
+</body>
+</html>

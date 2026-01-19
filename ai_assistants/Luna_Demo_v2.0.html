@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToMoon AI: Luna Design Demo v3.0 (Organic-Flow)</title>
+    <style>
+        :root {
+            /* --- THEME FROM LUNA v1.0 --- */
+            --bg-dark: #0f1115;
+            --bg-card: #1a1d24;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            
+            /* LUNA COLORS (v1.0) */
+            --luna-calm: rgb(139, 92, 246);   /* Violet */
+            --luna-active: rgb(56, 189, 248); /* Cyan */
+            --luna-alert: rgb(239, 68, 68);   /* Red */
+
+            /* ADAPTED ORGANIC VARS */
+            --org-primary: var(--luna-calm); 
+            --org-accent: #a78bfa; /* Lighter violet */
+            
+            --glass-bg: rgba(30, 34, 42, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.5);
+            /* Mapped for text */
+            --org-text: var(--text-main);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            /* v1.0 Dark Background Style */
+            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f1115 60%);
+            color: var(--org-text);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 { font-weight: 300; letter-spacing: 0.5px; }
+        h1 { margin-bottom: 10px; }
+        h2 { 
+            font-size: 18px; 
+            color: rgba(255,255,255,0.6); 
+            border-bottom: 1px solid var(--glass-border); 
+            padding-bottom: 15px; 
+            width: 100%; 
+            max-width: 800px;
+            margin-bottom: 40px;
+        }
+
+        .demo-section { width: 100%; max-width: 800px; }
+        .grid-display {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-bottom: 50px;
+            justify-items: center;
+        }
+
+        /* --- V3 AVATAR: ORGANIC BLOB --- */
+        .blob-container {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* The Blob Entity */
+        .blob {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--org-primary), var(--org-accent));
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            box-shadow: 0 10px 20px rgba(129, 140, 248, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        /* STATE: CALM (Breathing) */
+        .state-calm .blob {
+            animation: morph 8s ease-in-out infinite;
+            filter: blur(1px);
+        }
+
+        /* STATE: SPEAKING (Ripple) */
+        .state-speak {
+            position: relative;
+        }
+        .state-speak .blob {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            animation: morph-fast 3s ease-in-out infinite;
+            transform: scale(1.1);
+        }
+        .state-speak::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            animation: ripple 2s infinite;
+        }
+
+        /* STATE: ALERT (Sharp/Warning) */
+        .state-alert .blob {
+            background: linear-gradient(135deg, #f87171, #fb923c);
+            border-radius: 50%; /* Reset to circle then pulse */
+            animation: pulse-sharp 1s infinite;
+            box-shadow: 0 0 30px rgba(248, 113, 113, 0.4);
+        }
+
+        /* --- UI STYLE: SOFT GLASS --- */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: var(--shadow-soft);
+            color: #fff;
+            transition: transform 0.3s;
+        }
+        .glass-card:hover { transform: translateY(-3px); background: rgba(255,255,255,0.08); }
+
+        .ai-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .ai-name { font-size: 14px; font-weight: 600; opacity: 0.9; }
+        .ai-role { font-size: 11px; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; margin-left: auto; }
+        
+        .ai-body { font-size: 15px; line-height: 1.6; font-weight: 300; opacity: 0.9; }
+        
+        .ai-actions { margin-top: 20px; display: flex; gap: 10px; }
+        .soft-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .soft-btn:hover { background: rgba(255,255,255,0.2); }
+        .soft-btn.primary { background: var(--org-primary); color: white; box-shadow: 0 4px 12px rgba(129, 140, 248, 0.4); }
+
+        /* --- PLACEMENT: FLOAT --- */
+        .float-demo-area {
+            position: relative; width: 100%; height: 350px;
+            background: linear-gradient(to bottom, #1e293b, #0f172a);
+            border-radius: 20px; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .island-notification {
+            position: absolute; top: 30px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(15px);
+            padding: 10px 20px;
+            border-radius: 40px;
+            display: flex; align-items: center; gap: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: float-y 4s ease-in-out infinite;
+        }
+        
+        .spotlight-overlay {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.5s;
+        }
+        .spotlight-active { opacity: 1; pointer-events: auto; }
+
+        .focus-circle {
+            width: 300px; padding: 40px;
+            text-align: center;
+            background: radial-gradient(circle, rgba(20,20,35,0.95) 0%, rgba(10,10,20,0.95) 100%);
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 100px rgba(129, 140, 248, 0.2);
+        }
+
+        /* Animations */
+        @keyframes morph {
+            0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+            100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+        }
+        @keyframes morph-fast {
+            0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            50% { border-radius: 60% 40% 30% 70% / 60% 40% 70% 30%; }
+            100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+        }
+        @keyframes ripple {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+        }
+        @keyframes rotate-slow { 100% { transform: rotate(360deg); } }
+        @keyframes pulse-sharp { 0% { transform: scale(1); } 50% { transform: scale(0.9); } 100% { transform: scale(1); } }
+        @keyframes float-y { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+        .label { margin-top: 15px; font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
+
+    </style>
+</head>
+<body>
+
+    <h1>ToMoon AI Identity: <span style="font-weight:400; color:var(--org-primary)">Luna</span></h1>
+
+    <!-- 1. AVATAR CONCEPT -->
+    <div class="demo-section">
+        <h2>1. Organic Form (Living Intelligence)</h2>
+        <div class="grid-display">
+            <!-- Calm -->
+            <div style="text-align:center;">
+                <div class="blob-container state-calm">
+                    <div class="blob"></div>
+                </div>
+                <div class="label">Calm: Presence</div>
+            </div>
+            <!-- Speaking -->
+            <div style="text-align:center;">
+                <div class="blob-container state-speak">
+                    <div class="blob"></div>
+                </div>
+                <div class="label">Active: Interaction</div>
+            </div>
+            <!-- Alert -->
+            <div style="text-align:center;">
+                <div class="blob-container state-alert">
+                    <div class="blob"></div>
+                </div>
+                <div class="label">Alert: Focus</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. UI CARDS -->
+    <div class="demo-section">
+        <h2>2. Soft Glass Interface</h2>
+        <div class="grid-display" style="grid-template-columns: 1fr 1fr;">
+            
+            <!-- Standard Assist -->
+            <div class="glass-card">
+                <div class="ai-header">
+                    <div style="width:24px; height:24px; background:var(--org-primary); border-radius:50%;"></div>
+                    <span class="ai-name">Luna</span>
+                    <span class="ai-role">Coach</span>
+                </div>
+                <div class="ai-body">
+                    "You're in a good flow state, Alex. Your last 3 executions were impeccable. Would you like to increase your size slightly for the next setup?"
+                </div>
+                <div class="ai-actions">
+                    <button class="soft-btn primary">Yes, adjust size</button>
+                    <button class="soft-btn">Not now</button>
+                </div>
+            </div>
+
+            <!-- Guard Alert -->
+            <div class="glass-card" style="border-color: rgba(248, 113, 113, 0.3);">
+                <div class="ai-header">
+                    <div style="width:24px; height:24px; background:linear-gradient(135deg, #f87171, #fb923c); border-radius:50%;"></div>
+                    <span class="ai-name">Risk Guard</span>
+                    <span class="ai-role" style="color:#fca5a5;">Intervention</span>
+                </div>
+                <div class="ai-body">
+                    We've detected a significant deviation from your plan. To protect your capital, I've paused new entries for 15 minutes. Take a breath.
+                </div>
+                <div class="ai-actions">
+                    <button class="soft-btn" style="background:#f87171; color:white;">Accept Pause</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 3. PLACEMENT -->
+    <div class="demo-section">
+        <h2>3. Floating Interaction</h2>
+        <div class="float-demo-area">
+            <div style="color:rgba(255,255,255,0.1); font-size:40px; font-weight:800;">CHART AREA</div>
+            
+            <!-- Dynamic Island Notification -->
+            <div class="island-notification">
+                <div class="blob-container state-calm" style="width:20px; height:20px;">
+                    <div class="blob" style="width:15px; height:15px;"></div>
+                </div>
+                <div style="font-size:13px;">Reviewing last trade performance...</div>
+            </div>
+
+            <!-- Focus Overlay (Triggered) -->
+            <div id="focus-overlay" class="spotlight-overlay">
+                <div class="focus-circle">
+                    <div class="blob-container state-speak" style="margin:0 auto 20px auto;">
+                        <div class="blob"></div>
+                    </div>
+                    <h3 style="margin:0 0 10px 0;">Let's Refocus</h3>
+                    <p style="font-size:14px; opacity:0.8; margin-bottom:20px;">
+                        You've deviated from your blueprint 3 times in a row.
+                    </p>
+                    <button class="soft-btn primary" onclick="document.getElementById('focus-overlay').classList.remove('spotlight-active')">I'm Back</button>
+                </div>
+            </div>
+            
+            <button class="soft-btn" style="position:absolute; bottom:20px;" onclick="document.getElementById('focus-overlay').classList.add('spotlight-active')">Simulate Intervention</button>
+
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToMoon AI: Ethereal Zen Demo</title>
+    <style>
+        :root {
+            /* --- THEME FROM LUNA v1.0 --- */
+            --bg-dark: #0f1115;
+            --bg-card: #1a1d24;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            
+            /* LUNA COLORS */
+            --color-calm: 139, 92, 246;   /* Violet */
+            --color-active: 56, 189, 248; /* Cyan */
+            --color-alert: 239, 68, 68;   /* Red */
+
+            /* ETHEREAL ADAPTATION VARS */
+            --zen-glass-bg: rgba(30, 34, 42, 0.8);
+            --zen-glass-border: rgba(255, 255, 255, 0.1);
+            --zen-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            /* Subtle dark gradient overlay */
+            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f1115 60%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+            align-items: center;
+        }
+
+        h1, h2, h3 { font-weight: 300; letter-spacing: 0.5px; }
+        h1 { 
+            font-family: serif; 
+            font-style: italic; 
+            text-align: center;
+            margin-bottom: 40px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+
+        h2 { 
+            font-size: 14px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .demo-section { width: 100%; max-width: 800px; }
+        .grid-display {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-bottom: 50px;
+            justify-items: center;
+        }
+
+        /* --- VISUAL CORE: LIGHT ORB (DARK MODE) --- */
+        .orb-wrapper {
+            width: 100px; height: 100px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+
+        .orb-core {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: #fff;
+            position: relative;
+            z-index: 2;
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            /* Inner glow for dark mode essence */
+            box-shadow: 0 0 15px rgba(255,255,255,0.8); 
+        }
+
+        .orb-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            pointer-events: none;
+            transition: all 0.6s ease;
+            filter: blur(8px);
+        }
+
+        /* STATE: CALM (was Serene) - Violet */
+        .state-calm .orb-core {
+            transform: scale(1);
+            box-shadow: 0 0 20px rgba(var(--color-calm), 0.5), inset 0 0 10px rgba(var(--color-calm), 0.2);
+            animation: float 6s ease-in-out infinite;
+        }
+        .state-calm .orb-glow {
+            width: 60px; height: 60px;
+            background: radial-gradient(circle, rgba(var(--color-calm), 0.4) 0%, transparent 70%);
+            animation: breathe 5s ease-in-out infinite;
+        }
+
+        /* STATE: ACTIVE (was Flow) - Cyan */
+        .state-active .orb-core {
+            transform: scale(1.2);
+            background: #e0f2fe;
+            box-shadow: 0 0 30px rgba(var(--color-active), 0.8), 0 0 10px rgba(255,255,255,1);
+        }
+        .state-active .orb-glow {
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, rgba(var(--color-active), 0.3) 0%, transparent 70%);
+            animation: ripple 2s infinite;
+        }
+
+        /* STATE: ALERT (was Focus) - Red */
+        .state-alert .orb-core {
+            background: #fff0f0;
+            box-shadow: 0 0 10px rgba(var(--color-alert), 0.8);
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        .state-alert .orb-glow {
+            width: 90px; height: 90px;
+            background: radial-gradient(circle, rgba(var(--color-alert), 0.4) 0%, transparent 80%);
+            animation: none;
+        }
+
+
+        /* --- UI COMPONENT: ZEN CARD (DARK) --- */
+        .zen-card {
+            background: var(--zen-glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--zen-glass-border);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--zen-shadow);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: transform 0.3s;
+        }
+        .zen-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.2);
+            background: rgba(40, 44, 52, 0.9);
+        }
+
+        .zen-tag { 
+            font-size: 10px; 
+            letter-spacing: 2px; 
+            text-transform: uppercase; 
+            color: var(--text-muted);
+            opacity: 0.8;
+        }
+
+        .zen-msg {
+            font-family: serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-main);
+            font-weight: 300;
+        }
+        
+        .zen-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-zen {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2px;
+            font-family: inherit;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-zen:hover {
+            color: #fff;
+            border-color: rgba(var(--color-calm), 0.8);
+        }
+        .btn-zen.primary {
+            color: rgba(var(--color-calm), 1);
+            border-color: rgba(var(--color-calm), 0.5);
+        }
+        .btn-zen.primary:hover {
+            color: #fff;
+            border-color: #fff;
+            text-shadow: 0 0 10px rgba(var(--color-calm), 0.5);
+        }
+
+
+        /* --- PLACEMENT: BOTTOM SHEET --- */
+        .placement-box {
+            width: 100%; height: 350px;
+            border-radius: 12px;
+            /* Dark placeholder bg */
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bottom-sheet {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            /* Dark sheet bg */
+            background: rgba(20, 23, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--zen-glass-border);
+            padding: 20px 30px;
+            box-sizing: border-box;
+            transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .bottom-sheet.active { transform: translateY(0); }
+
+        /* Animations */
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
+        @keyframes breathe { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.2; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } }
+        @keyframes ripple { 0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.8); } }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
+    </style>
+</head>
+<body>
+
+    <h1>ToMoon AI Identity: <span style="color:rgba(139, 92, 246, 1)">Luna</span></h1>
+
+    <!-- 1. VISUAL LANG -->
+    <div class="demo-section">
+        <h2>1. State of Mind (Luna Colors)</h2>
+        <div class="grid-display">
+            <!-- Calm -->
+            <div style="text-align:center;">
+                <div class="orb-wrapper state-calm">
+                    <div class="orb-glow"></div>
+                    <div class="orb-core"></div>
+                </div>
+                <div style="font-size:11px; margin-top:20px; color:#aaa; letter-spacing:1px;">CALM (Violet)</div>
+            </div>
+            <!-- Active -->
+            <div style="text-align:center;">
+                <div class="orb-wrapper state-active">
+                    <div class="orb-glow"></div>
+                    <div class="orb-core"></div>
+                </div>
+                <div style="font-size:11px; margin-top:20px; color:#aaa; letter-spacing:1px;">ACTIVE (Cyan)</div>
+            </div>
+            <!-- Alert -->
+            <div style="text-align:center;">
+                <div class="orb-wrapper state-alert">
+                    <div class="orb-glow"></div>
+                    <div class="orb-core"></div>
+                </div>
+                <div style="font-size:11px; margin-top:20px; color:#aaa; letter-spacing:1px;">ALERT (Red)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. UI CARDS -->
+    <div class="demo-section">
+        <h2>2. Minimalist Feedback</h2>
+        <div class="grid-display" style="grid-template-columns: 1fr 1fr;">
+            
+            <div class="zen-card">
+                <div class="zen-tag" style="color: rgba(139, 92, 246, 0.8);">Insight</div>
+                <div class="zen-msg">
+                    "Patience often yields the best entry. The market is still finding its equilibrium."
+                </div>
+                <div class="zen-actions">
+                    <button class="btn-zen primary">Wait</button>
+                    <button class="btn-zen">Show Data</button>
+                </div>
+            </div>
+
+            <div class="zen-card" style="border-top: 1px solid rgba(239, 68, 68, 0.5);">
+                <div class="zen-tag" style="color: rgba(239, 68, 68, 0.8);">Mindfulness Check</div>
+                <div class="zen-msg">
+                    Your pace has increased significantly. Are you chasing the price?
+                </div>
+                <div class="zen-actions">
+                    <button class="btn-zen primary" style="color: rgba(239, 68, 68, 1); border-color: rgba(239, 68, 68, 0.5);">Pause</button>
+                    <button class="btn-zen">I am calm</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 3. INTERACTION -->
+    <div class="demo-section">
+        <h2>3. Non-Intrusive Presence</h2>
+        <div class="placement-box">
+            <div style="position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:#333; font-size:24px; font-weight:100; opacity: 0.3;">
+                [ Chart Content ]
+            </div>
+
+            <button class="btn-zen" style="position: absolute; bottom: 100px; left: 50%; transform:translateX(-50%); background: rgba(255,255,255,0.05); padding: 10px 20px; border-radius: 20px; border:1px solid rgba(255,255,255,0.1);" onclick="document.getElementById('zen-sheet').classList.add('active')">
+                Summon Assistant
+            </button>
+
+            <!-- Bottom Sheet -->
+            <div id="zen-sheet" class="bottom-sheet">
+                <div class="orb-wrapper state-calm" style="width:40px; height:40px;">
+                    <div class="orb-glow" style="width:40px; height:40px;"></div>
+                    <div class="orb-core" style="width:16px; height:16px;"></div>
+                </div>
+                <div style="flex-grow:1;">
+                    <div style="font-size:14px; font-weight:bold; color:#fff;">Session Analysis Ready</div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Based on your last 3 trades.</div>
+                </div>
+                <button class="btn-zen" onclick="document.getElementById('zen-sheet').classList.remove('active')">Dismiss</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

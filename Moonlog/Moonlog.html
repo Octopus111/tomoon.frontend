@@ -1,0 +1,3295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1400, initial-scale=0.25, maximum-scale=3, user-scalable=yes">
+    <title>Moonlog</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f1115;
+            --bg-card: #1a1d24;
+            --bg-panel: #232730;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* --- Main Layout --- */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            /* Hide scrollbar */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        .main-content::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .page-section { display: none; animation: fadeIn 0.3s; flex-direction: column; gap: 20px; }
+        .page-section.active { display: flex; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Components --- */
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+        
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 13px; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+        .btn-outline:hover { border-color: var(--text-main); color: var(--text-main); }
+        .btn-sm { padding: 4px 10px; font-size: 11px; }
+        
+        .tag { padding: 4px 8px; border-radius: 4px; font-size: 11px; background: var(--bg-panel); color: var(--text-muted); display: inline-block; }
+        .tag.win { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .tag.loss { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        
+        .text-green { color: var(--success); }
+        .text-red { color: var(--danger); }
+
+        /* --- Mission Control Styles --- */
+        .mission-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .mission-col { display: flex; flex-direction: column; gap: 20px; }
+        
+        .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .stat-card { background: var(--bg-panel); padding: 15px; border-radius: 8px; display: flex; flex-direction: column; }
+        .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
+        .stat-value { font-size: 20px; font-weight: 700; }
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr) 100px; gap: 10px; margin-top: 15px; }
+        .cal-day { background: var(--bg-panel); border-radius: 8px; min-height: 80px; padding: 10px; position: relative; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; }
+        .cal-day:hover { border-color: var(--primary); }
+        .cal-day.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
+        .cal-date { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; display: block; }
+        .cal-pnl { font-size: 14px; font-weight: 600; display: block; }
+        .cal-week-summary { background: rgba(255, 255, 255, 0.02); border-radius: 8px; border: 1px dashed var(--border); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 12px; color: var(--text-muted); }
+
+        .todo-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-panel); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+        .todo-item:hover { background: rgba(255,255,255,0.05); }
+        .todo-title { font-size: 13px; font-weight: 600; }
+        .todo-desc { font-size: 11px; color: var(--text-muted); }
+        
+        /* --- TradeLog Styles --- */
+        .filter-bar { display: flex; gap: 10px; }
+        .filter-btn { padding: 6px 12px; background: var(--bg-panel); border-radius: 6px; font-size: 12px; cursor: pointer; color: var(--text-muted); border: 1px solid transparent; }
+        .filter-btn.active { background: var(--primary); color: white; }
+        
+        .pending-bar { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--warning); padding: 10px 15px; border-radius: 8px; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+
+        .trade-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .trade-table th { text-align: left; padding: 12px; color: var(--text-muted); border-bottom: 1px solid var(--border); font-weight: 500; }
+        .trade-table td { padding: 12px; border-bottom: 1px solid var(--bg-panel); color: var(--text-main); vertical-align: middle; }
+        .trade-table tr:hover { background: rgba(255,255,255,0.02); }
+        
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .badge-long { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .badge-short { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        /* --- Tooltip Styles --- */
+        .tiptool-container { position: relative; display: inline-flex; align-items: center; margin-left: 8px; cursor: help; }
+        .tiptool-icon { color: var(--text-muted); font-size: 14px; opacity: 0.7; transition: 0.2s; }
+        .tiptool-icon:hover { opacity: 1; color: var(--primary); }
+        .tiptool-content { 
+            visibility: hidden; width: 200px; background-color: var(--bg-panel); color: var(--text-main); 
+            text-align: center; border-radius: 6px; padding: 8px 10px; position: absolute; z-index: 100; 
+            bottom: 125%; left: 50%; margin-left: -100px; opacity: 0; transition: opacity 0.3s; 
+            font-size: 11px; font-weight: 400; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.3); pointer-events: none;
+        }
+        .tiptool-container:hover .tiptool-content { visibility: visible; opacity: 1; }
+        .tiptool-arrow {
+            position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: var(--bg-panel) transparent transparent transparent;
+        }
+
+        /* --- SessionLog Styles --- */
+        .session-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .session-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .session-title { font-weight: 600; font-size: 14px; }
+        .session-meta { font-size: 12px; color: var(--text-muted); }
+
+        /* --- Session Detail (Review) Styles --- */
+        .completion-bar { display: flex; gap: 2px; margin-bottom: 20px; background: var(--bg-panel); padding: 4px; border-radius: 8px; }
+        .completion-step { flex: 1; text-align: center; padding: 8px; font-size: 12px; color: var(--text-muted); border-radius: 6px; transition: 0.2s; cursor: pointer; }
+        .completion-step:hover { background: rgba(255,255,255,0.03); }
+        .completion-step.active { background: var(--bg-card); color: var(--text-main); font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .completion-step.done { color: var(--success); background: rgba(16, 185, 129, 0.05); }
+
+        .review-section { margin-bottom: 20px; background: var(--bg-panel); border-radius: 8px; padding: 20px; border: 1px solid var(--border); }
+        .review-title { font-size: 14px; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: var(--text-main); }
+        
+        /* New Review Layout (Grid) */
+        .review-grid { display: grid; grid-template-columns: 380px 1fr; gap: 20px; align-items: start; }
+        .review-col { display: flex; flex-direction: column; gap: 20px; }
+        
+        /* New Review Components */
+        .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip { padding: 6px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; font-size: 11px; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+        .chip:hover { border-color: var(--primary); color: var(--text-main); }
+        .chip.active { background: rgba(59, 130, 246, 0.15); border-color: var(--primary); color: var(--primary); font-weight: 500; }
+        
+        .slider-container { background: var(--bg-card); padding: 10px; border-radius: 6px; border: 1px solid var(--border); }
+        .range-slider { width: 100%; margin-top: 5px; accent-color: var(--primary); }
+        
+        .prompt-bubble { padding: 6px 12px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 15px; font-size: 11px; color: var(--primary); cursor: pointer; transition: all 0.2s; }
+        .prompt-bubble:hover { background: rgba(59, 130, 246, 0.15); transform: translateY(-1px); }
+
+        /* --- Highlights Styles --- */
+        .tab-header { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 0; background: var(--bg-card); border-radius: 12px 12px 0 0; }
+        .tab-item { padding: 15px 20px; cursor: pointer; color: var(--text-muted); font-size: 13px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab-item:hover { color: var(--text-main); }
+        .tab-item.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; background: rgba(59, 130, 246, 0.02); }
+        .tab-content { display: none; animation: fadeIn 0.2s; padding: 20px; }
+        .tab-content.active { display: block; }
+
+        .highlight-card { background: var(--bg-panel); border-left: 3px solid var(--primary); padding: 15px; border-radius: 6px; margin-bottom: 10px; }
+        .highlight-text { font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
+        .highlight-meta { font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; }
+
+        .note-card { background: var(--bg-panel); padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; border: 1px solid transparent; }
+        .note-card:hover { border-color: var(--primary); }
+        .note-title { font-weight: 600; font-size: 14px; margin-bottom: 5px; }
+        .note-preview { font-size: 12px; color: var(--text-muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* --- Drawer --- */
+        .drawer { position: fixed; top: 0; right: -450px; width: 450px; height: 100vh; background: var(--bg-card); border-left: 1px solid var(--border); transition: right 0.3s; z-index: 1000; padding: 20px; display: flex; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.5); box-sizing: border-box; }
+        .drawer.open { right: 0; }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+        .drawer-content { flex: 1; overflow-y: auto; }
+        .drawer-footer { padding-top: 15px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+        /* --- Forms --- */
+        .moonlog-form { display: flex; flex-direction: column; gap: 15px; }
+        .form-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; display: block; }
+        .summary-input { width: 100%; background: var(--bg-panel); border: 1px solid var(--border); color: white; padding: 10px; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+        
+        .star-rating { display: flex; gap: 5px; }
+        .star { font-size: 20px; color: var(--border); cursor: pointer; }
+        .star.active { color: #fbbf24; }
+        
+        .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .option-btn { padding: 10px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); cursor: pointer; text-align: center; font-size: 13px; }
+        .option-btn:hover { border-color: var(--primary); }
+        .option-btn.selected { background: rgba(59, 130, 246, 0.1); border-color: var(--primary); color: var(--primary); font-weight: 600; }
+
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+        .log-tag { padding: 6px 12px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 20px; font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+        .log-tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .insight-box { background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; margin-top: 10px; }
+
+        /* --- Toast Notification --- */
+        .toast { position: fixed; bottom: 30px; right: 30px; background: var(--bg-panel); border: 1px solid var(--primary); color: var(--text-main); padding: 15px 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 2000; display: flex; align-items: center; gap: 10px; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast-icon { color: var(--primary); font-size: 18px; }
+
+        /* --- Modal Overlay --- */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1500; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { width: 500px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; }
+        .modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+        /* Hide scrollbar for Trade Detail Modal but allow scrolling */
+        #trade-detail-modal .modal-body { scrollbar-width: none; -ms-overflow-style: none; }
+        #trade-detail-modal .modal-body::-webkit-scrollbar { display: none; }
+
+        .modal-footer { padding: 15px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+        /* --- Search Input --- */
+        .search-input { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; color: var(--text-main); font-size: 13px; width: 200px; }
+        .search-input::placeholder { color: var(--text-muted); }
+
+        /* --- Progress Indicator --- */
+        .progress-mini { height: 4px; background: var(--bg-panel); border-radius: 2px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; background: var(--success); transition: width 0.3s; }
+
+        /* --- Highlight Card Enhanced --- */
+        .highlight-card { position: relative; }
+        .highlight-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .highlight-card.pinned { border-left-color: var(--warning); }
+        .highlight-card.reviewed { opacity: 0.6; }
+        .pin-badge { position: absolute; top: 10px; right: 10px; font-size: 14px; }
+
+        /* --- Note Card Enhanced --- */
+        .note-type-icon { font-size: 16px; margin-right: 8px; }
+        .link-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(59, 130, 246, 0.1); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 8px; }
+
+        /* --- Mini Trade List --- */
+        .mini-trade-item { background: var(--bg-panel); padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid var(--warning); }
+        .mini-trade-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+        .mini-trade-rating { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+        /* --- Empty State --- */
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+        .empty-state-icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
+        .empty-state-title { font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 5px; }
+
+        /* --- Custom Highlight Input --- */
+        .custom-highlight-input { display: none; margin-top: 10px; }
+        .custom-highlight-input.active { display: block; }
+
+        /* --- Link Chips --- */
+        .link-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .link-chip { display: inline-flex; align-items: center; gap: 5px; background: rgba(59, 130, 246, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+        .link-chip .remove { cursor: pointer; opacity: 0.7; }
+        .link-chip .remove:hover { opacity: 1; }
+
+        /* --- Link Selection Item --- */
+        .link-select-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+        .link-select-item:hover { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
+        .link-select-item.selected { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); }
+        .link-select-icon { font-size: 20px; width: 32px; text-align: center; }
+        .link-select-info { flex: 1; }
+        .link-select-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+        .link-select-meta { font-size: 11px; color: var(--text-muted); }
+        .link-select-check { color: var(--primary); font-size: 16px; opacity: 0; }
+        .link-select-item.selected .link-select-check { opacity: 1; }
+
+        /* ========== Mobile Responsive ========== */
+        @media (max-width: 1000px) {
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+                padding: 20px 15px;
+            }
+            
+            .mission-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: repeat(7, 1fr) !important;
+            }
+            .cal-week-summary {
+                display: none;
+            }
+            
+            .header-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 15px 10px;
+            }
+            
+            .card {
+                padding: 15px;
+                border-radius: 10px;
+            }
+            
+            .stats-bar {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .stat-card {
+                padding: 12px;
+            }
+            
+            .stat-value {
+                font-size: 18px;
+            }
+            
+            .stat-label {
+                font-size: 11px;
+            }
+            
+            .cal-day {
+                min-height: 50px;
+                padding: 6px;
+            }
+            
+            .cal-date {
+                font-size: 10px;
+            }
+            
+            .cal-pnl {
+                font-size: 11px;
+            }
+            
+            .btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            .todo-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 10px 8px;
+            }
+            
+            .stats-bar {
+                grid-template-columns: 1fr;
+            }
+            
+            .cal-day {
+                min-height: 40px;
+                padding: 4px;
+            }
+            
+            .card {
+                padding: 10px;
+            }
+        }
+
+        /* Tooltip Styles - Question Mark Icon */
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            background: rgba(148, 163, 184, 0.15);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: help;
+            position: relative;
+            margin-left: 4px;
+            vertical-align: middle;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+        .info-icon:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .info-icon .tooltip-content {
+            position: fixed;
+            background: #1e2129;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 400;
+            line-height: 1.4;
+            width: 200px;
+            white-space: normal;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.15s ease;
+            pointer-events: none;
+            z-index: 99999;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            text-transform: none;
+            letter-spacing: normal;
+        }
+        .info-icon:hover .tooltip-content {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* Legacy class for backward compatibility */
+        .info-tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast" class="toast">
+    <span class="toast-icon">✓</span>
+    <span id="toast-msg">Action Completed</span>
+</div>
+
+<!-- Unrated Trades Modal -->
+<div class="modal-overlay" id="unrated-modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 style="margin: 0;">Rate Pending Trades</h3>
+            <span style="cursor: pointer; color: var(--text-muted);" onclick="closeUnratedModal()">✕</span>
+        </div>
+        <div class="modal-body" id="unrated-modal-body">
+            <!-- Dynamic content -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeUnratedModal()">Later</button>
+            <button class="btn btn-primary" onclick="saveAllUnratedTrades()">Save All Ratings</button>
+        </div>
+    </div>
+</div>
+
+<!-- Trade Selector Modal (New) -->
+<div class="modal-overlay" id="trade-selector-modal">
+    <div class="modal-box" style="width: 400px;">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border); padding: 15px;">
+            <h3 style="margin: 0; font-size: 16px;">Select Trade</h3>
+            <span style="cursor: pointer; color: var(--text-muted);" onclick="closeTradeSelector()">✕</span>
+        </div>
+        <div class="modal-body" style="padding: 15px;">
+            <!-- Filter Bar -->
+            <div class="filter-bar" style="margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px;">
+                <button class="filter-btn active" onclick="filterTradeSelector('All', this)">All</button>
+                <button class="filter-btn" onclick="filterTradeSelector('NQ', this)">NQ</button>
+                <button class="filter-btn" onclick="filterTradeSelector('ES', this)">ES</button>
+                <button class="filter-btn" onclick="filterTradeSelector('CL', this)">CL</button>
+            </div>
+            <div id="trade-selector-list" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Items injected by JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Highlight Detail Modal -->
+<div class="modal-overlay" id="highlight-detail-modal">
+    <div class="modal-box" style="width: 550px;">
+        <div class="modal-header">
+            <h3 style="margin: 0;">Highlight Detail</h3>
+            <span style="cursor: pointer; color: var(--text-muted);" onclick="closeHighlightDetail()">✕</span>
+        </div>
+        <div class="modal-body" id="highlight-detail-body">
+            <!-- Dynamic content -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeHighlightDetail()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Link Selection Modal -->
+<div class="modal-overlay" id="link-modal">
+    <div class="modal-box" style="width: 450px;">
+        <div class="modal-header">
+            <h3 style="margin: 0;" id="link-modal-title">Select Item to Link</h3>
+            <span style="cursor: pointer; color: var(--text-muted);" onclick="closeLinkModal()">✕</span>
+        </div>
+        <div class="modal-body" id="link-modal-body" style="max-height: 400px; overflow-y: auto;">
+            <!-- Dynamic content -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeLinkModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Trade Detail Modal (New) -->
+<div class="modal-overlay" id="trade-detail-modal">
+    <div class="modal-box" style="width: 800px; max-width: 90vw;">
+        <div class="modal-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:18px; font-weight:700;">Trade Details</span>
+                <span class="tag" id="td-status" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">Completed</span>
+                <span style="font-size:12px; color:var(--success);">✓ Closed</span>
+            </div>
+            <div style="cursor:pointer;" onclick="closeTradeDetailModal()">✕</div>
+        </div>
+        <div class="modal-body" style="padding: 0;">
+            <!-- New Minimalist Clean Layout -->
+            <div style="padding: 30px 40px;">
+                
+                <!-- Row 1: Header (Symbol & P&L) -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <h2 id="td-symbol" style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.5px;">XAUUSD</h2>
+                        <span id="td-side" class="badge badge-long" style="font-size: 14px; padding: 4px 12px; border-radius: 4px;">Long</span>
+                    </div>
+                    <div id="td-pnl" style="font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">+$8,410.00</div>
+                </div>
+
+                <!-- Row 2: Strategy & ID -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <div style="font-size: 15px; color: var(--text-main); font-weight: 500;">
+                        <span style="color: var(--text-muted); margin-right: 6px;">Blueprint:</span>
+                        <span id="td-blueprint" style="color: var(--primary);">Scalping Strategy</span>
+                        <span style="display: inline-block; width: 4px; height: 4px; background: var(--border); vertical-align: middle; margin: 0 10px; border-radius: 50%;"></span>
+                        <span style="color: var(--text-muted);">ID: <span id="td-id">#8410</span></span>
+                    </div>
+                     <!-- Review Chips -->
+                    <div style="display: flex; gap: 10px;">
+                         <div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 4px 12px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span style="color: var(--text-muted);">Factor</span>
+                            <span class="info-icon" style="width: 12px; height: 12px; font-size: 8px;">?<span class="tooltip-content">User-defined market context or rationale influencing the trade decision.</span></span>
+                            <span id="td-factor" style="font-weight: 600;">Trend</span>
+                         </div>
+                         <div style="background: var(--bg-panel); border: 1px solid var(--border); padding: 4px 12px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span style="color: var(--text-muted);">Deviation</span>
+                            <span class="info-icon" style="width: 12px; height: 12px; font-size: 8px;">?<span class="tooltip-content">User-identified deviation from established trading plan or execution standards.</span></span>
+                            <span id="td-deviation" style="font-weight: 600;">None</span>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Metrics Strip -->
+                <div style="display:flex; justify-content: space-between; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 25px;">
+                    <div>
+                         <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px;">Total Lots</div>
+                         <div id="td-lots" style="font-size: 18px; font-weight: 600;">5.00</div>
+                    </div>
+                    <div>
+                         <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px;">Trades</div>
+                         <div id="td-count" style="font-size: 18px; font-weight: 600;">2</div>
+                    </div>
+                    <div>
+                         <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px;">Open Time</div>
+                         <div id="td-open-time" style="font-size: 15px; font-family: 'Consolas', monospace; color: var(--text-main);">2025-12-30 05:00:09</div>
+                    </div>
+                    <div>
+                         <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px;">Close Time</div>
+                         <div id="td-close-time" style="font-size: 15px; font-family: 'Consolas', monospace; color: var(--text-main);">2025-12-30 09:50:32</div>
+                    </div>
+                </div>
+
+                <!-- Row 4: Chart Placeholder -->
+                 <div style="height: 200px; background: linear-gradient(180deg, rgba(16, 185, 129, 0.03) 0%, rgba(0,0,0,0) 100%); border-radius: 8px; border: 1px solid var(--border); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    <span style="color: var(--text-muted); z-index: 1;">Chart Visualization Placeholder</span>
+                    <svg viewBox="0 0 800 200" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; opacity: 0.3;">
+                        <path d="M0,150 L100,140 L200,160 L300,100 L400,110 L500,50 L600,60 L700,20 L800,40" fill="none" stroke="var(--success)" stroke-width="2"/>
+                        <path d="M0,150 L100,140 L200,160 L300,100 L400,110 L500,50 L600,60 L700,20 L800,40 V200 H0 Z" fill="url(#grad1)" style="opacity:0.2"/>
+                        <defs>
+                            <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                              <stop offset="0%" style="stop-color:var(--success);stop-opacity:1" />
+                              <stop offset="100%" style="stop-color:var(--success);stop-opacity:0" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                 </div>
+            </div>
+
+             <!-- Sub-trades Table -->
+             <div style="padding: 0 40px 30px 40px;">
+                <h3 style="font-size: 14px; margin-bottom: 15px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Child Trades (<span id="td-child-count">2</span>)</h3>
+                <table class="trade-table" style="font-size: 13px;">
+                    <thead>
+                        <tr>
+                            <th style="color:var(--text-muted);">Time</th>
+                            <th style="color:var(--text-muted);">Operation</th>
+                            <th style="color:var(--text-muted);">Type</th>
+                            <th style="color:var(--text-muted);">Lots</th>
+                            <th style="color:var(--text-muted);">Price</th>
+                            <th style="color:var(--text-muted);">Position (Hold)</th>
+                            <th style="color:var(--text-muted); text-align:right;">P&L</th>
+                        </tr>
+                    </thead>
+                    <tbody id="td-subtrades-body">
+                         <!-- Filled by JS -->
+                    </tbody>
+                </table>
+             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar (Generated by shared module) -->
+<aside class="sidebar" id="sidebar"></aside>
+<script src="../shared/sidebar.js"></script>
+<script src="../shared/topbar.js"></script>
+<script src="../shared/luna.js"></script>
+<script>
+    // Auto-init sidebar
+    autoInitSidebar({ 
+        internalSwitch: true, 
+        switchFunction: 'switchViewFromSidebar',
+        title: 'Moonlog'
+    });
+    
+    // 初始化 Topbar（包含全局 Quick Journal）
+    initTopbar({ title: 'Mission Control' });
+    
+    // View titles mapping
+    const viewTitles = {
+        'missioncontrol': 'Mission Control',
+        'tradelog': 'Trades',
+        'sessionlog': 'Sessions',
+        'session-detail': 'Session Review',
+        'highlights': 'Highlights & Notes'
+    };
+    
+    function updateTopbarTitle(viewId) {
+        const titleEl = document.getElementById('topbar-page-title');
+        if (titleEl && viewTitles[viewId]) {
+            titleEl.textContent = viewTitles[viewId];
+        }
+    }
+    
+    function switchViewFromSidebar(viewId) {
+        switchView(viewId);
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const view = urlParams.get('view') || 'missioncontrol';
+        const accountFilter = urlParams.get('account');
+        
+        switchView(view);
+        updateSidebarActive(view);
+        
+        // Handle account filter from Strategy page
+        if (accountFilter && view === 'sessionlog') {
+            // Show toast indicating account filter
+            setTimeout(() => {
+                showToast(`Viewing sessions for: ${accountFilter}`, '👤');
+            }, 300);
+        }
+    });
+</script>
+
+<main class="main-content">
+    
+    <!-- VIEW 1: Mission Control -->
+    <div id="view-missioncontrol" class="page-section active">
+        <div class="header-row">
+            <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Your trading command center. Review, reflect, and prepare.</p>
+            <button class="btn btn-primary" onclick="window.location.href='../Strategy/Strategy_demo_v1.5.html?view=dashboard'">+ Start Session</button>
+        </div>
+
+        <div class="mission-grid">
+            <!-- Left Col -->
+            <div class="mission-col">
+                <!-- Status Card -->
+                <div class="card">
+                    <div class="header-row" style="margin-bottom: 15px;">
+                        <h3 style="font-size: 16px; margin: 0;">Today / Last Session</h3>
+                        <span class="tag win">Completed</span>
+                    </div>
+                    <div class="stats-bar" style="margin-bottom: 15px;">
+                        <div class="stat-card">
+                            <span class="stat-label">Execution Quality</span>
+                            <span class="stat-value text-green">High (4.8)</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Risk Guard</span>
+                            <span class="stat-value text-green">Safe</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Trades</span>
+                            <span class="stat-value">12 <span style="font-size: 12px; color: var(--text-muted); font-weight: normal;">(All Rated)</span></span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Net P&L</span>
+                            <span class="stat-value text-green">+$1,240</span>
+                        </div>
+                    </div>
+                    <!-- CTA Area -->
+                    <div style="display: flex; gap: 10px; padding-top: 15px; border-top: 1px solid var(--bg-panel);">
+                        <button class="btn btn-sm btn-outline" onclick="switchView('sessionlog')">View Details</button>
+                        <span style="flex: 1;"></span>
+                        <span style="font-size: 12px; color: var(--text-muted); align-self: center;">All caught up!</span>
+                    </div>
+                </div>
+
+                <!-- Timeline / Heatmap -->
+                <div class="card">
+                    <div class="header-row" style="margin-bottom: 15px;">
+                        <h3 style="font-size: 16px; margin: 0;">30-Day Consistency</h3>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn btn-outline btn-sm active">Quality</button>
+                            <button class="btn btn-outline btn-sm">P&L</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid">
+                        <!-- Mock Calendar Days -->
+                        <div class="cal-day active"><span class="cal-date">Dec 28</span><span class="cal-pnl text-green">+4.5</span></div>
+                        <div class="cal-day"><span class="cal-date">Dec 29</span><span class="cal-pnl text-red">-2.1</span></div>
+                        <div class="cal-day active"><span class="cal-date">Dec 30</span><span class="cal-pnl text-green">+4.8</span></div>
+                        <div class="cal-day"><span class="cal-date">Dec 31</span><span class="cal-pnl text-green">+3.9</span></div>
+                        <div class="cal-day active"><span class="cal-date">Jan 01</span><span class="cal-pnl text-green">+5.0</span></div>
+                        <div class="cal-day"><span class="cal-date">Jan 02</span><span class="cal-pnl text-green">+4.2</span></div>
+                        <div class="cal-day active" style="border-color: var(--primary);"><span class="cal-date">Today</span><span class="cal-pnl text-green">+4.8</span></div>
+                        <div class="cal-week-summary">
+                            <span style="font-size: 18px; font-weight: 700; color: var(--success);">4.4</span>
+                            <span>Avg Quality</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Col -->
+            <div class="mission-col">
+                <!-- To-Do Panel -->
+                <div class="card">
+                    <h3 style="font-size: 16px; margin-bottom: 15px; margin-top: 0;">Action Items</h3>
+                    
+                    <div class="todo-item" onclick="openSessionDetail('draft-001')">
+                        <div>
+                            <div class="todo-title">Draft Session (Jan 02)</div>
+                            <div class="todo-desc">Ended at 14:30 • Not Closed</div>
+                        </div>
+                        <button class="btn btn-sm btn-primary">Complete</button>
+                    </div>
+
+                    <div class="todo-item" onclick="openUnratedModal()">
+                        <div>
+                            <div class="todo-title">3 Pending Trades</div>
+                            <div class="todo-desc">From Jan 02 Session</div>
+                        </div>
+                        <button class="btn btn-sm btn-outline">Review</button>
+                    </div>
+                </div>
+
+                <!-- Highlights Preview -->
+                <div class="card">
+                    <div class="header-row" style="margin-bottom: 15px;">
+                        <h3 style="font-size: 16px; margin: 0;">Highlights</h3>
+                        <button class="btn btn-sm btn-outline" onclick="switchView('highlights')">View All</button>
+                    </div>
+                    
+                    <!-- Today's Highlight Section -->
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); margin-bottom: 8px; font-weight: 600;">Today's Highlight</div>
+                        <div class="highlight-card" style="border-left-color: var(--primary); background: rgba(59, 130, 246, 0.05);">
+                            <div class="highlight-text" style="font-size: 14px; font-weight: 500;">"Avoid trading the first 5 mins of NQ open when VIX is above 20."</div>
+                            <div class="highlight-meta">
+                                <span>Jan 02 Session</span>
+                                <span class="tag" style="background: rgba(59, 130, 246, 0.1); color: var(--primary);">#Strategy</span>
+                            </div>
+                            <div class="highlight-actions">
+                                <button class="btn btn-sm btn-outline" style="font-size: 10px; padding: 2px 6px;" onclick="showToast('Marked as reviewed')">✓ Reviewed</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">Recent</div>
+                    
+                    <div class="highlight-card">
+                        <div class="highlight-text">"Great patience on the pullback entry. Waited for the candle close."</div>
+                        <div class="highlight-meta">
+                            <span>Jan 01 Trade</span>
+                            <span>#Discipline</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: TradeLog -->
+    <div id="view-tradelog" class="page-section">
+        <div class="header-row">
+            <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Detailed ledger of every action. Rate and review.</p>
+            <div class="filter-bar" id="tradelog-filters" style="margin-bottom: 0;">
+                <button class="filter-btn active" onclick="filterTrades('all', this)">All</button>
+                <button class="filter-btn" onclick="filterTrades('unrated', this)">Unrated</button>
+                <button class="filter-btn" onclick="filterTrades('5star', this)">5 Stars</button>
+            </div>
+        </div>
+
+        <!-- TradeLog Overview -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px;">
+            <!-- Card 1: Review Status (Actionable) -->
+            <div id="pending-trades-bar" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                <div style="font-size: 11px; color: var(--warning); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Pending Reviews</div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                     <div style="font-size: 32px; font-weight: 800; color: var(--warning); line-height: 1;">3</div>
+                     <span style="font-size: 20px;">⚠️</span>
+                </div>
+                <div style="font-size: 11px; color: var(--warning); opacity: 0.9; font-weight: 500;">
+                    Action Required
+                </div>
+            </div>
+
+            <!-- Card 2: Execution Quality -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Avg Execution</div>
+                <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 8px;">
+                    <span style="font-size: 32px; font-weight: 800; color: var(--text-main); line-height: 1;">4.2</span>
+                    <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">/ 5.0</span>
+                </div>
+                <div style="width: 100%; max-width: 120px; height: 4px; background: var(--bg-panel); border-radius: 2px; overflow: hidden; margin-bottom: 6px;">
+                    <div style="width: 84%; height: 100%; background: var(--primary);"></div>
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted);">Top 10% of history</div>
+            </div>
+
+            <!-- Card 3: Discipline -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Discipline Rate</div>
+                <div style="font-size: 32px; font-weight: 800; color: var(--success); line-height: 1; margin-bottom: 8px;">92%</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">
+                    <span style="color: var(--danger); font-weight: 600;">1 Deviation</span> detected
+                </div>
+                <span class="tag" style="font-size: 9px; padding: 2px 8px;">FOMO</span>
+            </div>
+
+            <!-- Card 4: Mistake Cost -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Cost of Deviations</div>
+                <div style="font-size: 32px; font-weight: 800; color: var(--danger); line-height: 1; margin-bottom: 8px;">-$150</div>
+                <div style="font-size: 11px; color: var(--text-muted);">
+                    Avoidable losses
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px; font-style: italic;">
+                    "Stick to the plan"
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <table class="trade-table" id="trade-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Symbol</th>
+                        <th>Side</th>
+                        <th>Lots</th>
+                        <th>Price</th>
+                        <th>P&L</th>
+                        <th>Quality <span class="info-icon">?<span class="tooltip-content">User-assessed execution quality score based on personal trade review criteria.</span></span></th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="trade-table-body">
+                    <!-- Unrated Row 1 -->
+                    <tr data-status="unrated" style="background: rgba(245, 158, 11, 0.05); cursor: pointer;" onclick="openTradeDetail(1)">
+                        <td>2025-12-30 14:15:22</td>
+                        <td>NQ</td>
+                        <td><span class="badge badge-long">Long</span></td>
+                        <td>2.0</td>
+                        <td>16850.50</td>
+                        <td class="text-green">+$120.00</td>
+                        <td><span style="color: var(--warning);">Unrated</span></td>
+                        <td><button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); openDrawer('trade', 1)">Rate</button></td>
+                    </tr>
+                    <!-- Unrated Row 2 -->
+                    <tr data-status="unrated" style="background: rgba(245, 158, 11, 0.05); cursor: pointer;" onclick="openTradeDetail('demo-short')">
+                        <td>2025-12-30 13:45:10</td>
+                        <td>ES</td>
+                        <td><span class="badge badge-short">Short</span></td>
+                        <td>1.5</td>
+                        <td>4750.25</td>
+                        <td class="text-red">-$80.00</td>
+                        <td><span style="color: var(--warning);">Unrated</span></td>
+                        <td><button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); openDrawer('trade', 2)">Rate</button></td>
+                    </tr>
+                    <!-- Unrated Row 3 -->
+                    <tr data-status="unrated" style="background: rgba(245, 158, 11, 0.05); cursor: pointer;" onclick="openTradeDetail(3)">
+                        <td>2025-12-30 13:20:05</td>
+                        <td>NQ</td>
+                        <td><span class="badge badge-long">Long</span></td>
+                        <td>3.0</td>
+                        <td>16820.00</td>
+                        <td class="text-green">+$45.00</td>
+                        <td><span style="color: var(--warning);">Unrated</span></td>
+                        <td><button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); openDrawer('trade', 3)">Rate</button></td>
+                    </tr>
+                    <!-- Rated Rows -->
+                    <tr data-status="rated" data-stars="4" style="cursor: pointer;" onclick="openTradeDetail('demo-short')">
+                        <td>2025-12-30 10:30:05</td>
+                        <td>ES</td>
+                        <td><span class="badge badge-short">Short</span></td>
+                        <td>1.0</td>
+                        <td>4760.50</td>
+                        <td class="text-red">-$50.00</td>
+                        <td>⭐⭐⭐⭐</td>
+                        <td><button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); openDrawer('trade', 4)">Edit</button></td>
+                    </tr>
+                    <tr data-status="rated" data-stars="5" style="cursor: pointer;" onclick="openTradeDetail(5)">
+                        <td>2025-12-30 09:45:12</td>
+                        <td>NQ</td>
+                        <td><span class="badge badge-long">Long</span></td>
+                        <td>2.0</td>
+                        <td>16750.00</td>
+                        <td class="text-green">+$350.00</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td><button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); openDrawer('trade', 5)">Edit</button></td>
+                    </tr>
+                    <tr data-status="rated" data-stars="5" style="cursor: pointer;" onclick="openTradeDetail(6)">
+                        <td>2025-12-30 09:15:30</td>
+                        <td>NQ</td>
+                        <td><span class="badge badge-long">Long</span></td>
+                        <td>1.5</td>
+                        <td>16720.00</td>
+                        <td class="text-green">+$280.00</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td><button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); openDrawer('trade', 6)">Edit</button></td>
+                    </tr>
+                    <tr data-status="rated" data-stars="3" style="cursor: pointer;" onclick="openTradeDetail(7)">
+                        <td>2025-12-30 09:05:15</td>
+                        <td>ES</td>
+                        <td><span class="badge badge-short">Short</span></td>
+                        <td>1.0</td>
+                        <td>4745.00</td>
+                        <td class="text-green">+$75.00</td>
+                        <td>⭐⭐⭐</td>
+                        <td><button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); openDrawer('trade', 7)">Edit</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- VIEW 3: SessionLog -->
+    <div id="view-sessionlog" class="page-section">
+        <div class="header-row">
+            <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Your session directory. Review and close the loop.</p>
+        </div>
+
+        <style>
+            .session-section { margin-bottom: 32px; }
+            .section-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 16px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid var(--border);
+            }
+            .section-indicator {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+            }
+            .section-indicator.active { background: var(--success); animation: pulse 2s infinite; box-shadow: 0 0 8px var(--success); }
+            .section-indicator.draft { background: var(--warning); }
+            .section-indicator.completed { background: var(--primary); }
+            .section-title {
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--text-muted);
+            }
+            .section-count {
+                background: var(--bg-panel);
+                color: var(--text-muted);
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-size: 11px;
+                font-weight: 600;
+            }
+            .section-count.warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+            .section-count.live { background: rgba(16, 185, 129, 0.15); color: var(--success); animation: countPulse 1.5s ease-in-out infinite; }
+            
+            .session-item {
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 16px 20px;
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                transition: all 0.2s;
+            }
+            .session-item:hover { border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.02); }
+            .session-item.active-session { 
+                border-left: 3px solid var(--success); 
+                background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, var(--bg-card) 30%);
+                border-color: rgba(16, 185, 129, 0.3);
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.08);
+            }
+            .session-item.active-session:hover {
+                border-color: rgba(16, 185, 129, 0.5);
+                box-shadow: 0 0 25px rgba(16, 185, 129, 0.12);
+            }
+            .session-item.draft-session { border-left: 3px solid var(--warning); }
+            
+            .session-main { flex: 1; display: flex; align-items: center; gap: 24px; }
+            .session-identity { min-width: 180px; }
+            .session-identity-title { font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 2px; }
+            .session-identity-sub { font-size: 12px; color: var(--text-muted); }
+            
+            .session-metrics { display: flex; gap: 32px; flex: 1; }
+            .session-metric { text-align: center; min-width: 70px; }
+            .session-metric-value { font-size: 15px; font-weight: 600; color: var(--text-main); }
+            .session-metric-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
+            
+            /* Live indicator for active session metrics */
+            .live-value { position: relative; }
+            .live-dot {
+                display: inline-block;
+                width: 6px;
+                height: 6px;
+                background: var(--success);
+                border-radius: 50%;
+                margin-left: 6px;
+                animation: livePulse 1.2s ease-in-out infinite;
+            }
+            .live-pnl {
+                font-size: 18px;
+                font-weight: 700;
+                animation: valueGlow 2s ease-in-out infinite;
+            }
+            .live-pnl.positive { color: var(--success); }
+            .live-pnl.negative { color: var(--danger); }
+            
+            /* Duration counter */
+            .duration-counter {
+                font-family: 'Consolas', 'Monaco', monospace;
+                letter-spacing: 1px;
+            }
+            
+            /* Progress bar for active session */
+            .session-progress-bar {
+                width: 100%;
+                height: 3px;
+                background: var(--bg-panel);
+                border-radius: 2px;
+                overflow: hidden;
+                margin-top: 12px;
+            }
+            .session-progress-bar .fill {
+                height: 100%;
+                background: linear-gradient(90deg, var(--success), var(--primary));
+                border-radius: 2px;
+                animation: progressPulse 2s ease-in-out infinite;
+            }
+            
+            .session-progress { min-width: 120px; }
+            .progress-bar-container { height: 6px; background: var(--bg-panel); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+            .progress-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+            .progress-label { font-size: 11px; color: var(--text-muted); text-align: center; }
+            
+            .session-action { min-width: 140px; text-align: right; }
+            
+            .risk-badge { 
+                display: inline-flex; 
+                align-items: center; 
+                gap: 4px; 
+                padding: 3px 8px; 
+                border-radius: 4px; 
+                font-size: 11px; 
+                font-weight: 500;
+            }
+            .risk-badge.safe { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+            .risk-badge.touched { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+            .risk-badge.breach { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+            
+            .quality-score {
+                display: inline-flex;
+                align-items: center;
+                gap: 3px;
+                font-size: 14px;
+                font-weight: 600;
+            }
+            .quality-star { color: #fbbf24; font-size: 12px; }
+            
+            .empty-section {
+                background: var(--bg-card);
+                border: 1px dashed var(--border);
+                border-radius: 10px;
+                padding: 40px 20px;
+                text-align: center;
+            }
+            .empty-section-text { font-size: 13px; color: var(--text-muted); margin-bottom: 15px; }
+            
+            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+            @keyframes livePulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.8); } }
+            @keyframes countPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+            @keyframes valueGlow { 0%, 100% { text-shadow: 0 0 0 transparent; } 50% { text-shadow: 0 0 8px currentColor; } }
+            @keyframes progressPulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+        </style>
+
+        <!-- Section A: Active Sessions -->
+        <div class="session-section" id="active-sessions-section">
+            <div class="section-header">
+                <span class="section-indicator active"></span>
+                <span class="section-title">Live</span>
+                <span class="section-count live" id="active-count">1</span>
+            </div>
+            
+            <div id="active-sessions-list">
+                <!-- Active Session Item -->
+                <div class="session-item active-session">
+                    <div class="session-main">
+                        <div class="session-identity">
+                            <div class="session-identity-title">Main Account <span class="live-dot"></span></div>
+                            <div class="session-identity-sub">Scalping Strategy</div>
+                        </div>
+                        <div class="session-metrics">
+                            <div class="session-metric">
+                                <div class="session-metric-value duration-counter" id="active-duration">02:34:18</div>
+                                <div class="session-metric-label">Duration</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value live-value" id="active-trades">12<span class="live-dot"></span></div>
+                                <div class="session-metric-label">Trades</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value live-pnl positive" id="active-pnl">+$847.50</div>
+                                <div class="session-metric-label">Net P&L</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value"><span class="risk-badge safe">68% Safe</span></div>
+                                <div class="session-metric-label">Risk Used</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="session-action">
+                        <button class="btn btn-primary" onclick="window.location.href='../Strategy/Strategy_demo_v1.5.html?view=dashboard'" style="animation: countPulse 2s ease-in-out infinite;">Go to Execute →</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Empty State (hidden when has content) -->
+            <div class="empty-section" id="active-empty" style="display: none;">
+                <div class="empty-section-text">No active sessions right now.</div>
+                <button class="btn btn-primary" onclick="window.location.href='../Strategy/Strategy_demo_v1.5.html?view=dashboard'">Start a Session</button>
+            </div>
+        </div>
+
+        <!-- Section B: Draft Sessions (闭环关键) -->
+        <div class="session-section" id="draft-sessions-section">
+            <div class="section-header">
+                <span class="section-indicator draft"></span>
+                <span class="section-title">Drafts</span>
+                <span class="section-count warning" id="draft-count">0</span>
+            </div>
+            
+            <div id="draft-sessions-list">
+                <!-- Dynamically rendered from localStorage -->
+            </div>
+            
+            <!-- Empty State -->
+            <div class="empty-section" id="draft-empty">
+                <div class="empty-section-text">All sessions are completed. Great job!</div>
+            </div>
+        </div>
+
+        <!-- Section C: Completed Sessions -->
+        <div class="session-section" id="completed-sessions-section">
+            <div class="section-header">
+                <span class="section-indicator completed"></span>
+                <span class="section-title">Completed</span>
+                <span class="section-count" id="completed-count">3</span>
+            </div>
+            
+            <div id="completed-sessions-list">
+                <!-- Completed Session 1 -->
+                <div class="session-item" style="cursor: pointer;" onclick="openSessionDetail('completed-001')">
+                    <div class="session-main">
+                        <div class="session-identity">
+                            <div class="session-identity-title">Jan 02</div>
+                            <div class="session-identity-sub">09:00 – 11:30</div>
+                        </div>
+                        <div class="session-metrics">
+                            <div class="session-metric">
+                                <div class="session-metric-value">
+                                    <span class="quality-score"><span class="quality-star">★</span> 4.5</span>
+                                </div>
+                                <div class="session-metric-label">Quality</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value"><span class="risk-badge safe">Safe</span></div>
+                                <div class="session-metric-label">Risk</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value">0</div>
+                                <div class="session-metric-label">Deviations</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value" style="color: var(--text-muted); font-size: 13px;">+$680</div>
+                                <div class="session-metric-label">P&L</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="session-action">
+                        <button class="btn btn-outline btn-sm">View Detail</button>
+                    </div>
+                </div>
+                
+                <!-- Completed Session 2 -->
+                <div class="session-item" style="cursor: pointer;" onclick="openSessionDetail('completed-002')">
+                    <div class="session-main">
+                        <div class="session-identity">
+                            <div class="session-identity-title">Jan 01</div>
+                            <div class="session-identity-sub">09:30 – 12:00</div>
+                        </div>
+                        <div class="session-metrics">
+                            <div class="session-metric">
+                                <div class="session-metric-value">
+                                    <span class="quality-score"><span class="quality-star">★</span> 4.8</span>
+                                </div>
+                                <div class="session-metric-label">Quality</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value"><span class="risk-badge touched">Touched</span></div>
+                                <div class="session-metric-label">Risk</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value">1</div>
+                                <div class="session-metric-label">Deviations</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value" style="color: var(--text-muted); font-size: 13px;">+$1,240</div>
+                                <div class="session-metric-label">P&L</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="session-action">
+                        <button class="btn btn-outline btn-sm">View Detail</button>
+                    </div>
+                </div>
+                
+                <!-- Completed Session 3 -->
+                <div class="session-item" style="cursor: pointer;" onclick="openSessionDetail('completed-003')">
+                    <div class="session-main">
+                        <div class="session-identity">
+                            <div class="session-identity-title">Dec 30</div>
+                            <div class="session-identity-sub">10:00 – 14:00</div>
+                        </div>
+                        <div class="session-metrics">
+                            <div class="session-metric">
+                                <div class="session-metric-value">
+                                    <span class="quality-score"><span class="quality-star">★</span> 3.2</span>
+                                </div>
+                                <div class="session-metric-label">Quality</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value"><span class="risk-badge breach">Breach</span></div>
+                                <div class="session-metric-label">Risk</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value" style="color: var(--danger);">3</div>
+                                <div class="session-metric-label">Deviations</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value" style="color: var(--text-muted); font-size: 13px;">-$150</div>
+                                <div class="session-metric-label">P&L</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="session-action">
+                        <button class="btn btn-outline btn-sm">View Detail</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Empty State (for new users) -->
+            <div class="empty-section" id="completed-empty" style="display: none;">
+                <div class="empty-section-text">No sessions yet. Start one from Execute.</div>
+                <button class="btn btn-primary" onclick="window.location.href='../Strategy/Strategy_demo_v1.5.html?view=dashboard'">Go to Execute</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 3.5: Session Detail (Review) -->
+    <div id="view-session-detail" class="page-section">
+        <div class="header-row">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="btn btn-outline btn-sm" onclick="switchView('sessionlog')">← Back</button>
+                <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Jan 03 Morning Session • Apex-50k-001</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-outline" onclick="saveDraft()">Save Draft</button>
+                <button class="btn btn-primary" onclick="tryCompleteSession()">Complete Session</button>
+            </div>
+        </div>
+
+        <style>
+            .step-dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: var(--bg-panel);
+                border: 1px solid var(--text-muted);
+                opacity: 0.5;
+                transition: all 0.3s;
+            }
+            .step-dot.active {
+                background: var(--primary);
+                border-color: var(--primary);
+                opacity: 1;
+                transform: scale(1.2);
+            }
+            .review-step {
+                animation: fadeIn 0.3s ease-out;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(5px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        </style>
+        <!-- Main Review Container (Redesigned) -->
+        <style>
+            .session-review-container {
+                max-width: 1000px;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
+            }
+            .session-hero {
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 20px;
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 20px;
+                position: relative;
+                overflow: hidden;
+            }
+            .session-hero::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; width: 4px; height: 100%;
+                background: var(--primary);
+            }
+            .hero-metric { display: flex; flex-direction: column; gap: 5px; }
+            .hero-metric-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+            .hero-metric-value { font-size: 24px; font-weight: 700; color: var(--text-main); }
+            .hero-metric-sub { font-size: 12px; color: var(--text-muted); }
+            
+            .risk-status-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); font-weight: 600; }
+            .hero-risk-bar-bg { height: 6px; width: 100%; background: var(--bg-panel); border-radius: 3px; position: relative; margin-top: 8px; margin-bottom: 5px; overflow: hidden; }
+            .hero-risk-bar-fill { height: 100%; background: linear-gradient(90deg, var(--success), var(--warning)); width: 82%; border-radius: 3px; }
+            .hero-risk-limit { position: absolute; right: 0; top: 0; bottom: 0; width: 2px; background: var(--danger); z-index: 2; }
+            .hero-tag { font-size: 10px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); color: var(--text-muted); background: var(--bg-panel); display: inline-block; }
+
+            .wizard-progress { display: flex; justify-content: center; gap: 15px; align-items: center; margin-bottom: 10px; }
+            .wizard-step-item { display: flex; align-items: center; gap: 8px; opacity: 0.5; font-size: 13px; cursor: pointer; }
+            .wizard-step-item.active { opacity: 1; font-weight: 600; color: var(--primary); }
+            .wizard-step-number { width: 24px; height: 24px; border-radius: 50%; background: var(--bg-panel); border: 1px solid var(--border); display: flex; justify-content: center; align-items: center; font-size: 11px; }
+            .wizard-step-item.active .wizard-step-number { background: var(--primary); color: white; border-color: var(--primary); }
+            
+            .wizard-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 30px; position: relative; min-height: 400px; display: flex; flex-direction: column; }
+        </style>
+
+        <div class="session-review-container">
+            <!-- 1. Hero Summary (Updated) -->
+            <div class="session-hero">
+                <!-- Col 1: Session Info (Merged Result) -->
+                <div class="hero-metric">
+                    <div class="hero-metric-label">Session Info</div>
+                    <div style="font-size: 18px; font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 10px;">
+                        Jan 03, 2026
+                        <span class="text-green" style="font-size: 15px; font-weight: 700; background: rgba(16, 185, 129, 0.1); padding: 1px 8px; border-radius: 4px;">+$420</span>
+                    </div>
+                    <div class="hero-metric-sub" style="margin-top: 6px; font-size: 12px; color: var(--text-muted); display: flex; flex-direction: column; gap: 3px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span>09:30 - 11:15</span>
+                            <span style="width: 3px; height: 3px; background: var(--text-muted); border-radius: 50%;"></span>
+                            <span>1h 45m</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span>Apex-50k-001</span>
+                            <span style="width: 3px; height: 3px; background: var(--text-muted); border-radius: 50%;"></span>
+                            <span>12 Trades</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Col 2: Blueprint Execution (Prominent) -->
+                <div class="hero-metric" style="border-left: 1px solid var(--bg-panel); border-right: 1px solid var(--bg-panel); padding-left: 20px; padding-right: 20px;">
+                    <div class="hero-metric-label">Blueprint Execution</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                        <div style="font-size: 18px; font-weight: 700; color: var(--primary);">NQ Morning Gap</div>
+                        <div style="background: var(--bg-panel); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--success); padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">92% Adherence</div>
+                    </div>
+                    <div class="hero-metric-sub" style="margin-top: 8px;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 11px;">
+                             <!-- Rule 1: Strategy Type -->
+                             <div style="display: flex; align-items: center; justify-content: space-between; color: var(--text-main); background: var(--bg-panel); padding: 3px 6px; border-radius: 4px;">
+                                <span style="color: var(--text-muted);">Type: Breakout</span>
+                                <span style="color: var(--success);">✓</span>
+                             </div>
+                             <!-- Rule 2: Risk -->
+                             <div style="display: flex; align-items: center; justify-content: space-between; color: var(--text-main); background: var(--bg-panel); padding: 3px 6px; border-radius: 4px;">
+                                <span style="color: var(--text-muted);">Max Risk: $200</span>
+                                <span style="color: var(--success);">✓</span>
+                             </div>
+                             <!-- Rule 3: Stop Loss -->
+                             <div style="display: flex; align-items: center; justify-content: space-between; color: var(--text-main); background: var(--bg-panel); padding: 3px 6px; border-radius: 4px;">
+                                <span style="color: var(--text-muted);">SL: Fixed Stop</span>
+                                <span style="color: var(--success);">✓</span>
+                             </div>
+                             <!-- Rule 4: Boundary (Emotional) -->
+                             <div style="display: flex; align-items: center; justify-content: space-between; color: var(--text-main); background: var(--bg-panel); padding: 3px 6px; border-radius: 4px;">
+                                <span style="color: var(--text-muted);">Emotional: No</span>
+                                <span style="color: var(--warning);">⚠</span>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Col 3: Risk Guard (Focused) -->
+                <div class="hero-metric">
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                        <div class="hero-metric-label">Risk Guard 🛡️</div>
+                        <span class="risk-status-pill">Touched (82%)</span>
+                    </div>
+                    
+                    <div style="width: 100%;">
+                        <div class="hero-risk-bar-bg">
+                            <div class="hero-risk-bar-fill"></div>
+                            <div class="hero-risk-limit"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 10px;">
+                            <span style="color: var(--warning); font-weight: 500;">-$1,650</span>
+                            <span style="color: var(--danger);">-$2,000</span>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-metric-sub" style="margin-top: 6px; font-size: 11px; display: flex; gap: 10px; align-items: center;">
+                       <span style="color: var(--text-muted);">Stress Time: <span style="color: var(--text-main);">17 min</span></span>
+                       <span style="border-left: 1px solid var(--border); padding-left: 10px; font-style: italic; opacity: 0.7; font-size: 10px;">"Touched but not exceeded"</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Wizard Progress -->
+            <div class="wizard-progress">
+                <div class="wizard-step-item active" id="dot-step-1" onclick="changeReviewStep(1 - currentReviewStep)">
+                    <div class="wizard-step-number">1</div>
+                    <span>Rate Trades</span>
+                </div>
+                <div style="width: 30px; height: 1px; background: var(--border);"></div>
+                <div class="wizard-step-item" id="dot-step-2" onclick="changeReviewStep(2 - currentReviewStep)">
+                    <div class="wizard-step-number">2</div>
+                    <span>Behavior</span>
+                </div>
+                <div style="width: 30px; height: 1px; background: var(--border);"></div>
+                <div class="wizard-step-item" id="dot-step-3" onclick="changeReviewStep(3 - currentReviewStep)">
+                    <div class="wizard-step-number">3</div>
+                    <span>Reflection</span>
+                </div>
+                <div style="width: 30px; height: 1px; background: var(--border);"></div>
+                <div class="wizard-step-item" id="dot-step-4" onclick="changeReviewStep(4 - currentReviewStep)">
+                    <div class="wizard-step-number">4</div>
+                    <span>Wrap Up</span>
+                </div>
+            </div>
+
+            <!-- 3. Main Wizard Content -->
+            <div class="wizard-card">
+                 <div id="review-wizard-steps" style="flex: 1; display: flex; flex-direction: column;">
+                    
+                    <!-- Step 1: Quick Rate Unrated Trades -->
+                    <div class="review-step" id="review-step-1" style="margin-bottom: 0;">
+                        <div class="review-title" style="justify-content: center; margin-bottom: 25px;">
+                            <span style="font-size: 16px; font-weight: 600;">Step 1: Quick Rate Trades</span>
+                            <div class="tiptool-container">
+                                <span class="tiptool-icon">ⓘ</span>
+                                <div class="tiptool-content">Rate trades 1-5 stars based on execution quality.</div>
+                            </div>
+                        </div>
+                        
+                        <div id="unrated-trades-section" style="max-width: 500px; margin: 0 auto; width: 100%; display: none;">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div class="mini-trade-item" style="margin-bottom: 0; border-left-width: 2px; display: flex; align-items: center; justify-content: space-between; padding: 15px;">
+                                    <div>
+                                        <div style="font-size: 13px; font-weight: 600;">NQ Long</div>
+                                        <div style="font-size: 12px; color: var(--success); font-weight: 600;">+$120.00</div>
+                                    </div>
+                                    <div class="star-rating" data-trade="1">
+                                        <span class="star" onclick="setMiniStar(1, 1)">★</span>
+                                        <span class="star" onclick="setMiniStar(1, 2)">★</span>
+                                        <span class="star" onclick="setMiniStar(1, 3)">★</span>
+                                        <span class="star" onclick="setMiniStar(1, 4)">★</span>
+                                        <span class="star" onclick="setMiniStar(1, 5)">★</span>
+                                    </div>
+                                </div>
+                                <div class="mini-trade-item" style="margin-bottom: 0; border-left-width: 2px; display: flex; align-items: center; justify-content: space-between; padding: 15px;">
+                                    <div>
+                                        <div style="font-size: 13px; font-weight: 600;">ES Short</div>
+                                        <div style="font-size: 12px; color: var(--danger); font-weight: 600;">-$80.00</div>
+                                    </div>
+                                    <div class="star-rating" data-trade="2">
+                                        <span class="star" onclick="setMiniStar(2, 1)">★</span>
+                                        <span class="star" onclick="setMiniStar(2, 2)">★</span>
+                                        <span class="star" onclick="setMiniStar(2, 3)">★</span>
+                                        <span class="star" onclick="setMiniStar(2, 4)">★</span>
+                                        <span class="star" onclick="setMiniStar(2, 5)">★</span>
+                                    </div>
+                                </div>
+                                <div class="mini-trade-item" style="margin-bottom: 0; border-left-width: 2px; display: flex; align-items: center; justify-content: space-between; padding: 15px;">
+                                    <div>
+                                        <div style="font-size: 13px; font-weight: 600;">NQ Long</div>
+                                        <div style="font-size: 12px; color: var(--success); font-weight: 600;">+$45.00</div>
+                                    </div>
+                                    <div class="star-rating" data-trade="3">
+                                        <span class="star" onclick="setMiniStar(3, 1)">★</span>
+                                        <span class="star" onclick="setMiniStar(3, 2)">★</span>
+                                        <span class="star" onclick="setMiniStar(3, 3)">★</span>
+                                        <span class="star" onclick="setMiniStar(3, 4)">★</span>
+                                        <span class="star" onclick="setMiniStar(3, 5)">★</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="saveAllMiniRatings()" style="width: 100%; margin-top: 20px; padding: 12px;">Confirm Ratings</button>
+                        </div>
+                        
+                        <div id="all-rated-section" style="display: block; text-align: center; padding: 30px 20px; background: rgba(16, 185, 129, 0.05); border-radius: 12px; border: 1px dashed rgba(16, 185, 129, 0.3);">
+                            <div style="font-size: 32px; margin-bottom: 10px;">🎉</div>
+                            <div style="color: var(--success); font-weight: 600; font-size: 16px; margin-bottom: 5px;">All Trades Rated!</div>
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Your session data is complete and ready for analysis.</div>
+                            <div style="display: inline-flex; align-items: center; gap: 10px; background: var(--bg-card); padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);">
+                                <span style="font-size: 12px; color: var(--text-muted);">Session Quality:</span>
+                                <span style="font-weight: 700; color: var(--primary);" id="avg-quality">4.2</span>
+                                <span style="font-size: 12px; color: orange;">★★★★☆</span>
+                            </div>
+                            <div style="margin-top: 20px;">
+                                <button class="btn btn-sm btn-outline" onclick="document.getElementById('all-rated-section').style.display='none'; document.getElementById('unrated-trades-section').style.display='block';">Review Ratings</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Behavior & Emotion -->
+                    <div class="review-step" id="review-step-2" style="margin-bottom: 0; display: none;">
+                        <div class="review-title" style="justify-content: center; margin-bottom: 25px;">
+                            <span style="font-size: 16px; font-weight: 600;">Step 2: Behavior Check</span>
+                            <div class="tiptool-container">
+                                <span class="tiptool-icon">ⓘ</span>
+                                <div class="tiptool-content">Review your mental state and discipline during the session.</div>
+                            </div>
+                        </div>
+                        
+                        <div style="max-width: 500px; margin: 0 auto; width: 100%;">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
+                                <div class="slider-container" style="text-align: center;">
+                                    <div style="font-size: 12px; margin-bottom: 10px; font-weight: 500;">Focus</div>
+                                    <input type="range" min="1" max="3" value="3" class="range-slider" oninput="updateSlider(this)">
+                                    <div class="slider-val" style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">High</div>
+                                </div>
+                                <div class="slider-container" style="text-align: center;">
+                                    <div style="font-size: 12px; margin-bottom: 10px; font-weight: 500;">Discipline</div>
+                                    <input type="range" min="1" max="3" value="2" class="range-slider" oninput="updateSlider(this)">
+                                    <div class="slider-val" style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">Med</div>
+                                </div>
+                                <div class="slider-container" style="text-align: center;">
+                                    <div style="font-size: 12px; margin-bottom: 10px; font-weight: 500;">Emotion</div>
+                                    <input type="range" min="1" max="3" value="1" class="range-slider" oninput="updateSlider(this)">
+                                    <div class="slider-val" style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">Low</div>
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: center;">
+                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+                                    Dominant Emotion
+                                    <div class="tiptool-container">
+                                        <span class="tiptool-icon">ⓘ</span>
+                                        <div class="tiptool-content">Select the emotion that most impacted your trading.</div>
+                                    </div>
+                                </div>
+                                <div class="chip-group" id="emotion-chips" style="justify-content: center;">
+                                    <div class="chip" onclick="toggleEmotion(this)">Calm</div>
+                                    <div class="chip" onclick="toggleEmotion(this)">Confident</div>
+                                    <div class="chip" onclick="toggleEmotion(this)">Anxious</div>
+                                    <div class="chip" onclick="toggleEmotion(this)">Frustrated</div>
+                                    <div class="chip" onclick="toggleEmotion(this)">Impatient</div>
+                                    <div class="chip" onclick="toggleEmotion(this)">Fatigued</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Reflection -->
+                    <div class="review-step" id="review-step-3" style="margin-bottom: 0; display: none;">
+                        <div class="review-title" style="justify-content: center; margin-bottom: 25px;">
+                            <span style="font-size: 16px; font-weight: 600;">Step 3: Quick Reflection</span>
+                            <div class="tiptool-container">
+                                <span class="tiptool-icon">ⓘ</span>
+                                <div class="tiptool-content">Log key takeaways and market conditions for this session.</div>
+                            </div>
+                        </div>
+                        
+                        <div style="max-width: 500px; margin: 0 auto; width: 100%;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                                <div>
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Best Trade</div>
+                                    <div class="summary-input" id="best-trade-display" onclick="openTradeSelector('best')" style="font-size: 12px; padding: 8px; cursor: pointer; min-height: 35px; display: flex; align-items: center;">
+                                        <span class="placeholder" style="color: var(--text-muted);">Select...</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Worst Trade</div>
+                                    <div class="summary-input" id="worst-trade-display" onclick="openTradeSelector('worst')" style="font-size: 12px; padding: 8px; cursor: pointer; min-height: 35px; display: flex; align-items: center;">
+                                        <span class="placeholder" style="color: var(--text-muted);">Select...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Input Mode -->
+                            <div id="step3-content-input">
+                                <!-- Prompt Bubbles -->
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; justify-content: center;">
+                                    <div class="prompt-bubble" onclick="usePrompt('What worked well today?')">What worked</div>
+                                    <div class="prompt-bubble" onclick="usePrompt('Where did I deviate from my plan?')">Deviation</div>
+                                    <div class="prompt-bubble" onclick="usePrompt('How did emotions affect my decisions?')">Emotions</div>
+                                    <div class="prompt-bubble" onclick="usePrompt('What would I do differently?')">Redo</div>
+                                </div>
+                                
+                                <div id="active-prompt" style="display: none; font-size: 12px; color: var(--primary); margin-bottom: 10px; padding: 8px 12px; background: rgba(59, 130, 246, 0.08); border-radius: 6px; border-left: 3px solid var(--primary);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span><span id="prompt-text"></span></span>
+                                        <span style="cursor: pointer; opacity: 0.6; font-size: 14px;" onclick="clearPrompt()">×</span>
+                                    </div>
+                                </div>
+                                
+                                <textarea class="summary-input" id="reflection-input" rows="4" placeholder="Quick notes about today's session..." oninput="checkReflection()" style="resize: none; padding: 12px;"></textarea>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                                    <span style="font-size: 11px; color: var(--text-muted);">Simple reflection</span>
+                                    <button class="btn btn-sm btn-text" style="color: var(--primary); padding: 0; font-size: 12px; background: none; border: none; cursor: pointer;" onclick="addSessionNote()">
+                                        📝 Create Detailed Note (Full Editor)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Preview Mode (Hidden by default) -->
+                            <div id="step3-content-preview" style="display: none;">
+                                <div style="background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 15px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                                        <div style="font-weight: 600; font-size: 14px;" id="step3-note-title">Session Note</div>
+                                        <button class="btn btn-sm btn-outline" onclick="addSessionNote()" style="font-size: 11px; padding: 2px 8px;">Edit</button>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px; white-space: pre-wrap;" id="step3-note-preview"></div>
+                                    <div style="display: flex; gap: 5px;">
+                                        <span class="tag" id="step3-note-type" style="background: rgba(59, 130, 246, 0.1); color: var(--primary);">📝 Note</span>
+                                        <span class="tag" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">Linked to Session</span>
+                                    </div>
+                                </div>
+                                <div style="text-align: center; margin-top: 10px;">
+                                    <button class="btn btn-sm btn-text" style="color: var(--text-muted); font-size: 11px; background: none; border: none; cursor: pointer;" onclick="resetStep3()">Discard & Start Over</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Lock Highlight -->
+                    <div class="review-step" id="review-step-4" style="margin-bottom: 0; display: none;">
+                        <div class="review-title" style="justify-content: center; margin-bottom: 25px;">
+                            <span style="font-size: 16px; font-weight: 600;">Step 4: Lock One Highlight</span>
+                        </div>
+                        
+                        <div style="max-width: 500px; margin: 0 auto; width: 100%;">
+                            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px; text-align: center;">Choose one key takeaway to remember:</div>
+                            
+                            <div id="highlight-options" style="display: flex; flex-direction: column; gap: 10px;">
+                                <div class="option-btn" style="text-align: left; padding: 15px; display: flex; align-items: center; gap: 15px;" onclick="selectHighlight(this, 'Good discipline on waiting for setups.')">
+                                    <div style="width: 4px; height: 40px; background: var(--success); border-radius: 2px;"></div>
+                                    <div>
+                                        <div style="font-size: 13px; font-weight: 500; margin-bottom: 4px;">"Good discipline on waiting for setups."</div>
+                                        <div style="font-size: 11px; color: var(--text-muted);">Based on your high-rated trades</div>
+                                    </div>
+                                </div>
+                                <div class="option-btn" style="text-align: left; padding: 15px; display: flex; align-items: center; gap: 15px;" onclick="selectHighlight(this, 'Avoid trading during news events.')">
+                                    <div style="width: 4px; height: 40px; background: var(--danger); border-radius: 2px;"></div>
+                                    <div>
+                                        <div style="font-size: 13px; font-weight: 500; margin-bottom: 4px;">"Avoid trading during news events."</div>
+                                        <div style="font-size: 11px; color: var(--text-muted);">Based on your loss trade</div>
+                                    </div>
+                                </div>
+                                <div class="option-btn" style="text-align: left; padding: 15px; display: flex; align-items: center; gap: 15px;" onclick="showCustomHighlight()">
+                                    <div style="width: 4px; height: 40px; background: var(--primary); border-radius: 2px;"></div>
+                                    <div>
+                                        <div style="font-size: 13px; font-weight: 500; margin-bottom: 4px;">Write your own...</div>
+                                        <div style="font-size: 11px; color: var(--text-muted);">Custom highlight</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="custom-highlight-input" id="custom-highlight-box" style="margin-top: 15px;">
+                                <input type="text" class="summary-input" id="custom-highlight-input" placeholder="Write a one-sentence takeaway..." oninput="customHighlightChanged()" style="padding: 12px;">
+                                <button class="btn btn-sm btn-primary" style="margin-top: 10px; width: 100%; padding: 10px;" onclick="saveCustomHighlight()">Save Custom Highlight</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Wizard Footer (Clean) -->
+                <div style="margin-top: 40px; display: flex; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid var(--border);">
+                    <button class="btn btn-outline" id="btn-prev-step" onclick="changeReviewStep(-1)" style="visibility: hidden; min-width: 120px;">Previous</button>
+                    
+                    <div style="flex: 1;"></div> 
+
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-text" onclick="saveDraft()" id="btn-save-draft" style="color: var(--text-muted); padding: 8px 16px; background:none; border:none; cursor: pointer;">Save Draft</button>
+                        <button class="btn btn-primary" id="btn-next-step" onclick="changeReviewStep(1)" style="min-width: 120px;">Next Step</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 4: Highlights -->
+    <div id="view-highlights" class="page-section">
+        <div class="header-row">
+            <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Your knowledge base and value sedimentation.</p>
+        </div>
+
+        <div class="card" style="padding: 0; min-height: 500px;">
+            <div class="tab-header">
+                <div class="tab-item active" onclick="switchTab('highlights')">Highlights</div>
+                <div class="tab-item" onclick="switchTab('notes')">Notes</div>
+            </div>
+
+            <!-- Highlights Tab -->
+            <div id="tab-highlights" class="tab-content active">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div class="filter-bar" id="highlight-filters">
+                        <button class="filter-btn active" onclick="filterHighlights('all', this)">All</button>
+                        <button class="filter-btn" onclick="filterHighlights('strategy', this)">Strategy</button>
+                        <button class="filter-btn" onclick="filterHighlights('mindset', this)">Mindset</button>
+                        <button class="filter-btn" onclick="filterHighlights('discipline', this)">Discipline</button>
+                        <button class="filter-btn" onclick="filterHighlights('pinned', this)">Pinned</button>
+                    </div>
+                    <span style="font-size: 12px; color: var(--text-muted);">6 highlights</span>
+                </div>
+
+                <!-- Highlight Cards -->
+                <div id="highlights-list">
+                    <div class="highlight-card pinned" data-tag="strategy" onclick="openHighlightDetail(1)" style="cursor: pointer;">
+                        <span class="pin-badge">📌</span>
+                        <div class="highlight-text">"Avoid trading the first 5 mins of NQ open when VIX is above 20."</div>
+                        <div class="highlight-meta">
+                            <span>📅 Jan 02 Session • <span class="tag" style="margin-left: 5px;">#Strategy</span></span>
+                            <div class="highlight-actions">
+                                <button class="btn btn-sm btn-outline" style="padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); togglePin(this)">Unpin</button>
+                                <button class="btn btn-sm btn-outline" style="padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); markReviewed(this)">Reviewed</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="highlight-card" data-tag="discipline" onclick="openHighlightDetail(2)" style="cursor: pointer;">
+                        <div class="highlight-text">"Stop loss must be placed at technical levels, not dollar amounts."</div>
+                        <div class="highlight-meta">
+                            <span>📅 Dec 30 Trade • <span class="tag" style="margin-left: 5px;">#Discipline</span></span>
+                            <div class="highlight-actions">
+                                <button class="btn btn-sm btn-outline" style="padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); togglePin(this)">Pin</button>
+                                <button class="btn btn-sm btn-outline" style="padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); markReviewed(this)">Reviewed</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="highlight-card" data-tag="mindset" onclick="openHighlightDetail(3)" style="cursor: pointer;">
+                        <div class="highlight-text">"Great patience on the pullback entry. Waited for the candle close."</div>
+                        <div class="highlight-meta">
+                            <span>📅 Jan 01 Trade • <span class="tag" style="margin-left: 5px;">#Mindset</span></span>
+                            <div class="highlight-actions">
+                                <button class="btn btn-sm btn-outline" style="padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); togglePin(this)">Pin</button>
+                                <button class="btn btn-sm btn-outline" style="padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); markReviewed(this)">Reviewed</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="highlight-card" data-tag="discipline" onclick="openHighlightDetail(4)" style="cursor: pointer;">
+                        <div class="highlight-text">"When risk touched, I stepped back. Good emotional control."</div>
+                        <div class="highlight-meta">
+                            <span>📅 Jan 01 Session • <span class="tag" style="margin-left: 5px;">#Discipline</span></span>
+                            <div class="highlight-actions">
+                                <button class="btn btn-sm btn-outline" style="padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); togglePin(this)">Pin</button>
+                                <button class="btn btn-sm btn-outline" style="padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); markReviewed(this)">Reviewed</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="highlight-card reviewed" data-tag="strategy" onclick="openHighlightDetail(5)" style="cursor: pointer;">
+                        <div class="highlight-text">"NQ respects the 15m VWAP in high volatility days."</div>
+                        <div class="highlight-meta">
+                            <span>📅 Dec 28 Note • <span class="tag" style="margin-left: 5px;">#Strategy</span></span>
+                            <div class="highlight-actions">
+                                <span style="color: var(--success); font-size: 11px;">✓ Reviewed today</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="highlight-card" data-tag="mindset" onclick="openHighlightDetail(6)" style="cursor: pointer;">
+                        <div class="highlight-text">"Don't chase. If you miss it, there will be another setup."</div>
+                        <div class="highlight-meta">
+                            <span>📅 Dec 27 Session • <span class="tag" style="margin-left: 5px;">#Mindset</span></span>
+                            <div class="highlight-actions">
+                                <button class="btn btn-sm btn-outline" style="padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); togglePin(this)">Pin</button>
+                                <button class="btn btn-sm btn-outline" style="padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); markReviewed(this)">Reviewed</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Tab -->
+            <div id="tab-notes" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <input type="text" class="search-input" placeholder="Search notes..." oninput="searchNotes(this.value)">
+                        <div class="filter-bar" id="notes-filters" style="margin-bottom: 0;">
+                            <button class="filter-btn active" onclick="filterNotes('all', this)">My Notes</button>
+                            <button class="filter-btn" onclick="filterNotes('linked', this)">Linked Notes</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-primary" onclick="openDrawer('note')">+ New Note</button>
+                </div>
+
+                <div id="notes-list">
+                    <div class="note-card" data-linked="true" onclick="openDrawer('note-detail', 1)">
+                        <div style="display: flex; align-items: center;">
+                            <span class="note-type-icon">📝</span>
+                            <div class="note-title">Weekly Review - Week 50</div>
+                            <span class="link-badge">🔗 Session</span>
+                        </div>
+                        <div class="note-preview">
+                            Overall a good week. Focused on execution quality rather than P&L. The new scalping strategy is working well in high volatility...
+                        </div>
+                        <div style="margin-top: 8px; display: flex; gap: 8px;">
+                            <span class="tag">Review</span>
+                            <span style="font-size: 11px; color: var(--text-muted);">Dec 29, 2025</span>
+                        </div>
+                    </div>
+                    
+                    <div class="note-card" data-linked="false" onclick="openDrawer('note-detail', 2)">
+                        <div style="display: flex; align-items: center;">
+                            <span class="note-type-icon">📈</span>
+                            <div class="note-title">Market Thoughts: NQ Volatility</div>
+                        </div>
+                        <div class="note-preview">
+                            Noticed that NQ is respecting the 15m VWAP more than usual. Need to backtest this pattern across different market conditions...
+                        </div>
+                        <div style="margin-top: 8px; display: flex; gap: 8px;">
+                            <span class="tag">Market</span>
+                            <span style="font-size: 11px; color: var(--text-muted);">Dec 28, 2025</span>
+                        </div>
+                    </div>
+                    
+                    <div class="note-card" data-linked="true" onclick="openDrawer('note-detail', 3)">
+                        <div style="display: flex; align-items: center;">
+                            <span class="note-type-icon">🧠</span>
+                            <div class="note-title">Trading Psychology Notes</div>
+                            <span class="link-badge">🔗 Trade</span>
+                        </div>
+                        <div class="note-preview">
+                            When I feel FOMO, I need to remember: there's always another trade. The market doesn't care about my urgency...
+                        </div>
+                        <div style="margin-top: 8px; display: flex; gap: 8px;">
+                            <span class="tag">Mindset</span>
+                            <span style="font-size: 11px; color: var(--text-muted);">Dec 26, 2025</span>
+                        </div>
+                    </div>
+                    
+                    <div class="note-card" data-linked="false" onclick="openDrawer('note-detail', 4)">
+                        <div style="display: flex; align-items: center;">
+                            <span class="note-type-icon">🎯</span>
+                            <div class="note-title">Strategy Idea: Gap Fill Setup</div>
+                        </div>
+                        <div class="note-preview">
+                            Noticed a pattern on gap days - when ES gaps up more than 0.5%, there's often a fill attempt in the first hour...
+                        </div>
+                        <div style="margin-top: 8px; display: flex; gap: 8px;">
+                            <span class="tag">Strategy</span>
+                            <span style="font-size: 11px; color: var(--text-muted);">Dec 24, 2025</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- Drawer (Shared for Trade/Note) -->
+<div class="drawer" id="main-drawer">
+    <div class="drawer-header">
+        <h3 style="margin: 0;" id="drawer-title">Edit Trade</h3>
+        <button class="btn btn-sm btn-outline" onclick="closeDrawer()">Close</button>
+    </div>
+    <div class="drawer-content" id="drawer-body">
+        <!-- Dynamic Content -->
+    </div>
+    <div class="drawer-footer">
+        <button class="btn btn-outline" onclick="closeDrawer()">Cancel</button>
+        <button class="btn btn-primary" onclick="closeDrawer()">Save</button>
+    </div>
+</div>
+
+<script>
+    // ========== STATE MANAGEMENT ==========
+    let sessionReviewState = {
+        tradesRated: false,
+        executionReviewed: false,
+        reflectionDone: false,
+        highlightSelected: null
+    };
+
+    let miniRatings = {
+        1: { stars: 0, deviation: 'No Deviation', factor: 'Discipline' },
+        2: { stars: 0, deviation: 'No Deviation', factor: 'Discipline' },
+        3: { stars: 0, deviation: 'No Deviation', factor: 'Discipline' }
+    };
+
+    // ========== VIEW NAVIGATION ==========
+    function switchView(viewId) {
+        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById('view-' + viewId);
+        if(target) target.classList.add('active');
+        updateSidebarActive(viewId);
+        updateTopbarTitle(viewId);
+    }
+
+    function switchViewFromSidebar(viewId) {
+        switchView(viewId);
+    }
+
+    function openSessionDetail(sessionId) {
+        switchView('session-detail');
+        updateCompletionBar();
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        const tabs = document.querySelectorAll('.tab-item');
+        tabs.forEach(t => {
+            if(t.innerText.toLowerCase() === tabId) t.classList.add('active');
+        });
+        document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    // ========== TOAST NOTIFICATIONS ==========
+    function showToast(msg, icon = '✓') {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-msg').innerText = msg;
+        document.querySelector('.toast-icon').innerText = icon;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ========== TRADE LOG FILTERS ==========
+    function filterTrades(filter, btn) {
+        // Update button states
+        document.querySelectorAll('#tradelog-filters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Filter rows
+        const rows = document.querySelectorAll('#trade-table-body tr');
+        rows.forEach(row => {
+            const status = row.dataset.status;
+            const stars = row.dataset.stars;
+            
+            if (filter === 'all') {
+                row.style.display = '';
+            } else if (filter === 'unrated') {
+                row.style.display = status === 'unrated' ? '' : 'none';
+            } else if (filter === '5star') {
+                row.style.display = stars === '5' ? '' : 'none';
+            }
+        });
+    }
+
+    // ========== HIGHLIGHT FILTERS ==========
+    function filterHighlights(filter, btn) {
+        document.querySelectorAll('#highlight-filters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const cards = document.querySelectorAll('#highlights-list .highlight-card');
+        cards.forEach(card => {
+            const tag = card.dataset.tag;
+            const isPinned = card.classList.contains('pinned');
+            
+            if (filter === 'all') {
+                card.style.display = '';
+            } else if (filter === 'pinned') {
+                card.style.display = isPinned ? '' : 'none';
+            } else {
+                card.style.display = tag === filter ? '' : 'none';
+            }
+        });
+    }
+
+    // ========== NOTES FILTERS & SEARCH ==========
+    function filterNotes(filter, btn) {
+        document.querySelectorAll('#notes-filters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const cards = document.querySelectorAll('#notes-list .note-card');
+        cards.forEach(card => {
+            const isLinked = card.dataset.linked === 'true';
+            if (filter === 'all') {
+                card.style.display = '';
+            } else if (filter === 'linked') {
+                card.style.display = isLinked ? '' : 'none';
+            }
+        });
+    }
+
+    function searchNotes(query) {
+        const cards = document.querySelectorAll('#notes-list .note-card');
+        const q = query.toLowerCase();
+        cards.forEach(card => {
+            const title = card.querySelector('.note-title').innerText.toLowerCase();
+            const preview = card.querySelector('.note-preview').innerText.toLowerCase();
+            card.style.display = (title.includes(q) || preview.includes(q)) ? '' : 'none';
+        });
+    }
+
+    // ========== SESSION REVIEW LOGIC ==========
+    function updateCompletionBar() {
+        const steps = ['step-1', 'step-2', 'step-3', 'step-4'];
+        steps.forEach((id, idx) => {
+            const el = document.getElementById(id);
+            el.classList.remove('done', 'active');
+            
+            if (idx === 0 && sessionReviewState.tradesRated) {
+                el.classList.add('done');
+                el.innerText = '1. Trades Reviewed ✅';
+            } else if (idx === 1 && sessionReviewState.executionReviewed) {
+                el.classList.add('done');
+                el.innerText = '2. Execution Review ✅';
+            } else if (idx === 2 && sessionReviewState.reflectionDone) {
+                el.classList.add('done');
+                el.innerText = '3. Reflection ✅';
+            } else if (idx === 3 && sessionReviewState.highlightSelected) {
+                el.classList.add('done');
+                el.innerText = '4. Highlight Saved ✅';
+            }
+        });
+        
+        // Set active step
+        if (!sessionReviewState.tradesRated) {
+            document.getElementById('step-1').classList.add('active');
+        } else if (!sessionReviewState.reflectionDone) {
+            document.getElementById('step-2').classList.add('active');
+            document.getElementById('step-3').classList.add('active');
+        } else if (!sessionReviewState.highlightSelected) {
+            document.getElementById('step-4').classList.add('active');
+        }
+    }
+
+    function goToStep(step) {
+        const sections = ['review-step-1', 'review-step-2', 'review-step-3', 'review-step-4'];
+        const el = document.getElementById(sections[step - 1]);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function setMiniStar(tradeId, rating) {
+        miniRatings[tradeId].stars = rating;
+        const container = document.querySelector(`.star-rating[data-trade="${tradeId}"]`);
+        const stars = container.querySelectorAll('.star');
+        stars.forEach((star, idx) => {
+            star.classList.toggle('active', idx < rating);
+        });
+    }
+
+    function saveAllMiniRatings() {
+        // Check if all trades have ratings
+        let allRated = true;
+        for (let id in miniRatings) {
+            if (miniRatings[id].stars === 0) {
+                allRated = false;
+                break;
+            }
+        }
+        
+        if (!allRated) {
+            showToast('Please rate all trades first', '⚠️');
+            return;
+        }
+        
+        sessionReviewState.tradesRated = true;
+        document.getElementById('unrated-trades-section').style.display = 'none';
+        document.getElementById('all-rated-section').style.display = 'block';
+        document.getElementById('unrated-status').style.background = 'rgba(16, 185, 129, 0.1)';
+        document.getElementById('unrated-status').style.color = 'var(--success)';
+        document.getElementById('unrated-status').innerText = 'All Rated ✓';
+        
+        // Calculate average
+        let total = 0;
+        for (let id in miniRatings) {
+            total += miniRatings[id].stars;
+        }
+        document.getElementById('avg-quality').innerText = (total / 3).toFixed(1);
+        sessionReviewState.executionReviewed = true;
+        
+        updateCompletionBar();
+        showToast('All trades rated successfully!');
+    }
+
+    function checkReflection() {
+        const text = document.getElementById('reflection-input').value;
+        sessionReviewState.reflectionDone = text.length > 10;
+        updateCompletionBar();
+    }
+
+    function selectHighlight(el, text) {
+        document.querySelectorAll('#highlight-options .option-btn').forEach(btn => btn.classList.remove('selected'));
+        el.classList.add('selected');
+        sessionReviewState.highlightSelected = text;
+        document.getElementById('custom-highlight-box').classList.remove('active');
+        updateCompletionBar();
+    }
+
+    function showCustomHighlight() {
+        document.querySelectorAll('#highlight-options .option-btn').forEach(btn => btn.classList.remove('selected'));
+        document.getElementById('custom-highlight-box').classList.add('active');
+        sessionReviewState.highlightSelected = null;
+        updateCompletionBar();
+    }
+
+    function customHighlightChanged() {
+        const text = document.getElementById('custom-highlight-input').value;
+        sessionReviewState.highlightSelected = text.length > 5 ? text : null;
+        updateCompletionBar();
+    }
+
+    function saveCustomHighlight() {
+        const text = document.getElementById('custom-highlight-input').value;
+        if (text.length > 5) {
+            sessionReviewState.highlightSelected = text;
+            updateCompletionBar();
+            showToast('Custom highlight saved!');
+        }
+    }
+
+    function saveDraft() {
+        showToast('Draft saved');
+    }
+
+    function tryCompleteSession() {
+        if (!sessionReviewState.tradesRated) {
+            showToast('Please rate all trades first', '⚠️');
+            goToStep(1);
+            return;
+        }
+        if (!sessionReviewState.highlightSelected) {
+            showToast('Please select a highlight', '⚠️');
+            goToStep(4);
+            return;
+        }
+        completeSession();
+    }
+
+    function completeSession() {
+        showToast('Session Completed & Closed! 🎉');
+        setTimeout(() => switchView('sessionlog'), 1500);
+    }
+
+    function addSessionNote() {
+        // Mock data lookup - in real app, fetch session by currentSessionId
+        const sessionLink = { 
+            type: 'session', 
+            id: 's1', 
+            icon: '📅', 
+            title: 'Jan 02 Afternoon Session', 
+            meta: 'From Sessions' 
+        };
+        selectedLinks = [sessionLink];
+        
+        openDrawer('note-linked');
+        // Pre-fill with session info
+        setTimeout(() => {
+            const titleInput = document.querySelector('#drawer-body input[type="text"]');
+            if (titleInput) titleInput.value = 'Session Note · Jan 02 13:00-14:30';
+        }, 100);
+    }
+
+    // ========== HIGHLIGHT ACTIONS ==========
+    function togglePin(btn) {
+        const card = btn.closest('.highlight-card');
+        const isPinned = card.classList.toggle('pinned');
+        btn.innerText = isPinned ? 'Unpin' : 'Pin';
+        if (isPinned) {
+            card.innerHTML = '<span class="pin-badge">📌</span>' + card.innerHTML.replace('<span class="pin-badge">📌</span>', '');
+        } else {
+            card.querySelector('.pin-badge')?.remove();
+        }
+        showToast(isPinned ? 'Highlight pinned' : 'Highlight unpinned');
+    }
+
+    function markReviewed(btn) {
+        const card = btn.closest('.highlight-card');
+        card.classList.add('reviewed');
+        btn.parentElement.innerHTML = '<span style="color: var(--success); font-size: 11px;">✓ Reviewed today</span>';
+        showToast('Marked as reviewed');
+    }
+
+    function openHighlightDetail(id) {
+        const highlights = {
+            1: { text: 'Avoid trading the first 5 mins of NQ open when VIX is above 20.', source: 'Jan 02 Session', tag: 'Strategy' },
+            2: { text: 'Stop loss must be placed at technical levels, not dollar amounts.', source: 'Dec 30 Trade', tag: 'Discipline' },
+            3: { text: 'Great patience on the pullback entry. Waited for the candle close.', source: 'Jan 01 Trade', tag: 'Mindset' },
+            4: { text: 'When risk touched, I stepped back. Good emotional control.', source: 'Jan 01 Session', tag: 'Discipline' },
+            5: { text: 'NQ respects the 15m VWAP in high volatility days.', source: 'Dec 28 Note', tag: 'Strategy' },
+            6: { text: "Don't chase. If you miss it, there will be another setup.", source: 'Dec 27 Session', tag: 'Mindset' }
+        };
+        
+        const h = highlights[id];
+        document.getElementById('highlight-detail-body').innerHTML = `
+            <div style="margin-bottom: 20px;">
+                <div style="font-size: 18px; line-height: 1.5; margin-bottom: 15px; padding: 20px; background: var(--bg-panel); border-radius: 8px; border-left: 3px solid var(--primary);">
+                    "${h.text}"
+                </div>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <span class="tag">#${h.tag}</span>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label class="form-label">Source</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>📅 ${h.source}</span>
+                    <button class="btn btn-sm btn-outline">View Source</button>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="expandToNote(${id})">📝 Expand to Note</button>
+                <button class="btn btn-outline" onclick="closeHighlightDetail(); showToast('Marked as reviewed');">✓ Mark Reviewed</button>
+            </div>
+        `;
+        document.getElementById('highlight-detail-modal').classList.add('active');
+    }
+
+    function closeHighlightDetail() {
+        document.getElementById('highlight-detail-modal').classList.remove('active');
+    }
+
+    function expandToNote(highlightId) {
+        closeHighlightDetail();
+        openDrawer('note');
+        showToast('Note created from highlight');
+    }
+
+    // ========== UNRATED MODAL ==========
+    function openUnratedModal() {
+        document.getElementById('unrated-modal-body').innerHTML = `
+            <p style="margin-bottom: 15px; color: var(--text-muted);">Rate these trades quickly (10 seconds each)</p>
+            
+            <div class="mini-trade-item">
+                <div class="mini-trade-header">
+                    <span><strong>NQ</strong> Long · +$120.00</span>
+                    <span style="color: var(--text-muted);">14:15</span>
+                </div>
+                <div class="mini-trade-rating">
+                    <div class="star-rating" data-trade="modal-1">
+                        <span class="star" onclick="setModalStar('modal-1', 1)">★</span>
+                        <span class="star" onclick="setModalStar('modal-1', 2)">★</span>
+                        <span class="star" onclick="setModalStar('modal-1', 3)">★</span>
+                        <span class="star" onclick="setModalStar('modal-1', 4)">★</span>
+                        <span class="star" onclick="setModalStar('modal-1', 5)">★</span>
+                    </div>
+                    <select class="summary-input" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                        <option>No</option><option>Minor</option><option>Major</option>
+                    </select>
+                    <select class="summary-input" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                        <option>Discipline</option><option>Emotion</option><option>Noise</option><option>Execution</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mini-trade-item">
+                <div class="mini-trade-header">
+                    <span><strong>ES</strong> Short · -$80.00</span>
+                    <span style="color: var(--text-muted);">13:45</span>
+                </div>
+                <div class="mini-trade-rating">
+                    <div class="star-rating" data-trade="modal-2">
+                        <span class="star" onclick="setModalStar('modal-2', 1)">★</span>
+                        <span class="star" onclick="setModalStar('modal-2', 2)">★</span>
+                        <span class="star" onclick="setModalStar('modal-2', 3)">★</span>
+                        <span class="star" onclick="setModalStar('modal-2', 4)">★</span>
+                        <span class="star" onclick="setModalStar('modal-2', 5)">★</span>
+                    </div>
+                    <select class="summary-input" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                        <option>No</option><option>Minor</option><option>Major</option>
+                    </select>
+                    <select class="summary-input" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                        <option>Discipline</option><option>Emotion</option><option>Noise</option><option>Execution</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mini-trade-item">
+                <div class="mini-trade-header">
+                    <span><strong>NQ</strong> Long · +$45.00</span>
+                    <span style="color: var(--text-muted);">13:20</span>
+                </div>
+                <div class="mini-trade-rating">
+                    <div class="star-rating" data-trade="modal-3">
+                        <span class="star" onclick="setModalStar('modal-3', 1)">★</span>
+                        <span class="star" onclick="setModalStar('modal-3', 2)">★</span>
+                        <span class="star" onclick="setModalStar('modal-3', 3)">★</span>
+                        <span class="star" onclick="setModalStar('modal-3', 4)">★</span>
+                        <span class="star" onclick="setModalStar('modal-3', 5)">★</span>
+                    </div>
+                    <select class="summary-input" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                        <option>No</option><option>Minor</option><option>Major</option>
+                    </select>
+                    <select class="summary-input" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                        <option>Discipline</option><option>Emotion</option><option>Noise</option><option>Execution</option>
+                    </select>
+                </div>
+            </div>
+        `;
+        document.getElementById('unrated-modal').classList.add('active');
+    }
+
+    function closeUnratedModal() {
+        document.getElementById('unrated-modal').classList.remove('active');
+    }
+
+    function setModalStar(tradeId, rating) {
+        const container = document.querySelector(`.star-rating[data-trade="${tradeId}"]`);
+        const stars = container.querySelectorAll('.star');
+        stars.forEach((star, idx) => star.classList.toggle('active', idx < rating));
+    }
+
+    function saveAllUnratedTrades() {
+        closeUnratedModal();
+        const pendingCard = document.getElementById('pending-trades-bar');
+        if (pendingCard) {
+            pendingCard.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="font-size: 11px; color: var(--success); font-weight: 600; text-transform: uppercase;">Status</div>
+                        <div style="font-size: 16px; font-weight: 700; color: var(--success); margin-top: 5px;">All Caught Up</div>
+                    </div>
+                    <span style="font-size: 18px;">✅</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 10px;">Great job keeping your logs clean!</div>
+            `;
+            pendingCard.style.background = 'rgba(16, 185, 129, 0.1)';
+            pendingCard.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+        }
+        showToast('All trades rated successfully!');
+    }
+
+    // ========== DRAWER SYSTEM ==========
+    function openDrawer(type, id = null) {
+        if (type === 'trade') currentTradeId = id;
+
+        const drawer = document.getElementById('main-drawer');
+        const title = document.getElementById('drawer-title');
+        const body = document.getElementById('drawer-body');
+        const footer = document.querySelector('.drawer-footer');
+        
+        drawer.classList.add('open');
+
+        if (type === 'trade') {
+            title.innerText = 'Rate Trade';
+            body.innerHTML = `
+                <div class="moonlog-form">
+                    <div style="background: var(--bg-panel); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="font-size: 13px;"><strong>NQ</strong> Long · 14:15:22</div>
+                        <div style="font-size: 16px; font-weight: 600; color: var(--success); margin-top: 5px;">+$120.00</div>
+                    </div>
+                    <div>
+                        <label class="form-label">Execution Quality</label>
+                        <div class="star-rating" id="drawer-stars">
+                            <span class="star" onclick="setDrawerStar(1)">★</span>
+                            <span class="star" onclick="setDrawerStar(2)">★</span>
+                            <span class="star" onclick="setDrawerStar(3)">★</span>
+                            <span class="star" onclick="setDrawerStar(4)">★</span>
+                            <span class="star" onclick="setDrawerStar(5)">★</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Deviation</label>
+                        <div class="option-grid" id="deviation-options">
+                            <div class="option-btn selected" onclick="selectOption(this, 'deviation')">No Deviation</div>
+                            <div class="option-btn" onclick="selectOption(this, 'deviation')">Minor</div>
+                            <div class="option-btn" onclick="selectOption(this, 'deviation')">Major</div>
+                            <div class="option-btn" onclick="selectOption(this, 'deviation')">Not Sure</div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Factor</label>
+                        <div class="option-grid" id="factor-options">
+                            <div class="option-btn selected" onclick="selectOption(this, 'factor')">Discipline</div>
+                            <div class="option-btn" onclick="selectOption(this, 'factor')">Emotion</div>
+                            <div class="option-btn" onclick="selectOption(this, 'factor')">Market Noise</div>
+                            <div class="option-btn" onclick="selectOption(this, 'factor')">Execution</div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Tags (Optional)</label>
+                        <div class="tag-cloud" id="trade-tags">
+                            <span class="log-tag" onclick="toggleTag(this)">Entry</span>
+                            <span class="log-tag" onclick="toggleTag(this)">Exit</span>
+                            <span class="log-tag" onclick="toggleTag(this)">Sizing</span>
+                            <span class="log-tag" onclick="toggleTag(this)">Timing</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Note (Optional)</label>
+                        <textarea class="summary-input" rows="3" placeholder="Add a quick note..."></textarea>
+                    </div>
+                    <div style="margin-top: 10px; display: flex; gap: 10px;">
+                        <button class="btn btn-sm btn-outline" style="flex: 1;" onclick="saveAsHighlight()">⭐ Save as Highlight</button>
+                        <button class="btn btn-sm btn-outline" style="flex: 1;" onclick="addTradeNote()">📝 Add Note</button>
+                    </div>
+                </div>
+            `;
+            footer.innerHTML = `
+                <button class="btn btn-outline" onclick="closeDrawer()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTrade()">Save Rating</button>
+            `;
+
+        } else if (type === 'note' || type === 'note-detail' || type === 'note-linked') {
+            // Reset links for new note, or load existing for edit
+            if (type === 'note') {
+                selectedLinks = [];
+            } else if (type === 'note-linked') {
+                // Keep existing selectedLinks (passed from addTradeNote)
+            } else {
+                // Simulate existing links for demo
+                selectedLinks = [
+                    { type: 'session', id: 's2', icon: '📅', title: 'Jan 02 Morning Session' }
+                ];
+            }
+            
+            title.innerText = (type === 'note' || type === 'note-linked') ? 'New Note' : 'Edit Note';
+            body.innerHTML = `
+                <div class="moonlog-form">
+                    <div>
+                        <label class="form-label">Title</label>
+                        <input type="text" class="summary-input" id="note-title" placeholder="Untitled Note" value="${type === 'note-detail' ? 'Weekly Review - Week 50' : ''}">
+                    </div>
+                    <div>
+                        <label class="form-label">Type</label>
+                        <div class="tag-cloud" id="note-type-tags">
+                            <span class="log-tag selected" onclick="selectNoteType(this)">📝 Review</span>
+                            <span class="log-tag" onclick="selectNoteType(this)">🎯 Strategy</span>
+                            <span class="log-tag" onclick="selectNoteType(this)">🧠 Mindset</span>
+                            <span class="log-tag" onclick="selectNoteType(this)">📈 Market</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Content</label>
+                        <textarea class="summary-input" id="note-content" rows="10" placeholder="Start writing...">${type === 'note-detail' ? 'Overall a good week. Focused on execution quality rather than P&L. The new scalping strategy is working well in high volatility...' : ''}</textarea>
+                    </div>
+                    <div class="insight-box">
+                        <label class="form-label" style="color: var(--primary); margin-bottom: 10px;">🔗 Link to... (Optional)</label>
+                        <div class="tag-cloud" style="margin-bottom: 12px;">
+                            <span class="log-tag" onclick="addLink('session')">+ Session</span>
+                            <span class="log-tag" onclick="addLink('trade')">+ Trade</span>
+                            <span class="log-tag" onclick="addLink('blueprint')">+ Blueprint</span>
+                            <span class="log-tag" onclick="addLink('highlight')">+ Highlight</span>
+                        </div>
+                        <div class="link-chips" id="note-links">
+                            <!-- Linked items will appear here -->
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-sm btn-outline" style="width: 100%; border-style: dashed;" onclick="extractHighlightFromNote()">✨ Extract Highlight from Note</button>
+                    </div>
+                </div>
+            `;
+            
+            // Render existing links after DOM is ready
+            setTimeout(() => renderLinkChips(), 50);
+            
+            footer.innerHTML = `
+                <button class="btn btn-outline" onclick="closeDrawer()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+            `;
+        }
+    }
+
+    function closeDrawer() {
+        document.getElementById('main-drawer').classList.remove('open');
+    }
+
+    function setDrawerStar(rating) {
+        const stars = document.querySelectorAll('#drawer-stars .star');
+        stars.forEach((star, idx) => star.classList.toggle('active', idx < rating));
+    }
+
+    function selectOption(el, group) {
+        const container = el.parentElement;
+        container.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function toggleTag(el) {
+        el.classList.toggle('selected');
+    }
+
+    function selectNoteType(el) {
+        document.querySelectorAll('#note-type-tags .log-tag').forEach(t => t.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    // ========== NEW REVIEW FUNCTIONS ==========
+    function toggleChip(el) {
+        // Single select for some groups, multi for others? Assuming single for now based on UI
+        const group = el.parentElement;
+        group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function toggleEmotion(el) {
+        // Max 2 selection
+        if (el.classList.contains('active')) {
+            el.classList.remove('active');
+        } else {
+            const activeCount = el.parentElement.querySelectorAll('.chip.active').length;
+            if (activeCount < 2) {
+                el.classList.add('active');
+            } else {
+                // Optional: Shake or toast to indicate max reached
+            }
+        }
+    }
+
+    function updateSlider(el) {
+        const valMap = { '1': 'Low', '2': 'Med', '3': 'High' };
+        el.previousElementSibling.querySelector('.slider-val').innerText = valMap[el.value];
+    }
+
+    function usePrompt(text) {
+        const activePrompt = document.getElementById('active-prompt');
+        const promptText = document.getElementById('prompt-text');
+        const textarea = document.getElementById('reflection-input');
+        
+        activePrompt.style.display = 'block';
+        promptText.innerText = text;
+        
+        // Focus textarea
+        textarea.focus();
+    }
+
+    function clearPrompt() {
+        document.getElementById('active-prompt').style.display = 'none';
+    }
+
+    // ========== LINK SYSTEM ==========
+    const linkableItems = {
+        session: [
+            { id: 's1', icon: '📅', title: 'Jan 02 Afternoon Session', meta: '13:00-14:30 • 5 trades • +$85' },
+            { id: 's2', icon: '📅', title: 'Jan 02 Morning Session', meta: '09:00-11:30 • 8 trades • +$540' },
+            { id: 's3', icon: '📅', title: 'Jan 01 Morning Session', meta: '09:30-12:00 • 6 trades • +$320' },
+            { id: 's4', icon: '📅', title: 'Dec 30 Session', meta: '10:00-14:00 • 12 trades • -$150' }
+        ],
+        trade: [
+            { id: 't1', icon: '📊', title: 'NQ Long +$120.00', meta: 'Jan 02 14:15 • ⭐⭐⭐⭐⭐' },
+            { id: 't2', icon: '📊', title: 'ES Short -$80.00', meta: 'Jan 02 13:45 • ⭐⭐⭐' },
+            { id: 't3', icon: '📊', title: 'NQ Long +$350.00', meta: 'Jan 02 09:45 • ⭐⭐⭐⭐⭐' },
+            { id: 't4', icon: '📊', title: 'ES Short +$75.00', meta: 'Jan 01 10:30 • ⭐⭐⭐⭐' }
+        ],
+        blueprint: [
+            { id: 'b1', icon: '📘', title: 'Scalping Strategy', meta: 'NQ/ES • 68% Win Rate' },
+            { id: 'b2', icon: '📘', title: 'Breakout Hunter', meta: 'NQ • 72% Win Rate' },
+            { id: 'b3', icon: '📘', title: 'Mean Reversion', meta: 'ES • 65% Win Rate' }
+        ],
+        highlight: [
+            { id: 'h1', icon: '⭐', title: 'Avoid trading first 5 mins of NQ open...', meta: 'Jan 02 • #Strategy' },
+            { id: 'h2', icon: '⭐', title: 'Stop loss at technical levels...', meta: 'Dec 30 • #Discipline' },
+            { id: 'h3', icon: '⭐', title: 'Great patience on pullback entry...', meta: 'Jan 01 • #Mindset' },
+            { id: 'h4', icon: '⭐', title: 'When risk touched, stepped back...', meta: 'Jan 01 • #Discipline' }
+        ]
+    };
+
+    let currentLinkType = null;
+    let selectedLinks = [];
+    let currentTradeId = null;
+
+    function addLink(type) {
+        currentLinkType = type;
+        const typeLabels = {
+            session: 'Select Session to Link',
+            trade: 'Select Trade to Link',
+            blueprint: 'Select Blueprint to Link',
+            highlight: 'Select Highlight to Link'
+        };
+        
+        document.getElementById('link-modal-title').innerText = typeLabels[type];
+        
+        const items = linkableItems[type];
+        let html = '';
+        
+        items.forEach(item => {
+            const isSelected = selectedLinks.some(l => l.id === item.id);
+            html += `
+                <div class="link-select-item ${isSelected ? 'selected' : ''}" onclick="selectLinkItem('${type}', '${item.id}', '${item.icon}', '${item.title}')">
+                    <span class="link-select-icon">${item.icon}</span>
+                    <div class="link-select-info">
+                        <div class="link-select-title">${item.title}</div>
+                        <div class="link-select-meta">${item.meta}</div>
+                    </div>
+                    <span class="link-select-check">✓</span>
+                </div>
+            `;
+        });
+        
+        document.getElementById('link-modal-body').innerHTML = html;
+        document.getElementById('link-modal').classList.add('active');
+    }
+
+    function selectLinkItem(type, id, icon, title) {
+        // Check if already linked
+        const existingIndex = selectedLinks.findIndex(l => l.id === id);
+        
+        if (existingIndex >= 0) {
+            // Remove if already selected
+            selectedLinks.splice(existingIndex, 1);
+        } else {
+            // Add new link
+            selectedLinks.push({ type, id, icon, title: title.length > 30 ? title.substring(0, 30) + '...' : title });
+        }
+        
+        // Update modal UI
+        document.querySelectorAll('.link-select-item').forEach(item => {
+            const itemId = item.querySelector('.link-select-title').innerText;
+            const isSelected = selectedLinks.some(l => l.title.startsWith(itemId.substring(0, 20)) || itemId.startsWith(l.title.substring(0, 20)));
+        });
+        
+        // Refresh the link chips in drawer
+        renderLinkChips();
+        
+        // Close modal after selection
+        closeLinkModal();
+        showToast(`${icon} Linked successfully`);
+    }
+
+    function renderLinkChips() {
+        const container = document.getElementById('note-links');
+        if (!container) return;
+        
+        if (selectedLinks.length === 0) {
+            container.innerHTML = '<span style="font-size: 11px; color: var(--text-muted);">No links added yet</span>';
+            return;
+        }
+        
+        container.innerHTML = selectedLinks.map(link => `
+            <span class="link-chip">
+                ${link.icon} ${link.title}
+                <span class="remove" onclick="removeLink('${link.id}')">×</span>
+            </span>
+        `).join('');
+    }
+
+    function removeLink(id) {
+        selectedLinks = selectedLinks.filter(l => l.id !== id);
+        renderLinkChips();
+        showToast('Link removed');
+    }
+
+    function closeLinkModal() {
+        document.getElementById('link-modal').classList.remove('active');
+    }
+
+    function saveTrade() {
+        showToast('Trade Rated Successfully');
+        closeDrawer();
+    }
+
+    function saveNote() {
+        // Get content from drawer
+        const title = document.getElementById('note-title').value;
+        const content = document.getElementById('note-content').value;
+        const typeTag = document.querySelector('#note-type-tags .log-tag.selected')?.innerText || '📝 Note';
+        
+        // Update Step 3 UI if we are in the review wizard
+        const step3Input = document.getElementById('step3-content-input');
+        const step3Preview = document.getElementById('step3-content-preview');
+        
+        if (step3Input && step3Preview) {
+            step3Input.style.display = 'none';
+            step3Preview.style.display = 'block';
+            
+            document.getElementById('step3-note-title').innerText = title || 'Untitled Note';
+            document.getElementById('step3-note-preview').innerText = content.length > 150 ? content.substring(0, 150) + '...' : content;
+            document.getElementById('step3-note-type').innerText = typeTag;
+            
+            // Also update the hidden textarea so data isn't lost if logic depends on it
+            document.getElementById('reflection-input').value = content;
+        }
+
+        showToast('Note Saved & Linked to Session');
+        closeDrawer();
+    }
+
+    function resetStep3() {
+        document.getElementById('step3-content-input').style.display = 'block';
+        document.getElementById('step3-content-preview').style.display = 'none';
+        document.getElementById('reflection-input').value = '';
+    }
+
+    function saveAsHighlight() {
+        showToast('Saved as Highlight ⭐');
+    }
+
+    function addTradeNote() {
+        // Mock data lookup - in real app, fetch trade by currentTradeId
+        const tradeLink = { 
+            type: 'trade', 
+            id: currentTradeId || 't1', 
+            icon: '📊', 
+            title: 'Linked Trade (NQ)', 
+            meta: 'From Trades' 
+        };
+        selectedLinks = [tradeLink];
+        
+        closeDrawer();
+        setTimeout(() => openDrawer('note-linked'), 300);
+    }
+
+    let lastExtractedHighlight = '';
+
+    function extractHighlightFromNote() {
+        const textarea = document.getElementById('note-content');
+        let text = '';
+        
+        // 1. Priority: Get user selected text
+        if (textarea.selectionStart !== textarea.selectionEnd) {
+            text = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+        } 
+        
+        // 2. Fallback: If nothing selected, check if the whole note is short enough to be a highlight
+        if (!text) {
+            const fullContent = textarea.value.trim();
+            if (fullContent.length > 0 && fullContent.length < 150) {
+                text = fullContent; // Auto-extract full content if it's short
+            }
+        }
+
+        // 3. Validation & Feedback
+        if (!text || text.length < 3) {
+            if (textarea.value.trim().length === 0) {
+                showToast('Please write a note first', '⚠️');
+            } else {
+                // User has long text but didn't select anything
+                showToast('💡 Tip: Highlight the specific text you want to extract', 'point_up');
+            }
+            return;
+        }
+        
+        lastExtractedHighlight = text;
+        updateHighlightOptions();
+        showToast('Highlight Extracted! ⭐');
+        
+        // Visual feedback: Flash the button or something (optional)
+    }
+
+    function updateHighlightOptions() {
+        const container = document.getElementById('highlight-options');
+        if (!container) return;
+        
+        // Check if we already added the extracted one
+        const existing = document.getElementById('extracted-highlight-option');
+        if (existing) existing.remove();
+        
+        if (lastExtractedHighlight) {
+            const safeText = lastExtractedHighlight.replace(/'/g, "\\'");
+            const displayText = lastExtractedHighlight.length > 60 ? lastExtractedHighlight.substring(0, 60) + '...' : lastExtractedHighlight;
+            
+            const html = `
+                <div class="option-btn" id="extracted-highlight-option" style="text-align: left; padding: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--primary); background: rgba(59, 130, 246, 0.05);" onclick="selectHighlight(this, '${safeText}')">
+                    <div style="width: 4px; height: 40px; background: var(--primary); border-radius: 2px;"></div>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 500; margin-bottom: 4px;">"${displayText}"</div>
+                        <div style="font-size: 11px; color: var(--primary);">✨ Extracted from your Note</div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('afterbegin', html);
+        }
+    }
+
+    // ========== TRADE DETAIL MODAL ==========
+    function openTradeDetail(id) {
+        const modal = document.getElementById('trade-detail-modal');
+        if (!modal) return;
+
+        // Mock Data based on user request "XAUUSD" example
+        // In a real scenario, fetch by 'id'
+        const mockData = {
+             symbol: 'XAUUSD',
+             side: 'Long',
+             status: 'Completed',
+             pnl: 8410,
+             blueprint: 'Scalping Strategy',
+             deviation: 'None',
+             factor: 'Trend',
+             pnlText: '+$8,410.00',
+             pnlClass: 'text-green',
+             lots: '5.000',
+             trades: 2,
+             openTime: '2025-12-30T05:00:09',
+             closeTime: '2025-12-30T09:50:32',
+             subTrades: [
+                 { time: '2025/12/30 05:00:09', op: 'Open', type: 'Market', lots: 5, price: '4363.28', pos: '0.000 → 5.000', pnl: '$0' },
+                 { time: '2025/12/30 09:50:32', op: 'Close', type: 'Market', lots: 5, price: '4380.10', pos: '5.000 → 0.000', pnl: '+$8,410' }
+             ]
+        };
+        
+        // If the ID matches existing demo rows (used for variation)
+        if (id === 'demo-short') {
+             mockData.symbol = 'ES';
+             mockData.side = 'Short';
+             mockData.pnlText = '-$50.00';
+             mockData.pnlClass = 'text-red';
+             mockData.blueprint = 'Trend Following';
+             mockData.deviation = 'FOMO';
+             mockData.factor = 'Impulse';
+             mockData.subTrades[1].pnl = '-$50.00';
+        }
+
+        // Populate Modal Header
+        document.getElementById('td-symbol').innerText = mockData.symbol;
+        const sideBadge = document.getElementById('td-side');
+        sideBadge.innerText = mockData.side;
+        sideBadge.className = `badge badge-${mockData.side.toLowerCase()}`;
+        document.getElementById('td-id').innerText = '#' + (Number.isInteger(id) ? '8410' : '9999'); 
+        document.getElementById('td-blueprint').innerText = mockData.blueprint;
+        
+        const deviationEl = document.getElementById('td-deviation');
+        deviationEl.innerText = mockData.deviation;
+        deviationEl.style.color = mockData.deviation === 'None' ? 'var(--text-muted)' : 'var(--danger)'; 
+        
+        document.getElementById('td-factor').innerText = mockData.factor;
+        
+        const pnlEl = document.getElementById('td-pnl');
+        pnlEl.innerText = mockData.pnlText;
+        pnlEl.className = mockData.pnlClass;
+
+        document.getElementById('td-lots').innerText = mockData.lots;
+        document.getElementById('td-count').innerText = mockData.trades;
+        document.getElementById('td-open-time').innerText = mockData.openTime.replace('T', ' ');
+        document.getElementById('td-close-time').innerText = mockData.closeTime.replace('T', ' ');
+
+        document.getElementById('td-child-count').innerText = mockData.trades;
+
+        // Populate Sub-trades Table
+        const tbody = document.getElementById('td-subtrades-body');
+        tbody.innerHTML = mockData.subTrades.map(t => `
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding:10px; color:var(--text-main);">${t.time}</td>
+                <td style="padding:10px; color:var(--text-main); font-weight:500;">${t.op}</td>
+                <td style="padding:10px; color:var(--text-muted);">${t.type}</td>
+                <td style="padding:10px; color:var(--text-main);">${t.lots}</td>
+                <td style="padding:10px; color:var(--text-main);">${t.price}</td>
+                <td style="padding:10px; color:var(--text-muted); font-family:monospace;">${t.pos}</td>
+                <td style="padding:10px; text-align:right; font-weight:600; color:${t.pnl === '$0' ? 'var(--text-muted)' : (t.pnl.includes('-') ? 'var(--danger)' : 'var(--success)')};">${t.pnl}</td>
+            </tr>
+        `).join('');
+
+        modal.classList.add('active');
+    }
+
+    function closeTradeDetailModal() {
+        document.getElementById('trade-detail-modal').classList.remove('active');
+    }
+
+    // ========== WIZARD LOGIC ==========
+    let currentReviewStep = 1;
+    const totalReviewSteps = 4;
+
+    function changeReviewStep(n) {
+        const newStep = currentReviewStep + n;
+        
+        if (newStep < 1 || newStep > totalReviewSteps) return;
+        
+        // Hide current step
+        document.getElementById(`review-step-${currentReviewStep}`).style.display = 'none';
+        document.getElementById(`dot-step-${currentReviewStep}`).classList.remove('active');
+
+        // Luna Injected Logic: If going to Step 4 (Highlights)
+        if (newStep === 4 && n > 0 && typeof Luna !== 'undefined' && Luna.startHighlightGeneration) {
+             Luna.startHighlightGeneration(() => {
+                 finalizeStepChange(newStep);
+             });
+        } else {
+             finalizeStepChange(newStep);
+        }
+    }
+
+    function finalizeStepChange(newStep) {
+        // Show new step
+        currentReviewStep = newStep;
+        document.getElementById(`review-step-${currentReviewStep}`).style.display = 'block';
+        document.getElementById(`dot-step-${currentReviewStep}`).classList.add('active');
+        
+        // Update options if entering step 4
+        if (currentReviewStep === 4) {
+            updateHighlightOptions();
+        }
+
+        // Update buttons
+        const prevBtn = document.getElementById('btn-prev-step');
+        const nextBtn = document.getElementById('btn-next-step');
+        
+        if (currentReviewStep === 1) {
+            prevBtn.style.visibility = 'hidden';
+        } else {
+            prevBtn.style.visibility = 'visible';
+        }
+        
+        if (currentReviewStep === totalReviewSteps) {
+            nextBtn.innerText = '✓ Complete Session';
+            nextBtn.onclick = tryCompleteSession;
+        } else {
+            nextBtn.innerText = 'Next Step';
+            nextBtn.onclick = function() { changeReviewStep(1); };
+        }
+    }
+
+    // ========== PENDING SESSIONS FROM STRATEGY PAGE ==========
+    
+    /**
+     * 获取待处理的 Sessions (从 localStorage)
+     */
+    function getPendingSessionsFromStorage() {
+        const stored = localStorage.getItem('toMoon_pending_sessions');
+        if (stored) {
+            try {
+                const queue = JSON.parse(stored);
+                // 恢复 Date 对象
+                return queue.map(s => ({
+                    ...s,
+                    startTime: new Date(s.startTime),
+                    endTime: new Date(s.endTime)
+                }));
+            } catch (e) {
+                console.error('Failed to parse pending sessions', e);
+            }
+        }
+        return [];
+    }
+    
+    /**
+     * 渲染 Draft Sessions 列表
+     */
+    function renderDraftSessions() {
+        const container = document.getElementById('draft-sessions-list');
+        const countBadge = document.getElementById('draft-count');
+        const emptyState = document.getElementById('draft-empty');
+        
+        if (!container) return;
+        
+        const pendingSessions = getPendingSessionsFromStorage();
+        
+        // Update count badge
+        if (countBadge) countBadge.textContent = pendingSessions.length;
+        
+        if (pendingSessions.length === 0) {
+            container.innerHTML = '';
+            if (emptyState) emptyState.style.display = 'block';
+            return;
+        }
+        
+        if (emptyState) emptyState.style.display = 'none';
+        
+        container.innerHTML = pendingSessions.map(session => {
+            const startDate = session.startTime instanceof Date ? session.startTime : new Date(session.startTime);
+            const endDate = session.endTime instanceof Date ? session.endTime : new Date(session.endTime);
+            
+            const dateStr = startDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+            const startTime = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const endTime = endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            
+            const pnlClass = session.pnl >= 0 ? 'text-green' : 'text-red';
+            const pnlSign = session.pnl >= 0 ? '+' : '-';
+            
+            return `
+                <div class="session-item draft-session" data-session-id="${session.id}">
+                    <div class="session-main">
+                        <div class="session-identity">
+                            <div class="session-identity-title">${dateStr}</div>
+                            <div class="session-identity-sub">${startTime} – ${endTime}</div>
+                        </div>
+                        <div class="session-metrics">
+                            <div class="session-metric">
+                                <div class="session-metric-value">${session.trades}</div>
+                                <div class="session-metric-label">Trades</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value ${pnlClass}">${pnlSign}$${Math.abs(session.pnl).toFixed(0)}</div>
+                                <div class="session-metric-label">P&L</div>
+                            </div>
+                            <div class="session-metric">
+                                <div class="session-metric-value" style="color: var(--warning);">${session.trades}</div>
+                                <div class="session-metric-label">Unrated</div>
+                            </div>
+                        </div>
+                        <div class="session-progress">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: 0%; background: var(--warning);"></div>
+                            </div>
+                            <div class="progress-label">Not Started</div>
+                        </div>
+                    </div>
+                    <div class="session-action">
+                        <button class="btn btn-primary" style="background: var(--warning); color: black;" onclick="openSessionDetail('${session.id}')">Complete Session</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Listen to updates from other tabs/windows
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'toMoon_pending_sessions') {
+            renderDraftSessions();
+        }
+    });
+    
+    // Listen for pending session updates (from same tab)
+    window.addEventListener('pendingSessionsUpdated', function() {
+        renderDraftSessions();
+    });
+    
+    // ========== TOOLTIP POSITIONING ==========
+    function initTooltips() {
+        document.querySelectorAll('.info-icon').forEach(icon => {
+            icon.addEventListener('mouseenter', function(e) {
+                const tooltip = this.querySelector('.tooltip-content');
+                if (!tooltip) return;
+                
+                const rect = this.getBoundingClientRect();
+                const tooltipWidth = 200;
+                const tooltipHeight = tooltip.offsetHeight || 60;
+                
+                // Position above the icon, centered
+                let left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+                let top = rect.top - tooltipHeight - 10;
+                
+                // If tooltip goes above viewport, show below
+                if (top < 10) {
+                    top = rect.bottom + 10;
+                }
+                
+                // Keep within horizontal bounds
+                if (left < 10) left = 10;
+                if (left + tooltipWidth > window.innerWidth - 10) {
+                    left = window.innerWidth - tooltipWidth - 10;
+                }
+                
+                tooltip.style.left = left + 'px';
+                tooltip.style.top = top + 'px';
+            });
+        });
+    }
+    
+    // ========== ACTIVE SESSION LIVE UPDATES ==========
+    let activeSessionStartTime = new Date();
+    activeSessionStartTime.setHours(activeSessionStartTime.getHours() - 2);
+    activeSessionStartTime.setMinutes(activeSessionStartTime.getMinutes() - 34);
+    activeSessionStartTime.setSeconds(activeSessionStartTime.getSeconds() - 18);
+    
+    let activeSessionPnL = 847.50;
+    let activeSessionTrades = 12;
+    
+    function updateActiveDuration() {
+        const durationEl = document.getElementById('active-duration');
+        if (!durationEl) return;
+        
+        const now = new Date();
+        const diff = now - activeSessionStartTime;
+        
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        durationEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+    
+    function simulatePnLChange() {
+        const pnlEl = document.getElementById('active-pnl');
+        if (!pnlEl) return;
+        
+        // Random small fluctuation
+        const change = (Math.random() - 0.45) * 15; // Slight positive bias
+        activeSessionPnL += change;
+        
+        const sign = activeSessionPnL >= 0 ? '+' : '';
+        pnlEl.textContent = `${sign}$${Math.abs(activeSessionPnL).toFixed(2)}`;
+        pnlEl.className = `session-metric-value live-pnl ${activeSessionPnL >= 0 ? 'positive' : 'negative'}`;
+    }
+    
+    function simulateNewTrade() {
+        const tradesEl = document.getElementById('active-trades');
+        if (!tradesEl) return;
+        
+        // Occasionally add a trade (roughly every 30-60 seconds on average)
+        if (Math.random() < 0.03) {
+            activeSessionTrades++;
+            tradesEl.innerHTML = `${activeSessionTrades}<span class="live-dot"></span>`;
+            
+            // Flash effect
+            tradesEl.style.transform = 'scale(1.2)';
+            tradesEl.style.transition = 'transform 0.15s ease';
+            setTimeout(() => {
+                tradesEl.style.transform = 'scale(1)';
+            }, 150);
+        }
+    }
+    
+    // Start live updates
+    setInterval(updateActiveDuration, 1000);
+    setInterval(simulatePnLChange, 2000);
+    setInterval(simulateNewTrade, 1000);
+    
+    // ========== TRADE SELECTOR LOGIC (New) ==========
+    const sessionTrades = [
+        { id: 't1', symbol: 'NQ', type: 'Long', pnl: 120, time: '10:30', result: 'Win' },
+        { id: 't2', symbol: 'ES', type: 'Short', pnl: -80, time: '10:45', result: 'Loss' },
+        { id: 't3', symbol: 'NQ', type: 'Long', pnl: 45, time: '11:10', result: 'Win' },
+        { id: 't4', symbol: 'NQ', type: 'Long', pnl: -120, time: '11:25', result: 'Loss' },
+        { id: 't5', symbol: 'CL', type: 'Short', pnl: 210, time: '11:42', result: 'Win' }
+    ];
+
+    let selectionContext = null; // 'best' or 'worst'
+    let currentDetailFilter = 'All';
+
+    function openTradeSelector(context) {
+        selectionContext = context;
+        currentDetailFilter = 'All'; // Reset filter when opening
+        
+        // Reset filter UI buttons
+        const btnContainer = document.querySelector('#trade-selector-modal .filter-bar');
+        if(btnContainer) {
+            btnContainer.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('active');
+                if(b.innerText === 'All') b.classList.add('active');
+            });
+        }
+        
+        const modal = document.getElementById('trade-selector-modal');
+        if (modal) {
+            renderTradeSelectorList(); // Render logic separated
+            modal.classList.add('active');
+        }
+    }
+
+    function filterTradeSelector(filter, btn) {
+        currentDetailFilter = filter;
+        
+        // Update button visual
+        const parent = btn.parentElement;
+        parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        renderTradeSelectorList();
+    }
+
+    function renderTradeSelectorList() {
+        const container = document.getElementById('trade-selector-list');
+        if (!container) return;
+        
+        let filteredTrades = sessionTrades;
+        if (currentDetailFilter !== 'All') {
+            filteredTrades = sessionTrades.filter(t => t.symbol === currentDetailFilter);
+        }
+
+        container.innerHTML = filteredTrades.map(t => {
+            const pnlClass = t.pnl >= 0 ? 'text-green' : 'text-red';
+            const pnlSign = t.pnl >= 0 ? '+' : '-';
+            
+            return `
+                <div class="mini-trade-item" onclick="selectSessionTrade('${t.id}')" style="cursor: pointer; transition: background 0.2s; margin-bottom: 0; border-left-color: ${t.pnl >= 0 ? 'var(--success)' : 'var(--danger)'};">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 13px;">${t.symbol} ${t.type}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">${t.time}</div>
+                        </div>
+                        <div class="${pnlClass}" style="font-weight: 600;">${pnlSign}$${Math.abs(t.pnl)}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // Add "None" option only if not filtered (optional, but good for UX)
+        // Or always keep it
+        container.innerHTML += `
+            <div class="mini-trade-item" onclick="selectSessionTrade(null)" style="cursor: pointer; text-align: center; color: var(--text-muted); padding: 10px; border-left: 3px solid var(--text-muted); margin-bottom: 0;">
+                <i>None / Clear Selection</i>
+            </div>
+        `;
+    }
+
+    function selectSessionTrade(id) {
+        const displayEl = document.getElementById(`${selectionContext}-trade-display`);
+        if (!displayEl) return;
+        
+        if (id === null) {
+            displayEl.innerHTML = '<span class="placeholder" style="color: var(--text-muted);">Select...</span>';
+            displayEl.dataset.value = '';
+        } else {
+            const t = sessionTrades.find(x => x.id === id);
+            if(t) {
+                const pnlClass = t.pnl >= 0 ? 'text-green' : 'text-red';
+                const pnlSign = t.pnl >= 0 ? '+' : '-';
+                
+                displayEl.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span>${t.symbol} ${t.type}</span>
+                        <span class="${pnlClass}" style="font-weight: 600;">${pnlSign}$${Math.abs(t.pnl)}</span>
+                    </div>
+                `;
+                displayEl.dataset.value = id;
+            }
+        }
+        
+        closeTradeSelector();
+    }
+
+    function closeTradeSelector() {
+        document.getElementById('trade-selector-modal').classList.remove('active');
+    }
+
+    // ========== INIT ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const view = urlParams.get('view') || 'missioncontrol';
+        switchView(view);
+        updateSidebarActive(view);
+        
+        // Initialize completion bar if on session-detail view
+        if (view === 'session-detail') {
+            updateCompletionBar();
+        }
+        
+        // Render pending sessions from localStorage
+        renderDraftSessions();
+        
+        // Listen for new pending sessions added
+        window.addEventListener('pendingSessionAdded', function(e) {
+            renderDraftSessions();
+        });
+        
+        // Initialize tooltips
+        initTooltips();
+        
+        // Initialize Luna AI
+        if(typeof Luna !== 'undefined') Luna.init();
+
+        // Initialize active session duration
+        updateActiveDuration();
+    });
+</script>
+
+</body>
+</html>

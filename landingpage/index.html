@@ -1,0 +1,2524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToMoon - AI-Powered Trading Psychology Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0b0f;
+            --bg-card: #12141a;
+            --bg-panel: #1a1d24;
+            --luna-primary: #38bdf8;
+            --luna-secondary: #0ea5e9;
+            --luna-glow: 56, 189, 248;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(18, 20, 26, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* --- Global Background Atmosphere --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 100% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 30% at 0% 80%, rgba(56, 189, 248, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* --- Luna Core Visual Identity --- */
+        .luna-orb {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #bae6fd 40%, #38bdf8 100%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 60px rgba(var(--luna-glow), 0.8),
+                0 0 120px rgba(var(--luna-glow), 0.4),
+                inset -15px -10px 30px rgba(14, 165, 233, 0.6);
+            animation: luna-breathe 4s ease-in-out infinite;
+            position: relative;
+        }
+
+        .luna-orb::after {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 20%;
+            width: 20%;
+            height: 20%;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            filter: blur(3px);
+        }
+
+        .luna-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid;
+            box-sizing: border-box;
+        }
+
+        @keyframes luna-breathe {
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 0 60px rgba(var(--luna-glow), 0.6), 0 0 100px rgba(var(--luna-glow), 0.3);
+            }
+            50% { 
+                transform: scale(1.08); 
+                box-shadow: 0 0 80px rgba(var(--luna-glow), 0.9), 0 0 140px rgba(var(--luna-glow), 0.5);
+            }
+        }
+
+        @keyframes orbit {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes orbit-reverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        /* --- Glass Morphism Cards --- */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+
+        .glass-hover:hover {
+            border-color: rgba(var(--luna-glow), 0.4);
+            box-shadow: 0 0 40px rgba(var(--luna-glow), 0.15);
+            transform: translateY(-5px);
+        }
+
+        /* --- Container --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .btn-luna {
+            background: linear-gradient(135deg, var(--luna-primary), var(--accent-purple));
+            color: white;
+            box-shadow: 0 4px 20px rgba(var(--luna-glow), 0.4);
+        }
+
+        .btn-luna:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(var(--luna-glow), 0.6);
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(var(--luna-glow), 0.5);
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            height: 60px;
+            background: rgba(10, 11, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            overflow: visible;
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            height: 60px;
+        }
+
+        .nav-brand img {
+            height: 60px;
+            width: auto;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .nav-brand .luna-mini {
+            width: 32px;
+            height: 32px;
+            background: radial-gradient(circle at 35% 35%, #fff, #38bdf8);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(var(--luna-glow), 0.6);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--luna-primary);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 0 80px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(10, 11, 15, 0.75) 0%, rgba(10, 11, 15, 0.85) 50%, rgba(10, 11, 15, 0.75) 100%), 
+                        url('background.png') no-repeat center/cover;
+            background-attachment: fixed;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 100% 80% at 50% 50%, rgba(56, 189, 248, 0.15) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-content {
+            animation: fadeInUp 1s ease-out;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(var(--luna-glow), 0.1);
+            border: 1px solid rgba(var(--luna-glow), 0.3);
+            border-radius: 30px;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+            color: var(--luna-primary);
+        }
+
+        .hero-badge .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--luna-primary);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .hero-badge .pulse::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border: 2px solid var(--luna-primary);
+            border-radius: 50%;
+            animation: pulse-ring 1.5s ease-out infinite;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            font-weight: 700;
+        }
+
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--luna-primary), var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shimmer 3s linear infinite;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            max-width: 500px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+        }
+
+        .hero-stat {
+            text-align: left;
+        }
+
+        .hero-stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--luna-primary);
+        }
+
+        .hero-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Hero Visual */
+        .hero-visual {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .luna-hero-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .luna-hero-orb {
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #bae6fd 40%, #38bdf8 100%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 80px rgba(var(--luna-glow), 0.9),
+                0 0 160px rgba(var(--luna-glow), 0.5),
+                0 0 240px rgba(var(--luna-glow), 0.3),
+                inset -20px -15px 40px rgba(14, 165, 233, 0.7);
+            animation: luna-breathe 4s ease-in-out infinite;
+            position: relative;
+            z-index: 10;
+        }
+
+        .luna-hero-orb::after {
+            content: '';
+            position: absolute;
+            top: 18%;
+            left: 22%;
+            width: 25%;
+            height: 25%;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            filter: blur(4px);
+        }
+
+        .luna-orbit-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 1px dashed;
+        }
+
+        .luna-orbit-ring:nth-child(2) {
+            width: 250px;
+            height: 250px;
+            border-color: rgba(var(--luna-glow), 0.4);
+            animation: orbit 20s linear infinite;
+        }
+
+        .luna-orbit-ring:nth-child(2)::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: var(--luna-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--luna-primary);
+        }
+
+        .luna-orbit-ring:nth-child(3) {
+            width: 320px;
+            height: 320px;
+            border-color: rgba(139, 92, 246, 0.3);
+            animation: orbit-reverse 30s linear infinite;
+        }
+
+        .luna-orbit-ring:nth-child(3)::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 30%;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--accent-purple);
+        }
+
+        .luna-orbit-ring:nth-child(4) {
+            width: 400px;
+            height: 400px;
+            border-color: rgba(255, 255, 255, 0.1);
+            animation: orbit 40s linear infinite;
+        }
+
+        /* Floating Feature Cards */
+        .float-card {
+            position: absolute;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            animation: float 6s ease-in-out infinite;
+            z-index: 20;
+        }
+
+        .float-card-1 {
+            top: 10%;
+            right: 0;
+            animation-delay: 0s;
+        }
+
+        .float-card-2 {
+            bottom: 15%;
+            left: 0;
+            animation-delay: 2s;
+        }
+
+        .float-card-icon {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .float-card-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .float-card-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* --- Section Styles --- */
+        section {
+            padding: 120px 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(var(--luna-glow), 0.1);
+            border: 1px solid rgba(var(--luna-glow), 0.2);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--luna-primary);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* --- Luna AI Spotlight Section --- */
+        .luna-spotlight {
+            background: radial-gradient(ellipse 80% 50% at 50% 50%, rgba(var(--luna-glow), 0.08) 0%, transparent 70%);
+        }
+
+        .luna-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .luna-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .luna-display {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .luna-display-orb {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at 35% 35%, #ffffff, #bae6fd, #38bdf8);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 80px rgba(var(--luna-glow), 0.9),
+                0 0 160px rgba(var(--luna-glow), 0.5);
+            animation: luna-breathe 4s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        .luna-display-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+        }
+
+        .luna-display-ring:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            border: 1px solid rgba(var(--luna-glow), 0.4);
+            animation: orbit 15s linear infinite;
+        }
+
+        .luna-display-ring:nth-child(3) {
+            width: 280px;
+            height: 280px;
+            border: 1px dashed rgba(139, 92, 246, 0.3);
+            animation: orbit-reverse 25s linear infinite;
+        }
+
+        .luna-display-ring:nth-child(4) {
+            width: 350px;
+            height: 350px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .luna-info h2 {
+            font-size: 2.5rem;
+            margin-bottom: 24px;
+        }
+
+        .luna-info h2 .luna-text {
+            color: var(--luna-primary);
+            text-shadow: 0 0 30px rgba(var(--luna-glow), 0.5);
+        }
+
+        .luna-info > p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .luna-features {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .luna-feature {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .luna-feature:hover {
+            background: rgba(var(--luna-glow), 0.05);
+            border-color: rgba(var(--luna-glow), 0.3);
+            transform: translateX(10px);
+        }
+
+        .luna-feature-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(var(--luna-glow), 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .luna-feature-content h4 {
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .luna-feature-content p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Workflow Section --- */
+        .workflow {
+            background: var(--bg-card);
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .workflow-card {
+            padding: 32px 24px;
+            border-radius: 20px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .workflow-card:hover {
+            border-color: rgba(var(--luna-glow), 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .workflow-step {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, var(--luna-primary), var(--accent-purple));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(var(--luna-glow), 0.5);
+        }
+
+        .workflow-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .workflow-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+
+        .workflow-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* --- Features Grid --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            padding: 32px;
+            border-radius: 20px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(var(--luna-glow), 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-card-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(var(--luna-glow), 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 24px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* --- DMI Simulator --- */
+        .simulator {
+            background: radial-gradient(ellipse at center, rgba(var(--luna-glow), 0.05), transparent 70%);
+        }
+
+        .sim-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .sim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .sim-state {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .sim-score-bar {
+            width: 200px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .sim-score-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .sim-graph {
+            height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .sim-phases {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .sim-phase {
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        /* --- Video Section --- */
+        .video-section {
+            background: var(--bg-card);
+        }
+
+        .video-container {
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .video-placeholder {
+            position: relative;
+            padding-top: 56.25%;
+            background: var(--bg-panel);
+        }
+
+        .play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90px;
+            height: 90px;
+            background: rgba(var(--luna-glow), 0.2);
+            border: 2px solid var(--luna-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .play-btn:hover {
+            background: var(--luna-primary);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 15px 0 15px 25px;
+            border-color: transparent transparent transparent white;
+            margin-left: 5px;
+        }
+
+        /* --- Roadmap --- */
+        .roadmap-timeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .roadmap-item {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .roadmap-item.active .roadmap-content {
+            border-color: var(--luna-primary);
+            box-shadow: 0 0 40px rgba(var(--luna-glow), 0.2);
+            transform: translateY(-8px);
+        }
+
+        .roadmap-item::before {
+            content: '';
+            display: none;
+        }
+
+        .roadmap-item.active::before {
+            display: none;
+        }
+
+        .roadmap-date {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            color: var(--luna-primary);
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .roadmap-item.active .roadmap-date {
+            text-shadow: 0 0 20px rgba(var(--luna-glow), 0.5);
+        }
+
+        .roadmap-date::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: var(--luna-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--luna-primary);
+        }
+
+        .roadmap-item.active .roadmap-date::before {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 12px var(--luna-primary); }
+            50% { box-shadow: 0 0 24px var(--luna-primary); }
+        }
+
+        .roadmap-content {
+            background: linear-gradient(135deg, rgba(var(--luna-glow), 0.05), rgba(139, 92, 246, 0.03));
+            padding: 32px 28px;
+            border-radius: 20px;
+            border: 1px solid rgba(var(--luna-glow), 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .roadmap-item:hover .roadmap-content {
+            border-color: rgba(var(--luna-glow), 0.4);
+            box-shadow: 0 10px 30px rgba(var(--luna-glow), 0.1);
+        }
+
+        .roadmap-content h4 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--luna-primary), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .roadmap-content ul {
+            list-style: none;
+            flex: 1;
+        }
+
+        .roadmap-content li {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            padding: 10px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            line-height: 1.5;
+        }
+
+        .roadmap-content li::before {
+            content: '✓';
+            color: var(--luna-primary);
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .roadmap-item:hover .roadmap-content li::before {
+            color: var(--accent-purple);
+        }
+
+        /* --- FAQ --- */
+        .faq-grid {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .faq-item {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .faq-item:hover {
+            border-color: rgba(var(--luna-glow), 0.3);
+        }
+
+        .faq-question {
+            padding: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .faq-answer {
+            padding: 0 24px 24px;
+            color: var(--text-muted);
+            display: none;
+            line-height: 1.7;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        .faq-icon {
+            transition: transform 0.3s;
+            color: var(--luna-primary);
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        /* --- CTA Section --- */
+        .cta-section {
+            background: radial-gradient(ellipse at center, rgba(var(--luna-glow), 0.1), transparent 70%);
+            text-align: center;
+        }
+
+        .cta-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .cta-content h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .cta-content p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+
+        .cta-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: var(--bg-card);
+            padding: 80px 0 40px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-brand .luna-mini {
+            width: 28px;
+            height: 28px;
+            background: radial-gradient(circle at 35% 35%, #fff, #38bdf8);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(var(--luna-glow), 0.5);
+        }
+
+        .footer-col h4 {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col li {
+            margin-bottom: 12px;
+        }
+
+        .footer-col a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-col a:hover {
+            color: var(--luna-primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 1024px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .hero-visual {
+                display: none;
+            }
+            .hero p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .hero-actions {
+                justify-content: center;
+            }
+            .hero-stats {
+                justify-content: center;
+            }
+            .luna-showcase {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .luna-visual {
+                order: -1;
+                margin-bottom: 40px;
+            }
+            .luna-features {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+            .workflow-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .section-header h2 {
+                font-size: 2rem;
+            }
+            .workflow-grid {
+                grid-template-columns: 1fr;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+        /* --- News Demo Section --- */
+        .news-demo {
+            padding: 100px 0;
+            background: linear-gradient(to bottom, var(--bg-dark), var(--bg-panel));
+            overflow: hidden;
+        }
+
+        .news-chart-container {
+            max-width: 900px;
+            margin: 0 auto;
+            height: 450px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--bg-card);
+        }
+
+        .news-chart-header {
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.02);
+            z-index: 5;
+        }
+
+        .news-chart-area {
+            flex: 1;
+            position: relative;
+            background: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .news-marker {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            transform: translate(-50%, -50%) scale(0);
+            background: var(--bg-card);
+            border: 2px solid;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(0,0,0,0.6);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .news-marker.visible {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .news-marker.high { border-color: var(--danger); color: var(--danger); background: rgba(40, 10, 10, 0.9); }
+        .news-marker.medium { border-color: var(--warning); color: var(--warning); background: rgba(40, 30, 10, 0.9); }
+
+        .news-popup {
+            position: absolute;
+            width: 280px;
+            padding: 16px;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+            z-index: 30;
+            background: rgba(18, 20, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .news-popup::after { /* Arrow */
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 12px;
+            height: 12px;
+            background: var(--bg-panel); /* Match popup bg */
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .news-popup.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .news-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.75rem;
+        }
+
+        .news-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+        .news-badge.high { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        
+        .news-title {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            color: var(--text-main);
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        .news-data {
+            display: flex;
+            gap: 20px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .news-metric {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .news-metric .label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+        .news-metric .value { font-size: 0.95rem; font-weight: 700; font-family: 'Space Grotesk'; }
+        
+        .sim-volatility {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        /* --- Diagnosis Modal --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 11, 15, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .diagnosis-modal {
+            width: 100%;
+            max-width: 600px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .diagnosis-modal {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        .diagnosis-progress {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .diagnosis-bar {
+            height: 100%;
+            background: var(--luna-primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .diagnosis-step {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .diagnosis-step.active {
+            display: block;
+        }
+
+        .diagnosis-question {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            font-family: 'Space Grotesk', sans-serif;
+            text-align: center;
+        }
+
+        .diagnosis-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .diagnosis-option {
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .diagnosis-option:hover {
+            background: rgba(var(--luna-glow), 0.1);
+            border-color: var(--luna-primary);
+        }
+
+        .diagnosis-result {
+            text-align: center;
+        }
+
+        .persona-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 20px;
+            color: var(--accent-purple);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .persona-title {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--luna-primary), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 24px;
+            font-weight: 700;
+        }
+
+        .diagnosis-leak {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 16px;
+            border-radius: 12px;
+            color: #fca5a5;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .fix-plan {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .fix-step {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+
+        .fix-num {
+            width: 24px;
+            height: 24px;
+            background: var(--luna-primary);
+            color: var(--bg-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <div class="nav-brand">
+                <img src="White%20logo%20-%20no%20background.svg" alt="ToMoon">
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#luna">Luna AI</a>
+                <a href="#roadmap">Roadmap</a>
+                <a href="#faq">FAQ</a>
+                <a href="index.html" class="btn btn-luna" style="padding: 10px 24px;">Launch App</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="pulse"></span>
+                        Powered by Luna AI
+                    </div>
+                    <h1>Stop Gambling.<br>Trade with <span class="gradient">Discipline</span>.</h1>
+                    <!-- UPDATED: Changed "enforce" to "reinforce" and clarified assistance role -->
+                    <p>ToMoon is your AI-powered trading assistant. Define your edge, set your own risk parameters, and let Luna AI reinforce your discipline through real-time alerts.</p>
+                    <div class="hero-actions">
+                        <button class="btn btn-luna" onclick="openDiagnosis()">
+                            Begin 30-sec Diagnosis
+                        </button>
+                        <a href="#video-section" class="btn btn-ghost">
+                            <span>▶</span> Platform Walkthrough
+                        </a>
+                    </div>
+                    <div style="margin-top: -30px; margin-bottom: 40px;">
+                        <a href="#basics" style="color: var(--text-muted); font-size: 0.9rem; text-decoration: underline; text-underline-offset: 4px;">Or browse the Basics Survival Kit</a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <div class="hero-stat-value">1,200+</div>
+                            <div class="hero-stat-label">Trades Logged Daily</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-value">$580K+</div>
+                            <div class="hero-stat-label">Capital Monitored</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="luna-hero-container">
+                        <div class="luna-hero-orb"></div>
+                        <div class="luna-orbit-ring"></div>
+                        <div class="luna-orbit-ring"></div>
+                        <div class="luna-orbit-ring"></div>
+
+                        <!-- Float Cards -->
+                        <div class="float-card float-card-1">
+                            <div class="float-card-icon">🧠</div>
+                            <div class="float-card-title">DMI Score</div>
+                            <div class="float-card-value" style="color: var(--success);">Strong ↗</div>
+                        </div>
+                        <div class="float-card float-card-2">
+                            <div class="float-card-icon">🛡️</div>
+                            <div class="float-card-title">Risk Status</div>
+                            <div class="float-card-value" style="color: var(--luna-primary);">Safe Zone</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Luna AI Spotlight -->
+    <section class="luna-spotlight" id="luna">
+        <div class="container">
+            <div class="luna-showcase">
+                <div class="luna-visual">
+                    <div class="luna-display">
+                        <div class="luna-display-orb"></div>
+                        <div class="luna-display-ring"></div>
+                        <div class="luna-display-ring"></div>
+                        <div class="luna-display-ring"></div>
+                    </div>
+                </div>
+                <div class="luna-info">
+                    <span class="section-badge">Core AI Engine</span>
+                    <h2>Meet <span class="luna-text">Luna</span>.</h2>
+                    <!-- UPDATED: Clarified Luna's role as alerting, not intervening -->
+                    <p>Luna is not a bot that trades for you. She's your 24/7 journaling assistant — monitoring your data, alerting you when you deviate from your self-set rules, and generating insights to help you reflect.</p>
+                    
+                    <div class="luna-features">
+                        <div class="luna-feature">
+                            <div class="luna-feature-icon">🏗️</div>
+                            <div class="luna-feature-content">
+                                <h4>Blueprint Architect</h4>
+                                <p>Luna assists you in defining your own precise entry rules, risk parameters, and exit logic. You set the standards.</p>
+                            </div>
+                        </div>
+                        <div class="luna-feature">
+                            <div class="luna-feature-icon">⚡</div>
+                            <div class="luna-feature-content">
+                                <!-- UPDATED: "Intervention" -> "Guidance" -->
+                                <h4>Real-time Guidance</h4>
+                                <p>"This trade doesn't match your Blueprint." Luna highlights potential deviations to help you stay disciplined.</p>
+                            </div>
+                        </div>
+                        <div class="luna-feature">
+                            <div class="luna-feature-icon">📊</div>
+                            <div class="luna-feature-content">
+                                <h4>Execution Analysis</h4>
+                                <p>Weekly AI reports reveal hidden patterns: "You deviate from your plan after 2 PM. Consider AM focus."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workflow Section -->
+    <section class="workflow" id="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Your Trading Ecosystem</span>
+                <h2>The Professional Workflow</h2>
+                <p>A complete system connecting strategy, execution, reflection, and evolution.</p>
+            </div>
+            <div class="workflow-grid">
+                <div class="workflow-card">
+                    <div class="workflow-step">1</div>
+                    <div class="workflow-icon">📐</div>
+                    <h3>Blueprint</h3>
+                    <p>Define your edge. Create strategy blueprints with precise rules for entry, risk, and management that you commit to following.</p>
+                </div>
+                <div class="workflow-card">
+                    <div class="workflow-step">2</div>
+                    <div class="workflow-icon">📰</div>
+                    <h3>Context</h3>
+                    <p>See news events marked directly on charts. Understand market context before executing. Never get blindsided by FOMC again.</p>
+                </div>
+                <div class="workflow-card">
+                    <div class="workflow-step">3</div>
+                    <div class="workflow-icon">📝</div>
+                    <h3>Journal</h3>
+                    <p>The Moonlog captures every trade. Rate execution, log context, add notes. Luna helps you see patterns in your performance.</p>
+                </div>
+                <div class="workflow-card">
+                    <div class="workflow-step">4</div>
+                    <div class="workflow-icon">🔬</div>
+                    <h3>Insight</h3>
+                    <p>AI-generated reports analyze your execution quality. Discover your leaks, optimize your edge, and evolve as a trader.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section>
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Platform Capabilities</span>
+                <h2>Everything You Need</h2>
+                <p>Tools built by traders who've felt the pain of blowing accounts.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-card-icon">🧠</div>
+                    <h3>DMI Score</h3>
+                    <p>A credit score for execution. Track your adherence to rules, not just P&L. Get warned when you deviate.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-icon">🛡️</div>
+                    <h3>Risk Guard</h3>
+                    <!-- UPDATED: "Get locked out" -> "Receive critical alerts" -->
+                    <p>Connect broker accounts to monitor progress. Set daily loss limits and receive critical alerts to help you stop trading.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-icon">📰</div>
+                    <h3>News on Chart</h3>
+                    <p>Automatic news event markers on your trading charts. Understand the "why" behind price moves.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-icon">🔥</div>
+                    <h3>Strategy Heatmaps</h3>
+                    <p>Visualize win rate by time, session, and setup. Stop trading your weak hours.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-icon">💭</div>
+                    <h3>Trade Context</h3>
+                    <p>Log market context and notes for each trade. Optionally tag your mindset (e.g. "Patient", "Fomo") to spot patterns.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-icon">📊</div>
+                    <h3>AI Reports</h3>
+                    <p>Weekly execution analysis generated by Luna. Data-driven coaching at a fraction of the cost.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DMI Simulator -->
+    <section class="simulator">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Live Demo</span>
+                <!-- UPDATED: "intervenes" -> "assists" -->
+                <h2>See Discipline Impact P&L</h2>
+                <p>Watch how rule deviations destroy accounts — and how ToMoon assists you.</p>
+            </div>
+            <div class="sim-container">
+                <div class="sim-header">
+                    <div>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">Current State</div>
+                        <div id="sim-state" class="sim-state" style="color: var(--success);">Calm</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">DMI Score</div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div class="sim-score-bar">
+                                <div id="sim-bar" class="sim-score-fill" style="width: 90%; background: var(--success);"></div>
+                            </div>
+                            <span id="sim-score" style="font-family: 'Space Grotesk'; font-weight: 700; color: var(--success);">90</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="sim-graph">
+                    <svg id="sim-svg" style="width: 100%; height: 100%;">
+                        <path id="sim-line" d="M0,150" fill="none" stroke="var(--luna-primary)" stroke-width="3" />
+                        <circle id="sim-dot" cx="0" cy="150" r="6" fill="white" />
+                    </svg>
+                    <div id="sim-alert" style="position: absolute; inset: 0; background: rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); opacity: 0; transition: opacity 0.3s;">
+                        <div style="background: var(--bg-panel); border: 2px solid var(--danger); padding: 30px; border-radius: 16px; text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">🔔</div>
+                            <!-- UPDATED: "Risk Guard Activated" -> "Rule Reminder" -->
+                            <h3 style="color: var(--danger); margin-bottom: 8px;">Rule Reminder</h3>
+                            <p style="color: var(--text-muted);">Daily loss limit approaching. Check your plan.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sim-phases">
+                    <div class="sim-phase" id="step-calm" style="background: rgba(16,185,129,0.2); border-color: var(--success); color: var(--success);">1. Disciplined</div>
+                    <div class="sim-phase" id="step-tilt">2. Rule Deviation</div>
+                    <!-- UPDATED: "Intervention" -> "Reminder" -->
+                    <div class="sim-phase" id="step-save">3. Reminder</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- News on Chart Demo -->
+    <section class="news-demo" id="news-demo-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Market Context</span>
+                <h2>Never Trade Blindly</h2>
+                <p>See high-impact news events directly on your chart. Context is king.</p>
+            </div>
+            
+            <div class="news-chart-container glass">
+                <!-- Header / Toolbar -->
+                <div class="news-chart-header">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-weight:700; color:var(--text-main); font-size:1.1rem;">NQ 100</span>
+                        <span style="font-size:0.9rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">5m</span>
+                    </div>
+                    <div style="display:flex; gap:15px;">
+                        <div style="display:flex; align-items:center; gap:6px; font-size:0.8rem; color:var(--danger); opacity:0.8;">
+                            <span style="width:6px; height:6px; background:var(--danger); border-radius:50%;"></span> High Impact
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px; font-size:0.8rem; color:var(--warning); opacity:0.8;">
+                            <span style="width:6px; height:6px; background:var(--warning); border-radius:50%;"></span> Medium Impact
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Area -->
+                <div class="news-chart-area" id="news-chart-area">
+                    <div class="sim-volatility" id="news-volatility"></div>
+                    <svg id="news-svg" width="100%" height="100%" preserveAspectRatio="none" style="overflow:visible;">
+                        <defs>
+                            <linearGradient id="gradient-news" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3" />
+                                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Area below line -->
+                        <path id="news-price-area" d="" fill="url(#gradient-news)" stroke="none" />
+                        <!-- Path will be dynamic -->
+                        <path id="news-price-line" d="" fill="none" stroke="#3b82f6" stroke-width="2" vector-effect="non-scaling-stroke" />
+                    </svg>
+                    
+                    <!-- Dynamic Markers will be injected here -->
+                    <div id="news-markers-layer"></div>
+                    
+                    <!-- News Popup Card -->
+                    <div id="news-popup" class="news-popup glass">
+                        <div class="news-popup-header">
+                            <span class="news-badge high">High Impact</span>
+                            <span class="news-time">10:00 AM</span>
+                        </div>
+                        <h4 class="news-title">CPI Data Release (YoY)</h4>
+                        <div class="news-data">
+                            <div class="news-metric">
+                                <span class="label">Actual</span>
+                                <span class="value text-red">3.5%</span>
+                            </div>
+                            <div class="news-metric">
+                                <span class="label">Forecast</span>
+                                <span class="value">3.2%</span>
+                            </div>
+                            <div class="news-metric">
+                                <span class="label">Previous</span>
+                                <span class="value">3.2%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Section -->
+    <section class="video-section" id="video-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Platform Walkthrough</span>
+                <h2>See ToMoon in Action</h2>
+                <p>Watch how traders use Luna to transform their psychology.</p>
+            </div>
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div class="play-btn">
+                        <div class="play-icon"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section id="roadmap">  
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Development Plan</span>
+                <h2>Flight Plan 2026</h2>
+                <p>Our roadmap to revolutionize trading psychology.</p>
+            </div>
+            <div class="roadmap-timeline">
+                <div class="roadmap-item active">
+                    <div class="roadmap-date">Q1 2026 (Current)</div>
+                    <div class="roadmap-content">
+                        <h4>Blueprint Execution</h4>
+                        <ul>
+                            <li>Blueprint Creation and Execution</li>
+                            <li>Notebook Integration</li>
+                            <li>Chart + News Features</li>
+                            <li>Luna AI Platform Assistance</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="roadmap-item">
+                    <div class="roadmap-date">Q2 2026</div>
+                    <div class="roadmap-content">
+                        <h4>Advanced Intelligence</h4>
+                        <ul>
+                            <li>Risk Guard Automation</li>
+                            <li>Enhanced Luna AI Features</li>
+                            <li>Mobile App Beta</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Community Expansion removed per request; Public Profile Sharing moved to Q4 -->
+                <div class="roadmap-item">
+                    <div class="roadmap-date">Q4 2026</div>
+                    <div class="roadmap-content">
+                        <h4>Future Horizons</h4>
+                        <ul>
+                            <li>AI-Driven Trade Optimization</li>
+                            <li>Global Community Events</li>
+                            <li>Public Profile Sharing</li>
+                            <li>Advanced Analytics Suite</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Questions</span>
+                <h2>Frequently Asked</h2>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        What brokers do you support?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Currently we support direct API sync with MT5, Binance, Bybit, and ATAS. We're expanding to more platforms throughout 2026.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Is my trading data secure?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Absolutely. We use bank-grade encryption. We never execute trades on your behalf — we only read data to analyze performance and psychology.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Can I use this for Prop Firm accounts?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes. ToMoon is excellent for Prop Firm traders. The Risk Guard helps you monitor your daily loss limits to avoid breaching rules.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        What makes Luna different from other AI assistants?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Luna is purpose-built for trading psychology. She connects your self-imposed blueprints to your actual execution, tracks behavioral patterns over time, and generates insights specifically about your trading discipline.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Trade Smarter?</h2>
+                <p>Join thousands of traders who've stopped gambling and started building real edge with Luna AI.</p>
+                <div class="cta-actions">
+                    <button class="btn btn-luna">Start Free Trial</button>
+                    <button class="btn btn-ghost">Schedule Demo</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-brand">
+                        <img src="browser.png" alt="ToMoon" style="height: 28px; width: auto;">
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 300px;">
+                        Empowering traders to master execution and achieve consistent profitability through AI-driven insights.
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Pricing</a></li>
+                        <li><a href="#">Changelog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Psychology Guide</a></li>
+                        <li><a href="#">Help Center</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2026 ToMoon Trading Inc. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Diagnosis Modal -->
+    <div class="modal-overlay" id="diagnosis-overlay">
+        <div class="diagnosis-modal">
+            <button class="modal-close" onclick="closeDiagnosis()">×</button>
+            <div class="diagnosis-progress">
+                <div class="diagnosis-bar" id="diagnosis-bar"></div>
+            </div>
+
+            <div id="diagnosis-container">
+                <!-- Questions injected here by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FAQ Toggle
+        function toggleFaq(element) {
+            const item = element.parentElement;
+            item.classList.toggle('active');
+        }
+
+        // DMI Simulator
+        function runSimulation() {
+            const svg = document.getElementById('sim-svg');
+            const path = document.getElementById('sim-line');
+            const dot = document.getElementById('sim-dot');
+            const scoreBar = document.getElementById('sim-bar');
+            const scoreText = document.getElementById('sim-score');
+            const stateText = document.getElementById('sim-state');
+            const alertBox = document.getElementById('sim-alert');
+            
+            if (!svg) return;
+
+            let points = [{x:0, y:150}];
+            let x = 0;
+            let y = 150;
+            let frame = 0;
+            const totalFrames = 300;
+
+            alertBox.style.opacity = 0;
+
+            function updateUI(phase, dmi, state, color) {
+                document.querySelectorAll('.sim-phase').forEach(s => {
+                    s.style.background = 'transparent';
+                    s.style.borderColor = 'var(--border)';
+                    s.style.color = 'var(--text-muted)';
+                });
+                
+                const activeId = phase === 'calm' ? 'step-calm' : phase === 'tilt' ? 'step-tilt' : 'step-save';
+                const activeEl = document.getElementById(activeId);
+                if (activeEl) {
+                    activeEl.style.background = `rgba(${color}, 0.2)`;
+                    activeEl.style.borderColor = `rgb(${color})`;
+                    activeEl.style.color = `rgb(${color})`;
+                }
+
+                stateText.innerText = state;
+                stateText.style.color = `rgb(${color})`;
+                scoreText.innerText = Math.floor(dmi);
+                scoreText.style.color = `rgb(${color})`;
+                scoreBar.style.width = dmi + '%';
+                scoreBar.style.background = `rgb(${color})`;
+            }
+
+            const interval = setInterval(() => {
+                frame++;
+                x += 2;
+
+                let dmi = 90;
+                let phase = 'calm';
+
+                if (frame < 100) {
+                    phase = 'calm';
+                    y -= 0.5 + (Math.random() - 0.3) * 2;
+                    dmi = 90 - (frame / 10);
+                    updateUI(phase, dmi, 'Calm', '16, 185, 129');
+                } else if (frame < 200) {
+                    phase = 'tilt';
+                    y += 1.5 + (Math.random() - 0.4) * 15;
+                    dmi = 80 - ((frame - 100) / 2);
+                    updateUI(phase, dmi, 'Deviation Detected', '239, 68, 68');
+                } else {
+                    phase = 'saved';
+                    y += (Math.random() - 0.5) * 2;
+                    dmi = 30;
+                    // UPDATED: "Intervention" -> "Reminder"
+                    updateUI(phase, dmi, 'Rule Reminder', '56, 189, 248');
+                    if (frame === 205) alertBox.style.opacity = 1;
+                }
+
+                y = Math.max(10, Math.min(290, y));
+                points.push({x, y});
+
+                const d = points.map((p, i) => (i === 0 ? 'M' : 'L') + `${p.x},${p.y}`).join(' ');
+                path.setAttribute('d', d);
+                dot.setAttribute('cx', x);
+                dot.setAttribute('cy', y);
+
+                if (frame >= totalFrames) {
+                    clearInterval(interval);
+                    setTimeout(runSimulation, 2500);
+                }
+            }, 30);
+        }
+
+        // Start simulation when visible
+        const simObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    runSimulation();
+                    simObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        const simSection = document.getElementById('sim-svg');
+        if(simSection) simObserver.observe(simSection);
+
+        // News Demo Simulation
+        function runNewsSimulation() {
+            const svg = document.getElementById('news-svg');
+            const pathLine = document.getElementById('news-price-line');
+            const pathArea = document.getElementById('news-price-area');
+            const markersLayer = document.getElementById('news-markers-layer');
+            const popup = document.getElementById('news-popup');
+            const volatility = document.getElementById('news-volatility');
+            
+            if (!svg) return;
+
+            let points = [];
+            let frame = 0;
+            // Use container dims
+            const container = document.getElementById('news-chart-area');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            const totalFrames = 400;
+            const newsFrame = 150;
+            
+            // Reset
+            points = [];
+            markersLayer.innerHTML = '';
+            popup.classList.remove('active');
+            volatility.style.opacity = 0;
+            
+            let y = height / 2;
+            let targetY = y;
+            
+            // Create Marker (Positioned absolutely)
+            const markerX = (newsFrame / totalFrames) * width;
+            const markerY = height / 2 - 50; 
+            
+            const marker = document.createElement('div');
+            marker.className = 'news-marker high';
+            marker.innerHTML = '⚡';
+            marker.style.left = markerX + 'px';
+            marker.style.top = markerY + 'px'; 
+            markersLayer.appendChild(marker);
+
+            const interval = setInterval(() => {
+                frame++;
+                
+                // Price Movement Logic
+                if (frame < newsFrame) {
+                    // Normal market
+                    targetY = height / 2 + Math.sin(frame * 0.1) * 20 + (Math.random() - 0.5) * 10;
+                } else if (frame === newsFrame) {
+                    // News Hit
+                    marker.classList.add('visible');
+                    volatility.style.opacity = 1;
+                    setTimeout(() => volatility.style.opacity = 0, 500);
+                } else if (frame < newsFrame + 60) {
+                    // Volatility spike
+                    targetY = height / 2 + (Math.random() - 0.5) * 120; 
+                    
+                    // Show popup shortly after news
+                    if (frame === newsFrame + 10) {
+                        // Position popup relative to marker, ensure it fits
+                        let popLeft = markerX + 20;
+                        if(popLeft + 280 > width) popLeft = markerX - 300;
+                        
+                        popup.style.left = popLeft + 'px';
+                        popup.style.top = (markerY - 20) + 'px';
+                        popup.classList.add('active');
+                    }
+                } else {
+                    // New trend (down)
+                    const progress = frame - (newsFrame + 60);
+                    targetY = height / 2 + 50 + progress * 0.5 + Math.sin(frame * 0.1) * 20;
+                }
+                
+                // Smooth line
+                y += (targetY - y) * 0.1;
+                
+                // Clamp y to stay within SVG roughly
+                y = Math.max(10, Math.min(height - 10, y));
+                
+                const x = (frame / totalFrames) * width;
+                points.push({x, y});
+                
+                // Draw Line
+                if (points.length > 1) {
+                    const d = points.map((p, i) => (i === 0 ? 'M' : 'L') + `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+                    pathLine.setAttribute('d', d);
+                    
+                    // Draw Area
+                    pathArea.setAttribute('d', d + ` L${x},${height} L0,${height} Z`);
+                }
+
+                if (frame >= totalFrames) {
+                    clearInterval(interval);
+                    setTimeout(runNewsSimulation, 3000);
+                }
+            }, 20);
+        }
+
+        // Observer for News Demo
+        const newsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    runNewsSimulation();
+                    newsObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+        
+        const newsSection = document.getElementById('news-demo-section');
+        if(newsSection) newsObserver.observe(newsSection);
+
+        /* --- Diagnosis Logic --- */
+        const questions = [
+            {
+                id: 1,
+                text: "How do you usually lose the most?",
+                options: [
+                    { text: "Holding too long / moving stop", type: "fear" },
+                    { text: "Chasing prices impulsively", type: "impulsive" },
+                    { text: "Revenge trading after losses", type: "tilt" },
+                    { text: "Fear of missing profit", type: "fomo" }
+                ]
+            },
+            {
+                id: 2,
+                text: "What do you lack most?",
+                options: [
+                    { text: "Risk limits" },
+                    { text: "Clear strategy structure" },
+                    { text: "Disciplined execution" }
+                ]
+            },
+            {
+                id: 3,
+                text: "Your trading experience:",
+                options: [
+                    { text: "New trader" },
+                    { text: "Have experience but not stable" },
+                    { text: "Experienced, but in drawdown" }
+                ]
+            },
+            {
+                id: 4,
+                text: "Your trading frequency:",
+                options: [
+                    { text: "Many trades" },
+                    { text: "1-3 trades / day" },
+                    { text: "A few trades weekly" }
+                ]
+            },
+            {
+                id: 5,
+                text: "What do you want to fix first?",
+                options: [
+                    { text: "Stop bleeding" },
+                    { text: "Achieve consistency" },
+                    { text: "Match strategy to market" }
+                ]
+            }
+        ];
+
+        let currentStep = 0;
+        let answers = {};
+        const overlay = document.getElementById('diagnosis-overlay');
+        const container = document.getElementById('diagnosis-container');
+        const bar = document.getElementById('diagnosis-bar');
+
+        function openDiagnosis() {
+            currentStep = 0;
+            answers = {};
+            overlay.classList.add('active');
+            renderStep();
+        }
+
+        function closeDiagnosis() {
+            overlay.classList.remove('active');
+        }
+
+        function handleAnswer(stepIndex, value, type) {
+            answers[stepIndex] = { value, type }; // Store answer
+            if (type) answers.mainType = type; // Capture the archetype from Q2 specifically
+
+            if (stepIndex < questions.length - 1) {
+                currentStep++;
+                renderStep();
+            } else {
+                startAnalysis();
+            }
+        }
+
+        function startAnalysis() {
+            // Hide progress bar for immersion
+            document.querySelector('.diagnosis-progress').style.opacity = '0';
+            
+            container.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 0; animation: fadeIn 0.5s;">
+                    <div class="luna-orb" style="width: 100px; height: 100px; margin-bottom: 30px; box-shadow: 0 0 50px rgba(56, 189, 248, 0.4);">
+                        <div class="luna-ring" style="width: 140%; height: 140%; top: -20%; left: -20%; border-color: rgba(56, 189, 248, 0.3); animation: orbit 2s linear infinite;"></div>
+                        <div class="luna-ring" style="width: 180%; height: 180%; top: -40%; left: -40%; border-color: rgba(139, 92, 246, 0.2); animation: orbit-reverse 4s linear infinite;"></div>
+                    </div>
+                    <div style="font-family: 'Space Grotesk'; font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; color: white;">Luna Is Thinking...</div>
+                    <div id="ai-status" style="color: var(--luna-primary); font-family: monospace; font-size: 0.9rem; min-height: 20px; transition: opacity 0.2s;">Connecting to neural core...</div>
+                </div>
+            `;
+            
+            const steps = [
+                "Scanning behavioral patterns...",
+                "Detecting emotional leaks...",
+                "Calibrating risk profile...",
+                "Generating 72h Fix Plan..."
+            ];
+            
+            let i = 0;
+            
+            const interval = setInterval(() => {
+                if(i < steps.length) {
+                    const statusEl = document.getElementById('ai-status');
+                    if(statusEl) {
+                        statusEl.style.opacity = 0;
+                        setTimeout(() => {
+                            statusEl.innerText = steps[i];
+                            statusEl.style.opacity = 1;
+                        }, 200);
+                    }
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    showResults();
+                }
+            }, 1000);
+        }
+
+        function renderStep() {
+            const q = questions[currentStep];
+            const progress = ((currentStep + 1) / questions.length) * 100;
+            bar.style.width = `${progress}%`;
+
+            let html = `
+                <div class="diagnosis-step active">
+                    <div class="diagnosis-question">${q.text}</div>
+                    <div class="diagnosis-options">
+            `;
+
+            q.options.forEach(opt => {
+                html += `
+                    <div class="diagnosis-option" onclick="handleAnswer(${currentStep}, '${opt.score || ''}', '${opt.type || ''}')">
+                        <div style="width: 20px; height: 20px; border: 1px solid var(--text-muted); border-radius: 50%;"></div>
+                        <span>${opt.text}</span>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+            container.innerHTML = html;
+        }
+
+        function showResults() {
+            // Restore progress bar
+            document.querySelector('.diagnosis-progress').style.opacity = '1';
+            bar.style.width = '100%';
+            
+            // Logic for Persona
+            let persona = "The Aspiring Pro";
+            let leak = "Inconsistent Execution";
+            let plan = [
+                "Define a rigid Pre-Trade Checklist",
+                "Set a Hard Stop Loss for the day",
+                "Review yesterday's deviations"
+            ];
+
+            const type = answers.mainType; // From Q1
+
+            if (type === 'impulsive' || type === 'fomo') {
+                persona = "The Gunslinger";
+                leak = "Information Overload & FOMO";
+                plan = [
+                    "Limit trading to specific 'Event Windows'",
+                    "Force a 30-second 'Cool-off' before clicking buy",
+                    "Restrict yourself to 1 setup (Blueprint) only"
+                ];
+            } else if (type === 'tilt') {
+                persona = "The Gladiator";
+                leak = "Emotional Tilt & Revenge Trading";
+                plan = [
+                    "Activate RiskGuard 'Stop Mode' immediately",
+                    "Walk away after 2 consecutive losses",
+                    "Switch to 'Defensive Mode' for 1 week"
+                ];
+            } else if (type === 'fear') {
+                persona = "The Guardian";
+                leak = "Fear of Realizing Loss";
+                plan = [
+                    "Set automatic Hard Stop on entry",
+                    "Reduce position size to lower emotional attachment",
+                    "Practice taking small losses intentionally"
+                ];
+            }
+
+            const html = `
+                <div class="diagnosis-result animation-fade-up">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 30px; padding: 16px; background: rgba(56, 189, 248, 0.05); border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.1);">
+                        <div class="luna-orb" style="width: 48px; height: 48px; box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);"></div>
+                        <div style="text-align: left;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">AI Analysis Complete</div>
+                            <div style="font-size: 0.95rem; color: var(--luna-primary);">Here is your personalized roadmap.</div>
+                        </div>
+                    </div>
+
+                    <div class="persona-badge">Your Trading Persona</div>
+                    <div class="persona-title">${persona}</div>
+                    
+                    <div class="diagnosis-leak">
+                        <strong>⚠️ Critical Leak Detected:</strong><br>
+                        ${leak}
+                    </div>
+
+                    <div class="fix-plan">
+                        <h4 style="margin-bottom: 16px;">Your 72h Fix Plan:</h4>
+                        ${plan.map((step, i) => `
+                            <div class="fix-step">
+                                <div class="fix-num">${i+1}</div>
+                                <div>${step}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <button class="btn btn-luna" style="width: 100%;" onclick="window.location.href='index.html'">
+                        Start Your Fix Plan Now
+                    </button>
+                    <div style="text-align: center; margin-top: 16px;">
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">Includes 30-day trial of RiskGuard</span>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Close on outside click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeDiagnosis();
+        });
+
+    </script>
+
+</body>
+</html>

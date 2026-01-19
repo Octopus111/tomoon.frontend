@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToMoon Timeline v1 Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d0d0e;
+            --bg-secondary: #161618;
+            --bg-tertiary: #212124;
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --text-tertiary: #636366;
+            --accent-green: #30d158;
+            --accent-red: #ff453a;
+            --accent-blue: #0a84ff;
+            --accent-orange: #ff9f0a;
+            --accent-purple: #bf5af2;
+            --accent-teal: #64d2ff;
+            --border-color: #2a2a2c;
+            --grid-color: rgba(255, 255, 255, 0.05);
+            
+            /* Category Colors */
+            --cat-cb: #5e5ce6;
+            --cat-geo: #ff453a;
+            --cat-gov: #ff9f0a;
+            --cat-mkt: #ffd60a;
+            --cat-sys: #bf5af2;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .symbol-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .symbol-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #ffd60a, #ff9f0a);
+            color: #000;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        .symbol-details h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .symbol-details .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        /* Controls */
+        .timeline-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            background: var(--bg-tertiary);
+            padding: 4px;
+            border-radius: 8px;
+            gap: 4px;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .toggle-btn.active {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .toggle-btn.active.track-a { border-left: 3px solid var(--accent-teal); }
+        .toggle-btn.active.track-b { border-left: 3px solid var(--cat-cb); }
+
+        /* Chart Wrapper */
+        .chart-wrapper {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 0;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 600px; /* Taller to accommodate tracks */
+            width: 100%;
+            background: var(--bg-secondary);
+            padding: 16px;
+        }
+
+        #mainChart {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: absolute;
+            background: rgba(30, 30, 35, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 8px;
+            padding: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            z-index: 100;
+            min-width: 200px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            font-size: 12px;
+        }
+
+        .tooltip.visible { opacity: 1; }
+
+        /* Track A: Data Print Tooltip */
+        .tooltip.data-tooltip {
+            border-left: 3px solid var(--accent-teal);
+        }
+        
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: var(--accent-teal);
+            font-weight: 600;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 4px 12px;
+            font-family: 'SF Mono', monospace;
+        }
+        
+        .data-label { color: var(--text-secondary); }
+        .data-value { text-align: right; color: var(--text-primary); }
+
+        /* Track B: Headline Tooltip */
+        .tooltip.headline-tooltip {
+            border-left: 3px solid var(--cat-cb);
+            max-width: 280px;
+        }
+
+        .headline-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .headline-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .headline-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-tertiary);
+            font-size: 10px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 16px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.visible { display: flex; }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            width: 600px;
+            max-height: 80vh;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-tertiary);
+        }
+
+        .modal-header h2 { font-size: 18px; font-weight: 600; }
+        .close-btn { 
+            background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 24px;
+        }
+        .close-btn:hover { color: var(--text-primary); }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .event-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid transparent;
+        }
+
+        .event-main {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .event-title { font-weight: 600; font-size: 15px; }
+        .event-meta { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+        .event-body {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            line-height: 1.6;
+            white-space: pre-wrap; 
+        }
+        
+        .event-body.collapsed {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
+        }
+
+        .read-more-btn {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--accent-blue);
+            cursor: pointer;
+            font-weight: 500;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        .read-more-btn:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="chart-header">
+            <div class="symbol-info">
+                <div class="symbol-icon">Au</div>
+                <div class="symbol-details">
+                    <h1>XAU/USD</h1>
+                    <span class="subtitle">Gold Spot · OANDA</span>
+                </div>
+            </div>
+            
+            <div class="timeline-controls">
+                <div class="control-group">
+                    <button class="toggle-btn active" id="toggleEvents">
+                        <span class="dot" style="background: var(--text-primary); width: 6px; height: 6px; border-radius: 50%;"></span>
+                        Show Timeline Events
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-container">
+                <canvas id="mainChart"></canvas>
+                <canvas id="overlayCanvas" style="position: absolute; top: 16px; left: 16px; pointer-events: none;"></canvas>
+                <div class="tooltip" id="tooltip"></div>
+            </div>
+            
+            <div class="legend" style="display:none;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalDate">Jan 12, 2026</h2>
+                <button class="close-btn" onclick="document.getElementById('detailModal').classList.remove('visible')">&times;</button>
+            </div>
+            <div class="modal-body" id="modalList">
+                <!-- Events go here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Enums & Constants ---
+        const EventCategories = {
+            CB_ACTION: { label: 'CB ACTION', color: '#5e5ce6', priority: 3 },
+            CB_SPEECH: { label: 'CB SPEECH', color: '#5e5ce6', priority: 2 },
+            GEO_RISK: { label: 'GEO RISK', color: '#ff453a', priority: 3 },
+            GOV_POLICY: { label: 'GOV POLICY', color: '#ff9f0a', priority: 2 },
+            MKT_DISRUPTION: { label: 'MKT DISRUPTION', color: '#ffd60a', priority: 3 },
+            SYSTEMIC_RISK: { label: 'SYSTEMIC RISK', color: '#bf5af2', priority: 3 },
+            DATA_PRINT: { label: 'DATA PRINT', color: '#64d2ff', priority: 1 }, 
+            MKT_EVENT: { label: 'MKT EVENT', color: '#ffffff', priority: 1 }
+        };
+
+        // --- Mock Data Generation ---
+        function generateMockData(days = 90) {
+            const data = [];
+            let basePrice = 2300; 
+            const now = new Date();
+            
+            for (let i = days; i >= 0; i--) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                if(date.getDay() === 0 || date.getDay() === 6) continue;
+
+                const volatility = 0.008;
+                const change = (Math.random() - 0.48) * volatility;
+                const open = basePrice;
+                const close = basePrice * (1 + change);
+                const high = Math.max(open, close) * (1 + Math.random() * 0.005);
+                const low = Math.min(open, close) * (1 - Math.random() * 0.005);
+                const volume = 50000 + Math.random() * 50000;
+                
+                data.push({
+                    date: date,
+                    open: open, high: high, low: low, close: close, volume: volume,
+                    events: []
+                });
+                basePrice = close;
+            }
+            return data;
+        }
+
+        function populateEvents(candles) {
+            candles.forEach((candle, idx) => {
+                // Force "Busy Day" on specific indices logic (e.g., every 30th day)
+                const isBusyDay = idx % 25 === 0; 
+                const extraCount = isBusyDay ? 6 : 0;
+
+                // DATA_PRINT
+                if (Math.random() < 0.1 || isBusyDay) {
+                   candle.events.push({
+                        type: 'DATA_PRINT',
+                        category: 'DATA_PRINT',
+                        title: ['CPI YoY', 'NFP', 'GDP QoQ', 'Retail Sales'][Math.floor(Math.random()*4)],
+                        values: {
+                             actual: (Math.random() * 5).toFixed(1) + '%',
+                             forecast: (Math.random() * 5).toFixed(1) + '%'
+                        },
+                        timestamp: candle.date,
+                        source: 'BLS/BEA',
+                        importance: 2
+                    });
+                }
+
+                // HEADLINES
+                if (Math.random() < 0.08 || isBusyDay) {
+                    const count = isBusyDay ? 5 : 1;
+                    for(let k=0; k<count; k++) {
+                        const cats = Object.keys(EventCategories).filter(k => k !== 'DATA_PRINT');
+                        const catKey = cats[Math.floor(Math.random() * cats.length)];
+                        candle.events.push({
+                            type: 'HEADLINE',
+                            category: catKey,
+                            title: getMockHeadline(catKey),
+                            body: getMockBody(),
+                            timestamp: candle.date,
+                            source: 'Bloomberg',
+                            importance: Math.random() > 0.6 ? 3 : 2
+                        });
+                    }
+                }
+                
+                // Sort events by importance (3 > 2 > 1)
+                candle.events.sort((a, b) => b.importance - a.importance);
+            });
+        }
+
+        function getMockBody() {
+             const texts = [
+                "The Consumer Price Index (CPI) rose 0.4% in February on a seasonally adjusted basis, after rising 0.5% in January, the U.S. Bureau of Labor Statistics reported today. Over the last 12 months, the all items index increased 6.0% before seasonal adjustment. The index for shelter was the largest contributor to the monthly all items increase, accounting for over 70 percent of the increase.",
+                "Federal Reserve officials emphasized that they are highly attentive to inflation risks. The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run. In support of these goals, the Committee decided to raise the target range for the federal funds rate to 4-3/4 to 5 percent.",
+                "Gold prices surged to a new record high as investors flocked to safe-haven assets amidst growing geopolitical tensions in the Middle East and uncertainty surrounding the global economic outlook. Analysts predict that the momentum could continue if central banks maintain their accumulation of bullion reserves.",
+                "Major tech stocks tumbled today following reports of new regulatory restrictions on AI development. The NASDAQ Composite dropped 2.3% as market participants reassessed valuations in the sector. Meanwhile, defensive sectors such as utilities and consumer staples saw modest gains."
+            ];
+            let body = texts[Math.floor(Math.random() * texts.length)];
+            if(Math.random() > 0.4) body += "\n\n" + texts[Math.floor(Math.random() * texts.length)];
+            if(Math.random() > 0.7) body += "\n\n" + texts[Math.floor(Math.random() * texts.length)];
+            return body;
+        }
+
+        function getMockHeadline(category) {
+            const headlines = {
+                CB_ACTION: ["Fed Hikes 25bps", "ECB Holds Rates Steady", "BoJ Widens Yield Band"],
+                CB_SPEECH: ["Powell: 'Inflation sticky'", "Lagarde warns on growth", "Bailey on wage spiral"],
+                GEO_RISK: ["Missile strike reported in Red Sea", "Peace talks stall", "New sanctions announced"],
+                GOV_POLICY: ["Treasury announces debt buyback", "New import tariffs effective", "Capital gains tax proposal"],
+                MKT_DISRUPTION: ["NYSE brief trading halt", "LME nickel trading suspended"],
+                SYSTEMIC_RISK: ["Credit Suisse CDS spikes", "Regional bank deposits outflow"],
+            };
+            const list = headlines[category] || ["Significant Market Event"];
+            return list[Math.floor(Math.random() * list.length)];
+        }
+
+        // --- Chart Class ---
+
+        class TimelineChart {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.tooltip = document.getElementById('tooltip');
+                
+                this.padding = { top: 40, right: 60, bottom: 40, left: 10 };
+                this.showEvents = true;
+
+                this.data = generateMockData(120);
+                populateEvents(this.data);
+
+                this.hoveredIndex = -1;
+
+                this.setupCanvas();
+                this.bindEvents();
+                this.draw();
+            }
+
+            setupCanvas() {
+                const dpr = window.devicePixelRatio || 1;
+                const rect = this.canvas.parentElement.getBoundingClientRect();
+                this.canvas.width = rect.width * dpr;
+                this.canvas.height = rect.height * dpr;
+                this.canvas.style.width = rect.width + 'px';
+                this.canvas.style.height = rect.height + 'px';
+                this.ctx.scale(dpr, dpr);
+                this.width = rect.width;
+                this.height = rect.height;
+            }
+
+            bindEvents() {
+                window.addEventListener('resize', () => { this.setupCanvas(); this.draw(); });
+                
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.canvas.addEventListener('mouseleave', () => {
+                    this.hoveredIndex = -1;
+                    this.hideTooltip();
+                    this.draw();
+                });
+                this.canvas.addEventListener('click', () => this.handleClick());
+
+                document.getElementById('toggleEvents').addEventListener('click', (e) => {
+                    this.showEvents = !this.showEvents;
+                    e.currentTarget.classList.toggle('active');
+                    this.draw();
+                });
+            }
+
+            getMinMax() {
+                let min = Infinity, max = -Infinity;
+                this.data.forEach(d => {
+                    min = Math.min(min, d.low);
+                    max = Math.max(max, d.high);
+                });
+                return { min: min * 0.995, max: max * 1.005 };
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                const { min, max } = this.getMinMax();
+                const chartBottom = this.height - this.padding.bottom;
+                
+                const w = this.width - this.padding.left - this.padding.right;
+                const candleW = (w / this.data.length);
+                
+                // Draw Hover Highlight
+                if(this.hoveredIndex !== -1) {
+                    const x = this.padding.left + (this.hoveredIndex * candleW);
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                    this.ctx.fillRect(x, this.padding.top, candleW, chartBottom - this.padding.top);
+                }
+
+                this.drawGrid(chartBottom);
+                this.drawCandles(min, max, chartBottom, candleW);
+                this.drawPriceAxis(min, max, chartBottom);
+
+                if (this.showEvents) this.drawTimeline(chartBottom, candleW);
+            }
+
+            drawGrid(chartBottom) {
+                const w = this.width - this.padding.left - this.padding.right;
+                const h = chartBottom - this.padding.top;
+                this.ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                this.ctx.lineWidth = 1;
+                for(let i=0; i<5; i++) {
+                    const y = this.padding.top + (h/5)*i;
+                    this.ctx.beginPath(); this.ctx.moveTo(this.padding.left, y); this.ctx.lineTo(w + this.padding.left, y); this.ctx.stroke();
+                }
+            }
+
+            drawCandles(min, max, chartBottom, candleW) {
+                const h = chartBottom - this.padding.top;
+                const gap = candleW * 0.2;
+                
+                this.data.forEach((d, i) => {
+                    const x = this.padding.left + (i * candleW) + (gap/2);
+                    const cw = candleW - gap;
+                    const normalize = (val) => this.padding.top + (h - ((val - min) / (max - min)) * h);
+                    
+                    const isGreen = d.close >= d.open;
+                    this.ctx.fillStyle = isGreen ? '#2ebd85' : '#f6465d';
+                    this.ctx.strokeStyle = this.ctx.fillStyle; 
+                    
+                    // Wick
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x + cw/2, normalize(d.high));
+                    this.ctx.lineTo(x + cw/2, normalize(d.low));
+                    this.ctx.stroke();
+                    
+                    // Body
+                    this.ctx.fillRect(x, Math.min(normalize(d.open), normalize(d.close)), cw, Math.max(Math.abs(normalize(d.open) - normalize(d.close)), 1));
+                });
+            }
+            
+            drawPriceAxis(min, max, chartBottom) {
+                const h = chartBottom - this.padding.top;
+                this.ctx.fillStyle = '#8e8e93';
+                this.ctx.font = '10px Roboto';
+                this.ctx.textAlign = 'left';
+                
+                for(let i=0; i<=5; i++) {
+                    const price = max - ((max-min)/5)*i;
+                    const y = this.padding.top + (h/5)*i;
+                    this.ctx.fillText(price.toFixed(1), this.width - this.padding.right + 5, y + 3);
+                }
+            }
+
+            drawTimeline(chartBottom, candleW) {
+                // Merged Track
+                const yPos = chartBottom + 12;
+                const w = this.width - this.padding.left - this.padding.right;
+                
+                // Track Line
+                this.ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.padding.left, yPos);
+                this.ctx.lineTo(this.width - this.padding.right, yPos);
+                this.ctx.stroke();
+
+                this.data.forEach((d, i) => {
+                    if (d.events.length > 0) {
+                        const x = this.padding.left + (i * candleW) + (candleW/2);
+                        
+                        // Scoring Logic for Importance
+                        // Max Importance (1-3)
+                        // Count (1 to N)
+                        let maxImp = 0;
+                        d.events.forEach(e => maxImp = Math.max(maxImp, e.importance || 1));
+                        const count = d.events.length;
+
+                        // Color & Size Logic
+                        let fillStyle = '#5e5ce6'; // Tier 1: Blue-ish
+                        let size = 3;
+
+                        if (maxImp >= 3 || count >= 4) {
+                            fillStyle = '#ff453a'; // Tier 3: Red (High Impact / Busy)
+                            size = 5;
+                        } else if (maxImp === 2 || count >= 2) {
+                            fillStyle = '#bf5af2'; // Tier 2: Purple (Medium)
+                            size = 4;
+                        }
+
+                        // Draw Marker (Diamond)
+                        this.ctx.fillStyle = fillStyle;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(x, yPos - size);
+                        this.ctx.lineTo(x + size, yPos);
+                        this.ctx.lineTo(x, yPos + size);
+                        this.ctx.lineTo(x - size, yPos);
+                        this.ctx.fill();
+
+                        // Indicator for many events (Halo ring)
+                        if (count > 3) {
+                            this.ctx.strokeStyle = fillStyle;
+                            this.ctx.globalAlpha = 0.4;
+                            this.ctx.lineWidth = 1;
+                            this.ctx.beginPath();
+                            this.ctx.arc(x, yPos, size + 2, 0, Math.PI * 2);
+                            this.ctx.stroke();
+                            this.ctx.globalAlpha = 1.0;
+                        }
+                    }
+                });
+            }
+
+            handleMouseMove(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const w = this.width - this.padding.left - this.padding.right;
+                const candleW = (w / this.data.length);
+                const chartBottom = this.height - this.padding.bottom;
+                
+                // Only trigger if inside the main chart vertical area (roughly)
+                // or if we want the full height including bottom track buffer
+                
+                const idx = Math.floor((x - this.padding.left) / candleW);
+                
+                if (idx >= 0 && idx < this.data.length) {
+                    if (this.hoveredIndex !== idx) {
+                        this.hoveredIndex = idx;
+                        this.draw(); // Redraw highlight
+                        
+                        const candle = this.data[idx];
+                        if (candle.events.length > 0 && this.showEvents) {
+                            this.showTooltip(candle, x, y);
+                            document.body.style.cursor = 'pointer';
+                        } else {
+                            this.hideTooltip();
+                            document.body.style.cursor = 'default';
+                        }
+                    }
+                } else {
+                    this.hoveredIndex = -1;
+                    this.draw();
+                    this.hideTooltip();
+                    document.body.style.cursor = 'default';
+                }
+            }
+
+            handleClick() {
+                if (this.hoveredIndex !== -1) {
+                    const candle = this.data[this.hoveredIndex];
+                    if (candle.events.length > 0) {
+                        this.openModal(candle);
+                    }
+                }
+            }
+
+            showTooltip(candle, x, y) {
+                this.tooltip.className = 'tooltip visible';
+                this.tooltip.style.borderLeft = 'none'; // Reset specific borders
+                
+                // Top 2 Events
+                const topLimit = 3;
+                const topEvents = candle.events.slice(0, topLimit);
+                const remaining = candle.events.length - topLimit;
+                
+                // Fix date display
+                const dateStr = candle.date.toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' });
+                let html = `
+                    <div style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:600; color:#fff">${dateStr}</span>
+                        ${candle.events.length > 3 ? '<span style="background:var(--accent-red); color:#fff; font-size:9px; padding:1px 4px; border-radius:4px; font-weight:700;">HIGH ACTIVITY</span>' : ''}
+                    </div>
+                `;
+                
+                topEvents.forEach(e => {
+                    const config = EventCategories[e.category] || EventCategories.MKT_EVENT;
+                    const valStr = e.type === 'DATA_PRINT' ? `<span style="color:#fff; font-weight:bold; margin-left:4px;">${e.values.actual}</span>` : '';
+                    
+                    html += `
+                        <div style="margin-bottom:6px; border-left: 2px solid ${config.color}; padding-left: 6px;">
+                            <div style="font-size:9px; color:${config.color}; font-weight:700;">${config.label}</div>
+                            <div style="color:#ddd; font-size:11px;">${e.title} ${valStr}</div>
+                        </div>
+                    `;
+                });
+
+                if (remaining > 0) {
+                     html += `
+                        <div style="margin-top:6px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.1); color:var(--text-tertiary); font-size:10px; display:flex; align-items:center; gap:6px;">
+                            <span>+ ${remaining} more updates</span>
+                            <span style="margin-left:auto; color:var(--text-primary); font-weight:500;">Click to view all</span>
+                        </div>
+                     `;
+                } else {
+                     html += `<div style="font-size:10px; color:var(--text-tertiary); margin-top:4px;">Click to view full details</div>`;
+                }
+
+                this.tooltip.innerHTML = html;
+
+                // Positioning logic
+                const tooltipRect = this.tooltip.getBoundingClientRect();
+                let left = x + 20;
+                let top = y;
+                
+                if (left + tooltipRect.width > window.innerWidth) left = x - tooltipRect.width - 20;
+                if (top + tooltipRect.height > window.innerHeight) top = window.innerHeight - tooltipRect.height - 20;
+
+                this.tooltip.style.top = top + 'px';
+                this.tooltip.style.left = left + 'px';
+            }
+
+            hideTooltip() {
+                this.tooltip.classList.remove('visible');
+            }
+
+            openModal(candle) {
+                const modal = document.getElementById('detailModal');
+                const list = document.getElementById('modalList');
+                const dateStr = candle.date.toLocaleDateString("en-US", { month: 'long', day: 'numeric', year: 'numeric' });
+                
+                // Header Summary
+                const count = candle.events.length;
+                document.getElementById('modalDate').innerHTML = `
+                    ${dateStr} <span style="font-weight:400; color:var(--text-secondary); margin-left:8px; font-size:14px;">${count} Events</span>
+                `;
+                
+                list.innerHTML = candle.events.map(e => {
+                    const config = EventCategories[e.category] || EventCategories.MKT_EVENT;
+                    let detailHtml = '';
+                    
+                    if(e.type === 'DATA_PRINT') {
+                        detailHtml = `
+                            <div class="data-grid" style="margin-top:8px;">
+                                <span class="data-label">Actual</span> <span class="data-value">${e.values.actual}</span>
+                                <span class="data-label">Forecast</span> <span class="data-value">${e.values.forecast}</span>
+                            </div>
+                        `;
+                    }
+
+                    if (e.body) {
+                        const isLong = e.body.length > 150;
+                        detailHtml += `
+                            <div class="event-body ${isLong ? 'collapsed' : ''}">${e.body}</div>
+                            ${isLong ? `<button class="read-more-btn" onclick="this.previousElementSibling.classList.toggle('collapsed'); this.textContent = this.previousElementSibling.classList.contains('collapsed') ? 'Read More' : 'Read Less'">Read More</button>` : ''}
+                        `;
+                    }
+                    
+                    // High importance Highlight
+                    const borderStyle = e.importance >= 3 ? `border-left: 4px solid var(--accent-red); background: linear-gradient(90deg, rgba(255,69,58,0.05), transparent);` : `border-left-color: ${config.color}`;
+                    
+                    return `
+                    <div class="event-card" style="${borderStyle}">
+                        <div class="event-main">
+                            <span class="headline-badge" style="background: ${config.color}20; color: ${config.color}">${config.label}</span>
+                            <span class="event-meta">${e.source}</span>
+                            ${e.importance >= 3 ? '<span style="margin-left:auto; color:var(--accent-red); font-weight:700; font-size:10px;">HIGH IMPACT</span>' : ''}
+                        </div>
+                        <div class="event-title" style="${e.importance >= 3 ? 'font-size:16px;' : ''}">${e.title}</div>
+                        ${detailHtml}
+                    </div>
+                    `;
+                }).join('');
+                
+                modal.classList.add('visible');
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            new TimelineChart('mainChart');
+        });
+    </script>
+</body>
+</html>
