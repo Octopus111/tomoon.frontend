@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1400, initial-scale=0.25, maximum-scale=3, user-scalable=yes">
+    <title>ToMoon - Execute</title>
+    <style>
+        :root {
+            --bg-primary: #0d0f14;
+            --bg-card: #161a22;
+            --bg-panel: #1c212b;
+            --border: #2a3142;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .section-view {
+            display: none;
+        }
+
+        .section-view.active {
+            display: block;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        /* Sessions List */
+        .sessions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .session-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .session-card:hover {
+            border-color: var(--primary);
+        }
+
+        .session-card.live {
+            border-left: 3px solid var(--success);
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .session-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .session-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .session-status.live {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .session-status.ended {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-muted);
+        }
+
+        .session-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .session-stat {
+            text-align: center;
+        }
+
+        .session-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .session-stat-value.positive { color: var(--success); }
+        .session-stat-value.negative { color: var(--danger); }
+
+        .session-stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Blueprints Grid */
+        .blueprints-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .blueprint-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .blueprint-card:hover {
+            border-color: var(--primary);
+        }
+
+        .blueprint-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-panel);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .blueprint-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .blueprint-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .blueprint-stats {
+            display: flex;
+            gap: 16px;
+        }
+
+        .blueprint-stat {
+            font-size: 13px;
+        }
+
+        .blueprint-stat span {
+            color: var(--text-muted);
+        }
+
+        .create-blueprint-card {
+            border: 2px dashed var(--border);
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+            color: var(--primary);
+        }
+
+        .create-blueprint-card:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .create-blueprint-card svg {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar"></aside>
+<script src="../shared/sidebar_mvp.js"></script>
+<script src="../shared/topbar_mvp.js"></script>
+<script>
+    const { currentSubItem } = autoInitSidebar({
+        internalSwitch: true,
+        switchFunction: 'switchView',
+        title: 'Execute'
+    });
+    initTopbar({ title: 'Execute', basePath: '..' });
+</script>
+
+<main class="main-content">
+
+    <!-- Sessions View -->
+    <div id="view-sessions" class="section-view active">
+        <div class="page-header">
+            <h1 class="page-title">Sessions</h1>
+            <p class="page-subtitle">Manage your active and past trading sessions</p>
+        </div>
+
+        <div class="sessions-grid" id="sessions-grid">
+            <!-- Sessions will be rendered here -->
+        </div>
+    </div>
+
+    <!-- Blueprint View -->
+    <div id="view-blueprint" class="section-view">
+        <div class="page-header">
+            <h1 class="page-title">Blueprints</h1>
+            <p class="page-subtitle">Create and manage your trading strategies</p>
+        </div>
+
+        <div class="blueprints-grid">
+            <div class="blueprint-card create-blueprint-card" onclick="createBlueprint()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Create New Blueprint
+            </div>
+
+            <div class="blueprint-card" onclick="editBlueprint('momentum')">
+                <div class="blueprint-icon">⚡</div>
+                <div class="blueprint-name">Momentum Breakout</div>
+                <div class="blueprint-meta">Last used: Today</div>
+                <div class="blueprint-stats">
+                    <div class="blueprint-stat"><strong>65%</strong> <span>Win Rate</span></div>
+                    <div class="blueprint-stat"><strong>1:2.5</strong> <span>Avg RR</span></div>
+                </div>
+            </div>
+
+            <div class="blueprint-card" onclick="editBlueprint('scalping')">
+                <div class="blueprint-icon">🎯</div>
+                <div class="blueprint-name">Scalping Strategy</div>
+                <div class="blueprint-meta">Last used: Yesterday</div>
+                <div class="blueprint-stats">
+                    <div class="blueprint-stat"><strong>72%</strong> <span>Win Rate</span></div>
+                    <div class="blueprint-stat"><strong>1:1.5</strong> <span>Avg RR</span></div>
+                </div>
+            </div>
+
+            <div class="blueprint-card" onclick="editBlueprint('swing')">
+                <div class="blueprint-icon">📊</div>
+                <div class="blueprint-name">Swing Trading</div>
+                <div class="blueprint-meta">Last used: 3 days ago</div>
+                <div class="blueprint-stats">
+                    <div class="blueprint-stat"><strong>58%</strong> <span>Win Rate</span></div>
+                    <div class="blueprint-stat"><strong>1:3.0</strong> <span>Avg RR</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    // View switching
+    function switchView(view) {
+        document.querySelectorAll('.section-view').forEach(el => {
+            el.classList.remove('active');
+        });
+        
+        const targetView = document.getElementById('view-' + view);
+        if (targetView) {
+            targetView.classList.add('active');
+        }
+
+        // Update topbar title
+        const titleEl = document.getElementById('topbar-page-title');
+        if (titleEl) {
+            titleEl.textContent = view === 'sessions' ? 'Sessions' : 'Blueprints';
+        }
+    }
+
+    // Render sessions
+    function renderSessions() {
+        const container = document.getElementById('sessions-grid');
+        const liveSession = typeof getLiveSessionState === 'function' ? getLiveSessionState() : { active: false };
+
+        let html = '';
+
+        if (liveSession.active) {
+            const pnlSign = liveSession.pnl >= 0 ? '+' : '-';
+            const pnlClass = liveSession.pnl >= 0 ? 'positive' : 'negative';
+            
+            html += `
+                <div class="session-card live">
+                    <div class="session-header">
+                        <div class="session-name">${liveSession.sessionName}</div>
+                        <span class="session-status live">● LIVE</span>
+                    </div>
+                    <div class="session-stats">
+                        <div class="session-stat">
+                            <div class="session-stat-value ${pnlClass}">${pnlSign}$${Math.abs(liveSession.pnl).toFixed(2)}</div>
+                            <div class="session-stat-label">P&L</div>
+                        </div>
+                        <div class="session-stat">
+                            <div class="session-stat-value">${liveSession.tradeCount || 0}</div>
+                            <div class="session-stat-label">Trades</div>
+                        </div>
+                        <div class="session-stat">
+                            <div class="session-stat-value">--:--</div>
+                            <div class="session-stat-label">Duration</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Mock past sessions
+        html += `
+            <div class="session-card">
+                <div class="session-header">
+                    <div class="session-name">Morning Session</div>
+                    <span class="session-status ended">Ended</span>
+                </div>
+                <div class="session-stats">
+                    <div class="session-stat">
+                        <div class="session-stat-value positive">+$245.00</div>
+                        <div class="session-stat-label">P&L</div>
+                    </div>
+                    <div class="session-stat">
+                        <div class="session-stat-value">5</div>
+                        <div class="session-stat-label">Trades</div>
+                    </div>
+                    <div class="session-stat">
+                        <div class="session-stat-value">2h 15m</div>
+                        <div class="session-stat-label">Duration</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        if (!liveSession.active && html === '') {
+            html = `
+                <div class="card" style="grid-column: 1 / -1;">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <h3>No Active Sessions</h3>
+                        <p>Start a new session from the Home page to begin trading</p>
+                        <a href="../home/index.html" class="btn btn-primary">Go to Home</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        container.innerHTML = html;
+    }
+
+    function createBlueprint() {
+        alert('Create Blueprint - Coming Soon!');
+    }
+
+    function editBlueprint(id) {
+        alert('Edit Blueprint: ' + id + ' - Coming Soon!');
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check URL for view parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const view = urlParams.get('view');
+        
+        if (view === 'blueprint') {
+            switchView('blueprint');
+            updateSidebarActive('blueprint');
+        } else {
+            switchView('sessions');
+            updateSidebarActive('sessions');
+        }
+
+        renderSessions();
+    });
+
+    window.addEventListener('liveSessionStarted', renderSessions);
+    window.addEventListener('liveSessionEnded', renderSessions);
+</script>
+
+</body>
+</html>

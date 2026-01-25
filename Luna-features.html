@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToMoon AI: Luna Design Demo</title>
+    <style>
+        :root {
+            /* Platform Base Colors */
+            --bg-dark: #0f1115;
+            --bg-card: #1a1d24;
+            --bg-panel: #232730;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            
+            /* Luna Identity Colors - Distinct from platform */
+            --luna-base: #2D2F3F; /* Darker, slightly purple tinted bg for Luna UI */
+            --luna-glow-calm: 139, 92, 246; /* Violet/Purple */
+            --luna-glow-active: 56, 189, 248; /* Cyan/Light Blue */
+            --luna-glow-alert: 239, 68, 68;   /* Red */
+            --luna-text: #F8FAFC;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            align-items: center;
+        }
+
+        h1, h2 { 
+            font-weight: 300; letter-spacing: 1px; margin: 0 0 20px 0; 
+            text-align: center;
+        }
+        h2 { font-size: 18px; color: var(--text-muted); margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 10px; width: 100%; max-width: 800px; }
+
+        .demo-section {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 60px;
+        }
+
+        .grid-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            justify-items: center;
+        }
+
+        /* --- LUNA CORE COMPONENT --- */
+        .luna-avatar {
+            width: 40px;
+            height: 40px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.5s ease;
+        }
+
+        /* The Moon Icon - Using CSS Shapes */
+        .moon-shape {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            box-shadow: inset -3px -1px 0 0 white; /* Crescent by default */
+            transform: rotate(-45deg);
+            transition: all 0.5s ease;
+        }
+
+        /* 1. STATE: CALM (Monitoring/Idle) */
+        .luna-state-calm .moon-shape {
+            box-shadow: inset -4px -1px 0 0 rgba(255, 255, 255, 0.9);
+        }
+        .luna-state-calm {
+            box-shadow: 0 0 15px rgba(var(--luna-glow-calm), 0.3);
+            border: 1px solid rgba(var(--luna-glow-calm), 0.2);
+            animation: breathe-calm 4s infinite ease-in-out;
+        }
+
+        /* 2. STATE: ACTIVE (Coaching/Speaking) */
+        .luna-state-active .moon-shape {
+            background-color: rgba(255,255,255,0.95); /* Full moon */
+            box-shadow: none;
+        }
+        .luna-state-active {
+            box-shadow: 0 0 25px rgba(var(--luna-glow-active), 0.5);
+            border: 1px solid rgba(var(--luna-glow-active), 0.5);
+            animation: pulse-active 2s infinite;
+        }
+
+        /* 3. STATE: ALERT (Guard/Warning) */
+        .luna-state-alert .moon-shape {
+            box-shadow: inset -6px 0 0 0 #FCA5A5; /* Deep crescent red tint */
+            transform: rotate(0deg);
+        }
+        .luna-state-alert {
+            box-shadow: 0 0 0 2px rgba(var(--luna-glow-alert), 0.5), 0 0 30px rgba(var(--luna-glow-alert), 0.4);
+            animation: flash-alert 1s infinite alternate;
+        }
+
+
+        /* --- UI CONTAINERS --- */
+        /* Luna's Bubble Style - Distinct from platform cards */
+        .luna-bubble {
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            color: var(--luna-text);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            max-width: 320px;
+        }
+        
+        /* Subtle texture/noise overlay for "AI" feel (Optional) */
+        .luna-bubble::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.1), transparent 70%);
+            pointer-events: none;
+        }
+
+        .luna-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .luna-name {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .luna-content {
+            font-size: 14px;
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .luna-content strong {
+            color: #E0E7FF;
+            font-weight: 600;
+        }
+
+        .luna-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .luna-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .luna-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .luna-btn.primary {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+        .luna-btn.primary:hover {
+            background: rgba(139, 92, 246, 0.5);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes breathe-calm {
+            0%, 100% { box-shadow: 0 0 10px rgba(var(--luna-glow-calm), 0.2); transform: scale(1); }
+            50% { box-shadow: 0 0 18px rgba(var(--luna-glow-calm), 0.4); transform: scale(1.02); }
+        }
+        @keyframes pulse-active {
+            0% { box-shadow: 0 0 15px rgba(var(--luna-glow-active), 0.4); }
+            50% { box-shadow: 0 0 30px rgba(var(--luna-glow-active), 0.7); }
+            100% { box-shadow: 0 0 15px rgba(var(--luna-glow-active), 0.4); }
+        }
+        @keyframes flash-alert {
+            0% { border-color: rgba(var(--luna-glow-alert), 0.3); }
+            100% { border-color: rgba(var(--luna-glow-alert), 0.8); }
+        }
+
+        /* --- POSITION DEMOS --- */
+        .position-demo-container {
+            width: 100%;
+            height: 400px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        /* 1. Floating Corner Widget */
+        .luna-widget {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 15px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .luna-widget:hover {
+            width: auto;
+            background: rgba(0,0,0,0.6);
+            padding-right: 25px;
+        }
+        .luna-widget-text {
+            font-size: 13px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            max-width: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: 0.4s ease;
+        }
+        .luna-widget:hover .luna-widget-text {
+            max-width: 200px;
+            opacity: 1;
+        }
+
+        /* 2. Top Bar "Coach" Message */
+        .luna-top-message {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            /* Coach style */
+            background: linear-gradient(90deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border-top: 2px solid rgb(139, 92, 246);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        /* 3. Guard Modal Overlay - Dramatic */
+        .luna-guard-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(146, 26, 26, 0.1); 
+            backdrop-filter: blur(2px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .luna-guard-card {
+            background: #111;
+            border: 1px solid #ef4444;
+            box-shadow: 0 0 50px rgba(239, 68, 68, 0.2);
+            width: 400px;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- LABELS --- */
+        .label { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+
+    </style>
+</head>
+<body>
+
+    <h1>ToMoon AI Identity: <span style="color: #a5f3fc; font-weight: 600;">Luna</span></h1>
+
+    <!-- 1. Visual Language: Phase & Glow -->
+    <div class="demo-section">
+        <h2>1. Visual Language System: Phase + Glow</h2>
+        <div class="grid-display">
+            <!-- Calm -->
+            <div style="text-align: center;">
+                <div class="label">Calm / Monitoring</div>
+                <div class="luna-avatar luna-state-calm" style="margin: 0 auto 15px auto;">
+                    <button class="moon-shape" style="border:none; background:transparent;"></button>
+                </div>
+                <div style="font-size: 12px; color: #aaa;">
+                    Phase: Crescent<br>Glow: Soft Violet<br>Anim: Slow Breathe
+                </div>
+            </div>
+
+            <!-- Active -->
+            <div style="text-align: center;">
+                <div class="label">Active / Coaching</div>
+                <div class="luna-avatar luna-state-active" style="margin: 0 auto 15px auto;">
+                    <button class="moon-shape" style="border:none;"></button>
+                </div>
+                <div style="font-size: 12px; color: #aaa;">
+                    Phase: Full Moon<br>Glow: Bright Cyan<br>Anim: Pulse
+                </div>
+            </div>
+
+            <!-- Alert -->
+            <div style="text-align: center;">
+                <div class="label">Guard / Alert</div>
+                <div class="luna-avatar luna-state-alert" style="margin: 0 auto 15px auto;">
+                    <button class="moon-shape" style="border:none; background:transparent;"></button>
+                </div>
+                <div style="font-size: 12px; color: #aaa;">
+                    Phase: Eclipse/Sharp<br>Stroke: Red/Orange<br>Anim: Flash
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. UI Component: The Dialogue Bubble -->
+    <div class="demo-section">
+        <h2>2. UI Component: The Assistant Bubble</h2>
+        <p style="font-size: 13px; color: var(--text-muted); text-align: center; max-width: 500px; margin: 0 auto 20px auto;">
+            distinct "Luna Glass" style to separate Coach voice from Platform UI.
+        </p>
+
+        <div class="grid-display">
+            <!-- Normal Assist -->
+            <div class="luna-bubble">
+                <div class="luna-header">
+                    <div class="luna-avatar luna-state-calm" style="width: 24px; height: 24px;">
+                        <div class="moon-shape" style="width: 12px; height: 12px;"></div>
+                    </div>
+                    <span class="luna-name" style="color: #c4b5fd;">Luna Assistant</span>
+                </div>
+                <div class="luna-content">
+                    I noticed you've taken 3 trades in 15 minutes. Consider checking your <strong>Overtrading Rules</strong> before the next entry.
+                </div>
+                <div class="luna-actions">
+                    <button class="luna-btn primary">Check Rules</button>
+                    <button class="luna-btn">Dismiss</button>
+                </div>
+            </div>
+
+            <!-- Alert Guard -->
+            <div class="luna-bubble" style="border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(135deg, rgba(40, 10, 10, 0.95) 0%, rgba(20, 5, 5, 0.95) 100%);">
+                <div class="luna-header">
+                    <div class="luna-avatar luna-state-alert" style="width: 24px; height: 24px;">
+                        <div class="moon-shape" style="width: 12px; height: 12px;"></div>
+                    </div>
+                    <span class="luna-name" style="color: #fca5a5;">Risk Guard</span>
+                </div>
+                <div class="luna-content">
+                    <strong>Daily Loss Limit Reached ($500)</strong>.<br>
+                     I strongly recommend securing your profits and ending the session.
+                </div>
+                <div class="luna-actions">
+                    <button class="luna-btn" style="background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.5); color: #fecaca;">End Session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 3. Placement Demos -->
+    <div class="demo-section">
+        <h2>3. Interaction Models & Placement</h2>
+
+        <!-- Context A: The Corner Widget (Standard) -->
+        <div style="margin-bottom: 20px;">
+            <div class="label">A. Passive Monitoring (Corner Widget) - "Hover to interact"</div>
+            <div class="position-demo-container">
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color: #333;">
+                    [ Platform Content Area ]
+                </div>
+
+                <!-- The Widget -->
+                <div class="luna-widget">
+                    <div class="luna-avatar luna-state-calm" style="width: 30px; height: 30px; box-shadow: none; border: none;">
+                        <div class="moon-shape" style="width: 14px; height: 14px;"></div>
+                    </div>
+                    <div class="luna-widget-text">
+                        Session running smooth. No deviations.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Context B: Top Notification (Coach) -->
+        <div style="margin-bottom: 20px;">
+            <div class="label">B. Active Coaching (Top Toast) - "Nudges you without blocking"</div>
+            <div class="position-demo-container">
+                <div style="padding: 20px;">
+                    <div style="height: 20px; background: #222; margin-bottom: 10px; width: 60%;"></div>
+                    <div style="height: 20px; background: #222; margin-bottom: 10px; width: 80%;"></div>
+                    <div style="height: 20px; background: #222; margin-bottom: 10px; width: 40%;"></div>
+                </div>
+
+                <div class="luna-top-message">
+                    <div class="luna-avatar luna-state-active" style="width: 20px; height: 20px;">
+                        <div class="moon-shape" style="width: 10px; height: 10px;"></div>
+                    </div>
+                    <div style="font-size: 13px; color: #ddd;">
+                        <strong>Tip:</strong> Volatility is expanding. Try widening your stops by 2 ticks.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Context C: Global Guard (Blocker) -->
+        <div style="margin-bottom: 20px;">
+            <div class="label">C. Global Guard (Overlay) - "Intervention required"</div>
+            <div class="position-demo-container">
+                <!-- Background blurred platform -->
+                <div style="padding: 20px; filter: blur(4px);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div style="height: 100px; background: #222;"></div>
+                        <div style="height: 100px; background: #222;"></div>
+                    </div>
+                </div>
+
+                <div class="luna-guard-overlay">
+                    <div class="luna-guard-card">
+                        <div class="luna-avatar luna-state-alert" style="width: 60px; height: 60px; margin-bottom: 20px;">
+                            <div class="moon-shape" style="width: 30px; height: 30px;"></div>
+                        </div>
+                        <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 10px;">Titlt Triggered</h3>
+                        <p style="color: #ccc; font-size: 14px; margin-bottom: 20px;">
+                            You have reversed your position 3 times in 1 minute. This matches your "Revenge Trading" pattern.
+                        </p>
+                        <button class="luna-btn" style="background: #ef4444; color: white; padding: 8px 24px; font-size: 14px; border:none;">Lock Platform (15m)</button>
+                        <button class="luna-btn" style="background: transparent; border: none; color: #666; margin-top: 10px;">I'm in control, override</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

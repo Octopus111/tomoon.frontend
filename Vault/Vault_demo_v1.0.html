@@ -544,6 +544,7 @@
             font-size: 15px;
             line-height: 1.6;
             color: var(--text-primary);
+            outline: none;
         }
 
         .note-content h3 {
@@ -754,6 +755,7 @@
         /* Note Title Input */
         .note-title {
             flex: 1;
+            outline: none;
             min-width: 0;
         }
 
@@ -787,6 +789,10 @@
 </head>
 <body>
 
+    <!-- Text Editor Module -->
+    <link rel="stylesheet" href="../shared/text-editor/text-editor.css">
+    <script src="../shared/text-editor/text-editor.js"></script>
+
     <!-- Sidebar & Topbar scripts -->
     <aside class="sidebar" id="sidebar"></aside>
     <script src="../shared/sidebar.js"></script>
@@ -809,13 +815,6 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <input type="text" class="search-input" placeholder="Search notes & highlights...">
                 </div>
-                <button class="action-btn" onclick="saveQuickCapture()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    Save Note
-                </button>
-                <button class="action-btn secondary" style="padding: 0 10px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                </button>
             </div>
         </div>
 
@@ -832,7 +831,12 @@
                         </div>
                         <svg style="color: var(--text-muted); cursor: pointer;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                     </div>
-                    <textarea class="capture-input" placeholder="Write a thought... paste a screenshot..."></textarea>
+                    <textarea class="capture-input" placeholder="Write a thought... paste a screenshot..." style="min-height: 120px;"></textarea>
+                    <div id="quick-save-actions" style="display: none; justify-content: flex-end; margin-top: 10px;">
+                        <button class="action-btn" onclick="saveQuickCapture()">
+                            Save Note
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Collections -->
@@ -1005,11 +1009,11 @@
                 <div class="cl-sidebar">
                     <div class="cl-header">
                         <button class="btn-sm" onclick="switchView('hub')" style="margin-bottom: 15px;">← Back to Hub</button>
-                        <h3 style="margin: 0;">Vault / Notes</h3>
+                        <h3 style="margin: 0;">Collection</h3>
                     </div>
                     
                     <div style="padding: 10px 0;">
-                        <div class="cl-nav-item" onclick="switchView('hub')" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> All Notes</div>
+                        <div class="cl-nav-item" onclick="selectAllNotes(this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> All Notes</div>
                         <div class="cl-nav-item active" onclick="selectCollection('Gold Market', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Gold Market</div>
                         <div class="cl-nav-item" onclick="selectCollection('My Rules', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> My Rules</div>
                         <div class="cl-nav-item" onclick="selectCollection('Psychology', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Psychology</div>
@@ -1098,7 +1102,7 @@
                         </div>
                     </div>
 
-                    <div class="note-content">
+                    <div class="note-content" contenteditable="true">
                         <p>NQ is showing increased volatility as it approaches a critical resistance level at 15,350:</p>
                         <ul>
                             <li>VIX has spiked from 12 to 18 in the last 1 trading sessions.</li>
@@ -1199,26 +1203,7 @@
 
     </main>
 
-    <!-- Highlight Button -->
-    <button id="highlight-btn" style="
-        position: absolute; 
-        display: none; 
-        background: var(--bg-card); 
-        border: 1px solid var(--border); 
-        padding: 5px 10px; 
-        border-radius: 6px; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
-        z-index: 1000; 
-        cursor: pointer; 
-        color: var(--text-primary); 
-        font-size: 13px;
-        align-items: center;
-        gap: 6px;
-        transition: transform 0.2s, opacity 0.2s;
-    ">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#faa356" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-        Highlight
-    </button>
+    <!-- Highlight Button Removed (Integrated into Text Editor) -->
 
     <!-- Toast Notification -->
     <div id="vault-toast" style="
@@ -1244,7 +1229,7 @@
 
     <script>
         // ========== DATA MODELS ==========
-        const notesData = [
+        const defaultNotesData = [
             { id: 1, title: 'Market Thoughts: NQ Volatility', collection: 'Gold Market', type: 'Market', linked: true, pinned: false, date: 'Apr 22, 2024', content: `<p>NQ is showing increased volatility as it approaches a critical resistance level at 15,350:</p>
                 <ul>
                     <li>VIX has spiked from 12 to 18 in the last 1 trading sessions.</li>
@@ -1345,6 +1330,27 @@
             }
         ];
 
+        // Load notes from LocalStorage
+        let notesData = JSON.parse(localStorage.getItem('tm_vault_notes'));
+        if (!notesData || !Array.isArray(notesData)) {
+            notesData = defaultNotesData; // Fallback to default
+            localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+        }
+
+        // Activity Data
+        const defaultActivityData = [
+             { id: 'act-1', title: 'Weekly Review - Week 50', meta: 'Weekly Review · Today', type: 'folder', action: 'openActivityItem', payload: 'weekly-review-50' },
+             { id: 'act-2', title: 'Market Thoughts: NQ Volatility', meta: 'Market Thoughts · 2 days ago', type: 'note', action: 'openNote', payload: 1 }, 
+             { id: 'act-3', title: 'created note: Market Thoughts: NQ Volatility', meta: 'Yesterday', type: 'idea', action: 'openNote', payload: 1 },
+             { id: 'act-4', title: 'Extracted highlight to note: Strategic Idea: Gap Fill Setup', meta: 'Yesterday', type: 'journal', action: 'openActivityItem', payload: 'highlight-extracted' }
+        ];
+
+        let activityData = JSON.parse(localStorage.getItem('tm_vault_activity'));
+        if (!activityData) {
+            activityData = defaultActivityData;
+            localStorage.setItem('tm_vault_activity', JSON.stringify(activityData));
+        }
+
         const collectionsData = [
             { id: 'weekly', name: 'Weekly Reviews', icon: 'book', color: '#8957e5', unsorted: 0, preview: 'Week 50 - Reviewed NQ, ES price action patterns...' },
             { id: 'market', name: 'Market Thoughts', icon: 'idea', color: '#faa356', unsorted: 3, preview: 'Position sizing in range-bound markets...' },
@@ -1391,15 +1397,150 @@
         }
 
         // ========== QUICK CAPTURE ==========
+        const quickCaptureInput = document.querySelector('.capture-input');
+        const quickSaveActions = document.getElementById('quick-save-actions');
+
+        if (quickCaptureInput) {
+            quickCaptureInput.addEventListener('input', () => {
+                const hasText = quickCaptureInput.value.trim().length > 0;
+                quickSaveActions.style.display = hasText ? 'flex' : 'none';
+            });
+        }
+
+        // ========== ACTIVITY RENDER & ACTIONS ==========
+        function renderActivityList() {
+            const activityList = document.querySelector('.activity-list');
+            if (!activityList) return;
+            activityList.innerHTML = '';
+            
+            activityData.slice(0, 20).forEach(item => { // Limit to 20 items
+                const el = document.createElement('div');
+                el.className = 'activity-item';
+                
+                // Determine icon
+                let iconSvg = '';
+                if (item.type === 'note') {
+                    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+                } else if (item.type === 'folder') {
+                    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+                } else if (item.type === 'idea') {
+                    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+                } else if (item.type === 'journal') {
+                    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
+                } else {
+                     iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>`;
+                }
+
+                // Resolving title dynamically if possible
+                let displayTitle = item.title;
+                if (item.action === 'openNote') {
+                     const note = notesData.find(n => n.id === item.payload);
+                     if (note) {
+                         displayTitle = (item.type === 'idea' ? 'created note: ' : '') + note.title;
+                     }
+                }
+
+                el.innerHTML = `
+                <div class="item-icon ${item.type}-icon">
+                    ${iconSvg}
+                </div>
+                <div class="item-content">
+                    <div class="item-title">${displayTitle}</div>
+                    <div class="item-meta">${item.meta}</div>
+                </div>
+                <button class="collection-menu" onclick="event.stopPropagation(); showActivityMenu('${item.id}', this)">...</button>
+                `;
+                
+                el.onclick = () => handleActivityClick(item);
+                
+                activityList.appendChild(el);
+            });
+        }
+
+        function handleActivityClick(item) {
+            if (item.action === 'openNote') {
+                openNoteFromActivity(item.payload);
+            } else if (item.action === 'openActivityItem') {
+                if (typeof openActivityItem === 'function') openActivityItem(item.payload);
+            } else {
+                switchView('collection');
+            }
+        }
+
+        function openNoteFromActivity(noteId) {
+             const note = notesData.find(n => n.id === noteId);
+             if (!note) return;
+             
+             switchView('collection');
+             if (currentCollection !== note.collection) {
+                 currentCollection = note.collection;
+                 renderNotesList(); 
+             }
+             
+             // Select note after list renders
+             setTimeout(() => {
+                 selectNote(noteId);
+             }, 50);
+        }
+
         function saveQuickCapture() {
             const textarea = document.querySelector('.capture-input');
             const text = textarea.value.trim();
             if (text) {
-                showVaultToast('Quick note saved to Inbox');
+                // Create New Note Object
+                const newId = (notesData.length > 0) ? Math.max(...notesData.map(n => n.id)) + 1 : 1;
+                const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                // Determine title from first line or truncated text
+                const title = text.split('\n')[0].substring(0, 40) + (text.length > 40 ? '...' : '');
+                
+                // Add to notes setup (defaulting to first collection or a 'Quick Capture' one if we made it)
+                // For now, let's use 'Market Thoughts' as a default bucket so it appears somewhere
+                const defaultCollection = 'Market Thoughts'; 
+
+                const newNote = {
+                    id: newId,
+                    title: title,
+                    collection: defaultCollection,
+                    type: 'Note',
+                    linked: false,
+                    pinned: false,
+                    date: date,
+                    content: `<p>${text.replace(/\n/g, '<br>')}</p>`,
+                    backlinks: [],
+                    attachments: []
+                };
+
+                notesData.unshift(newNote);
+                localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                
+                // Add to Recent Activity
+                addActivityItem(title, `Quick Capture · Today`, 'note', { action: 'openNote', payload: newId });
+
+                showVaultToast('Quick note saved to ' + defaultCollection);
                 textarea.value = '';
-                // In real app, save to backend
-                console.log('Quick Capture:', text);
+                quickSaveActions.style.display = 'none';
+
+                // Refresh lists if needed
+                if (currentCollection === defaultCollection) {
+                   renderNotesList();
+                }
             }
+        }
+
+        function addActivityItem(title, meta, type, payloadInfo) {
+             const newActivity = {
+                id: 'act-' + Date.now() + Math.round(Math.random()*100),
+                title: title,
+                meta: meta,
+                type: type,
+                action: (payloadInfo && payloadInfo.action) || 'switchView',
+                payload: (payloadInfo && payloadInfo.payload) || 'collection'
+            };
+            
+            activityData.unshift(newActivity);
+            localStorage.setItem('tm_vault_activity', JSON.stringify(activityData));
+            renderActivityList();
         }
 
         // Add save on Ctrl+Enter
@@ -1427,7 +1568,7 @@
         }
 
         // ========== NOTE SELECTION ==========
-        function selectNote(noteId) {
+        function selectNote(noteId, evt = null) {
             currentNoteId = noteId;
             const note = notesData.find(n => n.id === noteId);
             if (!note) return;
@@ -1436,7 +1577,12 @@
             document.querySelectorAll('.cl-notes-list .note-card').forEach(card => {
                 card.classList.remove('active');
             });
-            event.currentTarget.classList.add('active');
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.classList.add('active');
+            } else {
+                const activeCard = document.querySelector(`.cl-notes-list .note-card[data-note-id="${noteId}"]`);
+                if (activeCard) activeCard.classList.add('active');
+            }
 
             // Update main note area
             document.querySelector('.note-title').value = note.title;
@@ -1502,7 +1648,13 @@
             const container = document.querySelector('.cl-notes-list > div:last-child');
             if (!container) return;
 
-            let filtered = notesData.filter(n => n.collection === currentCollection);
+            // Handle Collection Filter (All vs Specific)
+            let filtered;
+            if (currentCollection === 'All') {
+                filtered = [...notesData]; // show all
+            } else {
+                filtered = notesData.filter(n => n.collection === currentCollection);
+            }
             
             // Apply filters
             if (currentFilter.type !== 'All') {
@@ -1540,7 +1692,7 @@
         function renderNoteCard(note) {
             const isActive = note.id === currentNoteId ? 'active' : '';
             return `
-                <div class="note-card ${isActive}" onclick="selectNote(${note.id})">
+                <div class="note-card ${isActive}" data-note-id="${note.id}" onclick="selectNote(${note.id}, event)">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                         <div style="color: #faa356; font-size: 11px;">💡 ${note.collection}</div>
                         <div style="display: flex; gap: 5px;">
@@ -1676,6 +1828,19 @@
             }, 100);
             
             showVaultToast('New note created');
+        }
+
+        // ========== COLLECTION NAVIGATION ==========
+
+        function selectAllNotes(el) {
+            currentCollection = 'All';
+            document.querySelectorAll('.cl-nav-item').forEach(item => item.classList.remove('active'));
+            if(el) el.classList.add('active');
+            
+            // Update list title
+            document.querySelector('.list-title').innerHTML = `All Notes <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
+            
+            renderNotesList();
         }
 
         // ========== COLLECTION NAVIGATION ==========
@@ -2177,72 +2342,8 @@
         }
 
         // ========== HIGHLIGHT LOGIC ==========
-        const highlightBtn = document.getElementById('highlight-btn');
-        
-        document.addEventListener('mouseup', (e) => {
-            const noteContent = document.querySelector('.note-content');
-            if (!noteContent || !highlightBtn) return;
-            
-            const selection = window.getSelection();
-            
-            // Check if selection is inside note content and not empty
-            if (!selection.isCollapsed && noteContent.contains(selection.anchorNode)) {
-                const range = selection.getRangeAt(0);
-                const rect = range.getBoundingClientRect();
-                
-                const scrollTop = window.scrollY || document.documentElement.scrollTop;
-                const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+        // (Highlight button logic removed - integrated into text-editor module)
 
-                highlightBtn.style.top = `${rect.top + scrollTop - 40}px`;
-                highlightBtn.style.left = `${rect.left + scrollLeft + (rect.width / 2) - 50}px`;
-                highlightBtn.style.display = 'flex';
-            } else if (!highlightBtn.contains(e.target)) {
-                highlightBtn.style.display = 'none';
-            }
-        });
-        
-        highlightBtn?.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-        });
-
-        highlightBtn?.addEventListener('click', () => {
-            const selection = window.getSelection();
-            if (!selection.isCollapsed) {
-                const range = selection.getRangeAt(0);
-                const text = selection.toString();
-                
-                // Visual Highlight
-                const span = document.createElement('span');
-                span.style.background = 'rgba(250, 163, 86, 0.2)';
-                span.style.color = '#faa356';
-                span.style.borderRadius = '2px';
-                span.style.padding = '0 2px';
-                
-                try {
-                    range.surroundContents(span);
-                } catch(e) {
-                    // Fallback for complex selections
-                    span.textContent = text;
-                    range.deleteContents();
-                    range.insertNode(span);
-                }
-                
-                // Add to highlights
-                highlightsData.push({
-                    id: highlightsData.length + 1,
-                    text: text.substring(0, 60) + (text.length > 60 ? '...' : ''),
-                    source: notesData.find(n => n.id === currentNoteId)?.title || 'Note',
-                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                    reviewed: false
-                });
-                
-                showVaultToast('Text added to Highlights');
-                highlightBtn.style.display = 'none';
-                window.getSelection().removeAllRanges();
-                
-                console.log('Highlighted:', text);
-            }
-        });
 
         // ========== TOAST ==========
         function showVaultToast(msg, type = 'success') {
@@ -2300,6 +2401,8 @@
 
         // ========== INIT ==========
         document.addEventListener('DOMContentLoaded', () => {
+            renderActivityList();
+
             // Init view from URL
             const params = new URLSearchParams(window.location.search);
             if(params.get('view') === 'collection') {
@@ -2312,6 +2415,44 @@
                 fileInput.addEventListener('change', (e) => {
                     handleFiles(e.target.files);
                 });
+            }
+            
+            // Persistence Listeners for Title and Content
+            const titleInput = document.querySelector('.note-title');
+            if (titleInput) {
+                titleInput.addEventListener('input', (e) => {
+                    const note = notesData.find(n => n.id === Number(currentNoteId));
+                    if (note) {
+                        note.title = e.target.value;
+                        localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                        
+                        // Update List Card Title immediately
+                        const activeCard = document.querySelector('.note-card.active .nc-title');
+                        if(activeCard) activeCard.textContent = note.title;
+                    }
+                });
+            }
+
+            const contentDiv = document.querySelector('.note-content');
+            if (contentDiv) {
+                 // Save content on input
+                 contentDiv.addEventListener('input', (e) => {
+                    saveContent();
+                 });
+
+                 // Also use MutationObserver to catch changes made by scripts (e.g. Text Editor Toolbar)
+                 const observer = new MutationObserver((mutations) => {
+                     saveContent();
+                 });
+                 observer.observe(contentDiv, { childList: true, subtree: true, characterData: true, attributes: true });
+
+                 function saveContent() {
+                    const note = notesData.find(n => n.id === Number(currentNoteId));
+                    if (note) {
+                        note.content = contentDiv.innerHTML;
+                        localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                    }
+                 }
             }
         });
 
@@ -2366,6 +2507,26 @@
             }
         });
 
+        // ========== INTERNAL LINK CLICK HANDLER ==========
+        document.addEventListener('click', (e) => {
+            const internalLink = e.target.closest('.tm-internal-link[data-note-id]');
+            if (internalLink) {
+                e.preventDefault();
+                const noteId = parseInt(internalLink.dataset.noteId);
+                const note = notesData.find(n => n.id === noteId);
+                if (note) {
+                    // Switch to collection view and select the note
+                    switchView('collection');
+                    setTimeout(() => {
+                        selectNote(noteId);
+                        showVaultToast('🔗 Navigated to linked note');
+                    }, 100);
+                } else {
+                    showVaultToast('Note not found', 'error');
+                }
+            }
+        });
+
         // ========== KEYBOARD SHORTCUTS ==========
         document.addEventListener('keydown', (e) => {
             // Ctrl+N: New Note (when in collection view)
@@ -2389,7 +2550,227 @@
             if(typeof Luna !== 'undefined') {
                 Luna.init();
             }
+
+            // Initialize Text Editor Toolbar for Quick Capture and Note Content areas
+            if(typeof TMTextEditor !== 'undefined') {
+                TMTextEditor.init({
+                    targets: [
+                        '.capture-input',      // Quick Capture textarea
+                        '.note-content',       // Note content area in collection view
+                        '[contenteditable="true"]' // Any contenteditable elements
+                    ],
+                    // Callback when text is highlighted - add to Vault highlights
+                    onHighlight: function(text, color, source) {
+                        // Get current note title as source
+                        const noteTitle = notesData.find(n => n.id === currentNoteId)?.title || source;
+                        const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        
+                        // Add to highlightsData
+                        const newHighlight = {
+                            id: highlightsData.length + 1,
+                            text: text.substring(0, 80) + (text.length > 80 ? '...' : ''),
+                            fullText: text,
+                            source: noteTitle,
+                            color: color,
+                            date: date,
+                            reviewed: false
+                        };
+                        highlightsData.unshift(newHighlight);
+                        
+                        // Show toast notification
+                        showVaultToast('✨ Added to Highlights');
+                        
+                        console.log('[Vault] Highlight added:', newHighlight);
+                    },
+                    // Callback when Save to Vault is clicked
+                    onSaveToVault: function(text) {
+                        const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        const newId = (notesData.length > 0) ? Math.max(...notesData.map(n => n.id)) + 1 : 1;
+                        // Default to current collection if we can, otherwise Market Thoughts
+                        const targetCollection = (currentCollection !== 'All') ? currentCollection : 'Market Thoughts';
+
+                        const newNote = {
+                            id: newId,
+                            title: 'Clip: ' + text.substring(0, 15) + '...',
+                            collection: targetCollection,
+                            type: 'Note',
+                            preview: text.substring(0, 50) + '...',
+                            date: date,
+                            tags: ['snippet'],
+                            content: `<p>${text}</p>`,
+                            linked: false,
+                            pinned: false,
+                            sourceNoteId: currentNoteId,
+                            sourceText: text,
+                            backlinks: [],
+                            attachments: []
+                        };
+                        notesData.unshift(newNote);
+                        localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                        
+                        // Update source note's linked status
+                        const sourceNote = notesData.find(n => n.id === currentNoteId);
+                        if (sourceNote) {
+                            sourceNote.linked = true;
+                            if (!sourceNote.backlinks) sourceNote.backlinks = [];
+                            sourceNote.backlinks.push({
+                                noteId: newNote.id,
+                                title: newNote.title,
+                                time: 'Just now', // Add defaults
+                                icon: '🖇️'
+                            });
+                             localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                        }
+                        
+                        addActivityItem('New Note (' + newNote.title + ')', targetCollection, 'note', { action: 'openNote', payload: newNote.id });
+                        showVaultToast('📥 Saved to Vault (Linked)');
+
+                        // Refresh note list to show the new note immediately
+                        if (currentCollection === 'All' || currentCollection === targetCollection) {
+                            renderNotesList();
+                        }
+                        
+                        // Return note info for creating bidirectional link
+                        return { id: newNote.id, title: newNote.title };
+                    },
+                    // Callback when Ask Luna is clicked
+                    onAskLuna: function(text, action, customQuestion) {
+                        console.log('[Vault] Ask Luna - Action:', action, 'Text:', text);
+                        
+                        // Show processing feedback
+                        showVaultToast('Luna is thinking...', 'info');
+                        
+                        // Default simulated delay
+                        setTimeout(() => {
+                            let newText = text;
+                            let feedbackMsg = 'Action completed';
+                            
+                            // ========== 智能 Mock AI Logic (Preview Mode) ==========
+                            let previewContent = '';
+
+                            switch(action) {
+                                case 'summarize':
+                                    const sentences = text.split(/[.。!！?？]/).filter(s => s.trim());
+                                    const wordCount = text.length;
+                                    const keyPoints = sentences.slice(0, Math.min(3, sentences.length));
+                                    
+                                    // Minimalist Summary
+                                    previewContent = `<p style="color:var(--text-muted); font-size:0.9em; margin-bottom:5px;"><strong>Summary</strong></p>
+<ul style="padding-left:20px; margin:0;">
+${keyPoints.map(p => `<li>${p.trim()}</li>`).join('')}
+</ul>`;
+                                    feedbackMsg = '✅ Summary generated';
+                                    break;
+                                    
+                                case 'make-todo':
+                                    const lines = text.split(/[.。\n]/).filter(l => l.trim());
+                                    const tasks = [];
+                                    lines.forEach((line) => {
+                                        const trimmed = line.trim();
+                                        if (trimmed.length > 5 && tasks.length < 5) tasks.push(trimmed.substring(0, 50));
+                                    });
+                                    if(tasks.length === 0) tasks.push('Review trade execution', 'Check risk management');
+                                    
+                                    // Minimalist Todo List (Standard HTML Checkboxes for preview)
+                                    previewContent = tasks.map(t => 
+                                        `<div class="tm-checkbox-item" data-checked="false" style="display: flex; gap: 8px; margin: 4px 0;"><span class="tm-checkbox"></span><span class="tm-checkbox-text">${t}</span></div>`
+                                    ).join('');
+                                    feedbackMsg = '✅ Tasks generated';
+                                    break;
+                                    
+                                case 'format-data':
+                                    const kvPairs = [];
+                                    const kvRegex = /([A-Za-z\u4e00-\u9fa5]+)[:\s：]+([^\n,，]+)/g;
+                                    let match;
+                                    while ((match = kvRegex.exec(text)) !== null) {
+                                        kvPairs.push({ key: match[1].trim(), value: match[2].trim() });
+                                    }
+                                    
+                                    // Minimalist Table
+                                    if (kvPairs.length >= 1) {
+                                        const rows = kvPairs.map(kv => 
+                                            `<tr style="border-bottom:1px solid var(--border);"><td style="padding:6px; color:var(--text-muted);">${kv.key}</td><td style="padding:6px; text-align:right;">${kv.value}</td></tr>`
+                                        ).join('');
+                                        previewContent = `<table style="width:100%; border-collapse:collapse; font-size:0.95em;">${rows}</table>`;
+                                    } else {
+                                        previewContent = `<p style="white-space: pre-wrap; font-family: monospace;">${text}</p>`;
+                                    }
+                                    feedbackMsg = '✅ Data formatted';
+                                    break;
+                                    
+                                case 'translate':
+                                case 'translate-en':
+                                    // Minimalist Translation
+                                    let transEn = text;
+                                    const cnToEn = { '交易': 'trade', '买入': 'buy', '卖出': 'sell', '止损': 'stop loss', '目标': 'target', '盈利': 'profit', '亏损': 'loss' };
+                                    Object.keys(cnToEn).forEach(k => transEn = transEn.replace(new RegExp(k, 'g'), cnToEn[k]));
+                                    previewContent = `<p>${transEn}</p>`;
+                                    feedbackMsg = '✅ Translated';
+                                    break;
+                                    
+                                case 'translate-zh':
+                                    // Minimalist Translation
+                                    let transZh = text.toLowerCase();
+                                    const enToCn = { 'trade': '交易', 'buy': '买入', 'sell': '卖出', 'stop loss': '止损', 'target': '目标', 'profit': '盈利', 'loss': '亏损' };
+                                    Object.keys(enToCn).forEach(k => transZh = transZh.replace(new RegExp('\\b'+k+'\\b', 'gi'), enToCn[k]));
+                                    previewContent = `<p>${transZh}</p>`;
+                                    feedbackMsg = '✅ Translated';
+                                    break;
+
+                                default:
+                                    if (typeof Luna !== 'undefined' && Luna.openChatMode) {
+                                        Luna.openChatMode();
+                                        setTimeout(() => {
+                                             const input = document.querySelector('.luna-chat-input');
+                                             if(input) input.value = customQuestion || action;
+                                        }, 100);
+                                        return; 
+                                    }
+                            }
+                            
+                            // Apply Preview Wrapper
+                            if (previewContent && previewContent !== text) {
+                                const encodedOriginal = encodeURIComponent(text);
+                                const previewHTML = `
+                                    <div class="ai-preview-box" style="border-left: 2px solid var(--accent-purple); padding: 4px 0 4px 12px; margin: 8px 0;">
+                                        <div class="ai-preview-content" style="margin-bottom: 6px;">${previewContent}</div>
+                                        <div class="ai-actions" contenteditable="false" style="display: flex; gap: 15px; font-size: 12px; font-family: monospace; opacity: 0.8; user-select: none;">
+                                            <div class="ai-action-btn ai-confirm" onclick="applyAIPreview(this)" style="cursor: pointer; color: var(--success); display: flex; align-items: center; gap: 4px;"><span>✓</span> Apply</div>
+                                            <div class="ai-action-btn ai-cancel" onclick="discardAIPreview(this, '${encodedOriginal}')" style="cursor: pointer; color: var(--danger); display: flex; align-items: center; gap: 4px;"><span>✕</span> Discard</div>
+                                        </div>
+                                    </div>`;
+                                
+                                TMTextEditor.replaceSelection(previewHTML);
+                                showVaultToast(feedbackMsg);
+                            }
+                            
+                        }, 1000);
+                    }
+                });
+            }
         });
+    </script>
+    <script>
+        // AI Preview Action Helpers (must be global)
+        window.applyAIPreview = function(btn) {
+            const wrapper = btn.closest('.ai-preview-box');
+            if (wrapper) {
+                const content = wrapper.querySelector('.ai-preview-content').innerHTML;
+                wrapper.outerHTML = content;
+                showVaultToast('Applied');
+            }
+        };
+
+        window.discardAIPreview = function(btn, encodedOriginal) {
+            const wrapper = btn.closest('.ai-preview-box');
+            if (wrapper) {
+                const original = decodeURIComponent(encodedOriginal);
+                // Simple text replacement might lose HTML structure of original if it was complex, 
+                // but for this demo standard text restoration is sufficient.
+                wrapper.outerHTML = original;
+                showVaultToast('Discarded', 'info');
+            }
+        };
     </script>
 </body>
 </html>

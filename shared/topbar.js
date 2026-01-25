@@ -1608,7 +1608,14 @@ function generateFiltersHTML() {
  * 初始化/注入顶部筛选栏
  */
 function initTopbar(options = {}) {
-    if (document.getElementById('topbar')) return;
+    const existingTopbar = document.getElementById('topbar');
+    if (existingTopbar) {
+        if (options.title) {
+            const titleEl = document.getElementById('topbar-page-title');
+            if (titleEl) titleEl.textContent = options.title;
+        }
+        return;
+    }
     
     // 注入样式
     injectTopbarStyles();
@@ -1634,7 +1641,8 @@ function initTopbar(options = {}) {
     const isAllChecked = state.isAllAccounts ? 'checked' : '';
 
     // Page Title Logic
-    const pageTitle = options.title || '';
+    const inferredTitle = (document.body && document.body.dataset && document.body.dataset.topbarTitle) ? document.body.dataset.topbarTitle : '';
+    const pageTitle = (options.title || inferredTitle || document.title || '').replace(' - ToMoon', '').trim();
 
     const accountFilterHTML = `
             <div class="filter-group" id="account-filter" onclick="toggleDropdown('account-dropdown')">

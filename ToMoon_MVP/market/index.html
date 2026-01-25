@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1400, initial-scale=0.25, maximum-scale=3, user-scalable=yes">
+    <title>ToMoon - Market</title>
+    <meta http-equiv="refresh" content="0; url=timeline_v1_demo.html">
+    <style>
+        :root {
+            --bg-primary: #0d0f14;
+            --bg-card: #161a22;
+            --bg-panel: #1c212b;
+            --border: #2a3142;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+        }
+
+        .placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .placeholder h2 {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .placeholder p {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar"></aside>
+<script src="../shared/sidebar_mvp.js"></script>
+<script src="../shared/topbar_mvp.js"></script>
+<script>
+    // Fallback landing for direct visits. Market only contains Timeline & Calendar.
+    initSidebar('market', 'timeline', { title: 'Market', basePath: '..' });
+    window.location.replace('timeline_v1_demo.html');
+</script>
+
+<main class="main-content">
+    <div class="placeholder">
+        <div class="placeholder-icon">📊</div>
+        <h2>Redirecting…</h2>
+        <p>If you are not redirected, open <a href="timeline_v1_demo.html" style="color: var(--primary);">Timeline</a> or <a href="Economic_Calendar_demo.html" style="color: var(--primary);">Calendar</a>.</p>
+    </div>
+</main>
+
+</body>
+</html>

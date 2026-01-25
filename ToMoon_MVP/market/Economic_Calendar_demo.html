@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1400, initial-scale=0.25, maximum-scale=3, user-scalable=yes">
+    <title>ToMoon - Market Calendar</title>
+    <style>
+        :root {
+            /* Align with MVP theme tokens */
+            --bg-dark: #0d0f14;
+            --bg-card: #161a22;
+            --bg-panel: #1c212b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #2a3142;
+            
+            /* Calendar Specific */
+            --impact-high: #ef4444;
+            --impact-medium: #f59e0b;
+            --impact-low: #0ea5e9; /* Light blue */
+            --impact-holiday: #94a3b8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            min-height: 100vh;
+        }
+
+        /* --- Main Layout --- */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            height: calc(100vh - var(--topbar-height, 60px));
+        }
+
+        .content-container {
+            padding: 8px 16px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            height: 100%;
+        }
+
+        /* --- Breadcrumb --- */
+        .breadcrumb {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- Card Header --- */
+        .card-header {
+            padding: 16px 20px 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        /* --- Components --- */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            transition: 0.2s;
+            background: var(--bg-panel);
+            color: var(--text-main);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover { background: rgba(255,255,255,0.02); border-color: var(--border); }
+        .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        /* --- Calendar Header Controls --- */
+        .cal-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .date-range-display {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .timezone-select {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 6px;
+            min-width: 200px;
+        }
+
+        /* --- Day Tabs --- */
+        .day-tabs {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .day-tab {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: left; /* Left align text */
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; 
+            /* If justify-content: space-between interferes with left alignment if we want text left */
+        }
+
+        .day-tab:hover {
+            border-color: var(--text-muted);
+        }
+
+        .day-tab.active {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .day-tab.active::after {
+            content: '✓';
+            position: absolute;
+            right: 15px;
+            font-weight: bold;
+        }
+
+        .day-name { font-weight: 600; font-size: 14px; }
+        .day-date { font-size: 13px; opacity: 0.8; }
+        
+        /* Expandable Row Details */
+        .event-details-row {
+            background-color: var(--bg-card); /* Match card bg but maybe slightly lighter/darker? */
+            border-bottom: 1px solid var(--border);
+            display: none; 
+        }
+        
+        .event-details-container {
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border-top: 1px dashed var(--border);
+            display: flex;
+            gap: 20px;
+        }
+
+        .event-chart-placeholder {
+            flex: 2;
+            height: 120px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            border: 1px dashed var(--border);
+        }
+
+        .event-meta-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            font-size: 12px;
+        }
+        
+        .meta-row { display: flex; justify-content: space-between; }
+        .meta-label { color: var(--text-muted); }
+        .meta-val { font-weight: 600; }
+        
+        .event-row {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.1s;
+            cursor: pointer; /* Indicate clickable */
+        }
+        
+        .event-row.expanded {
+            background: rgba(255,255,255,0.03);
+            border-bottom: none; /* Remove border between row and its details */
+        }
+        
+        /* --- Filter Bar --- */
+        .filter-section {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 30px;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        
+        /* Hide scrollbar for cleaner look */
+        .filter-section::-webkit-scrollbar { display: none; }
+        .filter-section { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .filter-group {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+            white-space: nowrap;
+        }
+        
+        .filter-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 12px; /* Tighter gap */
+            align-items: center;
+        }
+
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        
+        /* Hidden layout checkbox */
+        .custom-checkbox input { 
+            display: none; 
+        }
+
+        /* Custom Checkbox Design */
+        .checkbox-box {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        /* Border Colors for Impact */
+        .checkbox-box.holiday { border-color: var(--text-muted); }
+        .checkbox-box.low { border-color: var(--impact-low); }
+        .checkbox-box.medium { border-color: var(--impact-medium); }
+        .checkbox-box.high { border-color: var(--impact-high); }
+
+        .checkbox-box svg {
+            width: 12px;
+            height: 12px;
+            stroke: var(--text-main);
+            stroke-width: 3;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        .custom-checkbox input:checked + .checkbox-box svg {
+            opacity: 1;
+        }
+
+        /* --- Event List --- */
+        .event-list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .event-scroll {
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+            /* Hide Scrollbar */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+        }
+        .event-scroll::-webkit-scrollbar { 
+            display: none; /* Chrome/Safari/Opera */
+        }
+
+        .event-group-header {
+            padding: 15px 20px;
+            background: var(--bg-dark); /* Use darker background to cover scrolling content */
+            font-weight: 700;
+            font-size: 18px; /* Increased Header Size */
+            border-bottom: 1px solid var(--border);
+            border-left: 4px solid var(--primary); 
+            position: sticky; 
+            top: 0; 
+            z-index: 20; /* Higher Z-index */
+        }
+        
+        /* Container for the header cell to add padding correctly */
+        .group-header-cell {
+            padding: 20px;
+            background: var(--bg-card); /* Ensure cell is opaque */
+        }
+
+        .event-row {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.1s;
+            cursor: pointer; /* Indicate clickable */
+        }
+        .event-row:hover { background: rgba(255,255,255,0.04); }
+        .event-row:last-child { border-bottom: none; }
+
+        .event-cell {
+            padding: 16px 20px; /* Increased padding */
+            vertical-align: middle;
+            font-size: 14px; /* Increased font size */
+        }
+        
+        /* Header cells */
+        .header-row td {
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 16px 20px; /* Match cell padding */
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cell-desc { position: relative; }
+        .cell-time { width: 120px; vertical-align: top; padding-top: 15px; }
+        .cell-currency { width: 60px; font-weight: 700; }
+        .cell-data { width: 90px; text-align: right; font-weight: 500; font-size: 13px; font-variant-numeric: tabular-nums; }
+        .cell-actions { width: 50px; text-align: right; }
+
+        /* Expired Row Styling */
+        .event-row.event-expired {
+            opacity: 0.5;
+            background: rgba(0,0,0,0.1); 
+        }
+
+        /* Signal Bars for Impact */
+        .signal-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 14px;
+            width: 18px;
+            margin-right: 12px;
+        }
+        .signal-bar {
+            width: 4px;
+            background: #334155; /* Inactive color */
+            border-radius: 1px;
+        }
+        .signal-bar:nth-child(1) { height: 6px; }
+        .signal-bar:nth-child(2) { height: 10px; }
+        .signal-bar:nth-child(3) { height: 14px; }
+
+        /* Active colors */
+        .impact-low .signal-bar:nth-child(1) { background: var(--impact-low); }
+        
+        .impact-medium .signal-bar:nth-child(1),
+        .impact-medium .signal-bar:nth-child(2) { background: var(--impact-medium); }
+        
+        .impact-high .signal-bar:nth-child(1),
+        .impact-high .signal-bar:nth-child(2),
+        .impact-high .signal-bar:nth-child(3) { background: var(--impact-high); }
+
+        .currency-flag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .flag-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px; /* Text inside flag */
+            overflow: hidden;
+            color: #fff;
+            position: relative;
+        }
+        /* Simple flag simulation */
+        .flag-us { background: linear-gradient(to bottom, #3c3b6e 50%, #b22234 50%); }
+        .flag-eu { background: #003399; }
+        .flag-uk { background: #00247d; }
+        .flag-ca { background: #ff0000; }
+        
+        .status-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: block;
+        }
+        .status-countdown {
+            color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .status-countdown svg { width: 10px; height: 10px; }
+
+        /* Data Colors */
+        .data-better { color: var(--success); }
+        .data-worse { color: var(--danger); }
+        .data-neutral { color: var(--text-main); }
+        .data-waiting { color: var(--text-muted); opacity: 0.5; }
+
+
+
+        /* Mobile specific adjustments */
+        @media (max-width: 768px) {
+            .day-tabs {
+                grid-template-columns: repeat(5, minmax(80px, 1fr));
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+            .filter-section {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            .event-list, .event-row, .event-cell {
+                display: block;
+                width: 100%;
+            }
+            .event-row { padding: 15px; position: relative; }
+            .event-cell { padding: 4px 0; text-align: left; width: auto; }
+            .cell-data { text-align: left; display: inline-block; margin-right: 15px; }
+            .cell-data::before { content: attr(data-label) ": "; color: var(--text-muted); }
+            
+            .cell-actions { position: absolute; top: 15px; right: 15px; }
+            .event-group-header { position: sticky; top: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <script src="../shared/sidebar_mvp.js"></script>
+    <script src="../shared/topbar_mvp.js"></script>
+    <script>
+        initSidebar('market', 'calendar', { title: 'Calendar', basePath: '..' });
+    </script>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Track key economic events and their market impact.</p>
+            </div>
+
+            <!-- Filters & Events Card -->
+            <div class="card" style="margin-bottom: 2px;">
+                
+                <div class="card-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    Economic Calendar
+                </div>
+
+                <!-- Controls Header -->
+                <div class="cal-controls" style="padding: 0 20px;">
+                    <div class="date-range-display">
+                        <button class="btn">Today</button>
+                        <span>19 Jan - 25 Jan 2026</span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <select class="timezone-select">
+                            <option>21:29 Asia/Shanghai (GMT+8)</option>
+                            <option>13:29 UTC (GMT+0)</option>
+                            <option>08:29 New York (GMT-5)</option>
+                        </select>
+                        
+                        <button class="btn btn-primary">
+                            Export
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Day Tabs -->
+                <div class="day-tabs" style="padding: 0 20px;">
+                    <div class="day-tab" id="tab-19" onclick="scrollToDate('date-19')">
+                        <span class="day-name">Mon 19</span>
+                    </div>
+                    <div class="day-tab" id="tab-20" onclick="scrollToDate('date-20')">
+                        <span class="day-name">Tue 20</span>
+                    </div>
+                    <div class="day-tab" id="tab-21" onclick="scrollToDate('date-21')">
+                        <span class="day-name">Wed 21</span>
+                    </div>
+                    <div class="day-tab active" id="tab-22" onclick="scrollToDate('date-22')">
+                        <span class="day-name">Thu 22</span>
+                    </div>
+                    <div class="day-tab" id="tab-23" onclick="scrollToDate('date-23')">
+                        <span class="day-name">Fri 23</span>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <span class="filter-label">Impact</span>
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <span>Holidays</span>
+                                <input type="checkbox">
+                                <div class="checkbox-box holiday">
+                                    <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </label>
+                            <label class="custom-checkbox">
+                                <span>Low</span>
+                                <input type="checkbox" checked>
+                                <div class="checkbox-box low">
+                                    <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </label>
+                            <label class="custom-checkbox">
+                                <span>Medium</span>
+                                <input type="checkbox" checked>
+                                <div class="checkbox-box medium">
+                                    <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </label>
+                            <label class="custom-checkbox">
+                                <span>High</span>
+                                <input type="checkbox" checked>
+                                <div class="checkbox-box high">
+                                    <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <span class="filter-label">Visibility</span>
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <span>Hide past news</span>
+                                <input type="checkbox">
+                                <div class="checkbox-box" style="border-color: var(--border)">
+                                    <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </label>
+                            <label class="custom-checkbox">
+                                <span>Show only restricted events</span>
+                                <input type="checkbox">
+                                <div class="checkbox-box" style="border-color: var(--border)">
+                                    <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group" style="margin-left: auto;">
+                        <span class="filter-label">Instrument</span>
+                        <select class="timezone-select" style="min-width: 100px; padding: 4px 8px; font-size: 13px; background: rgba(255,255,255,0.05); border-color: transparent;">
+                            <option>All</option>
+                            <option>USD</option>
+                            <option>EUR</option>
+                            <option>GBP</option>
+                        </select>
+                        <span style="font-size: 11px; color: var(--text-muted); margin-left: 10px;">
+                            Source: <a href="#" style="color: var(--text-muted); text-decoration: underline;">forexfactory.com</a>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Event List Table -->
+                <div class="event-scroll">
+                    <table class="event-list">
+                        <!-- thead removed for sticky group headers layout -->
+                        <tbody id="events-body">
+                            <!-- Content populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="text-align: right; color: var(--text-muted); font-size: 12px; margin-top: 10px;">
+                Source: forexfactory.com
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        // Expanded Mock Data
+        const events = [
+            // Mon 19
+            { id: 101, dateKey: 'date-19', dateDisplay: 'Mon 19 Jan', description: 'Industrial Production m/m', currency: 'JPY', time: '12:30', impact: 'medium', actual: '-1.0%', forecast: '-1.0%', previous: '1.5%', status: 'Expired', actualClass: 'data-neutral' },
+            { id: 102, dateKey: 'date-19', dateDisplay: 'Mon 19 Jan', description: 'Retail Sales y/y', currency: 'CNY', time: '14:00', impact: 'high', actual: '7.4%', forecast: '8.0%', previous: '10.1%', status: 'Expired', actualClass: 'data-worse' },
+
+            // Tue 20
+            { id: 201, dateKey: 'date-20', dateDisplay: 'Tue 20 Jan', description: 'Claimant Count Change', currency: 'GBP', time: '15:00', impact: 'high', actual: '16.0K', forecast: '15.0K', previous: '8.9K', status: 'Expired', actualClass: 'data-worse' },
+            { id: 202, dateKey: 'date-20', dateDisplay: 'Tue 20 Jan', description: 'ZEW Economic Sentiment', currency: 'EUR', time: '18:00', impact: 'medium', actual: '15.2', forecast: '12.0', previous: '9.8', status: 'Expired', actualClass: 'data-better' },
+
+            // Wed 21
+            { id: 301, dateKey: 'date-21', dateDisplay: 'Wed 21 Jan', description: 'CPI y/y', currency: 'GBP', time: '15:00', impact: 'high', actual: '4.0%', forecast: '3.8%', previous: '3.9%', status: 'Expired', actualClass: 'data-worse' },
+            { id: 302, dateKey: 'date-21', dateDisplay: 'Wed 21 Jan', description: 'Core Retail Sales m/m', currency: 'CAD', time: '21:30', impact: 'medium', actual: '-0.5%', forecast: '-0.1%', previous: '0.6%', status: 'Expired', actualClass: 'data-worse' },
+
+            // Thu 22
+            {
+                id: 1, dateKey: 'date-22', dateDisplay: 'Today 22 Jan',
+                description: 'CBI Realized Sales', currency: 'GBP', time: '20:00', impact: 'low', actual: '-17', forecast: '-35', previous: '-44', status: 'Expired', actualClass: 'data-better'
+            },
+            {
+                id: 2, dateKey: 'date-22', dateDisplay: 'Today 22 Jan',
+                description: 'ECB Monetary Policy Meeting Accounts', currency: 'EUR', time: '20:30', impact: 'low', actual: '-', forecast: '-', previous: '-', status: 'Expired', isHoliday: false
+            },
+            {
+                id: 3, dateKey: 'date-22', dateDisplay: 'Today 22 Jan',
+                description: 'NHPI m/m', currency: 'CAD', time: '21:30', impact: 'low', actual: '-0.2 %', forecast: '-0.2 %', previous: '0.0 %', status: 'Expired', actualClass: 'data-worse'
+            },
+            {
+                id: 4, dateKey: 'date-22', dateDisplay: 'Today 22 Jan',
+                description: 'Final GDP q/q', currency: 'USD', time: '22:30', impact: 'high', actual: '4.4 %', forecast: '4.3 %', previous: '4.3 %', status: 'Countdown', timeLeft: '00:53:47', actualClass: 'data-better'
+            },
+            {
+                id: 5, dateKey: 'date-22', dateDisplay: 'Today 22 Jan',
+                description: 'Unemployment Claims', currency: 'USD', time: '22:30', impact: 'high', actual: '200 K', forecast: '209 K', previous: '198 K', status: 'Countdown', timeLeft: '00:53:47', actualClass: 'data-better' 
+            },
+            {
+                id: 6, dateKey: 'date-22', dateDisplay: 'Today 22 Jan',
+                description: 'Final GDP Price Index q/q', currency: 'USD', time: '22:30', impact: 'medium', actual: '3.8 %', forecast: '3.8 %', previous: '3.8 %', status: 'Countdown', timeLeft: '00:53:47', actualClass: 'data-neutral'
+            },
+
+            // Fri 23
+            { id: 501, dateKey: 'date-23', dateDisplay: 'Fri 23 Jan', description: 'Flash Manufacturing PMI', currency: 'EUR', time: '16:15', impact: 'medium', actual: '-', forecast: '44.8', previous: '44.4', status: 'Upcoming', actualClass: '' },
+            { id: 502, dateKey: 'date-23', dateDisplay: 'Fri 23 Jan', description: 'Flash Services PMI', currency: 'GBP', time: '17:30', impact: 'high', actual: '-', forecast: '53.2', previous: '53.4', status: 'Upcoming', actualClass: '' },
+        ];
+
+        // Render Events
+        const tbody = document.getElementById('events-body');
+        
+        // Group events
+        const groups = {};
+        events.forEach(e => {
+            if(!groups[e.dateKey]) groups[e.dateKey] = { title: e.dateDisplay, items: [] };
+            groups[e.dateKey].items.push(e);
+        });
+
+        Object.keys(groups).forEach(key => {
+            const group = groups[key];
+            
+            // Header Row (Sticky Date)
+            const headerRow = document.createElement('tr');
+            headerRow.className = 'event-group-header';
+            headerRow.id = key; // date-19, date-20 etc.
+            headerRow.innerHTML = `<td colspan="7" class="group-header-cell">${group.title}</td>`;
+            tbody.appendChild(headerRow);
+            
+            // Column Headers (Repeated for each day as per screenshot design)
+            const colHeaderRow = document.createElement('tr');
+            colHeaderRow.className = 'header-row';
+            colHeaderRow.innerHTML = `
+                <td style="width: 45%;">Description:</td>
+                <td style="width: 10%;">Instrument:</td>
+                <td style="width: 15%;">Date:</td>
+                <td style="width: 10%; text-align: right;">Actual:</td>
+                <td style="width: 10%; text-align: right;">Forecast:</td>
+                <td style="width: 10%; text-align: right;">Previous:</td>
+                <td style="width: 5%; text-align: right;">Actions:</td>
+            `;
+            tbody.appendChild(colHeaderRow);
+
+            // Events
+            group.items.forEach((event, index) => {
+                const row = document.createElement('tr');
+                row.className = 'event-row';
+                row.id = `row-${event.id}`;
+                row.onclick = () => toggleEvent(event.id); // Add click handler
+                if(event.status === 'Expired') row.classList.add('event-expired');
+                if (index === 0) {
+                    row.setAttribute('data-first-in-group', key);
+                }
+
+                // Generate Signal Bars
+                let impactClass = 'impact-holiday';
+                if(event.impact === 'low') impactClass = 'impact-low';
+                if(event.impact === 'medium') impactClass = 'impact-medium';
+                if(event.impact === 'high') impactClass = 'impact-high';
+                
+                const impactSignal = `
+                    <div class="signal-bars ${impactClass}">
+                        <div class="signal-bar"></div>
+                        <div class="signal-bar"></div>
+                        <div class="signal-bar"></div>
+                    </div>
+                `;
+
+                // Flag
+                let flagCode = 'us';
+                if(event.currency === 'GBP') flagCode = 'uk';
+                if(event.currency === 'EUR') flagCode = 'eu';
+                if(event.currency === 'CAD') flagCode = 'ca';
+                if(event.currency === 'JPY') flagCode = 'jp';
+                if(event.currency === 'CNY') flagCode = 'cn';
+                
+                let flagStyle = '';
+                if(event.currency === 'JPY') flagStyle = 'background: white; color: red; border:1px solid #ccc;'; 
+                if(event.currency === 'CNY') flagStyle = 'background: #de2910; color: #ffde00;'; 
+
+                let flag = `<div class="flag-icon flag-${flagCode}" style="${flagStyle}"></div>`;
+                if(flagCode !== 'jp' && flagCode !== 'cn') flag = `<div class="flag-icon flag-${flagCode}"></div>`;
+
+                // Time Column Content
+                // Extract clean date from group title for the sub-text (e.g. "Today 22 Jan" -> "22 Jan")
+                const datePart = group.title.split(' ').slice(-2).join(' '); 
+                
+                let timeHtml = `<div><b>${event.time}</b> <span style="font-size:11px; opacity:0.7">${datePart}</span></div>`;
+                if(event.status === 'Expired') {
+                    timeHtml += `<span class="status-text">Expired</span>`;
+                } else if (event.status === 'Countdown') {
+                     timeHtml += `<div class="status-countdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${event.timeLeft}</div>`;
+                }
+
+                // Actual Data Formatting
+                const actualContent = (event.actual && event.actual !== '-') ? `<span class="${event.actualClass}">${event.actual}</span>` : '-';
+                
+                const descIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted); margin-left:8px; vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+
+                row.innerHTML = `
+                    <td class="event-cell cell-desc">
+                        <div style="display:flex; align-items:center;">
+                            ${impactSignal}
+                            <span>${event.description}</span>
+                            ${descIcon}
+                        </div>
+                    </td>
+                    <td class="event-cell cell-currency">
+                        <div class="currency-flag">${flag} <span style="color: ${event.currency === 'CAD' ? '#10b981' : (event.currency==='GBP'?'#a855f7': (event.currency==='EUR'?'#3b82f6':'#e2e8f0')) }">${event.currency}</span></div>
+                    </td>
+                    <td class="event-cell cell-time">
+                        ${timeHtml}
+                    </td>
+                    <td class="event-cell cell-data">${actualContent}</td>
+                    <td class="event-cell cell-data">${event.forecast}</td>
+                    <td class="event-cell cell-data">${event.previous}</td>
+                    <td class="event-cell cell-actions">
+                        <svg class="expand-icon" id="icon-${event.id}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="cursor:pointer; color:var(--text-muted); transition: transform 0.2s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </td>
+                `;
+                tbody.appendChild(row);
+
+                // Create Details Row (Hidden by default)
+                const detailsRow = document.createElement('tr');
+                detailsRow.className = 'event-details-row';
+                detailsRow.id = `details-${event.id}`;
+                detailsRow.innerHTML = `
+                    <td colspan="7">
+                        <div class="event-details-content">
+                            <div class="detail-chart">
+                                <span>Chart Visualization Placeholder</span>
+                            </div>
+                            <div class="detail-info">
+                                <div class="detail-info-row"><span class="detail-label">Source</span> <span class="detail-value">Bureau of Statistics</span></div>
+                                <div class="detail-info-row"><span class="detail-label">Frequency</span> <span class="detail-value">Monthly</span></div>
+                                <div class="detail-info-row"><span class="detail-label">Next Release</span> <span class="detail-value">Feb 22, 2026</span></div>
+                                <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border)">
+                                    <div class="detail-label" style="margin-bottom:5px">Why it matters</div>
+                                    <div style="color:var(--text-muted); line-height:1.4">
+                                        Data better than expected is generally bullish for ${event.currency}.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(detailsRow);
+            });
+        });
+
+        // Toggle Event Function
+        function toggleEvent(id) {
+            const details = document.getElementById(`details-${id}`);
+            const row = document.getElementById(`row-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            
+            if (details.style.display === 'table-row') {
+                details.style.display = 'none';
+                row.classList.remove('expanded');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                // Close others if needed? No, standard is allow multiple open
+                details.style.display = 'table-row';
+                row.classList.add('expanded');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        const eventScroll = document.querySelector('.event-scroll');
+        const groupHeaders = Array.from(document.querySelectorAll('.event-group-header'));
+
+        function getFirstRowByGroup(id) {
+            if (!eventScroll) return null;
+            return eventScroll.querySelector(`tr.event-row[data-first-in-group="${id}"]`);
+        }
+
+        // Scroll to Date Logic (scrolls to the first event row of the group)
+        window.scrollToDate = function(id) {
+            if (!eventScroll) return;
+            const header = document.getElementById(id);
+            const firstRow = getFirstRowByGroup(id);
+            const targetEl = firstRow || header;
+            if (!targetEl) return;
+
+            const containerTop = eventScroll.getBoundingClientRect().top;
+            const targetTop = targetEl.getBoundingClientRect().top - containerTop + eventScroll.scrollTop;
+            eventScroll.scrollTo({ top: targetTop, behavior: 'smooth' });
+            setTimeout(updateActiveTab, 120);
+        };
+
+        // Global Scroll Capture for Calendar Page
+        // Allows scrolling the event list even when mouse is over controls/headers
+        document.querySelector('.main-content').addEventListener('wheel', (e) => {
+            if (!eventScroll) return;
+            if (!eventScroll.contains(e.target) && e.target !== eventScroll) {
+                e.preventDefault();
+                eventScroll.scrollTop += e.deltaY;
+            }
+        }, { passive: false });
+
+        // Update Day Tabs based on scroll position
+        function updateActiveTab() {
+            if (!eventScroll || groupHeaders.length === 0) return;
+            const containerTop = eventScroll.getBoundingClientRect().top;
+            let currentHeader = groupHeaders[0];
+            const threshold = 8;
+
+            groupHeaders.forEach(header => {
+                const headerTop = header.getBoundingClientRect().top - containerTop;
+                if (headerTop <= threshold) {
+                    currentHeader = header;
+                }
+            });
+
+            const tabId = currentHeader.id.replace('date-', 'tab-');
+            document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+            const activeTab = document.getElementById(tabId);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+        }
+
+        if (eventScroll) {
+            eventScroll.addEventListener('scroll', updateActiveTab);
+            updateActiveTab();
+        }
+    </script>
+</body>
+</html>

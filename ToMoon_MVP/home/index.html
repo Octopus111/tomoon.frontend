@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1400, initial-scale=0.25, maximum-scale=3, user-scalable=yes">
+    <title>ToMoon - Home</title>
+    <style>
+        :root {
+            --bg-primary: #0d0f14;
+            --bg-card: #161a22;
+            --bg-panel: #1c212b;
+            --border: #2a3142;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        /* ========== Hero Section - Start Session ========== */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 380px;
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.08) 0%, transparent 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 300px;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-subtitle {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .start-session-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 18px 48px;
+            background: var(--primary);
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        .start-session-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
+            background: #2563eb;
+        }
+
+        .start-session-btn:active {
+            transform: translateY(0);
+        }
+
+        .start-session-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Session Flow Steps */
+        .session-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .flow-step-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flow-step-icon svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-muted);
+        }
+
+        .flow-arrow {
+            color: var(--border);
+            font-size: 16px;
+        }
+
+        /* ========== Dashboard Grid ========== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title-icon {
+            width: 20px;
+            height: 20px;
+            stroke: var(--primary);
+        }
+
+        .card-action {
+            font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+
+        .card-action:hover {
+            color: #60a5fa;
+        }
+
+        /* ========== Live Sessions Overview ========== */
+        .sessions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .session-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .session-item:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .session-item.live {
+            border-left: 3px solid var(--success);
+        }
+
+        .session-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .session-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+            50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+        }
+
+        .session-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .session-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .session-right {
+            text-align: right;
+        }
+
+        .session-pnl {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .session-pnl.positive { color: var(--success); }
+        .session-pnl.negative { color: var(--danger); }
+
+        .session-duration {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'SF Mono', monospace;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 16px;
+        }
+
+        .session-action-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .session-action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .session-action-btn.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .session-action-btn.primary:hover {
+            background: #2563eb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* ========== Market Overview ========== */
+        .market-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .market-stat {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .market-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .market-stat-value.highlight {
+            color: var(--warning);
+        }
+
+        .market-stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .next-event {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, transparent 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+        }
+
+        .next-event-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(245, 158, 11, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--warning);
+            font-size: 20px;
+        }
+
+        .next-event-info {
+            flex: 1;
+        }
+
+        .next-event-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .next-event-time {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .next-event-impact {
+            padding: 4px 10px;
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 4px;
+        }
+
+        .next-event-impact.medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .next-event-impact.low {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        /* ========== Session Wizard Modal ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 540px;
+            max-width: 95vw;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Wizard Steps */
+        .wizard-steps {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .wizard-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wizard-step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .wizard-step.active .wizard-step-number {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .wizard-step.completed .wizard-step-number {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .wizard-step-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .wizard-step.active .wizard-step-label {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .wizard-step-divider {
+            width: 40px;
+            height: 1px;
+            background: var(--border);
+            margin: 0 4px;
+        }
+
+        /* Step Content */
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-description {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .select-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .select-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .select-card:hover {
+            border-color: var(--primary);
+        }
+
+        .select-card.selected {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .select-card-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .select-card-info {
+            flex: 1;
+        }
+
+        .select-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .select-card-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .select-card-check {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            transition: all 0.2s;
+        }
+
+        .select-card.selected .select-card-check {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Risk Guard Summary */
+        .risk-summary {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .risk-summary-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .risk-summary-title svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--warning);
+        }
+
+        .risk-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .risk-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .risk-item-label {
+            color: var(--text-muted);
+        }
+
+        .risk-item-value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .risk-item-value.warning {
+            color: var(--warning);
+        }
+
+        .risk-item-value.danger {
+            color: var(--danger);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-muted);
+            color: var(--text-main);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Create Blueprint Link */
+        .create-blueprint-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .create-blueprint-link:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar"></aside>
+<script src="../shared/sidebar_mvp.js"></script>
+<script src="../shared/topbar_mvp.js"></script>
+<script>
+    initSidebar('home', null, { title: 'Home' });
+    initTopbar({ title: 'Home', basePath: '..' });
+</script>
+
+<main class="main-content">
+    
+    <!-- Hero Section - Start Session -->
+    <section class="hero-section">
+        <h1 class="hero-title">Start Session</h1>
+        <p class="hero-subtitle">Set blueprint & risk limit, then trade.</p>
+        
+        <button class="start-session-btn" onclick="openSessionWizard()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            Start Session
+        </button>
+        
+        <div class="session-flow">
+            <div class="flow-step">
+                <div class="flow-step-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="5" width="20" height="14" rx="2"/>
+                        <path d="M2 10h20"/>
+                    </svg>
+                </div>
+                <span>1. Choose Account</span>
+            </div>
+            <span class="flow-arrow">›</span>
+            <div class="flow-step">
+                <div class="flow-step-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                </div>
+                <span>2. Select Blueprint</span>
+            </div>
+            <span class="flow-arrow">›</span>
+            <div class="flow-step">
+                <div class="flow-step-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <span>3. Set Loss Limit</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        
+        <!-- Live Sessions Overview -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg class="card-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    Live Sessions
+                </h3>
+                <a href="../execute/index.html?view=sessions" class="card-action">
+                    View all
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            </div>
+            
+            <div class="sessions-list" id="sessions-list">
+                <!-- Sessions will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Today's Market -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg class="card-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    Today's Market
+                </h3>
+                <a href="../market/index.html" class="card-action">
+                    View Calendar
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            </div>
+            
+            <div class="market-stats">
+                <div class="market-stat">
+                    <div class="market-stat-value">12</div>
+                    <div class="market-stat-label">Scheduled Events</div>
+                </div>
+                <div class="market-stat">
+                    <div class="market-stat-value highlight">3</div>
+                    <div class="market-stat-label">High Impact</div>
+                </div>
+                <div class="market-stat">
+                    <div class="market-stat-value">2h 15m</div>
+                    <div class="market-stat-label">Until Next</div>
+                </div>
+            </div>
+            
+            <div class="next-event">
+                <div class="next-event-icon">📊</div>
+                <div class="next-event-info">
+                    <div class="next-event-title">US CPI YoY (Jan)</div>
+                    <div class="next-event-time">Today 08:30 EST • Bureau of Labor Statistics</div>
+                </div>
+                <span class="next-event-impact">HIGH</span>
+            </div>
+        </div>
+        
+    </div>
+</main>
+
+<!-- Session Wizard Modal -->
+<div class="modal-overlay" id="session-wizard-modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 class="modal-title">Start New Session</h2>
+            <button class="modal-close" onclick="closeSessionWizard()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <!-- Wizard Steps Indicator -->
+            <div class="wizard-steps">
+                <div class="wizard-step active" data-step="1">
+                    <div class="wizard-step-number">1</div>
+                    <span class="wizard-step-label">Account</span>
+                </div>
+                <div class="wizard-step-divider"></div>
+                <div class="wizard-step" data-step="2">
+                    <div class="wizard-step-number">2</div>
+                    <span class="wizard-step-label">Blueprint</span>
+                </div>
+                <div class="wizard-step-divider"></div>
+                <div class="wizard-step" data-step="3">
+                    <div class="wizard-step-number">3</div>
+                    <span class="wizard-step-label">Risk Limit</span>
+                </div>
+            </div>
+            
+            <!-- Step 1: Choose Account -->
+            <div class="step-content active" id="step-1">
+                <h3 class="step-title">Choose Account</h3>
+                <p class="step-description">Select the trading account for this session.</p>
+                
+                <div class="select-cards" id="account-cards">
+                    <div class="select-card selected" data-account="main" onclick="selectAccount(this)">
+                        <div class="select-card-icon">💼</div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Main Account</div>
+                            <div class="select-card-meta">Balance: $25,430.00 • Risk: Normal</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                    <div class="select-card" data-account="trading-a" onclick="selectAccount(this)">
+                        <div class="select-card-icon">📈</div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Trading Account A</div>
+                            <div class="select-card-meta">Balance: $10,250.00 • Risk: Conservative</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                    <div class="select-card" data-account="trading-b" onclick="selectAccount(this)">
+                        <div class="select-card-icon">🎯</div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Trading Account B</div>
+                            <div class="select-card-meta">Balance: $5,000.00 • Risk: Aggressive</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Select Blueprint -->
+            <div class="step-content" id="step-2">
+                <h3 class="step-title">Select Blueprint</h3>
+                <p class="step-description">Choose a trading blueprint to follow during this session.</p>
+                
+                <div class="select-cards" id="blueprint-cards">
+                    <div class="select-card selected" data-blueprint="momentum" onclick="selectBlueprint(this)">
+                        <div class="select-card-icon">⚡</div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Momentum Breakout</div>
+                            <div class="select-card-meta">Win Rate: 65% • Avg RR: 1:2.5</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                    <div class="select-card" data-blueprint="scalping" onclick="selectBlueprint(this)">
+                        <div class="select-card-icon">🎯</div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Scalping Strategy</div>
+                            <div class="select-card-meta">Win Rate: 72% • Avg RR: 1:1.5</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                    <div class="select-card" data-blueprint="swing" onclick="selectBlueprint(this)">
+                        <div class="select-card-icon">📊</div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Swing Trading</div>
+                            <div class="select-card-meta">Win Rate: 58% • Avg RR: 1:3.0</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                </div>
+                
+                <a href="../execute/index.html?view=blueprint&action=create" class="create-blueprint-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Create New Blueprint
+                </a>
+            </div>
+            
+            <!-- Step 3: Set Risk Limit -->
+            <div class="step-content" id="step-3">
+                <h3 class="step-title">Confirm Risk Guard</h3>
+                <p class="step-description">Review and confirm your risk limits for this session.</p>
+                
+                <div class="risk-summary">
+                    <div class="risk-summary-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        Risk Guard Settings
+                    </div>
+                    
+                    <div class="risk-items">
+                        <div class="risk-item">
+                            <span class="risk-item-label">Daily Loss Limit</span>
+                            <span class="risk-item-value">$500.00</span>
+                        </div>
+                        <div class="risk-item">
+                            <span class="risk-item-label">Max Position Size</span>
+                            <span class="risk-item-value">2%</span>
+                        </div>
+                        <div class="risk-item">
+                            <span class="risk-item-label">Max Open Trades</span>
+                            <span class="risk-item-value">3</span>
+                        </div>
+                        <div class="risk-item">
+                            <span class="risk-item-label">Current Daily P&L</span>
+                            <span class="risk-item-value">$0.00</span>
+                        </div>
+                        <div class="risk-item">
+                            <span class="risk-item-label">Remaining Risk</span>
+                            <span class="risk-item-value warning">$500.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="wizard-back-btn" onclick="wizardBack()" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Back
+            </button>
+            <button class="btn btn-primary" id="wizard-next-btn" onclick="wizardNext()">
+                Next
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== Session Wizard State ==========
+    let wizardState = {
+        currentStep: 1,
+        totalSteps: 3,
+        account: 'main',
+        blueprint: 'momentum',
+        accountData: {
+            'main': { name: 'Main Account', balance: 25430, riskLimit: 500 },
+            'trading-a': { name: 'Trading Account A', balance: 10250, riskLimit: 200 },
+            'trading-b': { name: 'Trading Account B', balance: 5000, riskLimit: 100 }
+        },
+        blueprintData: {
+            'momentum': { name: 'Momentum Breakout' },
+            'scalping': { name: 'Scalping Strategy' },
+            'swing': { name: 'Swing Trading' }
+        }
+    };
+
+    // ========== Wizard Functions ==========
+    function openSessionWizard() {
+        wizardState.currentStep = 1;
+        updateWizardUI();
+        document.getElementById('session-wizard-modal').classList.add('active');
+    }
+
+    function closeSessionWizard() {
+        document.getElementById('session-wizard-modal').classList.remove('active');
+    }
+
+    function wizardNext() {
+        if (wizardState.currentStep < wizardState.totalSteps) {
+            wizardState.currentStep++;
+            updateWizardUI();
+        } else {
+            // Final step - Start Session
+            startSession();
+        }
+    }
+
+    function wizardBack() {
+        if (wizardState.currentStep > 1) {
+            wizardState.currentStep--;
+            updateWizardUI();
+        }
+    }
+
+    function updateWizardUI() {
+        const step = wizardState.currentStep;
+        
+        // Update step indicators
+        document.querySelectorAll('.wizard-step').forEach((el, idx) => {
+            const stepNum = idx + 1;
+            el.classList.remove('active', 'completed');
+            if (stepNum === step) {
+                el.classList.add('active');
+            } else if (stepNum < step) {
+                el.classList.add('completed');
+            }
+        });
+        
+        // Update step content
+        document.querySelectorAll('.step-content').forEach((el, idx) => {
+            el.classList.remove('active');
+            if (idx + 1 === step) {
+                el.classList.add('active');
+            }
+        });
+        
+        // Update buttons
+        const backBtn = document.getElementById('wizard-back-btn');
+        const nextBtn = document.getElementById('wizard-next-btn');
+        
+        backBtn.style.display = step > 1 ? 'inline-flex' : 'none';
+        
+        if (step === wizardState.totalSteps) {
+            nextBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                Start Session
+            `;
+            nextBtn.className = 'btn btn-success';
+        } else {
+            nextBtn.innerHTML = `
+                Next
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            `;
+            nextBtn.className = 'btn btn-primary';
+        }
+        
+        // Update Risk Summary if on step 3
+        if (step === 3) {
+            updateRiskSummary();
+        }
+    }
+
+    function selectAccount(el) {
+        document.querySelectorAll('#account-cards .select-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        el.classList.add('selected');
+        wizardState.account = el.dataset.account;
+    }
+
+    function selectBlueprint(el) {
+        document.querySelectorAll('#blueprint-cards .select-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        el.classList.add('selected');
+        wizardState.blueprint = el.dataset.blueprint;
+    }
+
+    function updateRiskSummary() {
+        const accountData = wizardState.accountData[wizardState.account];
+        // Update risk items if needed
+    }
+
+    function startSession() {
+        const accountData = wizardState.accountData[wizardState.account];
+        const blueprintData = wizardState.blueprintData[wizardState.blueprint];
+        
+        // Start live session via topbar module
+        if (typeof startLiveSession === 'function') {
+            startLiveSession({
+                name: `${blueprintData.name} Session`,
+                account: accountData.name,
+                blueprint: blueprintData.name
+            });
+        }
+        
+        closeSessionWizard();
+        
+        // Show toast
+        if (typeof showTopbarToast === 'function') {
+            showTopbarToast('Session started! Good luck trading! 🚀');
+        }
+        
+        // Refresh sessions list
+        renderSessions();
+        
+        // Optional: Redirect to Execute page
+        // window.location.href = '../execute/index.html?view=sessions';
+    }
+
+    // ========== Sessions List ==========
+    function renderSessions() {
+        const container = document.getElementById('sessions-list');
+        const liveSession = typeof getLiveSessionState === 'function' ? getLiveSessionState() : { active: false };
+        
+        if (!liveSession.active) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <p>No active sessions</p>
+                    <p style="font-size: 12px; margin-top: 8px;">Click "Start Session" to begin trading</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const duration = typeof getSessionDuration === 'function' 
+            ? getSessionDuration(liveSession.startTime) 
+            : '00:00:00';
+        
+        const pnlSign = liveSession.pnl >= 0 ? '+' : '-';
+        const pnlClass = liveSession.pnl >= 0 ? 'positive' : 'negative';
+        
+        container.innerHTML = `
+            <div class="session-item live" onclick="goToSession('${liveSession.sessionId}')">
+                <div class="session-left">
+                    <div class="session-status"></div>
+                    <div class="session-info">
+                        <h4>${liveSession.sessionName}</h4>
+                        <p>${liveSession.account || 'Main Account'} • ${liveSession.tradeCount || 0} trades</p>
+                    </div>
+                </div>
+                <div class="session-right">
+                    <div class="session-pnl ${pnlClass}">${pnlSign}$${Math.abs(liveSession.pnl).toFixed(2)}</div>
+                    <div class="session-duration">${duration}</div>
+                </div>
+                <div class="session-actions">
+                    <button class="session-action-btn" onclick="event.stopPropagation(); quickLog()">Quick Log</button>
+                    <button class="session-action-btn primary" onclick="event.stopPropagation(); goToSession('${liveSession.sessionId}')">View</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function goToSession(sessionId) {
+        window.location.href = `../execute/index.html?view=sessions&session=${sessionId}`;
+    }
+
+    function quickLog() {
+        // Quick journal functionality
+        alert('Quick Log - Coming soon!');
+    }
+
+    // ========== Initialize ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        renderSessions();
+        
+        // Update sessions list periodically
+        setInterval(renderSessions, 5000);
+    });
+
+    // Listen for session events
+    window.addEventListener('liveSessionStarted', renderSessions);
+    window.addEventListener('liveSessionEnded', renderSessions);
+</script>
+
+</body>
+</html>

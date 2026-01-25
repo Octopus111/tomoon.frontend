@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Chart</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d0d0e;
+            --bg-secondary: #161618;
+            --bg-tertiary: #212124;
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --text-tertiary: #636366;
+            --accent-green: #30d158;
+            --accent-red: #ff453a;
+            --accent-blue: #0a84ff;
+            --border-color: #2a2a2c;
+            --grid-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .symbol-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .symbol-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #5e5ce6, #bf5af2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .symbol-details h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .symbol-details .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        .price-info {
+            text-align: right;
+        }
+
+        .current-price {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+
+        .price-change {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 4px;
+            font-size: 15px;
+        }
+
+        .price-change.positive {
+            color: var(--accent-green);
+        }
+
+        .price-change.negative {
+            color: var(--accent-red);
+        }
+
+        /* Time Range Selector */
+        .time-selector {
+            display: flex;
+            gap: 1px;
+            background: var(--border-color);
+            padding: 1px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: fit-content;
+        }
+
+        .time-btn {
+            padding: 8px 16px;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .time-btn:first-child {
+            border-top-left-radius: 9px;
+            border-bottom-left-radius: 9px;
+        }
+
+        .time-btn:last-child {
+            border-top-right-radius: 9px;
+            border-bottom-right-radius: 9px;
+        }
+
+        .time-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .time-btn.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* Chart Container */
+        .chart-wrapper {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 0;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .chart-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 500px;
+            width: 100%;
+            background: var(--bg-secondary);
+            padding: 16px;
+        }
+
+        #mainChart {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Chart Type Selector */
+        .chart-types {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chart-type-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chart-type-btn:hover {
+            border-color: var(--text-secondary);
+            color: var(--text-primary);
+        }
+
+        .chart-type-btn.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+
+        .chart-type-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Volume Chart */
+        .volume-wrapper {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .volume-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .volume-header h3 {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .volume-container {
+            height: 120px;
+            position: relative;
+        }
+
+        #volumeChart {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-value.positive {
+            color: var(--accent-green);
+        }
+
+        .stat-value.negative {
+            color: var(--accent-red);
+        }
+
+        /* Crosshair tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(44, 44, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 12px 16px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            z-index: 100;
+            min-width: 180px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        .tooltip-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+            font-size: 13px;
+        }
+
+        .tooltip-label {
+            color: var(--text-secondary);
+        }
+
+        .tooltip-value {
+            font-weight: 500;
+        }
+
+        /* Indicator Pills */
+        .indicators {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .indicator-pill {
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .indicator-pill .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .indicator-pill.ma20 .dot { background: #ff9f0a; }
+        .indicator-pill.ma50 .dot { background: #5e5ce6; }
+        .indicator-pill.volume .dot { background: var(--accent-blue); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .price-info {
+                text-align: left;
+            }
+            
+            .price-change {
+                justify-content: flex-start;
+            }
+        }
+
+        /* Loading animation */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .loading {
+            background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="chart-header">
+            <div class="symbol-info">
+                <div class="symbol-icon">BTC</div>
+                <div class="symbol-details">
+                    <h1>Bitcoin</h1>
+                    <span class="subtitle">BTC/USDT · Binance</span>
+                </div>
+            </div>
+            <div class="price-info">
+                <div class="current-price" id="currentPrice">$104,523.80</div>
+                <div class="price-change positive" id="priceChange">
+                    <span>+$2,341.50</span>
+                    <span>(+2.29%)</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Time Range Selector -->
+        <div class="time-selector">
+            <button class="time-btn" data-range="1H">1H</button>
+            <button class="time-btn" data-range="4H">4H</button>
+            <button class="time-btn active" data-range="1D">1D</button>
+            <button class="time-btn" data-range="1W">1W</button>
+            <button class="time-btn" data-range="1M">1M</button>
+            <button class="time-btn" data-range="3M">3M</button>
+            <button class="time-btn" data-range="1Y">1Y</button>
+            <button class="time-btn" data-range="ALL">ALL</button>
+        </div>
+
+        <!-- Main Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-toolbar">
+                <div class="chart-types">
+                    <button class="chart-type-btn active" data-type="candle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="5" y="8" width="3" height="8" rx="0.5"/>
+                            <line x1="6.5" y1="4" x2="6.5" y2="8"/>
+                            <line x1="6.5" y1="16" x2="6.5" y2="20"/>
+                            <rect x="11" y="6" width="3" height="10" rx="0.5"/>
+                            <line x1="12.5" y1="2" x2="12.5" y2="6"/>
+                            <line x1="12.5" y1="16" x2="12.5" y2="22"/>
+                            <rect x="17" y="9" width="3" height="6" rx="0.5"/>
+                            <line x1="18.5" y1="5" x2="18.5" y2="9"/>
+                            <line x1="18.5" y1="15" x2="18.5" y2="19"/>
+                        </svg>
+                        Candle
+                    </button>
+                    <button class="chart-type-btn" data-type="line">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="4,16 8,10 12,14 16,6 20,12"/>
+                        </svg>
+                        Line
+                    </button>
+                    <button class="chart-type-btn" data-type="area">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4,20 L4,16 L8,10 L12,14 L16,6 L20,12 L20,20 Z" fill="currentColor" opacity="0.3"/>
+                            <polyline points="4,16 8,10 12,14 16,6 20,12"/>
+                        </svg>
+                        Area
+                    </button>
+                </div>
+                <div class="indicators">
+                    <div class="indicator-pill ma20">
+                        <span class="dot"></span>
+                        MA(20)
+                    </div>
+                    <div class="indicator-pill ma50">
+                        <span class="dot"></span>
+                        MA(50)
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="mainChart"></canvas>
+                <div class="tooltip" id="tooltip">
+                    <div class="tooltip-date">Dec 12, 2025</div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Open</span>
+                        <span class="tooltip-value">$102,180.00</span>
+                    </div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">High</span>
+                        <span class="tooltip-value">$105,420.00</span>
+                    </div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Low</span>
+                        <span class="tooltip-value">$101,850.00</span>
+                    </div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Close</span>
+                        <span class="tooltip-value">$104,523.80</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Volume Chart -->
+        <div class="volume-wrapper">
+            <div class="volume-header">
+                <h3>Volume</h3>
+                <div class="indicator-pill volume">
+                    <span class="dot"></span>
+                    24H: 28.5B USDT
+                </div>
+            </div>
+            <div class="volume-container">
+                <canvas id="volumeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">24H High</div>
+                <div class="stat-value">$105,892.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">24H Low</div>
+                <div class="stat-value">$101,234.50</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">24H Volume</div>
+                <div class="stat-value">28.5B</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Market Cap</div>
+                <div class="stat-value">$2.07T</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate mock OHLCV data
+        function generateMockData(days = 60) {
+            const data = [];
+            let basePrice = 95000;
+            const now = new Date();
+            
+            for (let i = days; i >= 0; i--) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                
+                const volatility = 0.03;
+                const change = (Math.random() - 0.48) * volatility;
+                const open = basePrice;
+                const close = basePrice * (1 + change);
+                const high = Math.max(open, close) * (1 + Math.random() * 0.015);
+                const low = Math.min(open, close) * (1 - Math.random() * 0.015);
+                const volume = 15000000000 + Math.random() * 20000000000;
+                
+                data.push({
+                    date: date,
+                    open: open,
+                    high: high,
+                    low: low,
+                    close: close,
+                    volume: volume
+                });
+                
+                basePrice = close;
+            }
+            
+            return data;
+        }
+
+        // Calculate Moving Average
+        function calculateMA(data, period) {
+            const ma = [];
+            for (let i = 0; i < data.length; i++) {
+                if (i < period - 1) {
+                    ma.push(null);
+                } else {
+                    let sum = 0;
+                    for (let j = 0; j < period; j++) {
+                        sum += data[i - j].close;
+                    }
+                    ma.push(sum / period);
+                }
+            }
+            return ma;
+        }
+
+        class TradingChart {
+            constructor(canvasId, volumeCanvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.volumeCanvas = document.getElementById(volumeCanvasId);
+                this.volumeCtx = this.volumeCanvas.getContext('2d');
+                this.tooltip = document.getElementById('tooltip');
+                
+                this.data = generateMockData(60);
+                this.ma20 = calculateMA(this.data, 20);
+                this.ma50 = calculateMA(this.data, 50);
+                
+                this.chartType = 'candle';
+                this.padding = { top: 20, right: 80, bottom: 30, left: 20 };
+                
+                this.colors = {
+                    green: '#2ebd85',
+                    red: '#f6465d',
+                    grid: 'rgba(255, 255, 255, 0.06)',
+                    text: '#8b8b90',
+                    ma20: '#ff9800',
+                    ma50: '#2962ff',
+                    area: 'rgba(41, 98, 255, 0.1)',
+                    line: '#2962ff',
+                    crosshair: '#8b8b90'
+                };
+                
+                this.setupCanvas();
+                this.bindEvents();
+                this.draw();
+            }
+
+            setupCanvas() {
+                const dpr = window.devicePixelRatio || 1;
+                const rect = this.canvas.parentElement.getBoundingClientRect();
+                
+                this.canvas.width = rect.width * dpr;
+                this.canvas.height = rect.height * dpr;
+                this.canvas.style.width = rect.width + 'px';
+                this.canvas.style.height = rect.height + 'px';
+                this.ctx.scale(dpr, dpr);
+                
+                this.width = rect.width;
+                this.height = rect.height;
+                
+                // Volume canvas
+                const volRect = this.volumeCanvas.parentElement.getBoundingClientRect();
+                this.volumeCanvas.width = volRect.width * dpr;
+                this.volumeCanvas.height = volRect.height * dpr;
+                this.volumeCanvas.style.width = volRect.width + 'px';
+                this.volumeCanvas.style.height = volRect.height + 'px';
+                this.volumeCtx.scale(dpr, dpr);
+                
+                this.volWidth = volRect.width;
+                this.volHeight = volRect.height;
+            }
+
+            bindEvents() {
+                window.addEventListener('resize', () => {
+                    this.setupCanvas();
+                    this.draw();
+                });
+
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.canvas.addEventListener('mouseleave', () => this.hideTooltip());
+
+                // Chart type buttons
+                document.querySelectorAll('.chart-type-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.chart-type-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.chartType = btn.dataset.type;
+                        this.draw();
+                    });
+                });
+
+                // Time range buttons
+                document.querySelectorAll('.time-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.updateTimeRange(btn.dataset.range);
+                    });
+                });
+            }
+
+            updateTimeRange(range) {
+                const days = {
+                    '1H': 1,
+                    '4H': 2,
+                    '1D': 7,
+                    '1W': 30,
+                    '1M': 60,
+                    '3M': 90,
+                    '1Y': 365,
+                    'ALL': 365
+                };
+                this.data = generateMockData(days[range] || 60);
+                this.ma20 = calculateMA(this.data, 20);
+                this.ma50 = calculateMA(this.data, 50);
+                this.draw();
+                this.updatePriceDisplay();
+            }
+
+            updatePriceDisplay() {
+                const lastCandle = this.data[this.data.length - 1];
+                const firstCandle = this.data[0];
+                const change = lastCandle.close - firstCandle.open;
+                const changePercent = (change / firstCandle.open) * 100;
+                
+                document.getElementById('currentPrice').textContent = '$' + lastCandle.close.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                
+                const changeEl = document.getElementById('priceChange');
+                changeEl.className = 'price-change ' + (change >= 0 ? 'positive' : 'negative');
+                changeEl.innerHTML = `
+                    <span>${change >= 0 ? '+' : ''}$${Math.abs(change).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span>(${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)</span>
+                `;
+            }
+
+            getMinMax() {
+                let minPrice = Infinity;
+                let maxPrice = -Infinity;
+                let maxVolume = 0;
+                
+                this.data.forEach(candle => {
+                    minPrice = Math.min(minPrice, candle.low);
+                    maxPrice = Math.max(maxPrice, candle.high);
+                    maxVolume = Math.max(maxVolume, candle.volume);
+                });
+                
+                const pricePadding = (maxPrice - minPrice) * 0.1;
+                return {
+                    minPrice: minPrice - pricePadding,
+                    maxPrice: maxPrice + pricePadding,
+                    maxVolume: maxVolume
+                };
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                this.volumeCtx.clearRect(0, 0, this.volWidth, this.volHeight);
+                
+                const { minPrice, maxPrice, maxVolume } = this.getMinMax();
+                
+                this.drawGrid(minPrice, maxPrice);
+                this.drawPriceAxis(minPrice, maxPrice);
+                
+                if (this.chartType === 'candle') {
+                    this.drawCandles(minPrice, maxPrice);
+                } else if (this.chartType === 'line') {
+                    this.drawLine(minPrice, maxPrice);
+                } else if (this.chartType === 'area') {
+                    this.drawArea(minPrice, maxPrice);
+                }
+                
+                this.drawMA(minPrice, maxPrice);
+                this.drawVolume(maxVolume);
+            }
+
+            drawGrid(minPrice, maxPrice) {
+                const chartWidth = this.width - this.padding.left - this.padding.right;
+                const chartHeight = this.height - this.padding.top - this.padding.bottom;
+                
+                this.ctx.strokeStyle = this.colors.grid;
+                this.ctx.lineWidth = 1;
+                
+                // Horizontal lines
+                for (let i = 0; i <= 5; i++) {
+                    const y = this.padding.top + (chartHeight / 5) * i;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.padding.left, y);
+                    this.ctx.lineTo(this.width - this.padding.right, y);
+                    this.ctx.stroke();
+                }
+                
+                // Vertical lines (Time)
+                const timeSteps = 6;
+                for (let i = 0; i <= timeSteps; i++) {
+                    const x = this.padding.left + (chartWidth / timeSteps) * i;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, this.padding.top);
+                    this.ctx.lineTo(x, this.height - this.padding.bottom);
+                    this.ctx.stroke();
+                }
+            }
+
+            drawPriceAxis(minPrice, maxPrice) {
+                const chartHeight = this.height - this.padding.top - this.padding.bottom;
+                
+                this.ctx.fillStyle = this.colors.text;
+                this.ctx.font = '11px "SF Mono", "Roboto Mono", monospace';
+                this.ctx.textAlign = 'left';
+                
+                for (let i = 0; i <= 5; i++) {
+                    const price = maxPrice - ((maxPrice - minPrice) / 5) * i;
+                    const y = this.padding.top + (chartHeight / 5) * i;
+                    this.ctx.fillText('$' + price.toLocaleString('en-US', { maximumFractionDigits: 0 }), this.width - this.padding.right + 8, y + 4);
+                }
+            }
+
+            drawCandles(minPrice, maxPrice) {
+                const chartWidth = this.width - this.padding.left - this.padding.right;
+                const chartHeight = this.height - this.padding.top - this.padding.bottom;
+                const candleWidth = (chartWidth / this.data.length) * 0.7;
+                const gap = (chartWidth / this.data.length) * 0.3;
+                
+                this.data.forEach((candle, i) => {
+                    const x = this.padding.left + (chartWidth / this.data.length) * i + gap / 2;
+                    const isGreen = candle.close >= candle.open;
+                    
+                    const yHigh = this.padding.top + ((maxPrice - candle.high) / (maxPrice - minPrice)) * chartHeight;
+                    const yLow = this.padding.top + ((maxPrice - candle.low) / (maxPrice - minPrice)) * chartHeight;
+                    const yOpen = this.padding.top + ((maxPrice - candle.open) / (maxPrice - minPrice)) * chartHeight;
+                    const yClose = this.padding.top + ((maxPrice - candle.close) / (maxPrice - minPrice)) * chartHeight;
+                    
+                    // Wick
+                    this.ctx.strokeStyle = isGreen ? this.colors.green : this.colors.red;
+                    this.ctx.lineWidth = 1;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x + candleWidth / 2, yHigh);
+                    this.ctx.lineTo(x + candleWidth / 2, yLow);
+                    this.ctx.stroke();
+                    
+                    // Body
+                    this.ctx.fillStyle = isGreen ? this.colors.green : this.colors.red;
+                    const bodyTop = Math.min(yOpen, yClose);
+                    const bodyHeight = Math.max(Math.abs(yClose - yOpen), 1);
+                    
+                    this.ctx.beginPath();
+                    this.ctx.rect(x, bodyTop, candleWidth, bodyHeight);
+                    this.ctx.fill();
+                });
+            }
+
+            drawLine(minPrice, maxPrice) {
+                const chartWidth = this.width - this.padding.left - this.padding.right;
+                const chartHeight = this.height - this.padding.top - this.padding.bottom;
+                
+                this.ctx.strokeStyle = this.colors.line;
+                this.ctx.lineWidth = 2;
+                this.ctx.lineJoin = 'round';
+                this.ctx.lineCap = 'round';
+                
+                this.ctx.beginPath();
+                this.data.forEach((candle, i) => {
+                    const x = this.padding.left + (chartWidth / this.data.length) * i + (chartWidth / this.data.length) / 2;
+                    const y = this.padding.top + ((maxPrice - candle.close) / (maxPrice - minPrice)) * chartHeight;
+                    
+                    if (i === 0) {
+                        this.ctx.moveTo(x, y);
+                    } else {
+                        this.ctx.lineTo(x, y);
+                    }
+                });
+                this.ctx.stroke();
+            }
+
+            drawArea(minPrice, maxPrice) {
+                const chartWidth = this.width - this.padding.left - this.padding.right;
+                const chartHeight = this.height - this.padding.top - this.padding.bottom;
+                
+                // Draw area
+                this.ctx.beginPath();
+                this.data.forEach((candle, i) => {
+                    const x = this.padding.left + (chartWidth / this.data.length) * i + (chartWidth / this.data.length) / 2;
+                    const y = this.padding.top + ((maxPrice - candle.close) / (maxPrice - minPrice)) * chartHeight;
+                    
+                    if (i === 0) {
+                        this.ctx.moveTo(x, y);
+                    } else {
+                        this.ctx.lineTo(x, y);
+                    }
+                });
+                
+                // Close the area
+                const lastX = this.padding.left + chartWidth;
+                const firstX = this.padding.left + (chartWidth / this.data.length) / 2;
+                this.ctx.lineTo(lastX, this.height - this.padding.bottom);
+                this.ctx.lineTo(firstX, this.height - this.padding.bottom);
+                this.ctx.closePath();
+                
+                // Gradient fill
+                const gradient = this.ctx.createLinearGradient(0, this.padding.top, 0, this.height - this.padding.bottom);
+                gradient.addColorStop(0, 'rgba(10, 132, 255, 0.3)');
+                gradient.addColorStop(1, 'rgba(10, 132, 255, 0.02)');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fill();
+                
+                // Draw line on top
+                this.drawLine(minPrice, maxPrice);
+            }
+
+            drawMA(minPrice, maxPrice) {
+                const chartWidth = this.width - this.padding.left - this.padding.right;
+                const chartHeight = this.height - this.padding.top - this.padding.bottom;
+                
+                // MA20
+                this.ctx.strokeStyle = this.colors.ma20;
+                this.ctx.lineWidth = 1.5;
+                this.ctx.setLineDash([]);
+                this.ctx.beginPath();
+                let started = false;
+                this.ma20.forEach((value, i) => {
+                    if (value === null) return;
+                    const x = this.padding.left + (chartWidth / this.data.length) * i + (chartWidth / this.data.length) / 2;
+                    const y = this.padding.top + ((maxPrice - value) / (maxPrice - minPrice)) * chartHeight;
+                    if (!started) {
+                        this.ctx.moveTo(x, y);
+                        started = true;
+                    } else {
+                        this.ctx.lineTo(x, y);
+                    }
+                });
+                this.ctx.stroke();
+                
+                // MA50
+                this.ctx.strokeStyle = this.colors.ma50;
+                this.ctx.beginPath();
+                started = false;
+                this.ma50.forEach((value, i) => {
+                    if (value === null) return;
+                    const x = this.padding.left + (chartWidth / this.data.length) * i + (chartWidth / this.data.length) / 2;
+                    const y = this.padding.top + ((maxPrice - value) / (maxPrice - minPrice)) * chartHeight;
+                    if (!started) {
+                        this.ctx.moveTo(x, y);
+                        started = true;
+                    } else {
+                        this.ctx.lineTo(x, y);
+                    }
+                });
+                this.ctx.stroke();
+            }
+
+            drawVolume(maxVolume) {
+                const chartWidth = this.volWidth - this.padding.left - this.padding.right;
+                const chartHeight = this.volHeight - 10;
+                const barWidth = (chartWidth / this.data.length) * 0.7;
+                const gap = (chartWidth / this.data.length) * 0.3;
+                
+                this.data.forEach((candle, i) => {
+                    const x = this.padding.left + (chartWidth / this.data.length) * i + gap / 2;
+                    const height = (candle.volume / maxVolume) * chartHeight;
+                    const y = this.volHeight - height - 5;
+                    const isGreen = candle.close >= candle.open;
+                    
+                    this.volumeCtx.fillStyle = isGreen ? 'rgba(46, 189, 133, 0.5)' : 'rgba(246, 70, 93, 0.5)';
+                    this.volumeCtx.beginPath();
+                    this.volumeCtx.rect(x, y, barWidth, height);
+                    this.volumeCtx.fill();
+                });
+            }
+
+            handleMouseMove(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const chartWidth = this.width - this.padding.left - this.padding.right;
+                const index = Math.floor((x - this.padding.left) / (chartWidth / this.data.length));
+                
+                if (index >= 0 && index < this.data.length) {
+                    const candle = this.data[index];
+                    this.showTooltip(candle, e.clientX, e.clientY);
+                    this.drawCrosshair(x, y);
+                }
+            }
+
+            drawCrosshair(x, y) {
+                this.draw();
+                
+                this.ctx.strokeStyle = this.colors.crosshair;
+                this.ctx.lineWidth = 1;
+                this.ctx.setLineDash([4, 4]);
+                
+                // Vertical line
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, this.padding.top);
+                this.ctx.lineTo(x, this.height - this.padding.bottom);
+                this.ctx.stroke();
+                
+                // Horizontal line
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.padding.left, y);
+                this.ctx.lineTo(this.width - this.padding.right, y);
+                this.ctx.stroke();
+                
+                this.ctx.setLineDash([]);
+            }
+
+            showTooltip(candle, x, y) {
+                const tooltip = this.tooltip;
+                const date = candle.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                tooltip.innerHTML = `
+                    <div class="tooltip-date">${date}</div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Open</span>
+                        <span class="tooltip-value">$${candle.open.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">High</span>
+                        <span class="tooltip-value">$${candle.high.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Low</span>
+                        <span class="tooltip-value">$${candle.low.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Close</span>
+                        <span class="tooltip-value" style="color: ${candle.close >= candle.open ? '#30d158' : '#ff453a'}">$${candle.close.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Volume</span>
+                        <span class="tooltip-value">${(candle.volume / 1000000000).toFixed(2)}B</span>
+                    </div>
+                `;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                let tooltipX = x + 15;
+                let tooltipY = y - 80;
+                
+                if (tooltipX + 200 > window.innerWidth) {
+                    tooltipX = x - 195;
+                }
+                
+                tooltip.style.left = tooltipX + 'px';
+                tooltip.style.top = tooltipY + 'px';
+                tooltip.classList.add('visible');
+            }
+
+            hideTooltip() {
+                this.tooltip.classList.remove('visible');
+                this.draw();
+            }
+        }
+
+        // Initialize chart
+        document.addEventListener('DOMContentLoaded', () => {
+            const chart = new TradingChart('mainChart', 'volumeChart');
+        });
+    </script>
+</body>
+</html>
