@@ -33,13 +33,6 @@ const sidebarConfig = {
             type: 'single'
         },
         {
-            id: 'vault',
-            label: 'Vault',
-            icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>',
-            href: '../Vault/Vault_demo_v1.0.html',
-            type: 'single'
-        },
-        {
             id: 'strategy',
             label: 'Strategy',
             icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
@@ -88,6 +81,13 @@ const sidebarConfig = {
                 { id: 'behavior', label: 'Behavior', href: '../Insight/Insight_demo_v1.4-fix.html?view=behavior' },
                 { id: 'ai-report', label: 'AI Report', href: '../Insight/Insight_demo_v1.4-fix.html?view=ai-report' }
             ]
+        },
+        {
+            id: 'vault',
+            label: 'Vault',
+            icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>',
+            href: '../Vault/Vault_demo_v1.0.html',
+            type: 'single'
         },
         {
             id: 'calendar',
