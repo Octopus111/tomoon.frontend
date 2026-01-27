@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ToMoon Topbar 设计方案预览</title>
+    <style>
+        :root {
+            --bg-body: #0a0c10;
+            --bg-card: #161a22;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #2a3142;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            gap: 80px;
+        }
+
+        .design-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .design-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- 模拟 Topbar 容器 --- */
+        .topbar-mock {
+            height: 64px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        /* --- 方案 A: "多任务指挥舰" (Stack Mode) --- */
+        /* 这种设计最直观，通过视觉堆叠感体现“有多个在跑” */
+        .session-stack {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .session-pill {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 50px;
+            padding: 4px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .session-pill.active {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+
+        .session-pill.mini {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            justify-content: center;
+            border-color: var(--border);
+            color: var(--text-muted);
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--danger);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--danger);
+            animation: pulse 2s infinite;
+        }
+
+        /* --- 方案 B: "仪表盘标签页" (Tab Mode) --- */
+        /* 将 Session 提升到一级导航高度，适合频繁切换 */
+        .session-tabs {
+            display: flex;
+            background: #000;
+            padding: 4px;
+            border-radius: 8px;
+            gap: 2px;
+        }
+
+        .tab-item {
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .tab-item.active {
+            background: var(--bg-card);
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .risk-micro-bar {
+            width: 40px;
+            height: 3px;
+            background: #333;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .risk-micro-fill {
+            height: 100%;
+            background: var(--success);
+        }
+
+        /* --- 方案 C: "极简磨砂悬浮" (Glass Pill) --- */
+        /* 类似苹果灵动岛的设计，将数据高度压缩，悬停展开 */
+        .glass-island {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 99px;
+            padding: 6px 20px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .data-group {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .data-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
+        .data-value { font-size: 13px; font-family: monospace; font-weight: 600; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .btn-go {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="preview-container">
+    
+    <div class="design-section">
+        <div class="design-label">方案 A: 任务堆叠 (Stack Control) - 侧重“多任务存在感”</div>
+        <div class="topbar-mock">
+            <div style="font-weight: 700;">ToMoon</div>
+            <div class="session-stack">
+                <div class="session-pill active">
+                    <div class="live-dot"></div>
+                    <div class="data-group">
+                        <span style="font-size: 12px; font-weight: 600;">Main Scalp</span>
+                        <span style="font-size: 10px; color: var(--text-muted);">01:24:05</span>
+                    </div>
+                    <div class="risk-micro-bar"><div class="risk-micro-fill" style="width: 70%;"></div></div>
+                    <button class="btn-go">Go Live</button>
+                </div>
+                <div class="session-pill mini" title="Switch to Funding Session">F</div>
+                <div class="session-pill mini" title="Switch to Challenge Session">C</div>
+            </div>
+            <div style="width: 32px; height: 32px; background: #333; border-radius: 50%;"></div>
+        </div>
+    </div>
+
+    <div class="design-section">
+        <div class="design-label">方案 B: 终端页签 (Terminal Tabs) - 侧重“快速切换”</div>
+        <div class="topbar-mock">
+            <div style="font-weight: 700;">ToMoon</div>
+            <div class="session-tabs">
+                <div class="tab-item active">
+                    <div class="live-dot"></div>
+                    <span>#1 Apex-100k</span>
+                    <div class="risk-micro-bar"><div class="risk-micro-fill" style="width: 40%; background: var(--danger);"></div></div>
+                </div>
+                <div class="tab-item">
+                    <span>#2 MyFunded</span>
+                </div>
+                <div class="tab-item">
+                    <span>#3 Demo</span>
+                </div>
+            </div>
+            <div class="btn-go" style="background: transparent; border: 1px solid var(--border);">Overview</div>
+        </div>
+    </div>
+
+    <div class="design-section">
+        <div class="design-label">方案 C: 核心指标岛 (Indicator Island) - 极简/高级感</div>
+        <div class="topbar-mock">
+            <div style="font-weight: 700;">ToMoon</div>
+            <div class="glass-island">
+                <div class="data-group">
+                    <span class="data-label">Live Session</span>
+                    <span class="data-value" style="color: var(--danger);">REC ● 02:15:22</span>
+                </div>
+                <div class="data-group">
+                    <span class="data-label">Active Account</span>
+                    <span class="data-value">Apex_12903</span>
+                </div>
+                <div class="data-group">
+                    <span class="data-label">Risk Guard</span>
+                    <span class="data-value" style="color: var(--success);">$1,240.00</span>
+                </div>
+                <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1);"></div>
+                <div style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 12px; font-weight: 600;">3 Sessions</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+            </div>
+            <div class="btn-go">Return</div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

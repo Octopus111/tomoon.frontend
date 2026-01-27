@@ -1,0 +1,4208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1400, initial-scale=0.25, maximum-scale=3, user-scalable=yes">
+    <title>ToMoon Vault</title>
+    <style>
+        :root {
+            --bg-dark: #0f1115;
+            --bg-card: #161b22;
+            --bg-card-hover: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #2f81f7;
+            --accent-purple: #8957e5;
+            --accent-green: #238636;
+            --border: #30363d;
+            --border-hover: #8b949e;
+            --grid-gap: 20px;
+        }
+
+        /* Hide Scrollbars */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Main Content Area matches sidebar padding */
+        .main-content {
+            margin-left: 240px; /* Width of sidebar */
+            margin-top: 60px; /* Height of topbar */
+            padding: 30px;
+            flex: 1;
+            max-width: 1600px;
+            box-sizing: border-box;
+        }
+
+        /* Vault Header */
+        .vault-header {
+            margin-bottom: 30px;
+        }
+
+        .vault-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0 0 20px 0;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input-wrapper svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px 12px 12px 40px;
+            color: var(--text-primary);
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        /* Search dropdown */
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 12px 30px rgba(0,0,0,.45);
+            z-index: 9999;
+            overflow: hidden;
+            display: none;
+        }
+
+        .search-dropdown.active { display: block; }
+
+        .search-dd-header {
+            padding: 10px 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(48, 54, 61, 0.6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-dd-list {
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .search-dd-section-title {
+            padding: 10px 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            background: rgba(30, 36, 45, 0.35);
+            border-top: 1px solid rgba(48, 54, 61, 0.6);
+            border-bottom: 1px solid rgba(48, 54, 61, 0.6);
+        }
+
+        .search-dd-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.35);
+        }
+
+        .search-dd-item:hover,
+        .search-dd-item.active {
+            background: var(--bg-card-hover);
+        }
+
+        .search-dd-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.25;
+        }
+
+        .search-dd-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-dd-snippet {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .search-dd-pill {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            color: #c4b5fd;
+            background: rgba(139, 92, 246, 0.08);
+        }
+
+        .action-btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn.secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+        }
+
+        /* Grid Layout */
+        .vault-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .left-col {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Initial Quick Capture */
+        .quick-capture-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .capture-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+            min-height: 40px;
+        }
+
+        /* Quick Capture: contenteditable placeholder */
+        .capture-input[contenteditable="true"] {
+            white-space: pre-wrap;
+            line-height: 1.55;
+        }
+
+        .capture-input[contenteditable="true"]:empty::before {
+            content: attr(data-placeholder);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        /* Drag & Drop Styles */
+        .capture-input.drag-over,
+        .note-content.drag-over {
+            /* Use outline instead of border to avoid layout shift/jitter while dragging */
+            outline: 2px dashed var(--accent-blue) !important;
+            outline-offset: -2px;
+            background: rgba(47, 129, 247, 0.05) !important;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        /* Drag & Drop caret indicator (no DOM mutation inside editor) */
+        .tm-drop-caret-line {
+            position: fixed;
+            width: 2px;
+            background: var(--accent-blue);
+            border-radius: 2px;
+            box-shadow: 0 0 0 2px rgba(47, 129, 247, 0.15);
+            z-index: 10001;
+            pointer-events: none;
+            display: none;
+        }
+
+        /* Collections */
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        /* Collections in RIGHT column: render as a vertical list (single column) */
+        .right-col .collections-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .right-col .collection-card {
+            padding: 14px;
+        }
+
+        .right-col .collection-preview {
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            height: auto;
+        }
+
+        .collection-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .collection-card:hover {
+            border-color: var(--text-muted);
+            transform: translateY(-2px);
+        }
+
+        .collection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .collection-icon {
+            color: var(--accent-purple);
+        }
+
+        .collection-menu {
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .collection-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .collection-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .collection-preview {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 36px;
+            margin-bottom: 15px;
+        }
+
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .btn-sm:hover {
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+        }
+
+        /* Recent Activity */
+        .activity-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2px;
+        }
+
+        .filter-tab {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-muted);
+            position: relative;
+        }
+
+        .filter-tab.active {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .filter-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-blue);
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: var(--bg-card);
+            border-radius: 0;
+            transition: background 0.2s;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+        }
+
+        .activity-item:first-child { border-top-left-radius: 8px; border-top-right-radius: 8px; }
+        .activity-item:last-child { border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; border-bottom: none; }
+
+        .activity-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .item-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tag-pill {
+            background: rgba(48, 54, 61, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        /* Right Sidebar */
+        .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .highlight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .highlight-quote {
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--accent-purple);
+            padding-left: 15px;
+        }
+
+        .highlight-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .highlight-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .mini-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .mini-title {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .mini-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Icons */
+        .folder-icon { color: #8b949e; }
+        .note-icon { color: #8957e5; }
+        .idea-icon { color: #faa356; }
+        .journal-icon { color: #2f81f7; }
+
+        /* View Management */
+        .view-section {
+            display: none;
+        }
+        .view-section.active {
+            display: block;
+        }
+
+        /* Collection View Layout */
+        .collection-layout {
+            display: grid;
+            grid-template-columns: 240px 320px 1fr 0px;
+            gap: 0;
+            height: calc(100vh - 40px); /* Adjust for margins */
+            margin: -30px; /* Counteract main-content padding */
+            max-width: none;
+        }
+
+        .cl-sidebar {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cl-notes-list {
+            background: var(--bg-dark);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .cl-notes-list > div:last-child {
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+        }
+
+        .cl-notes-list > div:last-child::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cl-main {
+            padding: 30px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .cl-right {
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cl-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Note List Column Styles */
+        .list-header {
+            margin-bottom: 20px;
+        }
+        
+        .list-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .note-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .note-card:hover, .note-card.active {
+            border-color: var(--text-muted);
+            background: var(--bg-card-hover);
+        }
+
+        .note-card.active {
+            border-color: var(--accent-blue);
+        }
+
+        .nc-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .nc-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .note-tags {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .tag {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .tag.linked {
+            background: rgba(47, 129, 247, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .tag.pinned {
+            background: rgba(250, 163, 86, 0.1);
+            color: #faa356;
+        }
+
+        .cl-nav-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .cl-nav-item:hover, .cl-nav-item.active {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+        }
+
+        .cl-nav-item.active {
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .note-header {
+            margin-bottom: 20px;
+        }
+
+        .note-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            width: 100%;
+            outline: none;
+        }
+
+        .note-meta {
+            display: flex;
+            gap: 15px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .note-content {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .note-content h3 {
+            font-size: 18px;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        .note-content ul {
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        .note-content li {
+            margin-bottom: 8px;
+        }
+
+        /* Right sidebar widgets */
+        .widget-box {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .widget-header {
+            background: rgba(30, 36, 45, 0.5);
+            padding: 10px 15px;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .widget-content {
+            padding: 15px;
+        }
+
+        .backlink-item {
+            display: flex;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+            font-size: 13px;
+        }
+        
+        .backlink-item:last-child { border-bottom: none; }
+
+        .backlink-icon { color: var(--accent-purple); }
+
+        /* Highlight Card Hover Delete Icon */
+        .highlight-card-hover {
+            position: relative;
+        }
+
+        .highlight-delete-icon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .highlight-card-hover:hover .highlight-delete-icon,
+        .highlight-delete-icon:focus {
+            opacity: 1;
+        }
+
+        .highlight-delete-icon:hover {
+            opacity: 1;
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Dropdown Menu Styles */
+        .dropdown-menu {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 0;
+            min-width: 160px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            z-index: 9000;
+            animation: fadeIn 0.15s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .dropdown-item.danger {
+            color: #ef4444;
+        }
+
+        .dropdown-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 6px 0;
+        }
+
+        .submenu {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 0;
+            min-width: 160px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            z-index: 9001;
+            animation: fadeIn 0.15s ease-out;
+        }
+
+        /* Modal Styles */
+        .vault-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .vault-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.25s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .vault-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .vault-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .vault-modal-body {
+            padding: 20px;
+        }
+
+        .vault-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 15px 20px;
+            border-top: 1px solid var(--border);
+            background: rgba(30, 36, 45, 0.3);
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Collection Card Hover Improvements */
+        .collection-card:hover .collection-menu {
+            opacity: 1;
+        }
+
+        .collection-menu {
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        /* Mini Card Improvements */
+        .mini-card {
+            transition: all 0.2s;
+        }
+
+        .mini-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--text-muted);
+        }
+
+        /* Activity Item Menu Button */
+        .activity-item .collection-menu {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .activity-item .collection-menu:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        /* Luna Button Styles */
+        .luna-btn {
+            background: rgba(139, 92, 246, 0.1) !important;
+            border-color: rgba(139, 92, 246, 0.3) !important;
+            color: #a78bfa !important;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .luna-btn:hover {
+            background: rgba(139, 92, 246, 0.2) !important;
+            border-color: rgba(139, 92, 246, 0.5) !important;
+            color: #c4b5fd !important;
+        }
+
+        /* Note Title Input */
+        .note-title {
+            flex: 1;
+            outline: none;
+            min-width: 0;
+        }
+
+        /* Luna Action Buttons */
+        .luna-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .luna-action-btn:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
+        }
+
+        .luna-action-btn svg {
+            flex-shrink: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Text Editor Module -->
+    <link rel="stylesheet" href="../shared/text-editor/text-editor.css">
+    <script src="../shared/text-editor/text-editor.js"></script>
+
+    <!-- Sidebar & Topbar scripts -->
+    <aside class="sidebar" id="sidebar"></aside>
+    <script src="../shared/sidebar_mvp.js?v=20260127-3"></script>
+    <script src="../shared/topbar.js?v=20260127-3"></script>
+    <script src="../shared/luna.js"></script>
+    <script>
+        // Init navigation
+        initSidebar('vault', null, { title: 'Vault', basePath: '..' }); // 激活Vault高亮
+    </script>
+
+    <main class="main-content">
+        
+        <!-- View: HUB (Default) -->
+        <div id="view-hub" class="view-section active">
+            <!-- Header -->
+            <div class="vault-header">
+            <p style="color: var(--text-muted); margin: 0 0 20px 0;">Save what matters. Review it later.</p>
+            
+            <div class="search-row">
+                <div class="search-input-wrapper">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" class="search-input" placeholder="Search notes & highlights...">
+                    <div id="vault-search-dropdown" class="search-dropdown" aria-label="Search results">
+                        <div class="search-dd-header">
+                            <span id="vault-search-dd-title">Search</span>
+                            <span style="font-size: 11px; color: var(--text-muted);">Esc to close</span>
+                        </div>
+                        <div id="vault-search-dd-list" class="search-dd-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="vault-grid">
+            <!-- Left Main Column -->
+            <div class="left-col">
+                
+                <!-- Quick Capture -->
+                <div class="quick-capture-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            Quick Capture
+                        </div>
+                        <svg style="color: var(--text-muted); cursor: pointer;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    </div>
+                    <div class="capture-input" contenteditable="true" data-placeholder="Write a thought... paste a screenshot..." style="min-height: 120px;"></div>
+                    <div id="quick-save-actions" style="display: none; justify-content: flex-end; margin-top: 10px;">
+                        <button class="action-btn" onclick="saveQuickCapture()">
+                            Save Note
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Highlights (moved from right column) -->
+                <div class="highlight-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #faa356;"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path></svg>
+                            Highlights
+                        </div>
+                    </div>
+
+                    <div id="highlights-panel"></div>
+                </div>
+
+                <!-- Recent Activity List -->
+                <div>
+                    <div class="section-header">
+                        <div class="section-title">Recent Activity</div>
+                        <div class="activity-filters" style="border: none; margin: 0;">
+                            <div class="filter-tab active" style="padding: 0 10px; padding-bottom: 2px; cursor: pointer;" onclick="setActivityFilter('all', this)">All</div>
+                            <div class="filter-tab" style="padding: 0 10px; padding-bottom: 2px; cursor: pointer;" onclick="setActivityFilter('notes', this)">Notes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-list">
+                        <!-- Item 1 -->
+                        <div class="activity-item" onclick="openActivityItem('weekly-review-50')">
+                            <div class="item-icon folder-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                            </div>
+                            <div class="item-content">
+                                <div class="item-title">Weekly Review - Week 50</div>
+                                <div class="item-meta">Weekly Review · Today</div>
+                            </div>
+                            <button class="collection-menu" onclick="showActivityMenu('weekly-review-50', this, arguments[0])">...</button>
+                        </div>
+                        
+                        <!-- Item 2 -->
+                        <div class="activity-item" onclick="switchView('collection')">
+                            <div class="item-icon note-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </div>
+                            <div class="item-content">
+                                <div class="item-title">Market Thoughts: NQ Volatility</div>
+                                <div class="item-meta">Market Thoughts · 2 days ago</div>
+                            </div>
+                            <button class="collection-menu" onclick="showActivityMenu('nq-volatility', this, arguments[0])">...</button>
+                        </div>
+
+                        <!-- Item 3 -->
+                        <div class="activity-item" onclick="openActivityItem('note-created')">
+                            <div class="item-icon idea-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </div>
+                            <div class="item-content">
+                                <div class="item-title">created note: Market Thoughts: NQ Volatility</div>
+                                <div class="item-meta">Yesterday</div>
+                            </div>
+                            <button class="collection-menu" onclick="showActivityMenu('note-created', this, arguments[0])">...</button>
+                        </div>
+
+                         <!-- Item 4 -->
+                         <div class="activity-item" onclick="openActivityItem('highlight-extracted')">
+                            <div class="item-icon journal-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            </div>
+                            <div class="item-content">
+                                <div class="item-title">Extracted highlight to note: Strategic Idea: Gap Fill Setup</div>
+                                <div class="item-meta">Yesterday</div>
+                            </div>
+                            <button class="collection-menu" onclick="showActivityMenu('highlight-extracted', this, arguments[0])">...</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Sidebar Column -->
+            <div class="right-col">
+                <!-- Collections (moved from left column) -->
+                <div class="quick-capture-card">
+                    <div class="section-header">
+                        <div class="section-title">Collections</div>
+                    </div>
+
+                    <div class="collections-grid">
+                        <!-- Card 1: All Notes -->
+                        <div class="collection-card" data-collection-id="all" onclick="openCollection('all')">
+                            <div class="collection-header">
+                                <div class="collection-icon" style="color: var(--accent-blue);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"></path><path d="M8 8h8"></path><path d="M8 12h8"></path><path d="M8 16h6"></path></svg>
+                                </div>
+                                <button class="collection-menu" onclick="openCollection('all', arguments[0])">↗</button>
+                            </div>
+                            <div class="collection-title" data-role="collection-title">All Notes</div>
+                            <div class="collection-meta" data-role="collection-meta">—</div>
+                            <div class="collection-preview" data-role="collection-preview">—</div>
+                            <button class="btn-sm" style="width: 100%;" onclick="openCollection('all', arguments[0])">Open</button>
+                        </div>
+
+                        <!-- Card 2: Quick Notes -->
+                        <div class="collection-card" data-collection-id="quick" onclick="openCollection('quick')">
+                            <div class="collection-header">
+                                <div class="collection-icon" style="color: #faa356;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                                </div>
+                                <button class="collection-menu" onclick="showCollectionMenu('quick', this, arguments[0])">...</button>
+                            </div>
+                            <div class="collection-title" data-role="collection-title">Quick Notes</div>
+                            <div class="collection-meta" data-role="collection-meta">—</div>
+                            <div class="collection-preview" data-role="collection-preview">—</div>
+                            <button class="btn-sm" style="width: 100%;" onclick="openCollection('quick', arguments[0])">Open</button>
+                        </div>
+
+                        <!-- Card 3: Strategy Ideas -->
+                        <div class="collection-card" data-collection-id="strategy" onclick="openCollection('strategy')">
+                            <div class="collection-header">
+                                <div class="collection-icon" style="color: #2f81f7;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                                </div>
+                                <button class="collection-menu" onclick="showCollectionMenu('strategy', this, arguments[0])">...</button>
+                            </div>
+                            <div class="collection-title" data-role="collection-title">Strategy Ideas</div>
+                            <div class="collection-meta" data-role="collection-meta">—</div>
+                            <div class="collection-preview" data-role="collection-preview">—</div>
+                            <button class="btn-sm" style="width: 100%;" onclick="openCollection('strategy', arguments[0])">Open</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        </div> <!-- End of view-hub -->
+
+        <!-- View: COLLECTION (Detail) -->
+        <div id="view-collection" class="view-section">
+            <div class="collection-layout">
+                
+                <!-- Inner Sidebar -->
+                <div class="cl-sidebar">
+                    <div class="cl-header">
+                        <button class="btn-sm" onclick="switchView('hub')" style="margin-bottom: 15px;">← Back to Hub</button>
+                        <h3 style="margin: 0;">Collection</h3>
+                    </div>
+                    
+                    <div style="padding: 10px 0;" id="collection-nav-list">
+                        <div class="cl-nav-item active" data-collection="All" onclick="selectAllNotes(this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> All Notes</div>
+                        <div class="cl-nav-item" data-collection="Quick Notes" onclick="selectCollection('Quick Notes', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg> Quick Notes</div>
+                        <div class="cl-nav-item" data-collection="Strategy Ideas" onclick="selectCollection('Strategy Ideas', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg> Strategy Ideas</div>
+                        <div class="cl-nav-item" data-collection="Gold Market" onclick="selectCollection('Gold Market', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Gold Market</div>
+                    </div>
+
+                    <div style="padding: 20px;">
+                        <button onclick="createNewCollection()" style="width: 100%; border: 1px dashed var(--border); background: transparent; color: var(--text-muted); padding: 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--text-secondary)'; this.style.color='var(--text-secondary)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            New Collection
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notes List Column (New) -->
+                <div class="cl-notes-list">
+                    <div class="list-header">
+                        <div class="list-title">
+                            All Notes
+                            <button class="btn-sm" onclick="createNewNote()">+ New Note</button>
+                        </div>
+                        <div class="list-filters">
+                            <span style="cursor: pointer;" onclick="setSmartFilter('type')">Type: All</span> · <span>Tags: All</span> · <span>Sort: Last Modified ▼</span>
+                        </div>
+                        <input type="text" placeholder="Search notes..." style="width: 100%; padding: 8px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); border-radius: 4px; margin-top: 10px; font-size: 13px; outline: none;" oninput="filterNotesLocal(this.value)">
+                    </div>
+
+                    <div style="flex: 1; overflow-y: auto;" id="notes-list-container">
+                        <div class="note-card active" onclick="selectNote(1)">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <div style="color: #faa356; font-size: 11px;">💡 Gold Market</div>
+                                <button type="button" data-note-menu-btn="1" data-note-id="1" style="color: var(--text-muted); background: none; border: none; cursor: pointer;">...</button>
+                            </div>
+                            <div class="nc-title">Market Thoughts: NQ Volatility</div>
+                            <div class="nc-meta">Market · Linked · Apr 22, 2024</div>
+                        </div>
+
+                        <div class="note-card" onclick="selectNote(2)">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <div style="color: #faa356; font-size: 11px;">💡 Gold Market</div>
+                                <span style="color: #faa356;">📌</span>
+                            </div>
+                            <div class="nc-title">Gold Price Drivers - Macro & Micro</div>
+                            <div class="nc-meta">Market · Linked · Apr 18, 2024</div>
+                        </div>
+
+                        <div class="note-card" onclick="selectNote(3)">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <div style="color: #faa356; font-size: 11px;">💡 Gold Market</div>
+                                <span style="color: #faa356;">📌</span>
+                            </div>
+                            <div class="nc-title">Mental Checklist for Gold Trades</div>
+                            <div class="nc-meta">Checklist · Apr 18, 2024</div>
+                        </div>
+
+                        <div class="note-card" onclick="selectNote(4)">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <div style="color: #faa356; font-size: 11px;">💡 Gold Market</div>
+                                <button type="button" data-note-menu-btn="1" data-note-id="4" style="color: var(--text-muted); background: none; border: none; cursor: pointer;">...</button>
+                            </div>
+                            <div class="nc-title">Strategic Idea: Breakout Strategy</div>
+                            <div class="nc-meta">Strategy · Linked · Apr 10, 2024</div>
+                        </div>
+                        
+                        <div style="margin-top: 20px; font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📌 Pinned (2)</div>
+                    </div>
+                </div>
+
+                <!-- Main Note Area -->
+                <div class="cl-main">
+                    <div class="note-header">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                            <input type="text" class="note-title" value="Market Thoughts: NQ Volatility">
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn-sm luna-btn" onclick="askLunaAboutNote()" title="Ask Luna AI">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #8b5cf6;"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                                    Ask Luna
+                                </button>
+                                <button class="btn-sm" onclick="togglePinNote()" title="Pin Note">📌</button>
+                                <button class="btn-sm" onclick="showNoteOptions(arguments[0], this)" title="More Options">⋯</button>
+                            </div>
+                        </div>
+                        <div class="note-meta">
+                            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 2 hours ago</span>
+                            <span>Linked to: TradingView, Weekend Review</span>
+                        </div>
+                    </div>
+
+                    <div class="note-content" contenteditable="true">
+                        <p>NQ is showing increased volatility as it approaches a critical resistance level at 15,350:</p>
+                        <ul>
+                            <li>VIX has spiked from 12 to 18 in the last 1 trading sessions.</li>
+                            <li>Increased wicks and larger candles around the key level indicate hesitation.</li>
+                            <li>Big tech earnings upcoming could lead to increased price swings.</li>
+                        </ul>
+
+                        <h3>Potential Scenarios</h3>
+                        <ul>
+                            <li>Test and reject off 15,350 leads to pullback to 15,000 level.</li>
+                            <li>Strong breakout above 15,350 sets next target at 15,600.</li>
+                            <li>Revising position size accordingly, currently reducing trades by 25%.</li>
+                        </ul>
+
+                        <div style="margin-top: 20px; padding: 15px; background: #000; border-radius: 4px; border: 1px solid var(--border);">
+                            <div style="font-size: 12px; color: var(--text-muted); text-align: center;">[Chart Snapshot: NQ 1H Gap Fill]</div>
+                            <svg width="100%" height="200" viewBox="0 0 400 200" style="margin-top: 10px;">
+                                <path d="M0,150 L50,140 L80,160 L120,100 L150,110 L200,80 L250,90 L300,50 L350,60 L400,20" fill="none" stroke="#238636" stroke-width="2"></path>
+                            </svg>
+                        </div>
+
+                        <p style="margin-top: 20px;">
+                            Watching PA closely around the resistance. Looking for a rejection with a tight stop above resistance or a clean ...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar Context -->
+                <div class="cl-right">
+                    <div class="widget-box">
+                        <div class="widget-header">Recent Activity</div>
+                        <div class="widget-content">
+                            <div class="activity-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Highlight Button Removed (Integrated into Text Editor) -->
+
+    <!-- Toast Notification -->
+    <div id="vault-toast" style="
+        position: fixed; 
+        bottom: 30px; 
+        left: 50%; 
+        transform: translateX(-50%) translateY(100px); 
+        background: var(--bg-card); 
+        border: 1px solid var(--success); 
+        padding: 10px 20px; 
+        border-radius: 6px; 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+        z-index: 2000; 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        opacity: 0; 
+        transition: all 0.3s;
+    ">
+        <div style="color: var(--success);">✓</div>
+        <div id="vault-toast-msg" style="font-size: 14px;">Action Completed</div>
+    </div>
+
+    <script>
+        // ========== DATA MODELS ==========
+        const defaultNotesData = [
+            { id: 1, title: 'Market Thoughts: NQ Volatility', collection: 'Gold Market', type: 'Market', linked: true, pinned: false, date: 'Apr 22, 2024', content: `<p>NQ is showing increased volatility as it approaches a critical resistance level at 15,350:</p>
+                <ul>
+                    <li>VIX has spiked from 12 to 18 in the last 1 trading sessions.</li>
+                    <li>Increased wicks and larger candles around the key level indicate hesitation.</li>
+                    <li>Big tech earnings upcoming could lead to increased price swings.</li>
+                </ul>
+                <h3>Potential Scenarios</h3>
+                <ul>
+                    <li>Test and reject off 15,350 leads to pullback to 15,000 level.</li>
+                    <li>Strong breakout above 15,350 sets next target at 15,600.</li>
+                    <li>Revising position size accordingly, currently reducing trades by 25%.</li>
+                </ul>
+                <div style="margin-top: 20px; padding: 15px; background: #000; border-radius: 4px; border: 1px solid var(--border);">
+                    <div style="font-size: 12px; color: var(--text-muted); text-align: center;">[Chart Snapshot: NQ 1H Gap Fill]</div>
+                    <svg width="100%" height="200" viewBox="0 0 400 200" style="margin-top: 10px;">
+                        <path d="M0,150 L50,140 L80,160 L120,100 L150,110 L200,80 L250,90 L300,50 L350,60 L400,20" fill="none" stroke="#238636" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <p style="margin-top: 20px;">Watching PA closely around the resistance. Looking for a rejection with a tight stop above resistance or a clean breakout...</p>`,
+                backlinks: [
+                    { icon: '★', title: 'Weekend Review • Week 49', time: '2d ago' },
+                    { icon: '💡', title: 'Session Review: 8/16/2023', time: '3d ago' }
+                ],
+                attachments: [{ type: 'TV', name: 'TradingView', detail: 'NQ1! Nasdaq 100 E-mini' }]
+            },
+            { id: 2, title: 'Gold Price Drivers - Macro & Micro', collection: 'Gold Market', type: 'Market', linked: true, pinned: true, date: 'Apr 18, 2024', content: `<p>Key factors driving Gold prices:</p>
+                <h3>Macro Drivers</h3>
+                <ul>
+                    <li>Federal Reserve interest rate policy</li>
+                    <li>US Dollar strength (inverse correlation)</li>
+                    <li>Geopolitical tensions and risk-off sentiment</li>
+                    <li>Inflation expectations</li>
+                </ul>
+                <h3>Micro Drivers</h3>
+                <ul>
+                    <li>Technical support/resistance levels</li>
+                    <li>Seasonal patterns (wedding season in India)</li>
+                    <li>Central bank buying activity</li>
+                </ul>`,
+                backlinks: [{ icon: '📊', title: 'Gold Trading Blueprint', time: '5d ago' }],
+                attachments: []
+            },
+            { id: 3, title: 'Mental Checklist for Gold Trades', collection: 'Gold Market', type: 'Checklist', linked: false, pinned: true, date: 'Apr 18, 2024', content: `<p>Before entering any Gold trade, verify:</p>
+                <ul>
+                    <li>✅ Check DXY trend direction</li>
+                    <li>✅ Review economic calendar for USD events</li>
+                    <li>✅ Confirm technical setup on H4/D1</li>
+                    <li>✅ Set proper position size (max 2% risk)</li>
+                    <li>✅ Define clear stop loss level</li>
+                    <li>✅ Identify take profit targets (1:2 min RR)</li>
+                </ul>`,
+                backlinks: [],
+                attachments: []
+            },
+            { id: 4, title: 'Strategic Idea: Breakout Strategy', collection: 'Gold Market', type: 'Strategy', linked: true, pinned: false, date: 'Apr 10, 2024', content: `<p>Breakout strategy for ranging markets:</p>
+                <h3>Setup Criteria</h3>
+                <ul>
+                    <li>Price consolidating for 3+ sessions</li>
+                    <li>Volume declining during consolidation</li>
+                    <li>Clear support/resistance boundaries</li>
+                </ul>
+                <h3>Entry Rules</h3>
+                <ul>
+                    <li>Enter on candle close above/below range</li>
+                    <li>Confirm with volume spike (1.5x average)</li>
+                    <li>Stop loss: opposite side of range</li>
+                </ul>`,
+                backlinks: [{ icon: '⚡', title: 'Session: Apr 10 AM', time: '1w ago' }],
+                attachments: [{ type: 'IMG', name: 'Breakout Chart', detail: 'breakout_example.png' }]
+            },
+            { id: 5, title: 'Weekly Review - Week 50', collection: 'Weekly Reviews', type: 'Review', linked: false, pinned: false, date: 'Apr 24, 2024', content: `<p>Week 50 recap highlights:</p>
+                <ul>
+                    <li>Focused on patience around key levels.</li>
+                    <li>Reduced overtrading during low volatility sessions.</li>
+                    <li>Noted improvement in entry timing.</li>
+                </ul>
+                <p>Action: Keep pre-market checklist visible during sessions.</p>`,
+                backlinks: [],
+                attachments: []
+            },
+            { id: 6, title: 'Market Thoughts: NQ Volatility', collection: 'Market Thoughts', type: 'Market', linked: true, pinned: false, date: 'Apr 22, 2024', content: `<p>Key takeaways on current volatility:</p>
+                <ul>
+                    <li>Watch reactions at 15,350 resistance.</li>
+                    <li>Consider reduced size during earnings week.</li>
+                    <li>Plan for both rejection and breakout scenarios.</li>
+                </ul>`,
+                backlinks: [],
+                attachments: []
+            },
+            { id: 7, title: 'Strategy Idea: Pullback Continuation', collection: 'Strategy Ideas', type: 'Strategy', linked: false, pinned: false, date: 'Apr 12, 2024', content: `<p>Pullback continuation setup:</p>
+                <ul>
+                    <li>Trend confirmed on H1 and H4.</li>
+                    <li>Wait for 38.2%–50% retrace.</li>
+                    <li>Enter on rejection candle with volume confirmation.</li>
+                </ul>`,
+                backlinks: [],
+                attachments: []
+            }
+        ];
+
+        // Load notes from LocalStorage
+        let notesData = JSON.parse(localStorage.getItem('tm_vault_notes'));
+        if (!notesData || !Array.isArray(notesData)) {
+            notesData = defaultNotesData; // Fallback to default
+            localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+        }
+
+        // Activity Data
+        const defaultActivityData = [
+             { id: 'act-1', title: 'Weekly Review - Week 50', meta: 'Weekly Review · Today', type: 'folder', action: 'openActivityItem', payload: 'weekly-review-50' },
+             { id: 'act-2', title: 'Market Thoughts: NQ Volatility', meta: 'Market Thoughts · 2 days ago', type: 'note', action: 'openNote', payload: 1 }, 
+             { id: 'act-3', title: 'created note: Market Thoughts: NQ Volatility', meta: 'Yesterday', type: 'idea', action: 'openNote', payload: 1 },
+             { id: 'act-4', title: 'Extracted highlight to note: Strategic Idea: Gap Fill Setup', meta: 'Yesterday', type: 'journal', action: 'openActivityItem', payload: 'highlight-extracted' }
+        ];
+
+        let activityData = JSON.parse(localStorage.getItem('tm_vault_activity'));
+        if (!activityData) {
+            activityData = defaultActivityData;
+            localStorage.setItem('tm_vault_activity', JSON.stringify(activityData));
+        }
+
+        const collectionsData = [
+            { id: 'quick', name: 'Quick Notes', icon: 'note', color: '#faa356', unsorted: 0, preview: 'Quick capture notes...' },
+            { id: 'strategy', name: 'Strategy Ideas', icon: 'chart', color: '#2f81f7', unsorted: 2, preview: 'Gold 1-hour chart gap fill setup Today' }
+        ];
+
+        const defaultHighlightsData = [
+            { id: 1, text: 'Avoid overthinking the loss – stick to the process...', fullText: 'Avoid overthinking the loss – stick to the process...', source: 'Psychology', date: 'Apr 10, 2024', color: null, reviewed: true },
+            { id: 2, text: 'Remember: when in range-bound market, scalps are...', fullText: 'Remember: when in range-bound market, scalps are...', source: 'Session (Esention)', date: 'Apr 2024', color: null, reviewed: false },
+            { id: 3, text: 'Always reduce size in the middle of high volatility...', fullText: 'Always reduce size in the middle of high volatility...', source: 'Session (Today)', date: 'Apr 10, 2024', color: null, reviewed: false }
+        ];
+
+        let highlightsData = JSON.parse(localStorage.getItem('tm_vault_highlights'));
+        if (!highlightsData || !Array.isArray(highlightsData)) {
+            highlightsData = defaultHighlightsData;
+            localStorage.setItem('tm_vault_highlights', JSON.stringify(highlightsData));
+        }
+
+        // State
+        let currentNoteId = 1;
+        let currentCollection = 'All';
+        let currentFilter = { type: 'All', linked: false, pinned: false };
+        let activityFilter = 'all';
+
+        // Highlights state
+        let currentHighlightId = null;
+
+        function persistHighlights() {
+            localStorage.setItem('tm_vault_highlights', JSON.stringify(highlightsData));
+        }
+
+        function nextHighlightId() {
+            const maxId = highlightsData.reduce((m, h) => Math.max(m, Number(h.id) || 0), 0);
+            return maxId + 1;
+        }
+
+        function setActiveHighlight(id) {
+            currentHighlightId = id;
+            document.querySelectorAll('#highlights-panel [data-highlight-id]')
+                .forEach(el => el.classList.toggle('active', String(el.dataset.highlightId) === String(id)));
+        }
+
+        function removeHighlightFromAllNotes(highlightId) {
+            let changed = false;
+            notesData.forEach(n => {
+                if (!Array.isArray(n.highlightIds) || n.highlightIds.length === 0) return;
+                const beforeLen = n.highlightIds.length;
+                n.highlightIds = n.highlightIds.filter(id => String(id) !== String(highlightId));
+                if (n.highlightIds.length !== beforeLen) changed = true;
+            });
+            if (changed) {
+                localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+            }
+        }
+
+        function deleteHighlight(highlightId) {
+            const idx = highlightsData.findIndex(h => String(h.id) === String(highlightId));
+            if (idx === -1) return;
+
+            if (!confirm('Delete this highlight? This will also remove it from any notes.')) return;
+
+            highlightsData.splice(idx, 1);
+            persistHighlights();
+            removeHighlightFromAllNotes(highlightId);
+
+            // Close any open highlight modal(s)
+            document.querySelectorAll('.vault-modal-overlay[data-highlight-modal="1"]').forEach(m => m.remove());
+
+            // Clear selection if needed
+            if (String(currentHighlightId) === String(highlightId)) currentHighlightId = null;
+
+            renderHighlightsPanel();
+            showVaultToast('Highlight deleted');
+        }
+
+        function renderHighlightsPanel() {
+            const panel = document.getElementById('highlights-panel');
+            if (!panel) return;
+
+            const today = highlightsData[0] || null;
+            const unreviewed = highlightsData.filter(h => !h.reviewed);
+
+            const todayHTML = !today ? `
+                <div style="padding: 12px; color: var(--text-muted); font-size: 13px;">No highlights yet</div>
+            ` : `
+                <div class="mini-card highlight-card-hover" data-highlight-id="${today.id}" style="margin-bottom: 16px; cursor: pointer; border-style: solid; position: relative;" data-highlight-action="open">
+                    <button class="highlight-delete-icon" type="button" data-highlight-action="delete" data-highlight-id="${today.id}" title="Delete highlight">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    </button>
+                    <div class="mini-meta" style="margin-bottom: 10px;">Today's Highlight</div>
+                    <div class="highlight-quote">${today.text}</div>
+                    <div class="highlight-meta" style="gap: 10px;">
+                        <span>${today.source} · ${today.date}</span>
+                    </div>
+                </div>
+            `;
+
+            const newHTML = `
+                <div class="section-header" style="margin-top: 10px; margin-bottom: 10px;">
+                    <span class="mini-meta">New Highlights</span>
+                </div>
+                <div class="highlight-list">
+                    ${unreviewed.length === 0 ? `
+                        <div style="padding: 12px; color: var(--text-muted); font-size: 13px;">No new highlights</div>
+                    ` : unreviewed.slice(0, 5).map(h => `
+                        <div class="mini-card highlight-card-hover" data-highlight-id="${h.id}" data-highlight-action="open" style="cursor: pointer; position: relative;">
+                            <button class="highlight-delete-icon" type="button" data-highlight-action="delete" data-highlight-id="${h.id}" title="Delete highlight">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                            </button>
+                            <div class="mini-title">${h.text}</div>
+                            <div class="mini-meta">${h.source} · ${h.date}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${unreviewed.length > 0 ? `
+                <div style="margin-top: 12px; text-align: center;">
+                    <button class="btn-sm" type="button" data-highlight-action="review-modal" style="padding: 6px 16px;">Review All (${unreviewed.length})</button>
+                </div>
+                ` : ''}
+            `;
+
+            panel.innerHTML = todayHTML + newHTML;
+
+            if (currentHighlightId != null) {
+                setActiveHighlight(currentHighlightId);
+            }
+        }
+
+        // ========== SEARCH FUNCTIONALITY ==========
+        const searchInput = document.querySelector('.search-input');
+        if(searchInput) {
+            searchInput.addEventListener('focus', () => {
+                searchInput.parentElement.style.boxShadow = '0 0 0 2px rgba(47, 129, 247, 0.4)';
+            });
+            searchInput.addEventListener('blur', () => {
+                searchInput.parentElement.style.boxShadow = 'none';
+            });
+            searchInput.addEventListener('input', (e) => {
+                const query = (e.target.value || '').trim();
+                runVaultSearch(query);
+            });
+        }
+
+        const _vaultSearch = {
+            dd: null,
+            list: null,
+            title: null,
+            activeIndex: -1,
+            flatItems: [],
+            lastQuery: '',
+            timer: null
+        };
+
+        function initVaultSearchUI() {
+            _vaultSearch.dd = document.getElementById('vault-search-dropdown');
+            _vaultSearch.list = document.getElementById('vault-search-dd-list');
+            _vaultSearch.title = document.getElementById('vault-search-dd-title');
+            if (!_vaultSearch.dd || !_vaultSearch.list) return;
+
+            // Close dropdown on outside click
+            document.addEventListener('click', (evt) => {
+                const wrapper = document.querySelector('.search-input-wrapper');
+                if (!wrapper) return;
+                if (!wrapper.contains(evt.target)) hideVaultSearchDropdown();
+            });
+
+            // Keyboard navigation
+            searchInput?.addEventListener('keydown', (e) => {
+                if (!_vaultSearch.dd?.classList.contains('active')) {
+                    if (e.key === 'Escape') {
+                        searchInput.value = '';
+                        runVaultSearch('');
+                    }
+                    return;
+                }
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    hideVaultSearchDropdown();
+                    return;
+                }
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setActiveSearchIndex(Math.min(_vaultSearch.activeIndex + 1, _vaultSearch.flatItems.length - 1));
+                    return;
+                }
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setActiveSearchIndex(Math.max(_vaultSearch.activeIndex - 1, 0));
+                    return;
+                }
+                if (e.key === 'Enter') {
+                    if (_vaultSearch.activeIndex >= 0) {
+                        e.preventDefault();
+                        const item = _vaultSearch.flatItems[_vaultSearch.activeIndex];
+                        if (item) handleVaultSearchSelect(item);
+                    }
+                }
+            });
+        }
+
+        function showVaultSearchDropdown() {
+            if (_vaultSearch.dd) _vaultSearch.dd.classList.add('active');
+        }
+
+        function hideVaultSearchDropdown() {
+            if (_vaultSearch.dd) _vaultSearch.dd.classList.remove('active');
+            _vaultSearch.activeIndex = -1;
+        }
+
+        function setActiveSearchIndex(idx) {
+            _vaultSearch.activeIndex = idx;
+            const nodes = _vaultSearch.list?.querySelectorAll?.('.search-dd-item[data-idx]');
+            if (!nodes) return;
+            nodes.forEach(n => n.classList.remove('active'));
+            const active = _vaultSearch.list.querySelector(`.search-dd-item[data-idx="${idx}"]`);
+            if (active) {
+                active.classList.add('active');
+                // ensure in view
+                active.scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        function normalizeForSearch(s) {
+            return (s || '').toString().toLowerCase().replace(/\s+/g, ' ').trim();
+        }
+
+        function tokenizeQuery(query) {
+            const q = normalizeForSearch(query);
+            if (!q) return [];
+            // If user typed spaces, treat as AND tokens. Otherwise a single token (works for CN too).
+            if (q.includes(' ')) return q.split(' ').filter(Boolean);
+            return [q];
+        }
+
+        // Stricter match to improve precision:
+        // - Token AND match when query has spaces
+        // - Prefer direct substring
+        // - Allow very limited subsequence only for longer queries (>=4) with a tight span
+        // Returns null if not match, or { score }.
+        function strictMatch(query, text) {
+            const t = normalizeForSearch(text);
+            const tokens = tokenizeQuery(query);
+            if (!tokens.length || !t) return null;
+
+            // All tokens must be present (AND)
+            let firstHit = Infinity;
+            for (const tok of tokens) {
+                const idx = t.indexOf(tok);
+                if (idx === -1) return null;
+                firstHit = Math.min(firstHit, idx);
+            }
+
+            // Strong: direct substring of full query (when single token)
+            const qSingle = tokens.length === 1 ? tokens[0] : null;
+            if (qSingle) {
+                const subIdx = t.indexOf(qSingle);
+                if (subIdx !== -1) {
+                    // earlier is better; longer query gets a bonus
+                    return { score: 900 - subIdx + Math.min(120, qSingle.length * 10) };
+                }
+            }
+
+            // If multi-token, score by earliest hit + token lengths
+            const tokenLen = tokens.reduce((s, tok) => s + tok.length, 0);
+            return { score: 520 - firstHit + Math.min(120, tokenLen * 8) };
+        }
+
+        // Limited subsequence fallback for longer queries only (prevents tons of noisy matches).
+        function limitedSubsequenceMatch(query, text) {
+            const q = normalizeForSearch(query);
+            const t = normalizeForSearch(text);
+            if (!q || !t) return null;
+            if (q.length < 4) return null; // too noisy for short queries
+
+            let ti = 0;
+            let start = -1;
+            let last = -1;
+            for (let qi = 0; qi < q.length; qi++) {
+                const ch = q[qi];
+                const found = t.indexOf(ch, ti);
+                if (found === -1) return null;
+                if (start === -1) start = found;
+                last = found;
+                ti = found + 1;
+            }
+            const span = (last - start) + 1;
+            // Tight span requirement: reject very scattered matches
+            if (span > q.length * 3) return null;
+            const compactBonus = Math.max(0, 180 - span);
+            const earlyBonus = Math.max(0, 180 - start);
+            const lenBonus = Math.min(120, q.length * 10);
+            const score = compactBonus + earlyBonus + lenBonus;
+            // Require a minimum score to count
+            if (score < 200) return null;
+            return { score };
+        }
+
+        function makeSnippet(text, query, maxLen = 120) {
+            const raw = (text || '').toString();
+            const t = normalizeForSearch(raw);
+            const q = normalizeForSearch(query);
+            if (!t || !q) return raw.slice(0, maxLen);
+            const idx = t.indexOf(q);
+            if (idx !== -1) {
+                // Map idx back approximately to raw by using raw lowercased (good enough for demo)
+                const rawLower = raw.toLowerCase();
+                const rawIdx = rawLower.indexOf(q);
+                const start = Math.max(0, rawIdx - 40);
+                const end = Math.min(raw.length, rawIdx + q.length + 60);
+                const prefix = start > 0 ? '…' : '';
+                const suffix = end < raw.length ? '…' : '';
+                return prefix + raw.slice(start, end).replace(/\s+/g, ' ').trim() + suffix;
+            }
+            return raw.replace(/\s+/g, ' ').trim().slice(0, maxLen);
+        }
+
+        function runVaultSearch(query) {
+            if (_vaultSearch.timer) clearTimeout(_vaultSearch.timer);
+            _vaultSearch.timer = setTimeout(() => {
+                _vaultSearch.lastQuery = query;
+                renderVaultSearchResults(query);
+            }, 120);
+        }
+
+        function renderVaultSearchResults(query) {
+            if (!_vaultSearch.dd || !_vaultSearch.list) initVaultSearchUI();
+            if (!_vaultSearch.dd || !_vaultSearch.list) return;
+
+            const q = query.trim();
+            if (!q) {
+                _vaultSearch.list.innerHTML = '';
+                hideVaultSearchDropdown();
+                return;
+            }
+
+            // Very short queries are too noisy; require at least 2 chars
+            if (normalizeForSearch(q).length < 2) {
+                _vaultSearch.list.innerHTML = `<div style="padding: 14px; color: var(--text-muted); font-size: 13px;">请输入至少 2 个字符进行搜索。</div>`;
+                showVaultSearchDropdown();
+                return;
+            }
+
+            // Build note matches
+            const noteMatches = [];
+            notesData.forEach(n => {
+                const contentText = stripHTML(n.content || '');
+                const titleText = n.title || '';
+                const collectionText = n.collection || '';
+
+                // Precision: match title/content first; collection is low-weight and only for longer queries
+                const mt = strictMatch(q, titleText);
+                const mc = strictMatch(q, contentText);
+                let score = -1;
+                let matchKind = '';
+
+                if (mt) { score = Math.max(score, mt.score + 450); matchKind = 'title'; }
+                if (mc) { score = Math.max(score, mc.score + 200); matchKind = matchKind || 'content'; }
+
+                // allow limited subsequence on title/content only
+                if (score < 0) {
+                    const sst = limitedSubsequenceMatch(q, titleText);
+                    const ssc = limitedSubsequenceMatch(q, contentText);
+                    if (sst) { score = Math.max(score, sst.score + 260); matchKind = 'title-fuzzy'; }
+                    if (ssc) { score = Math.max(score, ssc.score + 120); matchKind = matchKind || 'content-fuzzy'; }
+                }
+
+                // collection-only match (low precision) — only if query length >= 3 and direct token match
+                if (score < 0 && normalizeForSearch(q).length >= 3) {
+                    const mcol = strictMatch(q, collectionText);
+                    if (mcol) { score = mcol.score + 40; matchKind = 'collection'; }
+                }
+
+                // Threshold: drop weak matches
+                if (score < 320) return;
+
+                noteMatches.push({
+                    kind: 'note',
+                    id: n.id,
+                    title: n.title || 'Untitled',
+                    collection: n.collection || 'Uncategorized',
+                    type: n.type || 'Note',
+                    date: n.date || '',
+                    snippet: makeSnippet(contentText || n.title || '', q),
+                    score,
+                    _mk: matchKind
+                });
+            });
+
+            // Build highlight matches
+            const highlightMatches = [];
+            highlightsData.forEach(h => {
+                const text1 = (h.fullText || h.text || '').toString();
+                const text2 = (h.source || '').toString();
+
+                const m1 = strictMatch(q, text1);
+                const m2 = strictMatch(q, text2);
+                let score = -1;
+                if (m1) score = Math.max(score, m1.score + 260);
+                if (m2) score = Math.max(score, m2.score + 120);
+
+                // highlights: allow limited subsequence only on fullText (not source)
+                if (score < 0) {
+                    const s1 = limitedSubsequenceMatch(q, text1);
+                    if (s1) score = s1.score + 120;
+                }
+
+                if (score < 340) return;
+                highlightMatches.push({
+                    kind: 'highlight',
+                    id: h.id,
+                    title: (h.text || h.fullText || '').toString().slice(0, 80),
+                    source: h.source || 'Highlight',
+                    date: h.date || '',
+                    snippet: makeSnippet((h.fullText || h.text || '').toString(), q),
+                    score
+                });
+            });
+
+            // Sort by score
+            noteMatches.sort((a, b) => b.score - a.score);
+            highlightMatches.sort((a, b) => b.score - a.score);
+
+            // Group notes by collection for hierarchical feel
+            const byCollection = new Map();
+            // Hard cap: keep only top matches for precision
+            const topNotes = noteMatches.slice(0, 18);
+            topNotes.forEach(n => {
+                if (!byCollection.has(n.collection)) byCollection.set(n.collection, []);
+                byCollection.get(n.collection).push(n);
+            });
+
+            const topHighlights = highlightMatches.slice(0, 8);
+            const total = topNotes.length + topHighlights.length;
+            _vaultSearch.title.textContent = `Results for "${q}"`;
+
+            _vaultSearch.flatItems = [];
+            _vaultSearch.activeIndex = -1;
+
+            let html = '';
+            if (total === 0) {
+                html = `<div style="padding: 14px; color: var(--text-muted); font-size: 13px;">No matches found.</div>`;
+                _vaultSearch.list.innerHTML = html;
+                showVaultSearchDropdown();
+                return;
+            }
+
+            // Notes section
+            if (topNotes.length > 0) {
+                html += `<div class="search-dd-section-title">Notes (by Collection)</div>`;
+                // limit number of collections shown to keep dropdown compact
+                Array.from(byCollection.keys()).slice(0, 6).forEach(col => {
+                    const items = byCollection.get(col) || [];
+                    html += `<div class="search-dd-section-title" style="text-transform:none; letter-spacing:0; font-size:12px;">📁 ${col} <span style="opacity:.7;">(${items.length})</span></div>`;
+                    // per collection cap
+                    items.slice(0, 4).forEach(n => {
+                        const idx = _vaultSearch.flatItems.length;
+                        _vaultSearch.flatItems.push(n);
+                        html += `
+                            <div class="search-dd-item" data-idx="${idx}">
+                                <div class="search-dd-title">
+                                    <span class="search-dd-pill">NOTE</span>
+                                    <span>${escapeHtml(n.title)}</span>
+                                </div>
+                                <div class="search-dd-meta">
+                                    <span>${escapeHtml(n.type)}</span>
+                                    ${n.date ? `<span>· ${escapeHtml(n.date)}</span>` : ''}
+                                </div>
+                                <div class="search-dd-snippet">${escapeHtml(n.snippet || '')}</div>
+                            </div>
+                        `;
+                    });
+                });
+            }
+
+            // Highlights section
+            if (topHighlights.length > 0) {
+                html += `<div class="search-dd-section-title">Highlights</div>`;
+                topHighlights.forEach(h => {
+                    const idx = _vaultSearch.flatItems.length;
+                    _vaultSearch.flatItems.push(h);
+                    html += `
+                        <div class="search-dd-item" data-idx="${idx}">
+                            <div class="search-dd-title">
+                                <span class="search-dd-pill">HIGHLIGHT</span>
+                                <span>${escapeHtml(h.source)}</span>
+                            </div>
+                            <div class="search-dd-meta">
+                                ${h.date ? `<span>${escapeHtml(h.date)}</span>` : ''}
+                            </div>
+                            <div class="search-dd-snippet">${escapeHtml(h.snippet || '')}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            _vaultSearch.list.innerHTML = html;
+            showVaultSearchDropdown();
+            setActiveSearchIndex(0);
+
+            // Click handlers
+            _vaultSearch.list.querySelectorAll('.search-dd-item[data-idx]').forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    const idx = Number(el.getAttribute('data-idx'));
+                    if (Number.isFinite(idx)) setActiveSearchIndex(idx);
+                });
+                el.addEventListener('click', (evt) => {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    const idx = Number(el.getAttribute('data-idx'));
+                    const item = _vaultSearch.flatItems[idx];
+                    if (item) handleVaultSearchSelect(item);
+                });
+            });
+        }
+
+        function handleVaultSearchSelect(item) {
+            hideVaultSearchDropdown();
+            if (!item) return;
+
+            if (item.kind === 'note') {
+                openNoteBySearch(item.id);
+                return;
+            }
+            if (item.kind === 'highlight') {
+                // Open highlight modal
+                viewHighlight(item.id);
+                return;
+            }
+        }
+
+        function openNoteBySearch(noteId) {
+            const note = notesData.find(n => n.id === noteId);
+            if (!note) return;
+            switchView('collection');
+            setTimeout(() => {
+                // Ensure collection matches so note is visible in list
+                currentCollection = note.collection || 'All';
+                setActiveCollectionNav(currentCollection);
+                const titleEl = document.querySelector('.list-title');
+                if (titleEl) titleEl.innerHTML = `${currentCollection === 'All' ? 'All Notes' : escapeHtml(currentCollection)} <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
+                renderNotesList();
+                setTimeout(() => selectNote(noteId), 30);
+            }, 60);
+        }
+
+        function escapeHtml(str) {
+            return (str || '').toString()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // ========== QUICK CAPTURE ==========
+        const quickCaptureInput = document.querySelector('.capture-input');
+        const quickSaveActions = document.getElementById('quick-save-actions');
+
+        if (quickCaptureInput) {
+            quickCaptureInput.addEventListener('input', () => {
+                const hasText = (quickCaptureInput.textContent || '').trim().length > 0;
+                if (quickSaveActions) quickSaveActions.style.display = hasText ? 'flex' : 'none';
+            });
+        }
+
+        function renderActivityList() {
+            const activityLists = document.querySelectorAll('.activity-list');
+            if (!activityLists.length) return;
+            activityLists.forEach(activityList => {
+                activityList.innerHTML = '';
+            });
+            
+            activityData.slice(0, 20).forEach(item => { // Limit to 20 items
+                const el = document.createElement('div');
+                el.className = 'activity-item';
+                
+                // Determine icon
+                let iconSvg = '';
+                if (item.type === 'note') {
+                    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+                } else if (item.type === 'folder') {
+                    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+                } else if (item.type === 'idea') {
+                    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+                } else if (item.type === 'journal') {
+                    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
+                } else {
+                     iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>`;
+                }
+
+                // Resolving title dynamically if possible
+                let displayTitle = item.title;
+                if (item.action === 'openNote') {
+                     const note = notesData.find(n => n.id === item.payload);
+                     if (note) {
+                         displayTitle = (item.type === 'idea' ? 'created note: ' : '') + note.title;
+                     }
+                }
+
+                el.innerHTML = `
+                <div class="item-icon ${item.type}-icon">
+                    ${iconSvg}
+                </div>
+                <div class="item-content">
+                    <div class="item-title">${displayTitle}</div>
+                    <div class="item-meta">${item.meta}</div>
+                </div>
+                <button class="collection-menu" onclick="showActivityMenu('${item.id}', this, arguments[0])">...</button>
+                `;
+                
+                activityLists.forEach(activityList => {
+                    const clonedEl = el.cloneNode(true);
+                    clonedEl.onclick = () => handleActivityClick(item);
+                    const menuBtn = clonedEl.querySelector('.collection-menu');
+                    if (menuBtn) {
+                        menuBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            showActivityMenu(item.id, menuBtn, e);
+                        };
+                    }
+                    activityList.appendChild(clonedEl);
+                });
+            });
+        }
+
+        function handleActivityClick(item) {
+            if (item.action === 'openNote') {
+                openNoteFromActivity(item.payload);
+            } else if (item.action === 'openActivityItem') {
+                if (typeof openActivityItem === 'function') openActivityItem(item.payload);
+            } else {
+                switchView('collection');
+            }
+        }
+
+        function openNoteFromActivity(noteId) {
+             const note = notesData.find(n => n.id === noteId);
+             if (!note) return;
+             
+             switchView('collection');
+             if (currentCollection !== note.collection) {
+                 currentCollection = note.collection;
+                 renderNotesList(); 
+             }
+             
+             // Select note after list renders
+             setTimeout(() => {
+                 selectNote(noteId);
+             }, 50);
+        }
+
+        function saveQuickCapture() {
+            const editor = document.querySelector('.capture-input');
+            if (!editor) return;
+
+            const plainText = (editor.textContent || '').trim();
+            const html = (editor.innerHTML || '').trim();
+            if (plainText) {
+                // Create New Note Object
+                const newId = (notesData.length > 0) ? Math.max(...notesData.map(n => n.id)) + 1 : 1;
+                const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                // Determine title from first line or truncated text
+                const title = plainText.split(/\r?\n/)[0].substring(0, 40) + (plainText.length > 40 ? '...' : '');
+                
+                // Add to notes setup - use 'Quick Notes' as the default collection for quick captures
+                const defaultCollection = 'Quick Notes'; 
+
+                const newNote = {
+                    id: newId,
+                    title: title,
+                    collection: defaultCollection,
+                    type: 'Note',
+                    linked: false,
+                    pinned: false,
+                    date: date,
+                    content: html ? `<div>${html}</div>` : `<p>${plainText.replace(/\n/g, '<br>')}</p>`,
+                    backlinks: [],
+                    attachments: []
+                };
+
+                notesData.unshift(newNote);
+                localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                
+                // Add to Recent Activity
+                addActivityItem(title, `Quick Capture · Today`, 'note', { action: 'openNote', payload: newId });
+
+                showVaultToast('Quick note saved to ' + defaultCollection);
+                editor.innerHTML = '';
+                if (quickSaveActions) quickSaveActions.style.display = 'none';
+
+                // Refresh HUB collection previews
+                updateHubCollectionsUI();
+
+                // Refresh lists if needed
+                if (currentCollection === defaultCollection) {
+                   renderNotesList();
+                }
+            }
+        }
+
+        // ========== HUB COLLECTIONS (REAL DATA PREVIEW) ==========
+        function stripHTML(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html || '';
+            return (tmp.textContent || '').replace(/\s+/g, ' ').trim();
+        }
+
+        function getLatestNoteForCollection(collectionName) {
+            const list = collectionName === 'All'
+                ? [...notesData]
+                : notesData.filter(n => n.collection === collectionName);
+            return list.length ? list[0] : null; // notesData is unshifted => newest first
+        }
+
+        function updateHubCollectionsUI() {
+            const cards = document.querySelectorAll('#view-hub .collection-card[data-collection-id]');
+            if (!cards.length) return;
+
+            cards.forEach(card => {
+                const id = card.getAttribute('data-collection-id');
+                const metaEl = card.querySelector('[data-role="collection-meta"]');
+                const previewEl = card.querySelector('[data-role="collection-preview"]');
+                const titleEl = card.querySelector('[data-role="collection-title"]');
+                if (!metaEl || !previewEl || !titleEl) return;
+
+                if (id === 'all') {
+                    const latest = getLatestNoteForCollection('All');
+                    metaEl.textContent = `${notesData.length} Notes`;
+                    if (latest) {
+                        const previewText = stripHTML(latest.content).slice(0, 80);
+                        previewEl.textContent = previewText ? previewText + (stripHTML(latest.content).length > 80 ? '...' : '') : latest.title;
+                    } else {
+                        previewEl.textContent = 'No notes yet.';
+                    }
+                    return;
+                }
+
+                const collection = collectionsData.find(c => c.id === id);
+                if (!collection) return;
+
+                // Ensure title matches config (in case cards were edited)
+                titleEl.textContent = collection.name;
+
+                const count = notesData.filter(n => n.collection === collection.name).length;
+                metaEl.textContent = `${count} Notes`;
+
+                const latest = getLatestNoteForCollection(collection.name);
+                if (latest) {
+                    const previewText = stripHTML(latest.content).slice(0, 80);
+                    previewEl.textContent = previewText ? previewText + (stripHTML(latest.content).length > 80 ? '...' : '') : latest.title;
+                } else {
+                    previewEl.textContent = 'No notes in this collection.';
+                }
+            });
+        }
+
+        function addActivityItem(title, meta, type, payloadInfo) {
+             const newActivity = {
+                id: 'act-' + Date.now() + Math.round(Math.random()*100),
+                title: title,
+                meta: meta,
+                type: type,
+                action: (payloadInfo && payloadInfo.action) || 'switchView',
+                payload: (payloadInfo && payloadInfo.payload) || 'collection'
+            };
+            
+            activityData.unshift(newActivity);
+            localStorage.setItem('tm_vault_activity', JSON.stringify(activityData));
+            renderActivityList();
+        }
+
+        // Add save on Ctrl+Enter
+        document.querySelector('.capture-input')?.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                saveQuickCapture();
+            }
+        });
+
+        // ========== ACTIVITY FILTER TABS ==========
+        function setActivityFilter(filter, el) {
+            document.querySelectorAll('#view-hub .filter-tab').forEach(tab => tab.classList.remove('active'));
+            el.classList.add('active');
+            activityFilter = filter;
+            
+            const items = document.querySelectorAll('#view-hub .activity-item');
+            items.forEach(item => {
+                const isNote = item.querySelector('.note-icon') !== null;
+                if (filter === 'all' || (filter === 'notes' && isNote)) {
+                    item.style.display = 'flex';
+                } else if (filter === 'notes' && !isNote) {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // ========== NOTE SELECTION ==========
+        function selectNote(noteId, evt = null) {
+            currentNoteId = noteId;
+            const note = notesData.find(n => n.id === noteId);
+            if (!note) return;
+
+            // Update note cards active state
+            document.querySelectorAll('.cl-notes-list .note-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.classList.add('active');
+            } else {
+                const activeCard = document.querySelector(`.cl-notes-list .note-card[data-note-id="${noteId}"]`);
+                if (activeCard) activeCard.classList.add('active');
+            }
+
+            // Update main note area
+            document.querySelector('.note-title').value = note.title;
+            document.querySelector('.note-content').innerHTML = note.content;
+            
+            // Update meta
+            const metaEl = document.querySelector('.note-meta');
+            metaEl.innerHTML = `
+                <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${note.date}</span>
+                <span>${note.linked ? 'Linked' : ''} ${note.pinned ? '• Pinned' : ''}</span>
+            `;
+
+            // Update attachments
+
+        }
+
+
+
+        // ========== NOTES LIST RENDERING ==========
+        function renderNotesList() {
+            const container = document.querySelector('.cl-notes-list > div:last-child');
+            if (!container) return;
+
+            // Handle Collection Filter (All vs Specific)
+            let filtered;
+            if (currentCollection === 'All') {
+                filtered = [...notesData]; // show all
+            } else {
+                filtered = notesData.filter(n => n.collection === currentCollection);
+            }
+            
+            // Apply filters
+            if (currentFilter.type !== 'All') {
+                filtered = filtered.filter(n => n.type === currentFilter.type);
+            }
+            if (currentFilter.linked) {
+                filtered = filtered.filter(n => n.linked);
+            }
+            if (currentFilter.pinned) {
+                filtered = filtered.filter(n => n.pinned);
+            }
+
+            // Separate pinned and unpinned
+            const pinned = filtered.filter(n => n.pinned);
+            const unpinned = filtered.filter(n => !n.pinned);
+
+            let html = '';
+            
+            // Pinned notes first
+            if (pinned.length > 0) {
+                html += `<div style="margin-bottom: 20px; font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📌 Pinned (${pinned.length})</div>`;
+                pinned.forEach(note => {
+                    html += renderNoteCard(note);
+                });
+            }
+
+            // Then unpinned
+            if (pinned.length > 0 && unpinned.length > 0) {
+                html += '<hr style="border: none; border-top: 2px solid var(--border); margin: 15px 0;">';
+            }
+            unpinned.forEach(note => {
+                html += renderNoteCard(note);
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderNoteCard(note) {
+            const isActive = note.id === currentNoteId ? 'active' : '';
+            return `
+                <div class="note-card ${isActive}" data-note-id="${note.id}" onclick="selectNote(${note.id}, arguments[0])">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <div style="color: #faa356; font-size: 11px;">💡 ${note.collection}</div>
+                        <button type="button" data-note-menu-btn="1" data-note-id="${note.id}" style="color: var(--text-muted); background: none; border: none; cursor: pointer;">...</button>
+                    </div>
+                    <div class="note-tags">
+                        ${note.linked ? '<span class="tag linked">Linked</span>' : ''}
+                        ${note.pinned ? '<span class="tag pinned">Pinned</span>' : ''}
+                    </div>
+                    <div class="nc-title">${note.title}</div>
+                    <div class="nc-meta">${note.type} · ${note.date}</div>
+                </div>
+            `;
+        }
+
+        function toggleNoteMenu(noteId, btn, evt = null) {
+            if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
+            closeActiveMenu();
+            
+            const note = notesData.find(n => n.id === noteId);
+            if (!note) return;
+            
+            // Get all unique collections from notesData + collectionsData
+            const existingCollections = [...new Set([
+                ...notesData.map(n => n.collection),
+                ...collectionsData.map(c => c.name),
+                'Quick Notes', 'Strategy Ideas', 'Weekly Reviews', 'Market Thoughts'
+            ])].filter(c => c);
+            
+            const menu = document.createElement('div');
+            menu.className = 'dropdown-menu';
+            menu.style.maxHeight = '400px';
+            menu.style.overflowY = 'auto';
+            menu.innerHTML = `
+                <div class="dropdown-item" onclick="pinNoteById(${noteId})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v4.76z"></path></svg>
+                    ${note.pinned ? 'Unpin Note' : 'Pin Note'}
+                </div>
+                <div class="dropdown-item" onclick="duplicateNoteById(${noteId})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Duplicate
+                </div>
+                <div class="dropdown-divider"></div>
+                <div style="padding: 8px 15px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Move to Collection</div>
+                ${existingCollections.map(col => `
+                    <div class="dropdown-item" onclick="moveNoteToCollectionById(${noteId}, '${col.replace(/'/g, "\\'")}')" style="padding-left: 25px; ${note.collection === col ? 'color: var(--accent-blue); font-weight: 500;' : ''}">
+                        ${note.collection === col ? '✓ ' : ''}${col}
+                    </div>
+                `).join('')}
+                <div class="dropdown-item" onclick="promptNewCollectionForNote(${noteId})" style="padding-left: 25px; color: var(--accent-purple);">
+                    + New Collection...
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item danger" onclick="deleteNoteById(${noteId})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Delete Note
+                </div>
+            `;
+            
+            // Position menu near the button
+            if (btn) {
+                const rect = btn.getBoundingClientRect();
+                menu.style.position = 'fixed';
+                menu.style.top = `${rect.bottom + 5}px`;
+                menu.style.left = `${Math.min(rect.left, window.innerWidth - 200)}px`;
+            } else {
+                menu.style.position = 'fixed';
+                menu.style.top = '50%';
+                menu.style.left = '50%';
+                menu.style.transform = 'translate(-50%, -50%)';
+            }
+            
+            document.body.appendChild(menu);
+            activeMenu = menu;
+            
+            setTimeout(() => {
+                document.addEventListener('click', closeMenuOnOutsideClick);
+            }, 10);
+        }
+
+        // Note menu action helpers
+        function pinNoteById(noteId) {
+            const note = notesData.find(n => n.id === noteId);
+            if (note) {
+                note.pinned = !note.pinned;
+                localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                renderNotesList();
+                showVaultToast(note.pinned ? 'Note pinned' : 'Note unpinned');
+            }
+            closeActiveMenu();
+        }
+
+        function duplicateNoteById(noteId) {
+            const note = notesData.find(n => n.id === noteId);
+            if (note) {
+                const newId = Math.max(...notesData.map(n => n.id)) + 1;
+                const newNote = { ...note, id: newId, title: note.title + ' (Copy)', pinned: false };
+                notesData.unshift(newNote);
+                localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                renderNotesList();
+                updateHubCollectionsUI();
+                showVaultToast('Note duplicated');
+                addActivityItem(`duplicated note: ${note.title}`, `${note.type} · Just Now`, 'note', { action: 'openNote', payload: newId });
+            }
+            closeActiveMenu();
+        }
+
+        function moveNoteToCollectionById(noteId, collectionName) {
+            const note = notesData.find(n => n.id === noteId);
+            if (note && note.collection !== collectionName) {
+                note.collection = collectionName;
+                localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                renderNotesList();
+                updateHubCollectionsUI();
+                showVaultToast(`Moved to ${collectionName}`);
+            }
+            closeActiveMenu();
+        }
+
+        function promptNewCollectionForNote(noteId) {
+            closeActiveMenu();
+            const name = prompt('Enter new collection name:');
+            if (name && name.trim()) {
+                moveNoteToCollectionById(noteId, name.trim());
+            }
+        }
+
+        function deleteNoteById(noteId) {
+            if (confirm('Are you sure you want to delete this note?')) {
+                const idx = notesData.findIndex(n => n.id === noteId);
+                if (idx !== -1) {
+                    notesData.splice(idx, 1);
+                    localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                    
+                    // Select another note if we deleted the current one
+                    if (currentNoteId === noteId && notesData.length > 0) {
+                        currentNoteId = notesData[0].id;
+                        selectNote(currentNoteId);
+                    }
+                    
+                    renderNotesList();
+                    updateHubCollectionsUI();
+                    showVaultToast('Note deleted');
+                }
+            }
+            closeActiveMenu();
+        }
+
+
+
+
+
+        // ========== NEW NOTE ==========
+        function createNewNote() {
+            const newId = Math.max(...notesData.map(n => n.id)) + 1;
+            const newNote = {
+                id: newId,
+                title: 'Untitled Note',
+                collection: currentCollection,
+                type: 'Note',
+                linked: false,
+                pinned: false,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                content: '<p>Start writing...</p>',
+                backlinks: [],
+                attachments: []
+            };
+            notesData.unshift(newNote);
+            currentNoteId = newId;
+            renderNotesList();
+
+            localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+            updateHubCollectionsUI();
+            
+            // Focus on title
+            setTimeout(() => {
+                const titleInput = document.querySelector('.note-title');
+                if (titleInput) {
+                    titleInput.focus();
+                    titleInput.select();
+                }
+            }, 100);
+            
+            showVaultToast('New note created');
+            addActivityItem(`created note: ${newNote.title}`, `${newNote.type} · Just Now`, 'note', { action: 'openNote', payload: newId });
+        }
+
+        // ========== COLLECTION NAVIGATION ==========
+
+        function selectAllNotes(el) {
+            currentCollection = 'All';
+            document.querySelectorAll('.cl-nav-item').forEach(item => item.classList.remove('active'));
+            if(el) el.classList.add('active');
+            
+            // Update list title
+            document.querySelector('.list-title').innerHTML = `All Notes <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
+            
+            renderNotesList();
+        }
+
+        // ========== COLLECTION NAVIGATION ==========
+        function selectCollection(collectionName, el = null) {
+            currentCollection = collectionName;
+            document.querySelectorAll('.cl-nav-item').forEach(item => item.classList.remove('active'));
+            if (el) el.classList.add('active');
+            
+            // Update list title
+            document.querySelector('.list-title').innerHTML = `${collectionName} <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
+            
+            renderNotesList();
+        }
+
+        function setActiveCollectionNav(collectionName) {
+            const navItems = document.querySelectorAll('.cl-nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+
+            const match = document.querySelector(`.cl-nav-item[data-collection="${CSS.escape(collectionName)}"]`);
+            if (match) match.classList.add('active');
+        }
+
+        // ========== OPEN COLLECTION (FROM HUB CARDS) ==========
+        function openCollection(collectionId, evt = null) {
+            if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
+            if (collectionId === 'all') {
+                currentCollection = 'All';
+                switchView('collection');
+                setTimeout(() => {
+                    setActiveCollectionNav('All');
+                    const titleEl = document.querySelector('.list-title');
+                    if (titleEl) titleEl.innerHTML = `All Notes <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
+                    renderNotesList();
+                    showVaultToast('Opened: All Notes');
+                }, 100);
+                return;
+            }
+
+            const collection = collectionsData.find(c => c.id === collectionId);
+            if (!collection) return;
+
+            currentCollection = collection.name;
+            switchView('collection');
+            setTimeout(() => {
+                setActiveCollectionNav(collection.name);
+                const titleEl = document.querySelector('.list-title');
+                if (titleEl) titleEl.innerHTML = `${collection.name} <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
+                renderNotesList();
+                showVaultToast(`Opened: ${collection.name}`);
+            }, 100);
+        }
+
+        // ========== COLLECTION MENU ==========
+        let activeMenu = null;
+        
+        function showCollectionMenu(collectionId, btn, evt = null) {
+            if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
+            closeActiveMenu();
+            
+            const collection = collectionsData.find(c => c.id === collectionId);
+            if (!collection) return;
+            
+            const menu = document.createElement('div');
+            menu.className = 'dropdown-menu';
+            menu.innerHTML = `
+                <div class="dropdown-item" onclick="renameCollection('${collectionId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    Rename
+                </div>
+                <div class="dropdown-item" onclick="duplicateCollection('${collectionId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Duplicate
+                </div>
+                <div class="dropdown-item" onclick="archiveCollection('${collectionId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                    Archive
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item danger" onclick="deleteCollection('${collectionId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Delete
+                </div>
+            `;
+            
+            const rect = btn ? btn.getBoundingClientRect() : { bottom: window.innerHeight / 2, left: window.innerWidth / 2 };
+            menu.style.position = 'fixed';
+            menu.style.top = `${rect.bottom + 5}px`;
+            menu.style.left = `${rect.left - 120}px`;
+            
+            document.body.appendChild(menu);
+            activeMenu = menu;
+            
+            // Close on outside click
+            setTimeout(() => {
+                document.addEventListener('click', closeMenuOnOutsideClick);
+            }, 10);
+        }
+
+        function closeActiveMenu() {
+            if (activeMenu) {
+                activeMenu.remove();
+                activeMenu = null;
+                document.removeEventListener('click', closeMenuOnOutsideClick);
+            }
+        }
+
+        function closeMenuOnOutsideClick(e) {
+            if (activeMenu && !activeMenu.contains(e.target)) {
+                closeActiveMenu();
+            }
+        }
+
+        // Collection Actions
+        function renameCollection(id) {
+            const collection = collectionsData.find(c => c.id === id);
+            if (collection) {
+                const newName = prompt('Enter new name:', collection.name);
+                if (newName && newName.trim()) {
+                    collection.name = newName.trim();
+                    showVaultToast('Collection renamed');
+                }
+            }
+            closeActiveMenu();
+        }
+
+        function duplicateCollection(id) {
+            const collection = collectionsData.find(c => c.id === id);
+            if (collection) {
+                collectionsData.push({
+                    ...collection,
+                    id: collection.id + '-copy',
+                    name: collection.name + ' (Copy)'
+                });
+                showVaultToast('Collection duplicated');
+            }
+            closeActiveMenu();
+        }
+
+        function archiveCollection(id) {
+            showVaultToast('Collection archived');
+            closeActiveMenu();
+        }
+
+        function deleteCollection(id) {
+            if (confirm('Are you sure you want to delete this collection?')) {
+                const index = collectionsData.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    collectionsData.splice(index, 1);
+                    showVaultToast('Collection deleted');
+                }
+            }
+            closeActiveMenu();
+        }
+
+        // ========== ACTIVITY MENU ==========
+        function showActivityMenu(itemId, btn, evt = null) {
+            if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
+            closeActiveMenu();
+            
+            const menu = document.createElement('div');
+            menu.className = 'dropdown-menu';
+            menu.innerHTML = `
+                <div class="dropdown-item" onclick="openActivityItem('${itemId}'); closeActiveMenu();">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    Open
+                </div>
+                <div class="dropdown-item" onclick="pinActivityItem('${itemId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4a2 2 0 0 0-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42z"></path></svg>
+                    Pin to Top
+                </div>
+                <div class="dropdown-item" onclick="hideActivityItem('${itemId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                    Hide
+                </div>
+            `;
+            
+            const rect = btn ? btn.getBoundingClientRect() : { bottom: window.innerHeight / 2, left: window.innerWidth / 2 };
+            menu.style.position = 'fixed';
+            menu.style.top = `${rect.bottom + 5}px`;
+            menu.style.left = `${rect.left - 100}px`;
+            
+            document.body.appendChild(menu);
+            activeMenu = menu;
+            
+            setTimeout(() => {
+                document.addEventListener('click', closeMenuOnOutsideClick);
+            }, 10);
+        }
+
+        function openActivityItem(itemId) {
+            closeActiveMenu();
+            switchView('collection');
+            showVaultToast('Opened from activity');
+        }
+
+        function pinActivityItem(itemId) {
+            closeActiveMenu();
+            showVaultToast('Pinned to top');
+        }
+
+        function hideActivityItem(itemId) {
+            closeActiveMenu();
+            showVaultToast('Hidden from activity');
+        }
+
+        // ========== HIGHLIGHT FUNCTIONS ==========
+        function viewHighlight(id) {
+            const highlight = highlightsData.find(h => h.id === id);
+            if (!highlight) return;
+
+            setActiveHighlight(id);
+            
+            // Show highlight modal
+            showHighlightModal(highlight);
+        }
+
+        function showHighlightModal(highlight) {
+            const modal = document.createElement('div');
+            modal.className = 'vault-modal-overlay';
+            modal.dataset.highlightModal = '1';
+            const selectId = `highlight-note-select-${highlight.id}`;
+            modal.innerHTML = `
+                <div class="vault-modal">
+                    <div class="vault-modal-header">
+                        <h3>Highlight</h3>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button onclick="deleteHighlight(${highlight.id})" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; transition: all 0.2s;" title="Delete highlight" onmouseover="this.style.color='#f87171'; this.style.background='rgba(239,68,68,.1)'" onmouseout="this.style.color='var(--text-muted)'; this.style.background='none'">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                            </button>
+                            <button onclick="this.closest('.vault-modal-overlay').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px;">×</button>
+                        </div>
+                    </div>
+                    <div class="vault-modal-body">
+                        <div class="highlight-quote" style="font-size: 16px; margin-bottom: 20px;">
+                            "${(highlight.fullText || highlight.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}"
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 13px;">
+                            <span>Source: ${highlight.source}</span>
+                            <span>${highlight.date}</span>
+                        </div>
+                    </div>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="vault-modal-footer">
+                        <button class="btn-sm" onclick="this.closest('.vault-modal-overlay').remove()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        }
+
+        function openHighlightReview(evt = null) {
+            if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
+            const unreviewed = highlightsData.filter(h => !h.reviewed);
+            
+            const modal = document.createElement('div');
+            modal.className = 'vault-modal-overlay';
+            modal.innerHTML = `
+                <div class="vault-modal" style="max-width: 550px;">
+                    <div class="vault-modal-header">
+                        <h3>Review Highlights</h3>
+                        <button onclick="this.closest('.vault-modal-overlay').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px;">×</button>
+                    </div>
+                    <div class="vault-modal-body" style="max-height: 400px; overflow-y: auto; padding: 15px;">
+                        ${unreviewed.length === 0 ? '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">🎉 All highlights reviewed!</p>' : 
+                        unreviewed.map(h => `
+                            <div class="review-card" data-review-id="${h.id}" style="padding: 12px 15px; background: rgba(30,36,45,.5); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border); position: relative;">
+                                <button class="highlight-delete-icon" style="position: absolute; top: 8px; right: 8px;" onclick="event.stopPropagation(); deleteHighlight(${h.id}); this.closest('.review-card').remove();" title="Delete">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                </button>
+                                <div style="font-size: 14px; line-height: 1.5; margin-bottom: 10px; padding-right: 20px;">"${h.text}"</div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: var(--text-muted); font-size: 11px;">${h.source} · ${h.date}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="vault-modal-footer" style="justify-content: space-between;">
+                        <span style="color: var(--text-muted); font-size: 12px;">${unreviewed.length} remaining</span>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-sm" onclick="this.closest('.vault-modal-overlay').remove()">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        }
+
+        // ========== LUNA AI INTEGRATION ==========
+        function askLunaAboutNote() {
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (note) {
+                // Check if Luna is available
+                if (typeof Luna !== 'undefined' && Luna.openChatMode) {
+                    // Open Luna chat and show note context
+                    Luna.openChatWithContext(
+                        'Analyzing note...',
+                        `I can help you with "${note.title}". What would you like me to do? I can summarize, extract key points, suggest improvements, or find related notes.`
+                    );
+                } else {
+                    // Fallback to local modal
+                    showLunaSuggestionModal(note);
+                }
+            }
+        }
+
+        function showLunaSuggestionModal(note) {
+            const modal = document.createElement('div');
+            modal.className = 'vault-modal-overlay';
+            modal.innerHTML = `
+                <div class="vault-modal" style="max-width: 500px;">
+                    <div class="vault-modal-header">
+                        <h3 style="display: flex; align-items: center; gap: 10px;">
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: rgba(139, 92, 246, 0.2); border-radius: 50%; color: #a78bfa;">🌙</span>
+                            Luna AI Assistant
+                        </h3>
+                        <button onclick="this.closest('.vault-modal-overlay').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px;">×</button>
+                    </div>
+                    <div class="vault-modal-body">
+                        <p style="color: var(--text-secondary); margin-bottom: 20px;">What would you like me to help with for "<strong>${note.title}</strong>"?</p>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button class="luna-action-btn" onclick="lunaAction('summarize'); this.closest('.vault-modal-overlay').remove();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
+                                Summarize this note
+                            </button>
+                            <button class="luna-action-btn" onclick="lunaAction('improve'); this.closest('.vault-modal-overlay').remove();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                Suggest improvements
+                            </button>
+                            <button class="luna-action-btn" onclick="lunaAction('key-points'); this.closest('.vault-modal-overlay').remove();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                Extract key points
+                            </button>
+                            <button class="luna-action-btn" onclick="lunaAction('related'); this.closest('.vault-modal-overlay').remove();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                Find related notes
+                            </button>
+                            <button class="luna-action-btn" onclick="lunaAction('question'); this.closest('.vault-modal-overlay').remove();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                Ask me a question
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        }
+
+        function lunaAction(action) {
+            const actionMessages = {
+                'summarize': 'Luna is summarizing your note...',
+                'improve': 'Luna is analyzing for improvements...',
+                'key-points': 'Luna is extracting key points...',
+                'related': 'Luna is finding related notes...',
+                'question': 'Ask Luna anything about this note!'
+            };
+            showVaultToast(actionMessages[action] || 'Luna is working...');
+            
+            // Simulate Luna response after delay
+            setTimeout(() => {
+                if (action === 'summarize') {
+                    showLunaResponse('Summary', 'This note discusses NQ volatility approaching the 15,350 resistance level. Key points: VIX increase, hesitation signals, and a recommendation to reduce position size by 25%.');
+                } else if (action === 'key-points') {
+                    showLunaResponse('Key Points', '• VIX spiked from 12 to 18\n• Critical resistance at 15,350\n• Two scenarios: rejection to 15,000 or breakout to 15,600\n• Reduced trade size by 25%');
+                } else if (action === 'related') {
+                    showLunaResponse('Related Notes', 'Found 3 related notes:\n• Gold Price Drivers - Macro & Micro\n• Weekly Review - Week 49\n• Strategic Idea: Breakout Strategy');
+                }
+                const note = notesData.find(n => n.id === currentNoteId);
+                if (note) {
+                    addActivityItem(`Luna ${action} on note: ${note.title}`, `${note.type} · Just Now`, 'note', { action: 'openNote', payload: currentNoteId });
+                }
+            }, 1500);
+        }
+
+        function showLunaResponse(title, message) {
+            const modal = document.createElement('div');
+            modal.className = 'vault-modal-overlay';
+            modal.innerHTML = `
+                <div class="vault-modal" style="max-width: 500px;">
+                    <div class="vault-modal-header">
+                        <h3 style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #a78bfa;">🌙</span>
+                            Luna: ${title}
+                        </h3>
+                        <button onclick="this.closest('.vault-modal-overlay').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px;">×</button>
+                    </div>
+                    <div class="vault-modal-body">
+                        <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 8px; padding: 15px; white-space: pre-line; color: var(--text-secondary); line-height: 1.6;">
+                            ${message}
+                        </div>
+                    </div>
+                    <div class="vault-modal-footer">
+                        <button class="btn-sm" onclick="copyToClipboard('${message.replace(/'/g, "\\'")}'); showVaultToast('Copied!');">Copy</button>
+                        <button class="btn-sm" style="background: var(--accent-blue);" onclick="this.closest('.vault-modal-overlay').remove();">Done</button>
+                    </div>
+                </div>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+        }
+
+        function askLunaToSummarize() {
+            if (typeof setLunaState === 'function') {
+                setLunaState('active');
+                setTimeout(() => {
+                    showVaultToast('Luna: I can summarize your notes! Click me to start.');
+                }, 500);
+            }
+        }
+
+        // ========== NOTE HEADER ACTIONS ==========
+        function togglePinNote() {
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (note) {
+                note.pinned = !note.pinned;
+                localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                renderNotesList();
+                showVaultToast(note.pinned ? 'Note pinned' : 'Note unpinned');
+                addActivityItem(`${note.pinned ? 'pinned' : 'unpinned'} note: ${note.title}`, `${note.type} · Just Now`, 'note', { action: 'openNote', payload: currentNoteId });
+            }
+        }
+
+        function showNoteOptions(e, btn = null) {
+            const evt = e || window.event || null;
+            if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
+            closeActiveMenu();
+            
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (!note) return;
+            
+            const menu = document.createElement('div');
+            menu.className = 'dropdown-menu';
+            menu.innerHTML = `
+                <div class="dropdown-item" onclick="saveCurrentNote()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    Save Note
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item" onclick="showMoveSubmenu(this)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    Move to...
+                </div>
+                <div class="dropdown-item" onclick="exportNote()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Export
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item danger" onclick="deleteNote()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Delete Note
+                </div>
+            `;
+            
+            const anchor = btn || (evt && (evt.currentTarget || evt.target)) || null;
+            const rect = anchor ? anchor.getBoundingClientRect() : { bottom: window.innerHeight / 2, right: window.innerWidth / 2 };
+            menu.style.position = 'fixed';
+            
+            // Calculate initial position
+            let left = rect.right + 5;
+            let top = rect.bottom + 5;
+            
+            // Check if menu would go off-screen and adjust
+            const menuRect = menu.getBoundingClientRect();
+            const menuWidth = 200; // Approximate menu width
+            const menuHeight = 200; // Approximate menu height
+            
+            if (left + menuWidth > window.innerWidth) {
+                left = rect.left - menuWidth - 5;
+            }
+            if (top + menuHeight > window.innerHeight) {
+                top = rect.top - menuHeight - 5;
+            }
+            
+            menu.style.left = `${left}px`;
+            menu.style.top = `${top}px`;
+            menu.style.right = 'auto';
+            
+            document.body.appendChild(menu);
+            menu.style.display = 'block';
+            activeMenu = menu;
+            
+            setTimeout(() => {
+                document.addEventListener('click', closeMenuOnOutsideClick);
+            }, 10);
+        }
+
+        function saveCurrentNote() {
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (!note) return;
+
+            const titleEl = document.querySelector('.note-title');
+            const contentEl = document.querySelector('.note-content');
+
+            if (titleEl && contentEl) {
+                const oldTitle = note.title;
+                const oldContent = note.content;
+                note.title = titleEl.value || 'Untitled';
+                note.content = contentEl.innerHTML;
+                localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                showVaultToast('Note saved');
+                // Add activity if title or content changed
+                if (oldTitle !== note.title || oldContent !== note.content) {
+                    addActivityItem(`edited note: ${note.title}`, `${note.type} · Just Now`, 'note', { action: 'openNote', payload: currentNoteId });
+                }
+            }
+            closeActiveMenu();
+        }
+
+        function showMoveSubmenu(element) {
+            // Remove any existing submenu
+            const existingSubmenu = element.parentElement.querySelector('.submenu');
+            if (existingSubmenu) {
+                existingSubmenu.remove();
+                return;
+            }
+
+            // Get all unique collection names from notes
+            const allCollections = [...new Set(notesData.map(n => n.collection))];
+            const currentNoteCollection = notesData.find(n => n.id === currentNoteId)?.collection;
+            
+            const availableCollections = allCollections.filter(c => c !== currentNoteCollection);
+
+            const submenu = document.createElement('div');
+            submenu.className = 'submenu';
+            submenu.innerHTML = availableCollections.map(collectionName => {
+                // Find collection data if it exists, otherwise use default
+                const collectionData = collectionsData.find(c => c.id === collectionName);
+                const color = collectionData ? collectionData.color : '#8b949e';
+                const displayName = collectionData ? collectionData.name : collectionName;
+                
+                return `<div class="dropdown-item" onclick="event.stopPropagation(); moveNoteToSelectedCollection('${collectionName}')">
+                    <span style="color: ${color}; margin-right: 8px;">●</span>
+                    ${displayName}
+                </div>`;
+            }).join('');
+
+            element.appendChild(submenu);
+        }
+
+        function exportNote() {
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (note) {
+                // Create downloadable text
+                const content = note.title + '\n\n' + note.content.replace(/<[^>]+>/g, '');
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = note.title.replace(/[^a-z0-9]/gi, '_') + '.txt';
+                a.click();
+                showVaultToast('Note exported');
+                addActivityItem(`exported note: ${note.title}`, `${note.type} · Just Now`, 'note', { action: 'openNote', payload: currentNoteId });
+            }
+            closeActiveMenu();
+        }
+
+        function deleteNote() {
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (!note) return;
+            if (confirm('Are you sure you want to delete this note?')) {
+                addActivityItem(`deleted note: ${note.title}`, `${note.type} · Just Now`, 'note', null);
+                const index = notesData.findIndex(n => n.id === currentNoteId);
+                if (index !== -1) {
+                    notesData.splice(index, 1);
+                    if (notesData.length > 0) {
+                        currentNoteId = notesData[0].id;
+                    }
+                    renderNotesList();
+                    showVaultToast('Note deleted');
+                }
+            }
+            closeActiveMenu();
+        }
+
+        // ========== HIGHLIGHT LOGIC ==========
+        // (Highlight button logic removed - integrated into text-editor module)
+
+
+        // ========== TOAST ==========
+        function showVaultToast(msg, type = 'success') {
+            const toast = document.getElementById('vault-toast');
+            const toastMsg = document.getElementById('vault-toast-msg');
+            toastMsg.textContent = msg;
+            
+            const iconEl = toast.querySelector('div:first-child');
+            if (type === 'success') {
+                iconEl.style.color = 'var(--accent-green)';
+                iconEl.textContent = '✓';
+                toast.style.borderColor = 'var(--accent-green)';
+            } else {
+                iconEl.style.color = 'var(--accent-blue)';
+                iconEl.textContent = 'ℹ';
+                toast.style.borderColor = 'var(--accent-blue)';
+            }
+            
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+            toast.style.opacity = '1';
+            
+            setTimeout(() => {
+                toast.style.transform = 'translateX(-50%) translateY(100px)';
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        // ========== VIEW SWITCHING ==========
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewName).classList.add('active');
+            
+            // Update URL params without reload
+            const url = new URL(window.location);
+            url.searchParams.set('view', viewName);
+            window.history.pushState({}, '', url);
+
+            // Initialize collection view
+            if (viewName === 'collection') {
+                setTimeout(() => {
+                    renderNotesList();
+                    initImageDragDrop(); // Re-initialize image drag & drop for note content
+                    // Re-init text editor for note content
+                    if(typeof TMTextEditor !== 'undefined') {
+                        TMTextEditor.init({
+                            targets: [
+                                '.capture-input',      // Quick Capture textarea
+                                '.note-content',       // Note content area in collection view
+                                '[contenteditable="true"]' // Any contenteditable elements
+                            ],
+                            // Callback when text is highlighted - add to Vault highlights
+                            onHighlight: function(text, color, source) {
+                                // Get current note title as source
+                                const noteTitle = notesData.find(n => n.id === currentNoteId)?.title || source;
+                                const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                                
+                                // Add to highlightsData
+                                const newHighlight = {
+                                    id: nextHighlightId(),
+                                    text: text.substring(0, 80) + (text.length > 80 ? '...' : ''),
+                                    fullText: text,
+                                    source: noteTitle,
+                                    color: color,
+                                    date: date,
+                                    reviewed: false
+                                };
+                                highlightsData.unshift(newHighlight);
+                                persistHighlights();
+                                renderHighlightsPanel();
+                                
+                                // Show toast notification
+                                showVaultToast('✨ Added to Highlights');
+                                
+                                console.log('[Vault] Highlight added:', newHighlight);
+                            },
+                            // Callback when Save to Vault is clicked
+                            onSaveToVault: function(text) {
+                                const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                const newId = (notesData.length > 0) ? Math.max(...notesData.map(n => n.id)) + 1 : 1;
+                                // Default to current collection if we can, otherwise Market Thoughts
+                                const targetCollection = (currentCollection !== 'All') ? currentCollection : 'Quick Notes';
+
+                                const newNote = {
+                                    id: newId,
+                                    title: 'Clip: ' + text.substring(0, 15) + '...',
+                                    collection: targetCollection,
+                                    type: 'Note',
+                                    preview: text.substring(0, 50) + '...',
+                                    date: date,
+                                    tags: ['snippet'],
+                                    content: `<p>${text}</p>`,
+                                    linked: false,
+                                    pinned: false,
+                                    sourceNoteId: currentNoteId,
+                                    sourceText: text,
+                                    backlinks: [],
+                                    attachments: []
+                                };
+                                
+                                notesData.unshift(newNote);
+                                localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                                
+                                // Add to activity
+                                addActivityItem('Created note: ' + newNote.title, targetCollection + ' · Today', 'note', newId);
+                                
+                                // Update UI
+                                renderNotesList();
+                                updateHubCollectionsUI();
+                                
+                                showVaultToast('Note saved to Vault');
+                                
+                                console.log('[Vault] Note saved from text selection:', newNote);
+                            },
+                            // Callback when Ask Luna is clicked
+                            onAskLuna: function(text, action) {
+                                console.log('[Vault] Ask Luna:', action, text);
+                                
+                                // Show Luna response modal with AI processing
+                                showLunaSuggestionModal({ title: 'AI Processing...', content: text }, action);
+                            }
+                        });
+                    }
+                }, 100);
+            }
+        }
+
+        // ========== INIT ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            renderActivityList();
+            updateHubCollectionsUI();
+            renderHighlightsPanel();
+            initImageDragDrop(); // Initialize image drag & drop support
+
+            // Init view from URL
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('view') === 'collection') {
+                switchView('collection');
+            }
+
+
+            
+            // Persistence Listeners for Title and Content
+            const titleInput = document.querySelector('.note-title');
+            if (titleInput) {
+                titleInput.addEventListener('input', (e) => {
+                    const note = notesData.find(n => n.id === Number(currentNoteId));
+                    if (note) {
+                        note.title = e.target.value;
+                        localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                        
+                        // Update List Card Title immediately
+                        const activeCard = document.querySelector('.note-card.active .nc-title');
+                        if(activeCard) activeCard.textContent = note.title;
+                    }
+                });
+            }
+
+            const contentDiv = document.querySelector('.note-content');
+            if (contentDiv) {
+                 // Save content on input
+                 contentDiv.addEventListener('input', (e) => {
+                    saveContent();
+                 });
+
+                 // Also use MutationObserver to catch changes made by scripts (e.g. Text Editor Toolbar)
+                 const observer = new MutationObserver((mutations) => {
+                     saveContent();
+                 });
+                 observer.observe(contentDiv, { childList: true, subtree: true, characterData: true, attributes: true });
+
+                 function saveContent() {
+                    const note = notesData.find(n => n.id === Number(currentNoteId));
+                    if (note) {
+                        note.content = contentDiv.innerHTML;
+                        localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                    }
+                 }
+            }
+        });
+
+        // ========== IMAGE DRAG & DROP SUPPORT ==========
+        // Keep stable handler refs so re-inits don't stack listeners.
+        const _vaultDnD = window.__tmVaultDnD || (window.__tmVaultDnD = {
+            caretEl: null,
+            lastRange: null,
+            activeTarget: null,
+        });
+
+        function _ensureDropCaret() {
+            if (_vaultDnD.caretEl && document.body.contains(_vaultDnD.caretEl)) return _vaultDnD.caretEl;
+            const el = document.createElement('div');
+            el.className = 'tm-drop-caret-line';
+            document.body.appendChild(el);
+            _vaultDnD.caretEl = el;
+            return el;
+        }
+
+        function _hideDropCaret() {
+            if (_vaultDnD.caretEl) _vaultDnD.caretEl.style.display = 'none';
+            _vaultDnD.lastRange = null;
+            _vaultDnD.activeTarget = null;
+        }
+
+        function _getCaretRangeFromPoint(x, y) {
+            // Chrome/Edge
+            if (document.caretRangeFromPoint) return document.caretRangeFromPoint(x, y);
+            // Firefox
+            if (document.caretPositionFromPoint) {
+                const pos = document.caretPositionFromPoint(x, y);
+                if (!pos) return null;
+                const r = document.createRange();
+                r.setStart(pos.offsetNode, pos.offset);
+                r.collapse(true);
+                return r;
+            }
+            return null;
+        }
+
+        function _rangeIsInsideTarget(range, target) {
+            if (!range || !target) return false;
+            const node = range.startContainer;
+            return node && target.contains(node.nodeType === 3 ? node.parentNode : node);
+        }
+
+        function _updateDropCaretForEvent(e, target) {
+            const caret = _ensureDropCaret();
+            const r = _getCaretRangeFromPoint(e.clientX, e.clientY);
+
+            if (r && _rangeIsInsideTarget(r, target)) {
+                _vaultDnD.lastRange = r;
+            } else {
+                // Fallback: end of target
+                const fallback = document.createRange();
+                fallback.selectNodeContents(target);
+                fallback.collapse(false);
+                _vaultDnD.lastRange = fallback;
+            }
+
+            _vaultDnD.activeTarget = target;
+
+            // Position caret line at the caret rect
+            const rect = (_vaultDnD.lastRange.getClientRects && _vaultDnD.lastRange.getClientRects()[0]) || null;
+            if (!rect) {
+                caret.style.display = 'none';
+                return;
+            }
+
+            // Make it a visible vertical caret
+            caret.style.left = `${rect.left}px`;
+            caret.style.top = `${rect.top}px`;
+            caret.style.height = `${Math.max(16, rect.height)}px`;
+            caret.style.display = 'block';
+        }
+
+        // Stable handlers (created once)
+        if (!_vaultDnD._handlers) {
+            _vaultDnD._handlers = {
+                dragenter(e) {
+                    const target = e.currentTarget;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    target.classList.add('drag-over');
+                    _updateDropCaretForEvent(e, target);
+                },
+                dragover(e) {
+                    const target = e.currentTarget;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Indicate we can drop
+                    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+                    target.classList.add('drag-over');
+                    _updateDropCaretForEvent(e, target);
+                },
+                dragleave(e) {
+                    const target = e.currentTarget;
+                    // Only clear when truly leaving the target (not moving between child nodes)
+                    if (e.relatedTarget && target.contains(e.relatedTarget)) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    target.classList.remove('drag-over');
+                    _hideDropCaret();
+                },
+                drop(e) {
+                    const target = e.currentTarget;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    target.classList.remove('drag-over');
+
+                    const files = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+                    const imageFile = files.find(f => f && typeof f.type === 'string' && f.type.startsWith('image/'));
+                    if (!imageFile) {
+                        _hideDropCaret();
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        // Keep image responsive by default; user can resize via TMTextEditor image resizer
+                        img.style.maxWidth = '100%';
+                        img.style.height = 'auto';
+                        img.style.borderRadius = '6px';
+                        img.style.margin = '10px 0';
+
+                        // Insert at stored caret position
+                        const sel = window.getSelection();
+                        const r = _vaultDnD.lastRange && _rangeIsInsideTarget(_vaultDnD.lastRange, target)
+                            ? _vaultDnD.lastRange
+                            : (() => {
+                                const rr = document.createRange();
+                                rr.selectNodeContents(target);
+                                rr.collapse(false);
+                                return rr;
+                            })();
+
+                        try {
+                            sel.removeAllRanges();
+                            sel.addRange(r);
+                        } catch (_) {}
+
+                        r.insertNode(img);
+
+                        // Move cursor after image
+                        r.setStartAfter(img);
+                        r.collapse(true);
+                        try {
+                            sel.removeAllRanges();
+                            sel.addRange(r);
+                        } catch (_) {}
+
+                        _hideDropCaret();
+
+                        // Persistence is already handled by input/mutation listeners in collection view,
+                        // but Quick Capture uses manual save; still safe to show feedback.
+                        showVaultToast('Image added');
+                    };
+                    reader.readAsDataURL(imageFile);
+                }
+            };
+        }
+
+        function initImageDragDrop() {
+            const quickCapture = document.querySelector('.capture-input');
+            const noteContent = document.querySelector('.note-content');
+            const h = _vaultDnD._handlers;
+
+            // Helper to (re)bind without stacking.
+            function bind(el) {
+                if (!el) return;
+                el.removeEventListener('dragenter', h.dragenter);
+                el.removeEventListener('dragover', h.dragover);
+                el.removeEventListener('dragleave', h.dragleave);
+                el.removeEventListener('drop', h.drop);
+                el.addEventListener('dragenter', h.dragenter);
+                el.addEventListener('dragover', h.dragover);
+                el.addEventListener('dragleave', h.dragleave);
+                el.addEventListener('drop', h.drop);
+            }
+
+            bind(quickCapture);
+            bind(noteContent);
+        }
+
+        // ========== LOCAL NOTES FILTER ==========
+        function filterNotesLocal(query) {
+            const q = query.toLowerCase();
+            document.querySelectorAll('#notes-list-container .note-card').forEach(card => {
+                const title = card.querySelector('.nc-title')?.textContent.toLowerCase() || '';
+                card.style.display = title.includes(q) ? 'block' : 'none';
+            });
+        }
+
+        // ========== NEW COLLECTION ==========
+        function createNewCollection() {
+            showNewCollectionModal();
+        }
+
+        function showNewCollectionModal() {
+            // Create modal overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'vault-modal-overlay';
+            overlay.innerHTML = `
+                <div class="vault-modal">
+                    <div class="vault-modal-header">
+                        <h3>Create New Collection</h3>
+                        <button onclick="this.closest('.vault-modal-overlay').remove()" style="background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;">×</button>
+                    </div>
+                    <div class="vault-modal-body">
+                        <input type="text" id="new-collection-name" placeholder="Enter collection name" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-card); color: var(--text-primary); outline: none;" onkeydown="if(event.key === 'Enter') createCollectionFromModal(); if(event.key === 'Escape') this.closest('.vault-modal-overlay').remove();">
+                    </div>
+                    <div class="vault-modal-footer">
+                        <button onclick="this.closest('.vault-modal-overlay').remove()" style="background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); padding: 8px 16px; border-radius: 6px; cursor: pointer;">Cancel</button>
+                        <button onclick="createCollectionFromModal()" style="background: var(--accent-blue); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Create</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            
+            // Focus the input
+            setTimeout(() => {
+                const input = overlay.querySelector('#new-collection-name');
+                if (input) input.focus();
+            }, 100);
+        }
+
+        function createCollectionFromModal() {
+            const input = document.querySelector('#new-collection-name');
+            if (!input) return;
+            
+            const name = input.value.trim();
+            if (!name) return;
+            
+            collectionsData.push({
+                id: name.toLowerCase().replace(/\s+/g, '-'),
+                name: name,
+                icon: 'folder',
+                color: '#8b949e',
+                unsorted: 0,
+                preview: 'New collection...'
+            });
+            
+            // Close modal
+            const overlay = input.closest('.vault-modal-overlay');
+            if (overlay) overlay.remove();
+            
+            // Update UI
+            renderCollectionsSidebar();
+            showVaultToast('Collection created: ' + name);
+        }
+
+        // ========== MOVE NOTE TO COLLECTION ==========
+        function moveNoteToSelectedCollection(targetCollectionId) {
+            const note = notesData.find(n => n.id === currentNoteId);
+            if (!note) return;
+
+            const oldCollection = note.collection;
+            note.collection = targetCollectionId;
+
+            // Persist changes
+            localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+
+            // Update UI
+            renderNotesList();
+            updateHubCollectionsUI();
+
+            // If we're in collection view and moved away from current collection, switch to new collection
+            if (currentCollection === oldCollection) {
+                selectCollection(targetCollectionId);
+            }
+
+            showVaultToast(`Note moved to ${collectionsData.find(c => c.id === targetCollectionId)?.name || 'collection'}`);
+            addActivityItem(`moved note: ${note.title} to ${collectionsData.find(c => c.id === targetCollectionId)?.name || targetCollectionId}`, `${note.type} · Just Now`, 'note', { action: 'openNote', payload: currentNoteId });
+            closeActiveMenu();
+        }
+
+        // ========== PASTE IMAGE SUPPORT ==========
+        document.addEventListener('paste', (e) => {
+            const noteContent = document.querySelector('.note-content');
+            if (!noteContent || !document.activeElement.closest('.cl-main')) return;
+            
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        // Add image to note
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.style.maxWidth = '100%';
+                        img.style.borderRadius = '4px';
+                        img.style.marginTop = '10px';
+                        noteContent.appendChild(img);
+                        showVaultToast('Image pasted');
+                    };
+                    reader.readAsDataURL(blob);
+                    e.preventDefault();
+                }
+            }
+        });
+
+        // ========== INTERNAL LINK CLICK HANDLER ==========
+        document.addEventListener('click', (e) => {
+            const internalLink = e.target.closest('.tm-internal-link[data-note-id]');
+            if (internalLink) {
+                e.preventDefault();
+                const noteId = parseInt(internalLink.dataset.noteId);
+                const note = notesData.find(n => n.id === noteId);
+                if (note) {
+                    // Switch to collection view and select the note
+                    switchView('collection');
+                    setTimeout(() => {
+                        selectNote(noteId);
+                        showVaultToast('🔗 Navigated to linked note');
+                    }, 100);
+                } else {
+                    showVaultToast('Note not found', 'error');
+                }
+            }
+        });
+
+        // ========== NOTE CARD MENU (DELEGATED) ==========
+        // Use capture-phase delegation so clicking the "..." button doesn't trigger the parent .note-card onclick.
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-note-menu-btn][data-note-id]');
+            if (!btn) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const noteId = parseInt(btn.dataset.noteId, 10);
+            if (!Number.isFinite(noteId)) return;
+
+            toggleNoteMenu(noteId, btn, e);
+        }, true);
+
+        // ========== HIGHLIGHTS (DELEGATED) ==========
+        document.addEventListener('click', (e) => {
+            const actionEl = e.target.closest('[data-highlight-action]');
+            if (!actionEl) return;
+
+            const action = actionEl.dataset.highlightAction;
+            const hid = actionEl.dataset.highlightId ? Number(actionEl.dataset.highlightId) : null;
+
+            if (action === 'open' && hid != null) {
+                e.preventDefault();
+                viewHighlight(hid);
+                return;
+            }
+
+            if (action === 'review-modal') {
+                e.preventDefault();
+                openHighlightReview(e);
+                return;
+            }
+
+            if (action === 'delete' && hid != null) {
+                e.preventDefault();
+                e.stopPropagation();
+                deleteHighlight(hid);
+                return;
+            }
+        });
+
+        // ========== KEYBOARD SHORTCUTS ==========
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+N: New Note (when in collection view)
+            if (e.ctrlKey && e.key === 'n' && document.getElementById('view-collection').classList.contains('active')) {
+                e.preventDefault();
+                createNewNote();
+            }
+            // Escape: Close modals or go back
+            if (e.key === 'Escape') {
+                // Close link popup if open
+                const linkPopup = document.getElementById('link-popup');
+                if (linkPopup) {
+                    linkPopup.remove();
+                    return;
+                }
+                if (document.getElementById('view-collection').classList.contains('active')) {
+                    switchView('hub');
+                }
+            }
+        });
+
+        // ========== /+ LINK INSERTION ==========
+        let linkTriggerRange = null;
+
+        function initLinkTrigger() {
+            const contentEl = document.querySelector('.note-content');
+            const captureEl = document.querySelector('.capture-input');
+            
+            if (contentEl) {
+                contentEl.addEventListener('input', (e) => checkForLinkTrigger(e.target));
+            }
+            
+            if (captureEl) {
+                captureEl.addEventListener('input', (e) => checkForLinkTrigger(e.target));
+            }
+        }
+
+        function checkForLinkTrigger(el) {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            const range = selection.getRangeAt(0);
+            if (!range.collapsed) return;
+
+            // Get text before cursor
+            const node = range.startContainer;
+            if (node.nodeType !== Node.TEXT_NODE) return;
+
+            const text = node.textContent;
+            const cursorPos = range.startOffset;
+            const beforeCursor = text.substring(0, cursorPos);
+
+            // Check if ends with /+
+            if (beforeCursor.endsWith('/+')) {
+                // Save range for later insertion
+                linkTriggerRange = {
+                    node: node,
+                    offset: cursorPos - 2, // Position before /+
+                    endOffset: cursorPos
+                };
+                showLinkPopup();
+            }
+        }
+
+        function showLinkPopup() {
+            // Remove existing popup
+            const existing = document.getElementById('link-popup');
+            if (existing) existing.remove();
+
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+
+            const popup = document.createElement('div');
+            popup.id = 'link-popup';
+            popup.style.cssText = `
+                position: fixed;
+                top: ${rect.bottom + 5}px;
+                left: ${rect.left}px;
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+                z-index: 10000;
+                width: 280px;
+                max-height: 300px;
+                overflow: hidden;
+                animation: fadeIn 0.15s ease-out;
+            `;
+
+            popup.innerHTML = `
+                <div style="padding: 10px; border-bottom: 1px solid var(--border);">
+                    <input type="text" id="link-search" placeholder="Search notes to link..." 
+                        style="width: 100%; padding: 8px 10px; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 4px; color: var(--text-primary); font-size: 13px; outline: none; box-sizing: border-box;"
+                    />
+                </div>
+                <div id="link-results" style="max-height: 220px; overflow-y: auto;"></div>
+            `;
+
+            document.body.appendChild(popup);
+
+            const searchInput = document.getElementById('link-search');
+            searchInput.focus();
+
+            // Render initial results
+            renderLinkResults('');
+
+            // Search on input
+            searchInput.addEventListener('input', (e) => {
+                renderLinkResults(e.target.value.toLowerCase());
+            });
+
+            // Handle keyboard navigation
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    popup.remove();
+                    restoreCursorAfterCancel();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const firstItem = popup.querySelector('.link-result-item');
+                    if (firstItem) firstItem.click();
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const firstItem = popup.querySelector('.link-result-item');
+                    if (firstItem) firstItem.focus();
+                }
+            });
+
+            // Close on outside click
+            setTimeout(() => {
+                document.addEventListener('click', closeLinkPopupOnOutside);
+            }, 10);
+        }
+
+        function renderLinkResults(query) {
+            const container = document.getElementById('link-results');
+            if (!container) return;
+
+            const filtered = notesData.filter(n => {
+                if (n.id === currentNoteId) return false; // Exclude current note
+                if (!query) return true;
+                return n.title.toLowerCase().includes(query) || 
+                       (n.collection && n.collection.toLowerCase().includes(query));
+            }).slice(0, 10);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="padding: 15px; color: var(--text-muted); font-size: 13px; text-align: center;">No notes found</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(n => `
+                <div class="link-result-item" tabindex="0" data-note-id="${n.id}" style="
+                    padding: 10px 12px;
+                    cursor: pointer;
+                    border-bottom: 1px solid rgba(48,54,61,0.5);
+                    transition: background 0.2s;
+                " onmouseover="this.style.background='var(--bg-card-hover)'" onmouseout="this.style.background='transparent'" onclick="insertNoteLink(${n.id})">
+                    <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px; display: flex; align-items: center; gap: 6px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        ${n.title}
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted);">${n.collection || 'Uncategorized'}</div>
+                </div>
+            `).join('');
+
+            // Add keyboard navigation to items
+            container.querySelectorAll('.link-result-item').forEach((item, idx, items) => {
+                item.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowDown' && idx < items.length - 1) {
+                        e.preventDefault();
+                        items[idx + 1].focus();
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (idx > 0) items[idx - 1].focus();
+                        else document.getElementById('link-search').focus();
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        item.click();
+                    } else if (e.key === 'Escape') {
+                        document.getElementById('link-popup')?.remove();
+                        restoreCursorAfterCancel();
+                    }
+                });
+            });
+        }
+
+        function insertNoteLink(noteId) {
+            const note = notesData.find(n => n.id === noteId);
+            if (!note || !linkTriggerRange) return;
+
+            const { node, offset, endOffset } = linkTriggerRange;
+
+            // Remove /+ from text
+            const text = node.textContent;
+            const before = text.substring(0, offset);
+            const after = text.substring(endOffset);
+            node.textContent = before + after;
+
+            // Create link element
+            const link = document.createElement('a');
+            link.href = `#note-${noteId}`;
+            link.className = 'tm-internal-link';
+            link.dataset.noteId = noteId;
+            link.textContent = note.title;
+            link.style.cssText = 'color: var(--accent-purple); text-decoration: underline; cursor: pointer;';
+
+            // Insert link at position
+            const range = document.createRange();
+            range.setStart(node, offset);
+            range.collapse(true);
+
+            // Split text node and insert link
+            const afterNode = node.splitText(offset);
+            node.parentNode.insertBefore(link, afterNode);
+
+            // Add space after link
+            const space = document.createTextNode(' ');
+            node.parentNode.insertBefore(space, afterNode);
+
+            // Move cursor after the link
+            const sel = window.getSelection();
+            const newRange = document.createRange();
+            newRange.setStartAfter(space);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+
+            // Mark current note as linked
+            const currentNote = notesData.find(n => n.id === currentNoteId);
+            if (currentNote) {
+                currentNote.linked = true;
+                localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+            }
+
+            // Close popup and clean up
+            document.getElementById('link-popup')?.remove();
+            document.removeEventListener('click', closeLinkPopupOnOutside);
+            linkTriggerRange = null;
+
+            showVaultToast(`Linked to: ${note.title}`);
+        }
+
+        function restoreCursorAfterCancel() {
+            // Just clean up, cursor stays where it was
+            document.removeEventListener('click', closeLinkPopupOnOutside);
+            linkTriggerRange = null;
+        }
+
+        function closeLinkPopupOnOutside(e) {
+            const popup = document.getElementById('link-popup');
+            if (popup && !popup.contains(e.target)) {
+                popup.remove();
+                document.removeEventListener('click', closeLinkPopupOnOutside);
+                linkTriggerRange = null;
+            }
+        }
+
+        // Init link trigger when DOM ready
+        document.addEventListener('DOMContentLoaded', initLinkTrigger);
+
+        // Global function for text-editor link clicks
+        window.openNoteById = function(noteId) {
+            switchView('collection');
+            selectNote(noteId);
+        };
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if(typeof Luna !== 'undefined') {
+                Luna.init();
+            }
+
+            // Initialize Text Editor Toolbar for Quick Capture and Note Content areas
+            if(typeof TMTextEditor !== 'undefined') {
+                TMTextEditor.init({
+                    targets: [
+                        '.capture-input',      // Quick Capture textarea
+                        '.note-content',       // Note content area in collection view
+                        '[contenteditable="true"]' // Any contenteditable elements
+                    ],
+                    // Callback when text is highlighted - add to Vault highlights
+                    onHighlight: function(text, color, source) {
+                        // Get current note title as source
+                        const noteTitle = notesData.find(n => n.id === currentNoteId)?.title || source;
+                        const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        
+                        // Add to highlightsData
+                        const newHighlight = {
+                            id: nextHighlightId(),
+                            text: text.substring(0, 80) + (text.length > 80 ? '...' : ''),
+                            fullText: text,
+                            source: noteTitle,
+                            color: color,
+                            date: date,
+                            reviewed: false
+                        };
+                        highlightsData.unshift(newHighlight);
+                        persistHighlights();
+                        renderHighlightsPanel();
+                        
+                        // Show toast notification
+                        showVaultToast('✨ Added to Highlights');
+                        
+                        console.log('[Vault] Highlight added:', newHighlight);
+                    },
+                    // Callback when Save to Vault is clicked
+                    onSaveToVault: function(text) {
+                        const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        const newId = (notesData.length > 0) ? Math.max(...notesData.map(n => n.id)) + 1 : 1;
+                        // Default to current collection if we can, otherwise Market Thoughts
+                        const targetCollection = (currentCollection !== 'All') ? currentCollection : 'Quick Notes';
+
+                        const newNote = {
+                            id: newId,
+                            title: 'Clip: ' + text.substring(0, 15) + '...',
+                            collection: targetCollection,
+                            type: 'Note',
+                            preview: text.substring(0, 50) + '...',
+                            date: date,
+                            tags: ['snippet'],
+                            content: `<p>${text}</p>`,
+                            linked: false,
+                            pinned: false,
+                            sourceNoteId: currentNoteId,
+                            sourceText: text,
+                            backlinks: [],
+                            attachments: []
+                        };
+                        notesData.unshift(newNote);
+                        localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                        
+                        // Update source note's linked status
+                        const sourceNote = notesData.find(n => n.id === currentNoteId);
+                        if (sourceNote) {
+                            sourceNote.linked = true;
+                            if (!sourceNote.backlinks) sourceNote.backlinks = [];
+                            sourceNote.backlinks.push({
+                                noteId: newNote.id,
+                                title: newNote.title,
+                                time: 'Just now', // Add defaults
+                                icon: '🖇️'
+                            });
+                             localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
+                        }
+                        
+                        addActivityItem('New Note (' + newNote.title + ')', targetCollection, 'note', { action: 'openNote', payload: newNote.id });
+                        showVaultToast('📥 Saved to Vault (Linked)');
+
+                        // Refresh HUB collection previews
+                        updateHubCollectionsUI();
+
+                        // Refresh note list to show the new note immediately
+                        if (currentCollection === 'All' || currentCollection === targetCollection) {
+                            renderNotesList();
+                        }
+                        
+                        // Return note info for creating bidirectional link
+                        return { id: newNote.id, title: newNote.title };
+                    },
+                    // Callback when Ask Luna is clicked
+                    onAskLuna: function(text, action, customQuestion) {
+                        console.log('[Vault] Ask Luna - Action:', action, 'Text:', text);
+                        
+                        // Show processing feedback
+                        showVaultToast('Luna is thinking...', 'info');
+                        
+                        // Default simulated delay
+                        setTimeout(() => {
+                            let newText = text;
+                            let feedbackMsg = 'Action completed';
+                            
+                            // ========== 智能 Mock AI Logic (Preview Mode) ==========
+                            let previewContent = '';
+
+                            switch(action) {
+                                case 'summarize':
+                                    const sentences = text.split(/[.。!！?？]/).filter(s => s.trim());
+                                    const wordCount = text.length;
+                                    const keyPoints = sentences.slice(0, Math.min(3, sentences.length));
+                                    
+                                    // Minimalist Summary
+                                    previewContent = `<p style="color:var(--text-muted); font-size:0.9em; margin-bottom:5px;"><strong>Summary</strong></p>
+<ul style="padding-left:20px; margin:0;">
+${keyPoints.map(p => `<li>${p.trim()}</li>`).join('')}
+</ul>`;
+                                    feedbackMsg = '✅ Summary generated';
+                                    break;
+                                    
+                                case 'make-todo':
+                                    const lines = text.split(/[.。\n]/).filter(l => l.trim());
+                                    const tasks = [];
+                                    lines.forEach((line) => {
+                                        const trimmed = line.trim();
+                                        if (trimmed.length > 5 && tasks.length < 5) tasks.push(trimmed.substring(0, 50));
+                                    });
+                                    if(tasks.length === 0) tasks.push('Review trade execution', 'Check risk management');
+                                    
+                                    // Minimalist Todo List (Standard HTML Checkboxes for preview)
+                                    previewContent = tasks.map(t => 
+                                        `<div class="tm-checkbox-item" data-checked="false" style="display: flex; gap: 8px; margin: 4px 0;"><span class="tm-checkbox"></span><span class="tm-checkbox-text">${t}</span></div>`
+                                    ).join('');
+                                    feedbackMsg = '✅ Tasks generated';
+                                    break;
+                                    
+                                case 'format-data':
+                                    const kvPairs = [];
+                                    const kvRegex = /([A-Za-z\u4e00-\u9fa5]+)[:\s：]+([^\n,，]+)/g;
+                                    let match;
+                                    while ((match = kvRegex.exec(text)) !== null) {
+                                        kvPairs.push({ key: match[1].trim(), value: match[2].trim() });
+                                    }
+                                    
+                                    // Minimalist Table
+                                    if (kvPairs.length >= 1) {
+                                        const rows = kvPairs.map(kv => 
+                                            `<tr style="border-bottom:1px solid var(--border);"><td style="padding:6px; color:var(--text-muted);">${kv.key}</td><td style="padding:6px; text-align:right;">${kv.value}</td></tr>`
+                                        ).join('');
+                                        previewContent = `<table style="width:100%; border-collapse:collapse; font-size:0.95em;">${rows}</table>`;
+                                    } else {
+                                        previewContent = `<p style="white-space: pre-wrap; font-family: monospace;">${text}</p>`;
+                                    }
+                                    feedbackMsg = '✅ Data formatted';
+                                    break;
+                                    
+                                case 'translate':
+                                case 'translate-en':
+                                    // Minimalist Translation
+                                    let transEn = text;
+                                    const cnToEn = { '交易': 'trade', '买入': 'buy', '卖出': 'sell', '止损': 'stop loss', '目标': 'target', '盈利': 'profit', '亏损': 'loss' };
+                                    Object.keys(cnToEn).forEach(k => transEn = transEn.replace(new RegExp(k, 'g'), cnToEn[k]));
+                                    previewContent = `<p>${transEn}</p>`;
+                                    feedbackMsg = '✅ Translated';
+                                    break;
+                                    
+                                case 'translate-zh':
+                                    // Minimalist Translation
+                                    let transZh = text.toLowerCase();
+                                    const enToCn = { 'trade': '交易', 'buy': '买入', 'sell': '卖出', 'stop loss': '止损', 'target': '目标', 'profit': '盈利', 'loss': '亏损' };
+                                    Object.keys(enToCn).forEach(k => transZh = transZh.replace(new RegExp('\\b'+k+'\\b', 'gi'), enToCn[k]));
+                                    previewContent = `<p>${transZh}</p>`;
+                                    feedbackMsg = '✅ Translated';
+                                    break;
+
+                                default:
+                                    if (typeof Luna !== 'undefined' && Luna.openChatMode) {
+                                        Luna.openChatMode();
+                                        setTimeout(() => {
+                                             const input = document.querySelector('.luna-chat-input');
+                                             if(input) input.value = customQuestion || action;
+                                        }, 100);
+                                        return; 
+                                    }
+                            }
+                            
+                            // Apply Preview Wrapper
+                            if (previewContent && previewContent !== text) {
+                                const encodedOriginal = encodeURIComponent(text);
+                                const previewHTML = `
+                                    <div class="ai-preview-box" style="border-left: 2px solid var(--accent-purple); padding: 4px 0 4px 12px; margin: 8px 0;">
+                                        <div class="ai-preview-content" style="margin-bottom: 6px;">${previewContent}</div>
+                                        <div class="ai-actions" contenteditable="false" style="display: flex; gap: 15px; font-size: 12px; font-family: monospace; opacity: 0.8; user-select: none;">
+                                            <div class="ai-action-btn ai-confirm" onclick="applyAIPreview(this)" style="cursor: pointer; color: var(--success); display: flex; align-items: center; gap: 4px;"><span>✓</span> Apply</div>
+                                            <div class="ai-action-btn ai-cancel" onclick="discardAIPreview(this, '${encodedOriginal}')" style="cursor: pointer; color: var(--danger); display: flex; align-items: center; gap: 4px;"><span>✕</span> Discard</div>
+                                        </div>
+                                    </div>`;
+                                
+                                TMTextEditor.replaceSelection(previewHTML);
+                                showVaultToast(feedbackMsg);
+                            }
+                            
+                        }, 1000);
+                    }
+                });
+            }
+        });
+    </script>
+    <script>
+        // AI Preview Action Helpers (must be global)
+        window.applyAIPreview = function(btn) {
+            const wrapper = btn.closest('.ai-preview-box');
+            if (wrapper) {
+                const content = wrapper.querySelector('.ai-preview-content').innerHTML;
+                wrapper.outerHTML = content;
+                showVaultToast('Applied');
+            }
+        };
+
+        window.discardAIPreview = function(btn, encodedOriginal) {
+            const wrapper = btn.closest('.ai-preview-box');
+            if (wrapper) {
+                const original = decodeURIComponent(encodedOriginal);
+                // Simple text replacement might lose HTML structure of original if it was complex, 
+                // but for this demo standard text restoration is sufficient.
+                wrapper.outerHTML = original;
+                showVaultToast('Discarded', 'info');
+            }
+        };
+    </script>
+</body>
+</html>

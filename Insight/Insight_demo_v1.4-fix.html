@@ -351,6 +351,7 @@
 <!-- Sidebar (由共享模块生成) -->
 <aside class="sidebar" id="sidebar"></aside>
 <script src="../shared/sidebar.js"></script>
+<script src="../shared/topbar.js"></script>
 <script>
     // 自动初始化侧边栏 - Insight页面启用页面内切换
     autoInitSidebar({ 
@@ -359,6 +360,9 @@
         title: 'Discipline Management Index'
     });
     
+    // 初始化 Topbar（Luna 依赖 topbar 插槽）
+    initTopbar({ title: 'Insight', basePath: '..' });
+
     // 包装函数用于侧边栏调用
     function switchViewFromSidebar(viewId) {
         switchView(viewId);
@@ -944,6 +948,9 @@
         updateDMI(82);
     });
 </script>
+
+<!-- Luna AI Module -->
+<script src="../shared/luna.js"></script>
 
 </body>
 </html>

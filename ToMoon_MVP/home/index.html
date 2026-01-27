@@ -610,15 +610,11 @@
             background: rgba(59, 130, 246, 0.1);
         }
 
-        .select-card-icon {
-            width: 44px;
+        .select-card-indicator {
+            width: 8px;
             height: 44px;
-            background: var(--bg-card);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
+            border-radius: 4px;
+            flex-shrink: 0;
         }
 
         .select-card-info {
@@ -783,8 +779,10 @@
 
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar"></aside>
-<script src="../shared/sidebar_mvp.js"></script>
-<script src="../shared/topbar_mvp.js"></script>
+<!-- Cache-bust for local static servers (avoid stale JS after edits) -->
+<script src="../shared/sidebar_mvp.js?v=20260127-3"></script>
+<script src="../shared/topbar_mvp.js?v=20260127-3"></script>
+<script src="../shared/blueprints_mvp.js?v=20260127-3"></script>
 <script>
     initSidebar('home', null, { title: 'Home' });
     initTopbar({ title: 'Home', basePath: '..' });
@@ -943,7 +941,7 @@
                 
                 <div class="select-cards" id="account-cards">
                     <div class="select-card selected" data-account="main" onclick="selectAccount(this)">
-                        <div class="select-card-icon">💼</div>
+                        <div class="select-card-indicator" style="background: #3b82f6;"></div>
                         <div class="select-card-info">
                             <div class="select-card-title">Main Account</div>
                             <div class="select-card-meta">Balance: $25,430.00 • Risk: Normal</div>
@@ -951,7 +949,7 @@
                         <div class="select-card-check">✓</div>
                     </div>
                     <div class="select-card" data-account="trading-a" onclick="selectAccount(this)">
-                        <div class="select-card-icon">📈</div>
+                        <div class="select-card-indicator" style="background: #22c55e;"></div>
                         <div class="select-card-info">
                             <div class="select-card-title">Trading Account A</div>
                             <div class="select-card-meta">Balance: $10,250.00 • Risk: Conservative</div>
@@ -959,7 +957,7 @@
                         <div class="select-card-check">✓</div>
                     </div>
                     <div class="select-card" data-account="trading-b" onclick="selectAccount(this)">
-                        <div class="select-card-icon">🎯</div>
+                        <div class="select-card-indicator" style="background: #f59e0b;"></div>
                         <div class="select-card-info">
                             <div class="select-card-title">Trading Account B</div>
                             <div class="select-card-meta">Balance: $5,000.00 • Risk: Aggressive</div>
@@ -976,7 +974,7 @@
                 
                 <div class="select-cards" id="blueprint-cards">
                     <div class="select-card selected" data-blueprint="momentum" onclick="selectBlueprint(this)">
-                        <div class="select-card-icon">⚡</div>
+                        <div class="select-card-indicator" style="background: #3b82f6;"></div>
                         <div class="select-card-info">
                             <div class="select-card-title">Momentum Breakout</div>
                             <div class="select-card-meta">Win Rate: 65% • Avg RR: 1:2.5</div>
@@ -984,7 +982,7 @@
                         <div class="select-card-check">✓</div>
                     </div>
                     <div class="select-card" data-blueprint="scalping" onclick="selectBlueprint(this)">
-                        <div class="select-card-icon">🎯</div>
+                        <div class="select-card-indicator" style="background: #22c55e;"></div>
                         <div class="select-card-info">
                             <div class="select-card-title">Scalping Strategy</div>
                             <div class="select-card-meta">Win Rate: 72% • Avg RR: 1:1.5</div>
@@ -992,7 +990,7 @@
                         <div class="select-card-check">✓</div>
                     </div>
                     <div class="select-card" data-blueprint="swing" onclick="selectBlueprint(this)">
-                        <div class="select-card-icon">📊</div>
+                        <div class="select-card-indicator" style="background: #f59e0b;"></div>
                         <div class="select-card-info">
                             <div class="select-card-title">Swing Trading</div>
                             <div class="select-card-meta">Win Rate: 58% • Avg RR: 1:3.0</div>
@@ -1085,6 +1083,84 @@
         }
     };
 
+    // Blueprint registry (shared with Execute)
+    function mvpGetBlueprintRegistry() {
+        if (window.TM_MVP_BLUEPRINTS) return window.TM_MVP_BLUEPRINTS;
+        return null;
+    }
+
+    function mvpBuildWizardBlueprintDataFromRegistry(registry) {
+        // wizard expects a map: key -> { name }
+        const out = {};
+        if (!registry) return out;
+        Object.keys(registry).forEach(id => {
+            const bp = registry[id];
+            if (bp && bp.name) out[id] = { name: bp.name };
+        });
+        return out;
+    }
+
+    function mvpBlueprintIcon(bp) {
+        const name = String((bp && bp.name) || '').toLowerCase();
+        const sym = String((bp && bp.market && bp.market.symbol) || '').toUpperCase();
+        let color = '#3b82f6'; // default blue
+        if (sym === 'NQ' || name.includes('momentum') || name.includes('break')) color = '#3b82f6';
+        else if (sym === 'ES' || name.includes('range')) color = '#22c55e';
+        else if (sym === 'GC' || name.includes('gold')) color = '#f59e0b';
+        else if (name.includes('scalp')) color = '#8b5cf6';
+        else if (name.includes('swing')) color = '#ef4444';
+        return `<div class="select-card-indicator" style="background: ${color};"></div>`;
+    }
+
+    function mvpFmtWinRate(bp) {
+        const wr = Number(bp && bp.winRate);
+        if (!Number.isFinite(wr)) return '—';
+        return `${wr}%`;
+    }
+
+    function mvpFmtAvgRR(bp) {
+        const rr = Number(bp && bp.avgRR);
+        if (!Number.isFinite(rr)) return '—';
+        return `1:${rr.toFixed(1)}`;
+    }
+
+    function mvpRenderBlueprintCards() {
+        const container = document.getElementById('blueprint-cards');
+        if (!container) return;
+
+        const registry = mvpGetBlueprintRegistry();
+        if (!registry || typeof window.tmGetMvpBlueprintsList !== 'function') return;
+
+        const list = window.tmGetMvpBlueprintsList();
+        if (!Array.isArray(list) || list.length === 0) return;
+
+        // Use first item as default if current selection not found
+        const currentId = String(wizardState.blueprint || '');
+        const hasCurrent = list.some(bp => String(bp.id || '') === currentId);
+        const selectedId = hasCurrent ? currentId : String(list[0].id);
+        wizardState.blueprint = selectedId;
+
+        // Rebuild blueprintData map for startSession() payload
+        wizardState.blueprintData = mvpBuildWizardBlueprintDataFromRegistry(registry);
+
+        container.innerHTML = list.map(bp => {
+            const id = String(bp.id || '');
+            const selected = id === selectedId ? 'selected' : '';
+            const icon = mvpBlueprintIcon(bp);
+            const meta = `Win Rate: ${mvpFmtWinRate(bp)} • Avg RR: ${mvpFmtAvgRR(bp)}`;
+            return `
+                <div class="select-card ${selected}" data-blueprint="${id}" onclick="selectBlueprint(this)">
+                    <div class="select-card-icon">${icon}</div>
+                    <div class="select-card-info">
+                        <div class="select-card-title">${bp.name || 'Blueprint'}</div>
+                        <div class="select-card-meta">${meta}</div>
+                    </div>
+                    <div class="select-card-check">✓</div>
+                </div>
+            `;
+        }).join('');
+    }
+
     // ========== Wizard Functions ==========
     function openSessionWizard() {
         wizardState.currentStep = 1;
@@ -1163,6 +1239,11 @@
         if (step === 3) {
             updateRiskSummary();
         }
+
+        // Step 2: ensure blueprint list is synced with Execute
+        if (step === 2) {
+            mvpRenderBlueprintCards();
+        }
     }
 
     function selectAccount(el) {
@@ -1192,11 +1273,22 @@
         
         // Start live session via topbar module
         if (typeof startLiveSession === 'function') {
-            startLiveSession({
+            const state = startLiveSession({
                 name: `${blueprintData.name} Session`,
                 account: accountData.name,
-                blueprint: blueprintData.name
+                blueprint: blueprintData.name,
+                riskLimit: accountData.riskLimit
             });
+
+            // 真实对接：启动后直接跳到 Execute → Sessions（LIVE 立即可见）
+            const live = (state && state.sessionId)
+                ? state
+                : (typeof getLiveSessionState === 'function' ? getLiveSessionState() : null);
+
+            if (live && live.active && live.sessionId) {
+                window.location.href = `../execute/index.html?view=sessions&session=${encodeURIComponent(live.sessionId)}`;
+                return;
+            }
         }
         
         closeSessionWizard();
@@ -1216,9 +1308,13 @@
     // ========== Sessions List ==========
     function renderSessions() {
         const container = document.getElementById('sessions-list');
-        const liveSession = typeof getLiveSessionState === 'function' ? getLiveSessionState() : { active: false };
-        
-        if (!liveSession.active) {
+        if (!container) return;
+
+        const sessions = (typeof getLiveSessions === 'function')
+            ? (Array.isArray(getLiveSessions()) ? getLiveSessions() : [])
+            : (typeof getLiveSessionState === 'function' && getLiveSessionState() && getLiveSessionState().active ? [getLiveSessionState()] : []);
+
+        if (!sessions || sessions.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">📊</div>
@@ -1228,32 +1324,51 @@
             `;
             return;
         }
-        
-        const duration = typeof getSessionDuration === 'function' 
-            ? getSessionDuration(liveSession.startTime) 
-            : '00:00:00';
-        
-        const pnlSign = liveSession.pnl >= 0 ? '+' : '-';
-        const pnlClass = liveSession.pnl >= 0 ? 'positive' : 'negative';
-        
+
+        const sorted = sessions.slice().sort((a, b) => {
+            const ta = a && a.startTime ? +new Date(a.startTime) : 0;
+            const tb = b && b.startTime ? +new Date(b.startTime) : 0;
+            return tb - ta;
+        });
+
+        const preview = sorted.slice(0, 3);
+        const more = Math.max(0, sorted.length - preview.length);
+
         container.innerHTML = `
-            <div class="session-item live" onclick="goToSession('${liveSession.sessionId}')">
-                <div class="session-left">
-                    <div class="session-status"></div>
-                    <div class="session-info">
-                        <h4>${liveSession.sessionName}</h4>
-                        <p>${liveSession.account || 'Main Account'} • ${liveSession.tradeCount || 0} trades</p>
+            ${preview.map(s => {
+                const duration = typeof getSessionDuration === 'function'
+                    ? getSessionDuration(s.startTime)
+                    : '00:00:00';
+                const pnl = Number(s.pnl || 0);
+                const pnlSign = pnl >= 0 ? '+' : '-';
+                const pnlClass = pnl >= 0 ? 'positive' : 'negative';
+                const trades = Number(s.tradeCount || 0);
+                return `
+                    <div class="session-item live" onclick="goToSession('${String(s.sessionId || '')}')">
+                        <div class="session-left">
+                            <div class="session-status"></div>
+                            <div class="session-info">
+                                <h4>${s.sessionName || 'Live Session'}</h4>
+                                <p>${s.account || 'Main Account'} • ${trades} trades</p>
+                            </div>
+                        </div>
+                        <div class="session-right">
+                            <div class="session-pnl ${pnlClass}">${pnlSign}$${Math.abs(pnl).toFixed(2)}</div>
+                            <div class="session-duration">${duration}</div>
+                        </div>
+                        <div class="session-actions">
+                            <button class="session-action-btn" onclick="event.stopPropagation(); quickLog()">Quick Log</button>
+                            <button class="session-action-btn primary" onclick="event.stopPropagation(); goToSession('${String(s.sessionId || '')}')">View</button>
+                        </div>
                     </div>
+                `;
+            }).join('')}
+            ${more > 0 ? `
+                <div style="margin-top: 10px; color: var(--text-muted); font-size: 12px;">
+                    还有 <strong style="color: var(--text-main);">${more}</strong> 个 Live Sessions 正在运行，
+                    <a href="../execute/index.html?view=sessions" style="color: var(--primary); text-decoration: none;">去 Sessions 查看全部 →</a>
                 </div>
-                <div class="session-right">
-                    <div class="session-pnl ${pnlClass}">${pnlSign}$${Math.abs(liveSession.pnl).toFixed(2)}</div>
-                    <div class="session-duration">${duration}</div>
-                </div>
-                <div class="session-actions">
-                    <button class="session-action-btn" onclick="event.stopPropagation(); quickLog()">Quick Log</button>
-                    <button class="session-action-btn primary" onclick="event.stopPropagation(); goToSession('${liveSession.sessionId}')">View</button>
-                </div>
-            </div>
+            ` : ''}
         `;
     }
 
@@ -1268,10 +1383,20 @@
 
     // ========== Initialize ==========
     document.addEventListener('DOMContentLoaded', function() {
+        // Sync Blueprint list from shared registry (Execute uses same source)
+        mvpRenderBlueprintCards();
+
         renderSessions();
         
         // Update sessions list periodically
-        setInterval(renderSessions, 5000);
+        setInterval(renderSessions, 2500);
+
+        // Cross-tab/page sync (Execute auto-sim + Start/End session)
+        window.addEventListener('storage', function (e) {
+            if (e.key === 'toMoon_live_sessions' || e.key === 'toMoon_live_session' || e.key === 'toMoon_live_focus_session_id') {
+                renderSessions();
+            }
+        });
     });
 
     // Listen for session events

@@ -24,6 +24,9 @@
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         p {
             color: #94a3b8;
@@ -48,9 +51,19 @@
 </head>
 <body>
     <div class="container">
-        <h1>🌙 ToMoon MVP</h1>
+        <h1>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            ToMoon MVP
+        </h1>
         <p>Start your trading session with confidence</p>
-        <a href="home/index.html" class="btn">Enter Dashboard →</a>
+        <a href="home/index.html" class="btn">
+            Enter Dashboard
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 8px;">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </a>
     </div>
 </body>
 </html>

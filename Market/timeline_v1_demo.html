@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToMoon Timeline v1 Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d0d0e;
+            --bg-secondary: #161618;
+            --bg-tertiary: #212124;
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --text-tertiary: #636366;
+            --accent-green: #30d158;
+            --accent-red: #ff453a;
+            --accent-blue: #0a84ff;
+            --accent-orange: #ff9f0a;
+            --accent-purple: #bf5af2;
+            --accent-teal: #64d2ff;
+            --border-color: #2a2a2c;
+            --grid-color: rgba(255, 255, 255, 0.05);
+            
+            /* Category Colors */
+            --cat-cb: #5e5ce6;
+            --cat-geo: #ff453a;
+            --cat-gov: #ff9f0a;
+            --cat-mkt: #ffd60a;
+            --cat-sys: #bf5af2;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .symbol-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .symbol-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #ffd60a, #ff9f0a);
+            color: #000;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        .symbol-details h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .symbol-details .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        /* Controls */
+        .timeline-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            background: var(--bg-tertiary);
+            padding: 4px;
+            border-radius: 8px;
+            gap: 4px;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .toggle-btn.active {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .toggle-btn.active.track-a { border-left: 3px solid var(--accent-teal); }
+        .toggle-btn.active.track-b { border-left: 3px solid var(--cat-cb); }
+
+        /* Time Range Selector */
+        .time-selector {
+            display: flex;
+            gap: 1px;
+            background: var(--border-color);
+            padding: 1px;
+            border-radius: 8px;
+            margin-right: auto; /* Push to left if in flex container */
+        }
+
+        .time-btn {
+            padding: 6px 12px;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .time-btn:first-child { border-top-left-radius: 7px; border-bottom-left-radius: 7px; }
+        .time-btn:last-child { border-top-right-radius: 7px; border-bottom-right-radius: 7px; }
+
+        .time-btn:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+        .time-btn.active { background: var(--bg-tertiary); color: var(--text-primary); }
+
+        /* Chart Wrapper */
+        .chart-wrapper {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 0;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 660px; /* Taller to accommodate tracks + time axis */
+            width: 100%;
+            background: var(--bg-secondary);
+            padding: 16px;
+        }
+
+        #mainChart {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Updated Tooltip Styles */
+        .tooltip {
+            position: absolute;
+            background: rgba(18, 18, 20, 0.95); /* Deep dark background */
+            backdrop-filter: blur(12px);
+            border-radius: 6px;
+            padding: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+            z-index: 100;
+            width: 320px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .tooltip.visible { opacity: 1; }
+
+        .hover-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .hover-date { font-size: 12px; font-weight: 700; color: #fff; }
+        .hover-count { font-size: 10px; font-weight: 600; color: #86868b; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; }
+
+        .hover-simple-list { display: flex; flex-direction: column; gap: 0; }
+        
+        .hover-simple-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05); /* Very subtle divider */
+        }
+        .hover-simple-item:last-child { border-bottom: none; }
+        
+        .hover-time-col {
+            font-family: 'SF Mono', monospace;
+            font-size: 11px;
+            color: #8e8e93;
+            min-width: 36px;
+            padding-top: 2px;
+        }
+        
+        .hover-content-col { flex: 1; }
+        
+        .hover-simple-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: #f2f2f5;
+            line-height: 1.3;
+            margin-bottom: 3px;
+        }
+        
+        .hover-category {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+        
+        /* Scrollbar hiding if needed */
+        .hover-simple-list::-webkit-scrollbar { display: none; }
+
+        .cat-pill {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.08);
+            color: #cfcfd6;
+        }
+
+        .hover-title-text {
+            color: #f1f1f4;
+            font-size: 13px;
+            line-height: 1.35;
+            margin-bottom: 6px;
+        }
+
+        .hover-meta {
+            color: var(--text-tertiary);
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .hover-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.08);
+            color: #cfcfd6;
+        }
+
+        .tag.success { background: rgba(48, 209, 88, 0.2); color: #8ef3ad; }
+        .tag.warning { background: rgba(255, 159, 10, 0.2); color: #ffd18a; }
+        .tag.danger { background: rgba(255, 69, 58, 0.2); color: #ff9a94; }
+        
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: var(--accent-teal);
+            font-weight: 600;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 4px 12px;
+            font-family: 'SF Mono', monospace;
+        }
+        
+        .data-label { color: var(--text-secondary); }
+        .data-value { text-align: right; color: var(--text-primary); }
+
+        /* Track B: Headline Tooltip */
+        .tooltip.headline-tooltip {
+            border-left: 3px solid var(--cat-cb);
+            max-width: 280px;
+        }
+
+        .headline-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .headline-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .headline-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-tertiary);
+            font-size: 10px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 16px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Modal - Transformed to Sidebar */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0); /* Initially transparent backdrop */
+            z-index: 1000;
+            justify-content: flex-end; /* Align to right */
+            align-items: flex-start;
+            transition: background 0.3s ease;
+        }
+
+        .modal.visible { 
+            display: flex; 
+            background: rgba(0,0,0,0.5); /* Dim background when visible */
+        }
+
+        .modal-content {
+            background: #1c1c1e;
+            width: 600px; /* Wider sidebar */
+            max-width: 90vw;
+            height: 100%;
+            border-radius: 0;
+            border-left: 1px solid var(--border-color);
+            border-top: none; border-right: none; border-bottom: none;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal.visible .modal-content {
+            transform: translateX(0); /* Slide in */
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-secondary);
+        }
+        
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Hide the old split layout containers that we don't need */
+        .modal-split { display:contents; } 
+        .modal-main { display: none; }
+        
+        /* Sidebar body becomes the main container */
+        .modal-side { 
+            background: transparent; 
+            padding: 24px; 
+        .side-tab.active {
+            color: #fff;
+            border-bottom: 2px solid #fff;
+            padding-bottom: 4px;
+        }
+
+        .side-card {
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .side-card .event-title { font-size: 13px; }
+
+        .event-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid transparent;
+        }
+
+        .event-card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 16px;
+        }
+
+        .event-left {
+            padding-right: 6px;
+            border-right: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .event-right {
+            padding-left: 6px;
+        }
+
+        .event-main {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .event-title { font-weight: 600; font-size: 15px; }
+        .event-meta { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+        .event-body {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            line-height: 1.6;
+            white-space: pre-wrap; 
+        }
+        
+        .event-body.collapsed {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
+        }
+
+        .read-more-btn {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--accent-blue);
+            cursor: pointer;
+            font-weight: 500;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        .read-more-btn:hover { text-decoration: underline; }
+
+        /* News Feed Styles (New Design) */
+        .news-container { display: flex; flex-direction: column; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        
+        .news-item {
+            display: flex;
+            gap: 20px;
+            padding: 24px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .news-item:last-child { border-bottom: none; }
+        
+        .news-time {
+            font-family: 'SF Mono', 'Roboto Mono', monospace;
+            font-size: 15px;
+            font-weight: 600;
+            color: #4a9eff; /* Bright blue like the image */
+            min-width: 70px;
+            padding-top: 2px;
+            flex-shrink: 0;
+        }
+        
+        .news-content { flex: 1; }
+        
+        .news-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f5f5f7;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .news-meta {
+            font-size: 12px;
+            color: #86868b;
+            margin-bottom: 12px;
+        }
+        
+        .news-body {
+            font-size: 15px;
+            color: #cecece;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        /* Simplified Hover Styles */
+        .hover-simple-list {
+            display: flex;
+            flex-direction: column;
+        }
+        .hover-simple-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .hover-simple-item:last-child { border-bottom: none; }
+        
+        .hover-time-col {
+            font-size: 11px;
+            color: var(--accent-teal);
+            font-family: 'SF Mono', monospace;
+            width: 40px;
+            flex-shrink: 0;
+            padding-top: 2px;
+        }
+        
+        .hover-content-col { flex: 1; }
+        .hover-simple-title { font-size: 12px; font-weight: 600; color: #fff; margin-bottom: 2px; line-height: 1.3; }
+        .hover-simple-meta { font-size: 10px; color: var(--text-tertiary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="chart-header">
+            <div class="symbol-info">
+                <div class="symbol-icon">Au</div>
+                <div class="symbol-details">
+                    <h1>XAU/USD</h1>
+                    <span class="subtitle">Gold Spot · OANDA</span>
+                </div>
+            </div>
+            
+            <div class="timeline-controls">
+                <!-- Time Selector -->
+                <div class="time-selector">
+                    <button class="time-btn" data-range="1H">1H</button>
+                    <button class="time-btn" data-range="4H">4H</button>
+                    <button class="time-btn" data-range="1D">1D</button>
+                    <button class="time-btn active" data-range="1W">1W</button>
+                    <button class="time-btn" data-range="1M">1M</button>
+                </div>
+
+                <div class="control-group">
+                    <button class="toggle-btn active" id="toggleEvents">
+                        <span class="dot" style="background: var(--text-primary); width: 6px; height: 6px; border-radius: 50%;"></span>
+                        Show Timeline Events
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-container">
+                <canvas id="mainChart"></canvas>
+                <canvas id="overlayCanvas" style="position: absolute; top: 16px; left: 16px; pointer-events: none;"></canvas>
+                <div class="tooltip" id="tooltip"></div>
+            </div>
+            
+            <div class="legend" style="display:none;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalDate">Jan 12, 2026</h2>
+                <button class="close-btn" onclick="document.getElementById('detailModal').classList.remove('visible')">&times;</button>
+            </div>
+            <div class="modal-body modal-split">
+                <div class="modal-main" id="modalList">
+                    <!-- Events go here -->
+                </div>
+                <aside class="modal-side" id="modalSide">
+                    <!-- Context panel goes here -->
+                </aside>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Enums & Constants ---
+        const EventCategories = {
+            CB_ACTION: { label: 'CB ACTION', color: '#5e5ce6', priority: 3 },
+            CB_SPEECH: { label: 'CB SPEECH', color: '#5e5ce6', priority: 2 },
+            GEO_RISK: { label: 'GEO RISK', color: '#ff453a', priority: 3 },
+            GOV_POLICY: { label: 'GOV POLICY', color: '#ff9f0a', priority: 2 },
+            MKT_DISRUPTION: { label: 'MKT DISRUPTION', color: '#ffd60a', priority: 3 },
+            SYSTEMIC_RISK: { label: 'SYSTEMIC RISK', color: '#bf5af2', priority: 3 },
+            DATA_PRINT: { label: 'DATA PRINT', color: '#64d2ff', priority: 1 }, 
+            MKT_EVENT: { label: 'MKT EVENT', color: '#ffffff', priority: 1 }
+        };
+
+        // --- Mock Data Generation ---
+        function generateMockData(count = 120, interval = '1W') {
+            const data = [];
+            let basePrice = 2300; 
+            let timeStep = 24 * 60 * 60 * 1000; // Default 1 day
+            
+            // Adjust step based on interval
+            if (interval === '1H') timeStep = 60 * 60 * 1000;
+            else if (interval === '4H') timeStep = 4 * 60 * 60 * 1000;
+            else if (interval === '1D') timeStep = 24 * 60 * 60 * 1000;
+            else if (interval === '1W') timeStep = 7 * 24 * 60 * 60 * 1000;
+            else if (interval === '1M') timeStep = 30 * 24 * 60 * 60 * 1000;
+
+            const now = new Date();
+            // Start from 'count' steps ago
+            const startTime = now.getTime() - (count * timeStep);
+            
+            for (let i = 0; i < count; i++) {
+                const date = new Date(startTime + (i * timeStep));
+                
+                // Skip weekends ONLY for daily data. 
+                // Weekly data (1W) spans the whole week, so we keep it even if the seed date is a Sunday.
+                if (interval === '1D') {
+                    if(date.getDay() === 0 || date.getDay() === 6) continue;
+                }
+
+                const volatility = 0.005;
+                const change = (Math.random() - 0.48) * volatility;
+                const open = basePrice;
+                const close = basePrice * (1 + change);
+                const high = Math.max(open, close) * (1 + Math.random() * 0.003);
+                const low = Math.min(open, close) * (1 - Math.random() * 0.003);
+                const volume = 50000 + Math.random() * 50000;
+                
+                data.push({
+                    date: date,
+                    open: open, high: high, low: low, close: close, volume: volume,
+                    events: []
+                });
+                basePrice = close;
+            }
+            return data;
+        }
+
+        function populateEvents(candles) {
+            candles.forEach((candle, idx) => {
+                // Force "Busy Day" on specific indices logic (e.g., every 30th day)
+                const isBusyDay = idx % 25 === 0; 
+                const extraCount = isBusyDay ? 6 : 0;
+
+                // DATA_PRINT
+                if (Math.random() < 0.1 || isBusyDay) {
+                   const hour = 12 + Math.floor(Math.random() * 5); // 12:00 - 16:00
+                   const min = Math.floor(Math.random() * 60);
+                   const eventTime = new Date(candle.date);
+                   eventTime.setHours(hour, min);
+
+                   candle.events.push({
+                        type: 'DATA_PRINT',
+                        category: 'DATA_PRINT',
+                        title: ['CPI YoY', 'NFP', 'GDP QoQ', 'Retail Sales'][Math.floor(Math.random()*4)],
+                        values: {
+                             actual: (Math.random() * 5).toFixed(1) + '%',
+                             forecast: (Math.random() * 5).toFixed(1) + '%'
+                        },
+                        timestamp: eventTime,
+                        source: 'BLS/BEA',
+                        importance: 2
+                    });
+                }
+
+                // HEADLINES
+                if (Math.random() < 0.08 || isBusyDay) {
+                    const count = isBusyDay ? 5 : 1;
+                    for(let k=0; k<count; k++) {
+                        const cats = Object.keys(EventCategories).filter(k => k !== 'DATA_PRINT');
+                        const catKey = cats[Math.floor(Math.random() * cats.length)];
+                        
+                        const hour = 8 + Math.floor(Math.random() * 12); // 08:00 - 20:00
+                        const min = Math.floor(Math.random() * 60);
+                        const eventTime = new Date(candle.date);
+                        eventTime.setHours(hour, min);
+
+                        candle.events.push({
+                            type: 'HEADLINE',
+                            category: catKey,
+                            title: getMockHeadline(catKey),
+                            body: getMockBody(),
+                            timestamp: eventTime,
+                            source: 'Bloomberg',
+                            importance: Math.random() > 0.6 ? 3 : 2
+                        });
+                    }
+                }
+                
+                // Sort by timestamp descending (Latest first)
+                candle.events.sort((a, b) => b.timestamp - a.timestamp);
+            });
+        }
+
+        function getMockBody() {
+             const texts = [
+                "The Consumer Price Index (CPI) rose 0.4% in February on a seasonally adjusted basis, after rising 0.5% in January, the U.S. Bureau of Labor Statistics reported today. Over the last 12 months, the all items index increased 6.0% before seasonal adjustment. The index for shelter was the largest contributor to the monthly all items increase, accounting for over 70 percent of the increase.",
+                "Federal Reserve officials emphasized that they are highly attentive to inflation risks. The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run. In support of these goals, the Committee decided to raise the target range for the federal funds rate to 4-3/4 to 5 percent.",
+                "Gold prices surged to a new record high as investors flocked to safe-haven assets amidst growing geopolitical tensions in the Middle East and uncertainty surrounding the global economic outlook. Analysts predict that the momentum could continue if central banks maintain their accumulation of bullion reserves.",
+                "Major tech stocks tumbled today following reports of new regulatory restrictions on AI development. The NASDAQ Composite dropped 2.3% as market participants reassessed valuations in the sector. Meanwhile, defensive sectors such as utilities and consumer staples saw modest gains."
+            ];
+            let body = texts[Math.floor(Math.random() * texts.length)];
+            if(Math.random() > 0.4) body += "\n\n" + texts[Math.floor(Math.random() * texts.length)];
+            if(Math.random() > 0.7) body += "\n\n" + texts[Math.floor(Math.random() * texts.length)];
+            return body;
+        }
+
+        function getMockHeadline(category) {
+            const headlines = {
+                CB_ACTION: ["Fed Hikes 25bps", "ECB Holds Rates Steady", "BoJ Widens Yield Band"],
+                CB_SPEECH: ["Powell: 'Inflation sticky'", "Lagarde warns on growth", "Bailey on wage spiral"],
+                GEO_RISK: ["Missile strike reported in Red Sea", "Peace talks stall", "New sanctions announced"],
+                GOV_POLICY: ["Treasury announces debt buyback", "New import tariffs effective", "Capital gains tax proposal"],
+                MKT_DISRUPTION: ["NYSE brief trading halt", "LME nickel trading suspended"],
+                SYSTEMIC_RISK: ["Credit Suisse CDS spikes", "Regional bank deposits outflow"],
+            };
+            const list = headlines[category] || ["Significant Market Event"];
+            return list[Math.floor(Math.random() * list.length)];
+        }
+
+        // --- Chart Class ---
+
+        class TimelineChart {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.tooltip = document.getElementById('tooltip');
+                
+                this.padding = { top: 40, right: 60, bottom: 90, left: 10 };
+                this.showEvents = true;
+                this.interval = '1W'; // Default interval
+
+                // Initial Data
+                this.fullData = generateMockData(200, this.interval); // Generate more data to allow panning
+                populateEvents(this.fullData);
+                this.data = this.fullData; // data to draw
+
+                // Viewport State
+                this.minCandles = 20;
+                this.maxCandles = 200;
+                this.visibleCandles = 60; // Initial zoom level
+                this.offset = Math.max(0, this.data.length - this.visibleCandles); // Start at the end
+
+                this.hoveredIndex = -1;
+
+                this.setupCanvas();
+                this.bindEvents();
+                this.draw();
+            }
+
+            setupCanvas() {
+                const dpr = window.devicePixelRatio || 1;
+                const rect = this.canvas.parentElement.getBoundingClientRect();
+                this.canvas.width = rect.width * dpr;
+                this.canvas.height = rect.height * dpr;
+                this.canvas.style.width = rect.width + 'px';
+                this.canvas.style.height = rect.height + 'px';
+                this.ctx.scale(dpr, dpr);
+                this.width = rect.width;
+                this.height = rect.height;
+            }
+
+            bindEvents() {
+                window.addEventListener('resize', () => { this.setupCanvas(); this.draw(); });
+                
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.canvas.addEventListener('mouseleave', () => {
+                    this.hoveredIndex = -1;
+                    if (this.hoverTimer) clearTimeout(this.hoverTimer);
+                    this.hideTooltip();
+                    this.draw();
+                });
+                this.canvas.addEventListener('click', () => this.handleClick());
+                
+                // Zoom Support
+                this.canvas.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
+
+                // Time Range Selectors
+                document.querySelectorAll('.time-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.updateInterval(e.target.dataset.range);
+                    });
+                });
+
+                document.getElementById('toggleEvents').addEventListener('click', (e) => {
+                    this.showEvents = !this.showEvents;
+                    e.currentTarget.classList.toggle('active');
+                    this.draw();
+                });
+            }
+
+            updateInterval(interval) {
+                this.interval = interval;
+                
+                // Adjust data count based on interval (more points for smaller intervals usually)
+                let count = 200;
+                if (interval === '1H') count = 400; 
+                
+                this.fullData = generateMockData(count, interval);
+                populateEvents(this.fullData);
+                this.data = this.fullData;
+                
+                // Reset view to end
+                this.offset = Math.max(0, this.data.length - this.visibleCandles);
+                this.draw();
+            }
+
+            handleWheel(e) {
+                e.preventDefault();
+                
+                const zoomSpeed = 0.1;
+                const delta = Math.sign(e.deltaY);
+                
+                // Calculate new visible count
+                let newVisible = this.visibleCandles + (delta * 5);
+                newVisible = Math.max(this.minCandles, Math.min(this.maxCandles, newVisible));
+                
+                if (newVisible !== this.visibleCandles) {
+                    // Try to zoom centered on mouse? For now, anchor right (standard)
+                    // Anchor Right logic:
+                    // The end index is (offset + visibleCandles). We want to keep it roughly same?
+                    // Usually chart zooms from the right if we are at the latest data.
+                    
+                    // Simple Right Anchor:
+                    const rightIndex = this.offset + this.visibleCandles;
+                    this.visibleCandles = newVisible;
+                    this.offset = Math.max(0, rightIndex - this.visibleCandles);
+                    
+                    // Clamp offset
+                    if (this.offset + this.visibleCandles > this.data.length) {
+                        this.offset = this.data.length - this.visibleCandles;
+                    }
+                    if (this.offset < 0) this.offset = 0;
+
+                    this.hideTooltip();
+                    this.draw();
+                }
+            }
+
+            getMinMax() {
+                let min = Infinity, max = -Infinity;
+                // Only scan visible data
+                const end = Math.min(this.data.length, this.offset + this.visibleCandles);
+                for (let i = this.offset; i < end; i++) {
+                    const d = this.data[i];
+                    min = Math.min(min, d.low);
+                    max = Math.max(max, d.high);
+                }
+                if (min === Infinity) return { min: 2000, max: 2500 };
+                return { min: min * 0.995, max: max * 1.005 };
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                if (!this.data || this.data.length === 0) {
+                    this.ctx.fillStyle = '#8e8e93';
+                    this.ctx.font = '14px sans-serif';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText("No Data Available", this.width / 2, this.height / 2);
+                    return;
+                }
+
+                const { min, max } = this.getMinMax();
+                const chartBottom = this.height - this.padding.bottom;
+                
+                const w = this.width - this.padding.left - this.padding.right;
+                // Dynamic candle width based on zoom
+                const candleW = w / this.visibleCandles;
+                
+
+                // Crosshair moved to end of draw()
+
+
+                this.drawGrid(chartBottom);
+                this.drawCandles(min, max, chartBottom, candleW);
+                this.drawPriceAxis(min, max, chartBottom);
+
+                if (this.showEvents) this.drawEventMarkers(min, max, chartBottom, candleW);
+                this.drawTimeAxis(chartBottom, candleW, this.height - 30);
+
+                // Draw Crosshair (Moved here)
+                if(this.hoveredIndex !== -1 && this.hoveredIndex >= this.offset && this.hoveredIndex < this.offset + this.visibleCandles) {
+                    const screenIdx = this.hoveredIndex - this.offset;
+                    const x = this.padding.left + (screenIdx * candleW);
+                    const centerX = x + (candleW / 2);
+                    const axisY = this.height - 30;
+                    
+                    this.ctx.save();
+                    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    this.ctx.setLineDash([5, 5]);
+                    this.ctx.lineWidth = 1;
+
+                    // Vertical Line
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(centerX, this.padding.top);
+                    this.ctx.lineTo(centerX, axisY);
+                    this.ctx.stroke();
+
+                    // Horizontal Line
+                    if (this.mouseY && this.mouseY > this.padding.top && this.mouseY < chartBottom) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(this.padding.left, this.mouseY);
+                        this.ctx.lineTo(w + this.padding.left, this.mouseY);
+                        this.ctx.stroke();
+                        
+                        // Price Label
+                        const h = chartBottom - this.padding.top;
+                        const price = max - ((this.mouseY - this.padding.top) / h) * (max - min);
+                        this.ctx.fillStyle = '#2c2c2e';
+                        this.ctx.fillRect(w + this.padding.left + 2, this.mouseY - 9, 45, 18);
+                        this.ctx.fillStyle = '#fff';
+                        this.ctx.textAlign = 'left';
+                        this.ctx.fillText(price.toFixed(1), w + this.padding.left + 5, this.mouseY + 4);
+                    }
+                    
+                    // Time Label
+                    const d = this.data[this.hoveredIndex].date;
+                    const timeLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false });
+                    
+                    this.ctx.font = '10px Roboto'; 
+                    const textM = this.ctx.measureText(timeLabel);
+                    const textW = textM.width;
+                    const labelH = 20;
+                    
+                    // Draw Label Background on Axis
+                    const labelX = centerX - (textW + 16) / 2;
+                    const labelY = axisY; 
+                    
+                    this.drawRoundedRect(labelX, labelY, textW + 16, labelH, 4, '#2c2c2e');
+                    
+                    this.ctx.fillStyle = '#fff';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(timeLabel, centerX, labelY + labelH/2);
+
+                    this.ctx.restore();
+                }
+            }
+
+            drawGrid(chartBottom) {
+                const w = this.width - this.padding.left - this.padding.right;
+                const h = chartBottom - this.padding.top;
+                this.ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                this.ctx.lineWidth = 1;
+                for(let i=0; i<5; i++) {
+                    const y = this.padding.top + (h/5)*i;
+                    this.ctx.beginPath(); this.ctx.moveTo(this.padding.left, y); this.ctx.lineTo(w + this.padding.left, y); this.ctx.stroke();
+                }
+            }
+
+            drawCandles(min, max, chartBottom, candleW) {
+                const h = chartBottom - this.padding.top;
+                const gap = candleW * 0.2;
+                
+                // Only loop visible range
+                const end = Math.min(this.data.length, this.offset + this.visibleCandles);
+                
+                for (let i = this.offset; i < end; i++) {
+                    const d = this.data[i];
+                    // Map i to screen x (0 to visibleCandles)
+                    const screenIdx = i - this.offset;
+                    
+                    const x = this.padding.left + (screenIdx * candleW) + (gap/2);
+                    const cw = candleW - gap;
+                    const normalize = (val) => this.padding.top + (h - ((val - min) / (max - min)) * h);
+                    
+                    const isGreen = d.close >= d.open;
+                    this.ctx.fillStyle = isGreen ? '#2ebd85' : '#f6465d';
+                    this.ctx.strokeStyle = this.ctx.fillStyle; 
+                    
+                    // Wick
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x + cw/2, normalize(d.high));
+                    this.ctx.lineTo(x + cw/2, normalize(d.low));
+                    this.ctx.stroke();
+                    
+                    // Body
+                    this.ctx.fillRect(x, Math.min(normalize(d.open), normalize(d.close)), cw, Math.max(Math.abs(normalize(d.open) - normalize(d.close)), 1));
+                }
+            }
+            
+            drawPriceAxis(min, max, chartBottom) {
+                const h = chartBottom - this.padding.top;
+                this.ctx.fillStyle = '#8e8e93';
+                this.ctx.font = '10px Roboto';
+                this.ctx.textAlign = 'left';
+                
+                for(let i=0; i<=5; i++) {
+                    const price = max - ((max-min)/5)*i;
+                    const y = this.padding.top + (h/5)*i;
+                    this.ctx.fillText(price.toFixed(1), this.width - this.padding.right + 5, y + 3);
+                }
+            }
+
+            drawEventMarkers(min, max, chartBottom, candleW) {
+                const h = chartBottom - this.padding.top;
+                const normalize = (val) => this.padding.top + (h - ((val - min) / (max - min)) * h);
+
+                const end = Math.min(this.data.length, this.offset + this.visibleCandles);
+                this.ctx.font = '10px SF Pro Display, Roboto, sans-serif';
+
+                for (let i = this.offset; i < end; i++) {
+                    const d = this.data[i];
+                    const count = d.events.length;
+                    
+                    if (count > 0) {
+                        const screenIdx = i - this.offset;
+                        const x = this.padding.left + (screenIdx * candleW) + (candleW / 2);
+                        
+                        // Check horizontal bounds
+                        if (x < this.padding.left || x > this.width - this.padding.right) continue;
+
+                        const label = count > 99 ? '99+' : String(count);
+                        const textW = this.ctx.measureText(label).width;
+                        const pillW = Math.max(16, textW + 8);
+                        const pillH = 14;
+
+                        // Determine position: Above High or Below Low?
+                        // Default to Above High
+                        let y = normalize(d.high);
+                        let isAbove = true;
+                        
+                        // If near top edge, flip to below Low
+                        if (y - 30 < this.padding.top) {
+                            y = normalize(d.low);
+                            isAbove = false;
+                        }
+
+                        // Colors
+                        let fillStyle = '#ffd60a'; 
+                        if (count >= 6) fillStyle = '#ff453a'; 
+                        else if (count >= 3) fillStyle = '#ff9f0a'; 
+
+                        this.ctx.strokeStyle = fillStyle;
+                        this.ctx.lineWidth = 1;
+                        this.ctx.beginPath();
+                        
+                        // Draw Stem & Bubble
+                        if (isAbove) {
+                             // Stem going up
+                             this.ctx.moveTo(x, y - 4); 
+                             this.ctx.lineTo(x, y - 16);
+                             this.ctx.stroke();
+                             
+                             // Bubble
+                             const pillX = x - pillW / 2;
+                             const pillY = y - 16 - pillH;
+                             this.drawRoundedRect(pillX, pillY, pillW, pillH, 4, fillStyle);
+                             
+                             this.ctx.fillStyle = '#111';
+                             this.ctx.textAlign = 'center';
+                             this.ctx.textBaseline = 'middle';
+                             this.ctx.fillText(label, x, pillY + pillH / 2 + 1);
+                        } else {
+                             // Stem going down
+                             this.ctx.moveTo(x, y + 4); 
+                             this.ctx.lineTo(x, y + 16);
+                             this.ctx.stroke();
+
+                             // Bubble
+                             const pillX = x - pillW / 2;
+                             const pillY = y + 16;
+                             this.drawRoundedRect(pillX, pillY, pillW, pillH, 4, fillStyle);
+                             
+                             this.ctx.fillStyle = '#111';
+                             this.ctx.textAlign = 'center';
+                             this.ctx.textBaseline = 'middle';
+                             this.ctx.fillText(label, x, pillY + pillH / 2 + 1);
+                        }
+                    }
+                }
+            }
+
+            drawTimeAxis(chartBottom, candleW, axisY) {
+                const w = this.width - this.padding.left - this.padding.right;
+
+                this.ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.padding.left, axisY);
+                this.ctx.lineTo(this.width - this.padding.right, axisY);
+                this.ctx.stroke();
+
+                // Dynamic step based on visibleCandles
+                // If we see 20 candles, show every 2nd or 3rd
+                // If we see 100 candles, show every 10th
+                let steps = Math.floor(this.visibleCandles / 6); // Aim for ~6 labels
+                steps = Math.max(1, steps);
+                
+                this.ctx.fillStyle = '#8e8e93';
+                this.ctx.font = '10px SF Pro Display, Roboto, sans-serif';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'top';
+
+                let lastDay = null;
+                const end = Math.min(this.data.length, this.offset + this.visibleCandles);
+                
+                for (let i = this.offset; i < end; i += steps) {
+                    const screenIdx = i - this.offset;
+                    const x = this.padding.left + (screenIdx * candleW) + (candleW / 2);
+                    
+                    if (x < this.padding.left || x > this.width - this.padding.right) continue;
+
+                    const d = this.data[i].date;
+                    const dayKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                    
+                    // Format based on interval
+                    let timeLabel;
+                    if (this.interval === '1H' || this.interval === '4H') {
+                        timeLabel = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); // 14:00
+                    } else {
+                        timeLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // Jan 12
+                    }
+                    
+                    const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+                    this.ctx.fillText(timeLabel, x, axisY + 6);
+                    
+                    // Logic to show extra date/year info if it changes
+                    if (this.interval !== '1D' && this.interval !== '1W' && this.interval !== '1M') {
+                        if (dayKey !== lastDay) {
+                             this.ctx.fillStyle = '#b0b0b6';
+                             this.ctx.fillText(dateLabel, x, axisY + 18);
+                             this.ctx.fillStyle = '#8e8e93';
+                             lastDay = dayKey;
+                        }
+                    }
+                }
+            }
+
+            drawRoundedRect(x, y, w, h, r, fill) {
+                const ctx = this.ctx;
+                const radius = Math.min(r, w / 2, h / 2);
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.arcTo(x + w, y, x + w, y + h, radius);
+                ctx.arcTo(x + w, y + h, x, y + h, radius);
+                ctx.arcTo(x, y + h, x, y, radius);
+                ctx.arcTo(x, y, x + w, y, radius);
+                ctx.closePath();
+                ctx.fillStyle = fill;
+                ctx.fill();
+            }
+
+            handleMouseMove(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.mouseY = y; // Update for crosshair
+
+                const w = this.width - this.padding.left - this.padding.right;
+                // Use visibleCandles to calculate width
+                const candleW = w / this.visibleCandles;
+                
+                // Calculate index based on mouse position
+                const screenIdx = Math.floor((x - this.padding.left) / candleW);
+                const idx = this.offset + screenIdx;
+                
+                // Bounds check
+                if (idx >= this.offset && idx < Math.min(this.data.length, this.offset + this.visibleCandles) && x > this.padding.left && x < (this.width - this.padding.right)) {
+                    // Update Hover State
+                    if (this.hoveredIndex !== idx) {
+                        this.hoveredIndex = idx;
+                        
+                        // Clear pending tooltip timer whenever we switch candles
+                        if (this.hoverTimer) clearTimeout(this.hoverTimer);
+                        this.hideTooltip();
+
+                        const candle = this.data[idx];
+                        if (candle.events.length > 0 && this.showEvents) {
+                            document.body.style.cursor = 'pointer';
+                            // Add delay before showing tooltip to reduce annoyance
+                            this.hoverTimer = setTimeout(() => {
+                                this.showTooltip(candle, x, y);
+                            }, 500); 
+                        } else {
+                            document.body.style.cursor = 'crosshair';
+                        }
+                    } 
+                } else {
+                    this.hoveredIndex = -1;
+                    if (this.hoverTimer) clearTimeout(this.hoverTimer);
+                    this.hideTooltip();
+                    document.body.style.cursor = 'default';
+                }
+                
+                this.draw(); // Always redraw for smooth crosshair
+            }
+
+            handleClick() {
+                if (this.hoveredIndex !== -1) {
+                    const candle = this.data[this.hoveredIndex];
+                    if (candle.events.length > 0) {
+                        this.openModal(candle);
+                    }
+                }
+            }
+
+            showTooltip(candle, x, y) {
+                this.tooltip.className = 'tooltip visible'; 
+
+                const dateStr = candle.date.toLocaleDateString("en-US", { month: 'short', day: 'numeric' });
+                const count = candle.events.length;
+
+                // Simple List Render
+                const listItems = candle.events.slice(0, 5).map(e => {
+                    const config = EventCategories[e.category] || EventCategories.MKT_EVENT;
+                    const time = e.timestamp.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false });
+                    
+                    return `
+                        <div class="hover-simple-item">
+                            <div class="hover-time-col">${time}</div>
+                            <div class="hover-content-col">
+                                <div class="hover-simple-title">${e.title}</div>
+                                <div class="hover-category" style="color:${config.color}">${config.label}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                const moreCount = count > 5 ? `<div style="padding-top:8px; font-size:10px; color:#666; text-align:center;">+${count - 5} more events</div>` : '';
+
+                this.tooltip.innerHTML = `
+                    <div class="hover-header-row">
+                        <span class="hover-date">${dateStr}</span>
+                        <span class="hover-count">${count}</span>
+                    </div>
+                    <div class="hover-simple-list">
+                        ${listItems}
+                    </div>
+                    ${moreCount}
+                `;
+
+                // Positioning logic
+                const tooltipRect = this.tooltip.getBoundingClientRect();
+                const containerW = this.width;
+                const containerH = this.height;
+                
+                let left = x + 20;
+                let top = y;
+                
+                // Flip to left if not enough space on right (considering container width)
+                if (left + tooltipRect.width > containerW - 10) {
+                    left = x - tooltipRect.width - 20;
+                }
+                
+                // Adjust if going off bottom
+                if (top + tooltipRect.height > containerH - 10) {
+                    top = containerH - tooltipRect.height - 10;
+                }
+
+                // Verify left edge isn't off-screen to the left (rare)
+                if (left < 10) left = 10;
+
+                this.tooltip.style.top = top + 'px';
+                this.tooltip.style.left = left + 'px';
+            }
+
+            hideTooltip() {
+                this.tooltip.classList.remove('visible');
+            }
+
+            openModal(candle) {
+                const modal = document.getElementById('detailModal');
+                const side = document.getElementById('modalSide');
+                const dateStr = candle.date.toLocaleDateString("en-US", { month: 'long', day: 'numeric', year: 'numeric' });
+                
+                // Header (Compact)
+                const count = candle.events.length;
+                document.getElementById('modalDate').innerHTML = `
+                   <div style="font-size:16px; font-weight:600; color:#fff;">${dateStr}</div>
+                `;
+                
+                // Render Time-Ordered News Feed (No Cards)
+                // Use a simpler list layout as requested
+                const sideContent = candle.events.map((e, idx) => {
+                    const config = EventCategories[e.category] || EventCategories.MKT_EVENT;
+                    const timeStr = e.timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                    
+                    // Data Print Extra
+                    let extra = '';
+                    if (e.type === 'DATA_PRINT') {
+                        extra = `<div style="margin-top:4px; font-family:'SF Mono',monospace; font-size:13px; color:#ffd60a;">Actual: ${e.values.actual} vs Forecast: ${e.values.forecast}</div>`;
+                    }
+                    
+                    return `
+                        <div class="news-item">
+                            <div class="news-time">${timeStr}</div>
+                            <div class="news-content">
+                                <div class="news-title">${e.title}</div>
+                                <div class="news-meta">
+                                    <span style="color:${config.color}; font-weight:600; text-transform:uppercase;">${config.label}</span> 
+                                    · ${e.source}
+                                </div>
+                                ${e.body ? `<div class="news-body">${e.body}</div>` : ''}
+                                ${extra}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                side.innerHTML = `
+                    <div class="news-container">
+                        ${sideContent}
+                    </div>
+                `;
+                
+                modal.classList.add('visible');
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            new TimelineChart('mainChart');
+        });
+    </script>
+</body>
+</html>
