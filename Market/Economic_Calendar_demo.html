@@ -43,8 +43,6 @@
             flex-direction: column;
             overflow: hidden;
             position: relative;
-            margin-left: var(--sidebar-width);
-            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .content-container {
@@ -646,8 +644,8 @@
     <script src="../shared/topbar.js"></script>
     <script>
         // Initialize Sidebar & Topbar
-        initSidebar('calendar', null, { internalSwitch: false });
-        initTopbar({ title: 'E-Calendar', basePath: '..' });
+        initSidebar('market', 'calendar', { internalSwitch: false });
+        initTopbar({ title: 'Calendar', basePath: '..' });
 
         // Expanded Mock Data
         const events = [

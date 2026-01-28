@@ -99,6 +99,11 @@ function initSidebarBehavior() {
     }
     
     initMobileSidebar(sidebar);
+    
+    // 保存滚动位置
+    sidebar.addEventListener('scroll', () => {
+        sessionStorage.setItem('sidebarScrollTop', sidebar.scrollTop);
+    });
 }
 
 /**
@@ -621,6 +626,13 @@ function initSidebar(currentPage, currentSubItem = null, options = {}) {
         }
         
         sidebarContainer.innerHTML = sidebarHTML;
+        
+        // 恢复滚动位置
+        const savedScrollTop = sessionStorage.getItem('sidebarScrollTop');
+        if (savedScrollTop) {
+            sidebarContainer.scrollTop = parseInt(savedScrollTop, 10);
+        }
+        
         initSidebarBehavior();
         
         loadTopbarModule(options);

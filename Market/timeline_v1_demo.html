@@ -40,7 +40,12 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
-            padding: 20px;
+            display: flex;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 24px;
         }
 
         .container {
@@ -585,6 +590,9 @@
     </style>
 </head>
 <body>
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
     <div class="container">
         <!-- Header -->
         <header class="chart-header">
@@ -646,7 +654,15 @@
         </div>
     </div>
 
+    </main>
+
+    <script src="../shared/sidebar.js"></script>
+    <script src="../shared/topbar.js"></script>
     <script>
+        // Initialize Sidebar & Topbar
+        initSidebar('market', 'timeline', { internalSwitch: false });
+        initTopbar({ title: 'Timeline', basePath: '..' });
+
         // --- Enums & Constants ---
         const EventCategories = {
             CB_ACTION: { label: 'CB ACTION', color: '#5e5ce6', priority: 3 },
@@ -1386,5 +1402,8 @@
             new TimelineChart('mainChart');
         });
     </script>
+
+    <!-- Luna AI Module -->
+    <script src="../shared/luna.js"></script>
 </body>
 </html>
