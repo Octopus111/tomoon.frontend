@@ -227,12 +227,13 @@ const TMTextEditor = (function() {
                 </svg>
             </button>
 
-            <!-- Save to Vault (New) -->
-            <button class="tm-toolbar-btn" data-action="save-to-vault" data-tooltip="Capture to Vault">
+            <!-- Save selection as Note -->
+            <button class="tm-toolbar-btn" data-action="save-to-vault" data-tooltip="Save as Note" aria-label="Save as Note">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                    <polyline points="7 3 7 8 15 8"></polyline>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="11" x2="12" y2="17"></line>
+                    <line x1="9" y1="14" x2="15" y2="14"></line>
                 </svg>
             </button>
 
@@ -1105,6 +1106,19 @@ const TMTextEditor = (function() {
     }
 
     /**
+     * Get selected HTML content preserving formatting
+     */
+    function getSelectedHTML() {
+        if (!config.currentRange) return '';
+        
+        const range = config.currentRange;
+        const cloned = range.cloneContents();
+        const div = document.createElement('div');
+        div.appendChild(cloned);
+        return div.innerHTML;
+    }
+
+    /**
      * Handle Save to Vault
      */
     function handleSaveToVault() {
@@ -1112,12 +1126,15 @@ const TMTextEditor = (function() {
         const text = config.selectedText;
         if (!text) return;
         
+        // Get selected HTML content to preserve formatting
+        const selectedHTML = getSelectedHTML();
+        
         // Restore selection first so we can modify it
         restoreSelection();
         
         if (config.onSaveToVault && typeof config.onSaveToVault === 'function') {
             // Callback returns note info for creating bidirectional link
-            const noteInfo = config.onSaveToVault(text);
+            const noteInfo = config.onSaveToVault(text, selectedHTML);
             
             // If noteInfo is returned, create a link to the new note
             if (noteInfo && noteInfo.id) {

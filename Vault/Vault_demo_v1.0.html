@@ -265,6 +265,13 @@
             pointer-events: none;
         }
 
+        /* Note content placeholder (for new note editor) */
+        .note-content[contenteditable="true"]:empty::before {
+            content: attr(data-placeholder);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
         /* Drag & Drop Styles */
         .capture-input.drag-over,
         .note-content.drag-over {
@@ -634,6 +641,10 @@
             background: var(--bg-card-hover);
         }
 
+        .note-card.pinned-note {
+            border-left: 3px solid var(--accent-purple);
+        }
+
         .note-card.active {
             border-color: var(--accent-blue);
         }
@@ -667,13 +678,8 @@
         }
 
         .tag.linked {
-            background: rgba(47, 129, 247, 0.1);
-            color: var(--accent-blue);
-        }
-
-        .tag.pinned {
-            background: rgba(250, 163, 86, 0.1);
-            color: #faa356;
+            background: rgba(47, 129, 247, 0.08);
+            color: rgba(47, 129, 247, 0.8);
         }
 
         .cl-nav-item {
@@ -685,6 +691,7 @@
             color: var(--text-muted);
             font-size: 14px;
             transition: 0.2s;
+            position: relative;
         }
 
         .cl-nav-item:hover, .cl-nav-item.active {
@@ -806,16 +813,40 @@
             background: rgba(239, 68, 68, 0.1);
         }
 
+        /* Note card menu button: hidden by default, show on hover similar to highlight delete */
+        .note-card { position: relative; }
+        .note-card button[data-note-menu-btn] {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            transform: translateY(-2px);
+        }
+        .note-card:hover button[data-note-menu-btn],
+        .note-card:focus-within button[data-note-menu-btn] {
+            opacity: 1;
+            transform: translateY(0);
+            color: var(--text-secondary);
+            background: rgba(255,255,255,0.02);
+        }
+
         /* Dropdown Menu Styles */
-        .dropdown-menu {
+        .vault-dropdown-menu {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 6px 0;
             min-width: 160px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            z-index: 9000;
-            animation: fadeIn 0.15s ease-out;
+            z-index: 9999;
+            /* animation: fadeIn 0.15s ease-out; */
         }
 
         @keyframes fadeIn {
@@ -933,6 +964,25 @@
         .collection-menu {
             opacity: 0.5;
             transition: opacity 0.2s;
+        }
+
+        /* Sidebar nav: show three-dot menu only on hover */
+        .cl-nav-item .collection-menu {
+            opacity: 0;
+            position: absolute;
+            right: 10px;
+            top: 8px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.12s ease;
+        }
+
+        .cl-nav-item:hover .collection-menu {
+            opacity: 1;
         }
 
         /* Mini Card Improvements */
@@ -1062,9 +1112,9 @@
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                             Quick Capture
                         </div>
-                        <svg style="color: var(--text-muted); cursor: pointer;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                        <svg id="quick-capture-new" onclick="createNewNote()" title="+ New Note" style="color: var(--text-muted); cursor: pointer;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                     </div>
-                    <div class="capture-input" contenteditable="true" data-placeholder="Write a thought... paste a screenshot..." style="min-height: 120px;"></div>
+                    <div class="capture-input" contenteditable="true" data-placeholder="Jot an idea or insight" style="min-height: 120px;"></div>
                     <div id="quick-save-actions" style="display: none; justify-content: flex-end; margin-top: 10px;">
                         <button class="action-btn" onclick="saveQuickCapture()">
                             Save Note
@@ -1216,12 +1266,7 @@
                         <h3 style="margin: 0;">Collection</h3>
                     </div>
                     
-                    <div style="padding: 10px 0;" id="collection-nav-list">
-                        <div class="cl-nav-item active" data-collection="All" onclick="selectAllNotes(this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> All Notes</div>
-                        <div class="cl-nav-item" data-collection="Quick Notes" onclick="selectCollection('Quick Notes', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg> Quick Notes</div>
-                        <div class="cl-nav-item" data-collection="Strategy Ideas" onclick="selectCollection('Strategy Ideas', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg> Strategy Ideas</div>
-                        <div class="cl-nav-item" data-collection="Gold Market" onclick="selectCollection('Gold Market', this)" style="cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Gold Market</div>
-                    </div>
+                    <div style="padding: 10px 0;" id="collection-nav-list"></div>
 
                     <div style="padding: 20px;">
                         <button onclick="createNewCollection()" style="width: 100%; border: 1px dashed var(--border); background: transparent; color: var(--text-muted); padding: 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--text-secondary)'; this.style.color='var(--text-secondary)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'">
@@ -1289,7 +1334,7 @@
                 <div class="cl-main">
                     <div class="note-header">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                            <input type="text" class="note-title" value="Market Thoughts: NQ Volatility">
+                            <input type="text" class="note-title" placeholder="Title" value="Market Thoughts: NQ Volatility">
                             <div style="display: flex; gap: 8px;">
                                 <button class="btn-sm luna-btn" onclick="askLunaAboutNote()" title="Ask Luna AI">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #8b5cf6;"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
@@ -1305,7 +1350,7 @@
                         </div>
                     </div>
 
-                    <div class="note-content" contenteditable="true">
+                    <div class="note-content" contenteditable="true" data-placeholder="Type anything — idea, link, screenshot。">
                         <p>NQ is showing increased volatility as it approaches a critical resistance level at 15,350:</p>
                         <ul>
                             <li>VIX has spiked from 12 to 18 in the last 1 trading sessions.</li>
@@ -1495,10 +1540,24 @@
             localStorage.setItem('tm_vault_activity', JSON.stringify(activityData));
         }
 
-        const collectionsData = [
+        const defaultCollections = [
             { id: 'quick', name: 'Quick Notes', icon: 'note', color: '#faa356', unsorted: 0, preview: 'Quick capture notes...' },
             { id: 'strategy', name: 'Strategy Ideas', icon: 'chart', color: '#2f81f7', unsorted: 2, preview: 'Gold 1-hour chart gap fill setup Today' }
         ];
+
+        // Load collections order from localStorage if present, otherwise use defaults
+        let collectionsData = (function(){
+            try {
+                const raw = localStorage.getItem('tm_vault_collections');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length) return parsed;
+                }
+            } catch (e) {}
+            // fall back to defaults
+            localStorage.setItem('tm_vault_collections', JSON.stringify(defaultCollections));
+            return defaultCollections.slice();
+        })();
 
         const defaultHighlightsData = [
             { id: 1, text: 'Avoid overthinking the loss – stick to the process...', fullText: 'Avoid overthinking the loss – stick to the process...', source: 'Psychology', date: 'Apr 10, 2024', color: null, reviewed: true },
@@ -2358,7 +2417,11 @@
             
             // Pinned notes first
             if (pinned.length > 0) {
-                html += `<div style="margin-bottom: 20px; font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📌 Pinned (${pinned.length})</div>`;
+                html += `
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v4.76z"></path></svg>
+                Pinned (${pinned.length})
+            </div>`;
                 pinned.forEach(note => {
                     html += renderNoteCard(note);
                 });
@@ -2377,15 +2440,15 @@
 
         function renderNoteCard(note) {
             const isActive = note.id === currentNoteId ? 'active' : '';
+            const isPinned = note.pinned ? 'pinned-note' : '';
             return `
-                <div class="note-card ${isActive}" data-note-id="${note.id}" onclick="selectNote(${note.id}, arguments[0])">
+                <div class="note-card ${isActive} ${isPinned}" data-note-id="${note.id}" onclick="selectNote(${note.id}, arguments[0])">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <div style="color: #faa356; font-size: 11px;">💡 ${note.collection}</div>
+                        <div style="color: #faa356; font-size: 11px;">${note.collection}</div>
                         <button type="button" data-note-menu-btn="1" data-note-id="${note.id}" style="color: var(--text-muted); background: none; border: none; cursor: pointer;">...</button>
                     </div>
                     <div class="note-tags">
                         ${note.linked ? '<span class="tag linked">Linked</span>' : ''}
-                        ${note.pinned ? '<span class="tag pinned">Pinned</span>' : ''}
                     </div>
                     <div class="nc-title">${note.title}</div>
                     <div class="nc-meta">${note.type} · ${note.date}</div>
@@ -2394,6 +2457,7 @@
         }
 
         function toggleNoteMenu(noteId, btn, evt = null) {
+            console.log('Vault: toggleNoteMenu called with noteId:', noteId);
             if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
             closeActiveMenu();
             
@@ -2408,34 +2472,35 @@
             ])].filter(c => c);
             
             const menu = document.createElement('div');
-            menu.className = 'dropdown-menu';
+            menu.className = 'vault-dropdown-menu';
             menu.style.maxHeight = '400px';
             menu.style.overflowY = 'auto';
+            console.log('Creating menu innerHTML');
             menu.innerHTML = `
                 <div class="dropdown-item" onclick="pinNoteById(${noteId})">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v4.76z"></path></svg>
-                    ${note.pinned ? 'Unpin Note' : 'Pin Note'}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                    Pin Note
                 </div>
                 <div class="dropdown-item" onclick="duplicateNoteById(${noteId})">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="6" height="6" rx="1"></rect><path d="M15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"></path></svg>
                     Duplicate
                 </div>
-                <div class="dropdown-divider"></div>
-                <div style="padding: 8px 15px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Move to Collection</div>
-                ${existingCollections.map(col => `
-                    <div class="dropdown-item" onclick="moveNoteToCollectionById(${noteId}, '${col.replace(/'/g, "\\'")}')" style="padding-left: 25px; ${note.collection === col ? 'color: var(--accent-blue); font-weight: 500;' : ''}">
-                        ${note.collection === col ? '✓ ' : ''}${col}
-                    </div>
-                `).join('')}
-                <div class="dropdown-item" onclick="promptNewCollectionForNote(${noteId})" style="padding-left: 25px; color: var(--accent-purple);">
-                    + New Collection...
+                <div class="dropdown-item" onclick="showMoveSubmenu(this, ${noteId})">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                    Move to Collection
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: auto;"><path d="M9 18l6-6-6-6"></path></svg>
                 </div>
                 <div class="dropdown-divider"></div>
+                <div class="dropdown-item" onclick="exportNoteById(${noteId})">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Export
+                </div>
                 <div class="dropdown-item danger" onclick="deleteNoteById(${noteId})">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    Delete Note
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    Delete
                 </div>
             `;
+            console.log('Menu innerHTML length:', menu.innerHTML.length);
             
             // Position menu near the button
             if (btn) {
@@ -2451,6 +2516,10 @@
             }
             
             document.body.appendChild(menu);
+            console.log('Menu appended to body, contains:', document.body.contains(menu), 'menu style:', menu.style.cssText);
+            setTimeout(() => {
+                console.log('Menu dimensions:', menu.offsetWidth, 'x', menu.offsetHeight, 'visible:', menu.offsetWidth > 0 && menu.offsetHeight > 0);
+            }, 100);
             activeMenu = menu;
             
             setTimeout(() => {
@@ -2535,32 +2604,34 @@
             const newId = Math.max(...notesData.map(n => n.id)) + 1;
             const newNote = {
                 id: newId,
-                title: 'Untitled Note',
+                title: '',
                 collection: currentCollection,
                 type: 'Note',
                 linked: false,
                 pinned: false,
                 date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                content: '<p>Start writing...</p>',
+                content: '',
                 backlinks: [],
                 attachments: []
             };
             notesData.unshift(newNote);
-            currentNoteId = newId;
-            renderNotesList();
-
             localStorage.setItem('tm_vault_notes', JSON.stringify(notesData));
             updateHubCollectionsUI();
-            
-            // Focus on title
+
+            // Ensure collection view is active and the list is re-rendered
+            switchView('collection');
+            renderNotesList();
+
+            // Select and focus the newly created note (allow DOM to update)
             setTimeout(() => {
+                selectNote(newId);
                 const titleInput = document.querySelector('.note-title');
                 if (titleInput) {
                     titleInput.focus();
                     titleInput.select();
                 }
-            }, 100);
-            
+            }, 60);
+
             showVaultToast('New note created');
             addActivityItem(`created note: ${newNote.title}`, `${newNote.type} · Just Now`, 'note', { action: 'openNote', payload: newId });
         }
@@ -2614,7 +2685,7 @@
                 return;
             }
 
-            const collection = collectionsData.find(c => c.id === collectionId);
+            const collection = collectionsData.find(c => c.id === collectionId || c.name === collectionId);
             if (!collection) return;
 
             currentCollection = collection.name;
@@ -2653,6 +2724,10 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
                     Archive
                 </div>
+                <div class="dropdown-item" onclick="changeCollectionIcon('${collectionId}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"></path><path d="M12 18v4"></path><path d="M4.9 4.9l2.8 2.8"></path><path d="M16.3 16.3l2.8 2.8"></path></svg>
+                    Change Icon
+                </div>
                 <div class="dropdown-divider"></div>
                 <div class="dropdown-item danger" onclick="deleteCollection('${collectionId}')">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -2680,6 +2755,8 @@
                 activeMenu = null;
                 document.removeEventListener('click', closeMenuOnOutsideClick);
             }
+            // Also remove any move-submenu instances appended to body
+            document.querySelectorAll('.submenu').forEach(s => s.remove());
         }
 
         function closeMenuOnOutsideClick(e) {
@@ -2699,6 +2776,53 @@
                 }
             }
             closeActiveMenu();
+        }
+
+        function changeCollectionIcon(id) {
+            const collection = collectionsData.find(c => c.id === id);
+            if (!collection) return;
+            closeActiveMenu();
+
+            const overlay = document.createElement('div');
+            overlay.className = 'vault-modal-overlay';
+            overlay.innerHTML = `
+                <div class="vault-modal" role="dialog" aria-modal="true">
+                    <div class="vault-modal-header">
+                        <h3 style="margin:0;">Change Icon</h3>
+                        <button class="btn-sm" id="cc-close">Close</button>
+                    </div>
+                    <div class="vault-modal-body" style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="btn-sm tm-icon-choice" data-icon="folder">Folder</button>
+                        <button class="btn-sm tm-icon-choice" data-icon="note">Note</button>
+                        <button class="btn-sm tm-icon-choice" data-icon="chart">Chart</button>
+                        <button class="btn-sm tm-icon-choice" data-icon="idea">Idea</button>
+                        <button class="btn-sm tm-icon-choice" data-icon="journal">Journal</button>
+                    </div>
+                    <div class="vault-modal-footer">
+                        <button class="btn-sm" id="cc-cancel">Cancel</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            function closeOverlay() { overlay.remove(); }
+
+            overlay.querySelectorAll('.tm-icon-choice').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const icon = btn.getAttribute('data-icon');
+                    collection.icon = icon || 'folder';
+                    try { localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData)); } catch (e) {}
+                    renderCollectionsSidebar();
+                    showVaultToast('Collection icon updated');
+                    closeOverlay();
+                });
+            });
+
+            const closeBtn = overlay.querySelector('#cc-close');
+            const cancelBtn = overlay.querySelector('#cc-cancel');
+            if (closeBtn) closeBtn.addEventListener('click', closeOverlay);
+            if (cancelBtn) cancelBtn.addEventListener('click', closeOverlay);
         }
 
         function duplicateCollection(id) {
@@ -3092,35 +3216,74 @@
             closeActiveMenu();
         }
 
-        function showMoveSubmenu(element) {
-            // Remove any existing submenu
-            const existingSubmenu = element.parentElement.querySelector('.submenu');
-            if (existingSubmenu) {
-                existingSubmenu.remove();
-                return;
-            }
+        function showMoveSubmenu(element, noteId) {
+            // Remove any existing submenu (global)
+            document.querySelectorAll('.submenu').forEach(s => s.remove());
 
-            // Get all unique collection names from notes
-            const allCollections = [...new Set(notesData.map(n => n.collection))];
-            const currentNoteCollection = notesData.find(n => n.id === currentNoteId)?.collection;
-            
-            const availableCollections = allCollections.filter(c => c !== currentNoteCollection);
+            // Order collections according to `collectionsData` first, then append any extra collections
+            const definedNames = collectionsData.map(c => c.name).filter(Boolean);
+            const noteNames = [...new Set(notesData.map(n => n.collection).filter(Boolean))];
+            const extraNames = noteNames.filter(nm => !definedNames.includes(nm));
+            const orderedCollections = [...definedNames, ...extraNames];
+
+            const currentNoteCollection = notesData.find(n => n.id === noteId)?.collection;
+            const availableCollections = orderedCollections.filter((c) => c && c !== currentNoteCollection);
 
             const submenu = document.createElement('div');
             submenu.className = 'submenu';
-            submenu.innerHTML = availableCollections.map(collectionName => {
-                // Find collection data if it exists, otherwise use default
-                const collectionData = collectionsData.find(c => c.id === collectionName);
-                const color = collectionData ? collectionData.color : '#8b949e';
-                const displayName = collectionData ? collectionData.name : collectionName;
-                
-                return `<div class="dropdown-item" onclick="event.stopPropagation(); moveNoteToSelectedCollection('${collectionName}')">
-                    <span style="color: ${color}; margin-right: 8px;">●</span>
-                    ${displayName}
-                </div>`;
-            }).join('');
 
-            element.appendChild(submenu);
+            if (!availableCollections.length) {
+                submenu.innerHTML = `<div class="dropdown-item" style="opacity:0.6; cursor:default;">No other collections</div>`;
+            } else {
+                submenu.innerHTML = availableCollections.map(collectionName => {
+                    // Find collection data by id or name
+                    const collectionData = collectionsData.find(c => c.id === collectionName || c.name === collectionName);
+                    const color = collectionData ? collectionData.color : '#8b949e';
+                    const displayName = collectionData ? collectionData.name : collectionName;
+                    return `<div class="dropdown-item" onclick="event.stopPropagation(); moveNoteToSelectedCollection('${collectionName}', ${noteId})">
+                        <span style="color: ${color}; margin-right: 8px;">●</span>
+                        ${displayName}
+                    </div>`;
+                }).join('');
+            }
+
+            // Position submenu in the viewport (avoid clipping by parent overflow)
+            const rect = element.getBoundingClientRect();
+            submenu.style.position = 'fixed';
+            // initial placement to the right of the trigger
+            let top = Math.max(8, rect.top);
+            let left = rect.right;
+
+            document.body.appendChild(submenu);
+
+            // After append, measure and flip if overflowing viewport
+            const sRect = submenu.getBoundingClientRect();
+            if (left + sRect.width > window.innerWidth - 8) {
+                // place to the left of trigger
+                left = Math.max(8, rect.left - sRect.width);
+            }
+            // Avoid going off bottom
+            if (top + sRect.height > window.innerHeight - 8) {
+                top = Math.max(8, window.innerHeight - sRect.height - 8);
+            }
+
+            submenu.style.top = `${top}px`;
+            submenu.style.left = `${left}px`;
+
+            // Close submenu on outside click (one-time handler)
+            const outsideHandler = (ev) => {
+                if (!submenu.contains(ev.target) && ev.target !== element) {
+                    submenu.remove();
+                    document.removeEventListener('click', outsideHandler);
+                }
+            };
+            // Use capture to ensure we close before other listeners if needed
+            setTimeout(() => document.addEventListener('click', outsideHandler, { capture: true }));
+        }
+
+        function exportNoteById(noteId) {
+            if (Number.isFinite(+noteId)) currentNoteId = Number(noteId);
+            exportNote();
         }
 
         function exportNote() {
@@ -3234,10 +3397,9 @@
                                 // Show toast notification
                                 showVaultToast('✨ Added to Highlights');
                                 
-                                console.log('[Vault] Highlight added:', newHighlight);
                             },
                             // Callback when Save to Vault is clicked
-                            onSaveToVault: function(text) {
+                            onSaveToVault: function(text, html) {
                                 const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                                 const newId = (notesData.length > 0) ? Math.max(...notesData.map(n => n.id)) + 1 : 1;
                                 // Default to current collection if we can, otherwise Market Thoughts
@@ -3251,7 +3413,7 @@
                                     preview: text.substring(0, 50) + '...',
                                     date: date,
                                     tags: ['snippet'],
-                                    content: `<p>${text}</p>`,
+                                    content: html || `<p>${text}</p>`,
                                     linked: false,
                                     pinned: false,
                                     sourceNoteId: currentNoteId,
@@ -3272,11 +3434,9 @@
                                 
                                 showVaultToast('Note saved to Vault');
                                 
-                                console.log('[Vault] Note saved from text selection:', newNote);
                             },
                             // Callback when Ask Luna is clicked
                             onAskLuna: function(text, action) {
-                                console.log('[Vault] Ask Luna:', action, text);
                                 
                                 // Show Luna response modal with AI processing
                                 showLunaSuggestionModal({ title: 'AI Processing...', content: text }, action);
@@ -3291,6 +3451,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderActivityList();
             updateHubCollectionsUI();
+            renderCollectionsSidebar();
             renderHighlightsPanel();
             initImageDragDrop(); // Initialize image drag & drop support
 
@@ -3582,6 +3743,8 @@
                 unsorted: 0,
                 preview: 'New collection...'
             });
+            // persist new order
+            try { localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData)); } catch (e) {}
             
             // Close modal
             const overlay = input.closest('.vault-modal-overlay');
@@ -3592,9 +3755,166 @@
             showVaultToast('Collection created: ' + name);
         }
 
+        // Render the collection navigation sidebar dynamically from `collectionsData`.
+        function renderCollectionsSidebar() {
+            const container = document.getElementById('collection-nav-list');
+            if (!container) return;
+            // defined collections are the persisted ones (collectionsData) in their current order
+            const persisted = collectionsData.slice();
+            const defaultIds = defaultCollections.map(d => d.id);
+            const defaultPart = persisted.filter(c => defaultIds.includes(c.id));
+            const userPart = persisted.filter(c => !defaultIds.includes(c.id));
+
+            // any collections referenced by notes but not present in persisted should be shown after defaults and before user-created ones
+            const noteNames = [...new Set(notesData.map(n => n.collection).filter(Boolean))];
+            const persistedNames = persisted.map(p => p.name);
+            const extras = noteNames.filter(nm => !persistedNames.includes(nm));
+
+            container.innerHTML = '';
+
+            // create nav item element
+            function createItemEl({ id, name, icon, draggable = false, isActive = false, clickHandler = null }) {
+                const el = document.createElement('div');
+                el.className = 'cl-nav-item' + (isActive ? ' active' : '');
+                el.setAttribute('data-collection', name);
+                if (id) el.setAttribute('data-collection-id', id);
+                el.style.cursor = 'pointer';
+                const svg = icon === 'note' ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>' : (icon === 'chart' ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>');
+                el.innerHTML = svg + ' ' + escapeHtml(name);
+                if (clickHandler) el.addEventListener('click', function () { clickHandler(this); });
+
+                if (draggable && id) {
+                    el.setAttribute('draggable', 'true');
+                    el.addEventListener('dragstart', (e) => {
+                        // set multiple types for broader compatibility
+                        try { e.dataTransfer.setData('application/x-collection-id', id); } catch (err) {}
+                        try { e.dataTransfer.setData('text/plain', id); } catch (err) {}
+                        e.dataTransfer.effectAllowed = 'move';
+                        el.classList.add('dragging');
+                        window.__tmDraggingCollection = true;
+                    });
+                    el.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        el.classList.add('drag-over');
+                    });
+                    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+                    el.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const draggedId = e.dataTransfer.getData('application/x-collection-id') || e.dataTransfer.getData('text/plain');
+                        if (!draggedId || draggedId === id) return;
+                        reorderCollections(draggedId, id);
+                    });
+                    el.addEventListener('dragend', () => {
+                        container.querySelectorAll('.cl-nav-item').forEach(n => n.classList.remove('dragging','drag-over'));
+                        window.__tmDraggingCollection = false;
+                    });
+                }
+                // add a three-dot menu button that appears on hover (for all collections)
+                const menuBtn = document.createElement('button');
+                menuBtn.className = 'collection-menu';
+                menuBtn.setAttribute('aria-label', 'Collection menu');
+                menuBtn.style.marginLeft = 'auto';
+                menuBtn.style.display = 'flex';
+                menuBtn.style.alignItems = 'center';
+                // store both id and name for fallback
+                if (id) menuBtn.dataset.collectionId = id;
+                menuBtn.dataset.collectionName = name;
+                menuBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg>';
+                menuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const target = menuBtn.dataset.collectionId || menuBtn.dataset.collectionName;
+                    if (typeof showCollectionMenu === 'function') showCollectionMenu(target, menuBtn, e);
+                });
+                // append menu button to nav item
+                el.appendChild(menuBtn);
+                return el;
+            }
+
+            // Home / All Notes at top (not draggable)
+            const homeSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>';
+            const allEl = document.createElement('div');
+            allEl.className = 'cl-nav-item' + (currentCollection === 'All' ? ' active' : '');
+            allEl.setAttribute('data-collection', 'All');
+            allEl.style.cursor = 'pointer';
+            allEl.innerHTML = homeSvg + ' All Notes';
+            allEl.addEventListener('click', function () { selectAllNotes(this); });
+            container.appendChild(allEl);
+
+            // Render default/persisted collections (defaultPart) first — draggable
+            defaultPart.forEach(d => {
+                const isActive = currentCollection === d.name;
+                const item = createItemEl({ id: d.id, name: d.name, icon: d.icon, draggable: true, isActive, clickHandler: (self) => selectCollection(d.name, self) });
+                container.appendChild(item);
+            });
+
+            // Render extras (collections found only in notes) after defaults — not draggable
+            extras.forEach(name => {
+                const item = createItemEl({ id: null, name, icon: 'folder', draggable: false, isActive: currentCollection === name, clickHandler: (self) => selectCollection(name, self) });
+                container.appendChild(item);
+            });
+
+            // Render user-created collections (those not in defaultIds) at the bottom — draggable
+            userPart.forEach(d => {
+                const isActive = currentCollection === d.name;
+                const item = createItemEl({ id: d.id, name: d.name, icon: d.icon, draggable: true, isActive, clickHandler: (self) => selectCollection(d.name, self) });
+                container.appendChild(item);
+            });
+
+            // container-level handlers: allow drop to move to end (only inside this sidebar)
+            // ensure we add these only once
+            if (!window.__tmCollectionDnDInitialized) {
+                container.addEventListener('dragover', (e) => { e.preventDefault(); });
+                container.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const draggedId = e.dataTransfer.getData('application/x-collection-id') || e.dataTransfer.getData('text/plain');
+                    if (!draggedId) return;
+                    const last = collectionsData[collectionsData.length - 1];
+                    if (last && last.id !== draggedId) reorderCollections(draggedId, null);
+                });
+
+                // If dragging a collection and user drops outside the sidebar, prevent other drop handlers from acting.
+                document.addEventListener('dragover', (e) => {
+                    if (window.__tmDraggingCollection) e.preventDefault();
+                });
+                document.addEventListener('drop', (e) => {
+                    if (window.__tmDraggingCollection && !e.target.closest('#collection-nav-list')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // ignore drop outside and reset flag
+                        window.__tmDraggingCollection = false;
+                        showVaultToast('Drop inside the collections sidebar to reorder', 'info');
+                    }
+                });
+                window.__tmCollectionDnDInitialized = true;
+            }
+
+            // Reorder helper
+            function reorderCollections(draggedId, targetId) {
+                const fromIdx = collectionsData.findIndex(c => c.id === draggedId);
+                if (fromIdx === -1) return;
+                const item = collectionsData.splice(fromIdx, 1)[0];
+                if (targetId == null) {
+                    // append to end
+                    collectionsData.push(item);
+                } else {
+                    const toIdx = collectionsData.findIndex(c => c.id === targetId);
+                    const insertAt = toIdx === -1 ? collectionsData.length : toIdx;
+                    collectionsData.splice(insertAt, 0, item);
+                }
+                try { localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData)); } catch (e) {}
+                renderCollectionsSidebar();
+                showVaultToast('Collection moved');
+            }
+
+            setActiveCollectionNav(currentCollection);
+        }
+
         // ========== MOVE NOTE TO COLLECTION ==========
-        function moveNoteToSelectedCollection(targetCollectionId) {
-            const note = notesData.find(n => n.id === currentNoteId);
+        function moveNoteToSelectedCollection(targetCollectionId, noteId) {
+            const note = notesData.find(n => n.id === noteId);
             if (!note) return;
 
             const oldCollection = note.collection;
@@ -3611,9 +3931,9 @@
             if (currentCollection === oldCollection) {
                 selectCollection(targetCollectionId);
             }
-
-            showVaultToast(`Note moved to ${collectionsData.find(c => c.id === targetCollectionId)?.name || 'collection'}`);
-            addActivityItem(`moved note: ${note.title} to ${collectionsData.find(c => c.id === targetCollectionId)?.name || targetCollectionId}`, `${note.type} · Just Now`, 'note', { action: 'openNote', payload: currentNoteId });
+            const targetCollectionDisplay = collectionsData.find(c => c.id === targetCollectionId || c.name === targetCollectionId)?.name || targetCollectionId;
+            showVaultToast(`Note moved to ${targetCollectionDisplay}`);
+            addActivityItem(`moved note: ${note.title} to ${targetCollectionDisplay}`, `${note.type} · Just Now`, 'note', { action: 'openNote', payload: noteId });
             closeActiveMenu();
         }
 
@@ -3666,15 +3986,19 @@
         // ========== NOTE CARD MENU (DELEGATED) ==========
         // Use capture-phase delegation so clicking the "..." button doesn't trigger the parent .note-card onclick.
         document.addEventListener('click', (e) => {
+            console.log('Vault: Click event captured, target:', e.target.tagName, e.target.className);
             const btn = e.target.closest('button[data-note-menu-btn][data-note-id]');
+            console.log('Vault: Closest button found:', !!btn);
             if (!btn) return;
 
             e.preventDefault();
             e.stopPropagation();
 
             const noteId = parseInt(btn.dataset.noteId, 10);
+            console.log('Vault: Parsed noteId:', noteId);
             if (!Number.isFinite(noteId)) return;
 
+            console.log('Vault: Calling toggleNoteMenu');
             toggleNoteMenu(noteId, btn, e);
         }, true);
 
@@ -3727,7 +4051,7 @@
             }
         });
 
-        // ========== /+ LINK INSERTION ==========
+        // ========== / LINK INSERTION ==========
         let linkTriggerRange = null;
 
         function initLinkTrigger() {
@@ -3758,12 +4082,12 @@
             const cursorPos = range.startOffset;
             const beforeCursor = text.substring(0, cursorPos);
 
-            // Check if ends with /+
-            if (beforeCursor.endsWith('/+')) {
+            // Check if ends with /
+            if (beforeCursor.endsWith('/')) {
                 // Save range for later insertion
                 linkTriggerRange = {
                     node: node,
-                    offset: cursorPos - 2, // Position before /+
+                    offset: cursorPos - 1, // Position before /
                     endOffset: cursorPos
                 };
                 showLinkPopup();
@@ -3898,7 +4222,7 @@
 
             const { node, offset, endOffset } = linkTriggerRange;
 
-            // Remove /+ from text
+            // Remove / from text
             const text = node.textContent;
             const before = text.substring(0, offset);
             const after = text.substring(endOffset);
@@ -4009,10 +4333,9 @@
                         // Show toast notification
                         showVaultToast('✨ Added to Highlights');
                         
-                        console.log('[Vault] Highlight added:', newHighlight);
                     },
                     // Callback when Save to Vault is clicked
-                    onSaveToVault: function(text) {
+                    onSaveToVault: function(text, html) {
                         const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                         const newId = (notesData.length > 0) ? Math.max(...notesData.map(n => n.id)) + 1 : 1;
                         // Default to current collection if we can, otherwise Market Thoughts
@@ -4026,7 +4349,7 @@
                             preview: text.substring(0, 50) + '...',
                             date: date,
                             tags: ['snippet'],
-                            content: `<p>${text}</p>`,
+                            content: html || `<p>${text}</p>`,
                             linked: false,
                             pinned: false,
                             sourceNoteId: currentNoteId,
@@ -4067,7 +4390,6 @@
                     },
                     // Callback when Ask Luna is clicked
                     onAskLuna: function(text, action, customQuestion) {
-                        console.log('[Vault] Ask Luna - Action:', action, 'Text:', text);
                         
                         // Show processing feedback
                         showVaultToast('Luna is thinking...', 'info');

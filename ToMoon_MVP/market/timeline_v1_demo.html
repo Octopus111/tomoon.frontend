@@ -616,9 +616,7 @@
                 <div class="time-selector">
                     <button class="time-btn" data-range="1H">1H</button>
                     <button class="time-btn" data-range="4H">4H</button>
-                    <button class="time-btn" data-range="1D">1D</button>
-                    <button class="time-btn active" data-range="1W">1W</button>
-                    <button class="time-btn" data-range="1M">1M</button>
+                    <button class="time-btn active" data-range="1D">1D</button>
                 </div>
 
                 <div class="control-group">
@@ -962,14 +960,14 @@
                 this.drawPriceAxis(min, max, chartBottom);
 
                 if (this.showEvents) this.drawEventMarkers(min, max, chartBottom, candleW);
-                this.drawTimeAxis(chartBottom, candleW, this.height - 30);
+                this.drawTimeAxis(chartBottom, candleW, chartBottom + 20);
 
                 // Draw Crosshair (Moved here)
                 if(this.hoveredIndex !== -1 && this.hoveredIndex >= this.offset && this.hoveredIndex < this.offset + this.visibleCandles) {
                     const screenIdx = this.hoveredIndex - this.offset;
                     const x = this.padding.left + (screenIdx * candleW);
                     const centerX = x + (candleW / 2);
-                    const axisY = this.height - 30;
+                    const axisY = chartBottom + 20;
                     
                     this.ctx.save();
                     this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
@@ -1101,21 +1099,33 @@
                         const pillW = Math.max(16, textW + 8);
                         const pillH = 14;
 
-                        // Determine position: Above High or Below Low?
-                        // Default to Above High
-                        let y = normalize(d.high);
-                        let isAbove = true;
-                        
-                        // If near top edge, flip to below Low
-                        if (y - 30 < this.padding.top) {
+                        // Position based on candle direction:
+                        // - If candle is up (close >= open) -> place bubble below the low (events pushed up)
+                        // - If candle is down -> place bubble above the high (events push down)
+                        const isGreenCandle = d.close >= d.open;
+                        let y, isAbove;
+                        if (isGreenCandle) {
+                            // up day -> bubble below low
                             y = normalize(d.low);
                             isAbove = false;
+                            // If this would be clipped by bottom, fallback to above high
+                            if (y + 30 > chartBottom) {
+                                y = normalize(d.high);
+                                isAbove = true;
+                            }
+                        } else {
+                            // down day -> bubble above high
+                            y = normalize(d.high);
+                            isAbove = true;
+                            // If clipped by top, fallback to below low
+                            if (y - 30 < this.padding.top) {
+                                y = normalize(d.low);
+                                isAbove = false;
+                            }
                         }
 
-                        // Colors
-                        let fillStyle = '#ffd60a'; 
-                        if (count >= 6) fillStyle = '#ff453a'; 
-                        else if (count >= 3) fillStyle = '#ff9f0a'; 
+                        // Unified platform color (tech teal)
+                        let fillStyle = '#64d2ff';
 
                         this.ctx.strokeStyle = fillStyle;
                         this.ctx.lineWidth = 1;
@@ -1259,7 +1269,7 @@
                             // Add delay before showing tooltip to reduce annoyance
                             this.hoverTimer = setTimeout(() => {
                                 this.showTooltip(candle, x, y);
-                            }, 500); 
+                            }, 300); 
                         } else {
                             document.body.style.cursor = 'crosshair';
                         }

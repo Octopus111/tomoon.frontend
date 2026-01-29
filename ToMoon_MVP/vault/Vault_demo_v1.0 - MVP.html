@@ -2428,7 +2428,6 @@
         }
 
         function toggleNoteMenu(noteId, btn, evt = null) {
-            console.log('MVP: toggleNoteMenu called with noteId:', noteId);
             if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
             closeActiveMenu();
             
@@ -3711,19 +3710,15 @@
         // ========== NOTE CARD MENU (DELEGATED) ==========
         // Use capture-phase delegation so clicking the "..." button doesn't trigger the parent .note-card onclick.
         document.addEventListener('click', (e) => {
-            console.log('MVP: Click event captured, target:', e.target.tagName, e.target.className);
             const btn = e.target.closest('button[data-note-menu-btn][data-note-id]');
-            console.log('MVP: Closest button found:', !!btn);
             if (!btn) return;
 
             e.preventDefault();
             e.stopPropagation();
 
             const noteId = parseInt(btn.dataset.noteId, 10);
-            console.log('MVP: Parsed noteId:', noteId);
             if (!Number.isFinite(noteId)) return;
 
-            console.log('MVP: Calling toggleNoteMenu');
             toggleNoteMenu(noteId, btn, e);
         }, true);
 

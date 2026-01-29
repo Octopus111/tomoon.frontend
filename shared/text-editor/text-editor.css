@@ -621,24 +621,6 @@
 .tm-image-handle.tr { right: -6px; top: -6px; cursor: nesw-resize; }
 .tm-image-handle.bl { left: -6px; bottom: -6px; cursor: nesw-resize; }
 
-/* Hover preview card for internal links */
-.tm-internal-link[data-note-id]:hover::after {
-    content: attr(title);
-    position: absolute;
-    bottom: calc(100% + 5px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1e2128;
-    border: 1px solid #30363d;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 11px;
-    color: #8b949e;
-    white-space: nowrap;
-    z-index: 10002;
-    pointer-events: none;
-}
-
 /* ========== Mobile Responsive ========== */
 @media (max-width: 768px) {
     .tm-text-toolbar {
