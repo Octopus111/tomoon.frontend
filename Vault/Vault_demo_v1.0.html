@@ -331,6 +331,17 @@
             transform: translateY(-2px);
         }
 
+        /* Collection inline edit mode (rename + icon edit) */
+        .collection-card[data-editing="1"] {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(47, 129, 247, 0.25);
+            transform: none;
+        }
+
+        .collection-card[data-editing="1"] .collection-icon {
+            cursor: pointer;
+        }
+
         .collection-header {
             display: flex;
             justify-content: space-between;
@@ -1060,6 +1071,277 @@
             flex-shrink: 0;
         }
 
+        /* Hub Highlights Banner (方案2) */
+        .hub-highlights-banner {
+            background: linear-gradient(135deg, rgba(137, 87, 229, 0.15) 0%, rgba(250, 163, 86, 0.1) 100%);
+            border: 2px solid var(--accent-purple);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hub-highlights-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-yellow);
+        }
+
+        .hub-banner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .hub-banner-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hub-banner-toggle-btn, .hub-banner-edit-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .hub-banner-toggle-btn:hover, .hub-banner-edit-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+            border-color: var(--text-muted);
+        }
+
+        .hub-banner-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .hub-banner-text {
+            flex: 1;
+            font-size: 15px;
+            line-height: 1.6;
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .hub-banner-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .hub-banner-source-link {
+            color: var(--accent-blue);
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .hub-banner-source-link:hover {
+            color: var(--accent-purple);
+            text-decoration: underline;
+        }
+
+        .hub-banner-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-end;
+        }
+
+        .hub-highlights-list {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .hub-highlights-list-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-purple);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .hub-highlights-list-item:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-yellow);
+        }
+
+        .hub-highlights-list-item.unreviewed {
+            border-left-color: var(--accent-purple);
+            box-shadow: 0 0 0 2px rgba(137, 87, 229, 0.1);
+        }
+
+        /* Collection Highlights Panel (方案3) */
+        .collection-highlight-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            border-left: 3px solid transparent;
+        }
+
+        .collection-highlight-item:hover {
+            border-color: var(--accent-yellow);
+            background: var(--bg-card-hover);
+        }
+
+        .collection-highlight-item.unreviewed {
+            border-left-color: var(--accent-purple);
+        }
+
+        .collection-highlight-text {
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .collection-highlight-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .collection-highlight-source-link {
+            color: var(--accent-blue);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+        }
+
+        .collection-highlight-source-link:hover {
+            color: var(--accent-purple);
+            text-decoration: underline;
+        }
+
+        /* Highlight Detail Popup */
+        .highlight-detail-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 10001;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.25s ease-out;
+        }
+
+        .highlight-detail-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .highlight-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .highlight-detail-body {
+            padding: 20px;
+        }
+
+        .highlight-detail-text {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-style: italic;
+            border-left: 3px solid var(--accent-yellow);
+            padding-left: 15px;
+        }
+
+        .highlight-detail-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .highlight-detail-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .unreviewed-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .demo-3-badge {
+            background: var(--accent-purple);
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
     </style>
 </head>
 <body>
@@ -1082,10 +1364,43 @@
         
         <!-- View: HUB (Default) -->
         <div id="view-hub" class="view-section active">
+            <!-- Highlights Banner (Top of Hub) - Moved to top -->
+            <div id="hub-highlights-banner" class="hub-highlights-banner" style="display: none;">
+                <div class="hub-banner-header">
+                    <div class="hub-banner-title">
+                        <span class="unreviewed-indicator" id="hub-banner-indicator" style="display: none;"></span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                            <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                        </svg>
+                        <span id="hub-banner-title-text">Today's Highlight</span>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                    </div>
+                </div>
+                <div class="hub-banner-content">
+                    <div class="hub-banner-text" id="hub-banner-text">
+                        <!-- Highlight text will be inserted here -->
+                    </div>
+                    <div class="hub-banner-actions">
+                        <a href="#" class="hub-banner-source-link" id="hub-banner-source-link" onclick="event.preventDefault(); openSourceNoteFromHighlight();">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            查看来源
+                        </a>
+                        <div class="hub-banner-meta" id="hub-banner-meta">
+                            <!-- Source and time will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="hub-highlights-list" id="hub-highlights-list" style="display: none;">
+                    <!-- All highlights list will be inserted here -->
+                </div>
+            </div>
+
             <!-- Header -->
             <div class="vault-header">
-            <p style="color: var(--text-muted); margin: 0 0 20px 0;">Save what matters. Review it later.</p>
-            
             <div class="search-row">
                 <div class="search-input-wrapper">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -1122,17 +1437,6 @@
                     </div>
                 </div>
 
-                <!-- Highlights (moved from right column) -->
-                <div class="highlight-card">
-                    <div class="section-header">
-                        <div class="section-title">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #faa356;"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path></svg>
-                            Highlights
-                        </div>
-                    </div>
-
-                    <div id="highlights-panel"></div>
-                </div>
 
                 <!-- Recent Activity List -->
                 <div>
@@ -1154,7 +1458,7 @@
                                 <div class="item-title">Weekly Review - Week 50</div>
                                 <div class="item-meta">Weekly Review · Today</div>
                             </div>
-                            <button class="collection-menu" onclick="showActivityMenu('weekly-review-50', this, arguments[0])">...</button>
+                            <button type="button" class="collection-menu" onclick="event.stopPropagation(); showActivityMenu('weekly-review-50', this, event)">...</button>
                         </div>
                         
                         <!-- Item 2 -->
@@ -1166,7 +1470,7 @@
                                 <div class="item-title">Market Thoughts: NQ Volatility</div>
                                 <div class="item-meta">Market Thoughts · 2 days ago</div>
                             </div>
-                            <button class="collection-menu" onclick="showActivityMenu('nq-volatility', this, arguments[0])">...</button>
+                            <button type="button" class="collection-menu" onclick="event.stopPropagation(); showActivityMenu('nq-volatility', this, event)">...</button>
                         </div>
 
                         <!-- Item 3 -->
@@ -1178,7 +1482,7 @@
                                 <div class="item-title">created note: Market Thoughts: NQ Volatility</div>
                                 <div class="item-meta">Yesterday</div>
                             </div>
-                            <button class="collection-menu" onclick="showActivityMenu('note-created', this, arguments[0])">...</button>
+                            <button type="button" class="collection-menu" onclick="event.stopPropagation(); showActivityMenu('note-created', this, event)">...</button>
                         </div>
 
                          <!-- Item 4 -->
@@ -1190,7 +1494,7 @@
                                 <div class="item-title">Extracted highlight to note: Strategic Idea: Gap Fill Setup</div>
                                 <div class="item-meta">Yesterday</div>
                             </div>
-                            <button class="collection-menu" onclick="showActivityMenu('highlight-extracted', this, arguments[0])">...</button>
+                            <button type="button" class="collection-menu" onclick="event.stopPropagation(); showActivityMenu('highlight-extracted', this, event)">...</button>
                         </div>
                     </div>
                 </div>
@@ -1207,12 +1511,12 @@
 
                     <div class="collections-grid">
                         <!-- Card 1: All Notes -->
-                        <div class="collection-card" data-collection-id="all" onclick="openCollection('all')">
+                        <div class="collection-card" data-collection-name="All" onclick="openCollection('all')">
                             <div class="collection-header">
                                 <div class="collection-icon" style="color: var(--accent-blue);">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"></path><path d="M8 8h8"></path><path d="M8 12h8"></path><path d="M8 16h6"></path></svg>
                                 </div>
-                                <button class="collection-menu" onclick="openCollection('all', arguments[0])">↗</button>
+                                <button type="button" class="collection-menu" onclick="event.stopPropagation(); openCollection('all', event)">↗</button>
                             </div>
                             <div class="collection-title" data-role="collection-title">All Notes</div>
                             <div class="collection-meta" data-role="collection-meta">—</div>
@@ -1221,12 +1525,12 @@
                         </div>
 
                         <!-- Card 2: Quick Notes -->
-                        <div class="collection-card" data-collection-id="quick" onclick="openCollection('quick')">
+                        <div class="collection-card" data-collection-name="Quick Notes" onclick="openCollection('quick')">
                             <div class="collection-header">
-                                <div class="collection-icon" style="color: #faa356;">
+                                <div class="collection-icon" style="color: #faa356;" onclick="maybeEditCollectionIcon('Quick Notes', this, arguments[0])">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
                                 </div>
-                                <button class="collection-menu" onclick="showCollectionMenu('quick', this, arguments[0])">...</button>
+                                <button type="button" class="collection-menu" onclick="event.stopPropagation(); showCollectionMenu('Quick Notes', this, event)">...</button>
                             </div>
                             <div class="collection-title" data-role="collection-title">Quick Notes</div>
                             <div class="collection-meta" data-role="collection-meta">—</div>
@@ -1235,17 +1539,30 @@
                         </div>
 
                         <!-- Card 3: Strategy Ideas -->
-                        <div class="collection-card" data-collection-id="strategy" onclick="openCollection('strategy')">
+                        <div class="collection-card" data-collection-name="Strategy Ideas" onclick="openCollection('strategy')">
                             <div class="collection-header">
-                                <div class="collection-icon" style="color: #2f81f7;">
+                                <div class="collection-icon" style="color: #2f81f7;" onclick="maybeEditCollectionIcon('Strategy Ideas', this, arguments[0])">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
                                 </div>
-                                <button class="collection-menu" onclick="showCollectionMenu('strategy', this, arguments[0])">...</button>
+                                <button type="button" class="collection-menu" onclick="event.stopPropagation(); showCollectionMenu('Strategy Ideas', this, event)">...</button>
                             </div>
                             <div class="collection-title" data-role="collection-title">Strategy Ideas</div>
                             <div class="collection-meta" data-role="collection-meta">—</div>
                             <div class="collection-preview" data-role="collection-preview">—</div>
                             <button class="btn-sm" style="width: 100%;" onclick="openCollection('strategy', arguments[0])">Open</button>
+                        </div>
+
+                        <!-- Card 4: Highlights -->
+                        <div class="collection-card" data-collection-name="Highlights" onclick="openCollection('highlights')">
+                            <div class="collection-header">
+                                <div class="collection-icon" style="color: #8957e5;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                                </div>
+                            </div>
+                            <div class="collection-title" data-role="collection-title">Highlights</div>
+                            <div class="collection-meta" data-role="collection-meta">—</div>
+                            <div class="collection-preview" data-role="collection-preview">—</div>
+                            <button class="btn-sm" style="width: 100%;" onclick="openCollection('highlights', arguments[0])">Open</button>
                         </div>
                     </div>
 
@@ -1380,6 +1697,24 @@
 
                 <!-- Right Sidebar Context -->
                 <div class="cl-right">
+                    <!-- Highlights Panel (Collection View) -->
+                    <div class="widget-box" style="margin-bottom: 20px;">
+                        <div class="widget-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                                    <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                                </svg>
+                                Highlights
+                            </div>
+                            <span class="demo-3-badge" id="collection-highlights-count">0</span>
+                        </div>
+                        <div class="widget-content" style="padding: 0;">
+                            <div id="collection-highlights-list" style="max-height: 400px; overflow-y: auto;">
+                                <!-- Highlights will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="widget-box">
                         <div class="widget-header">Recent Activity</div>
                         <div class="widget-content">
@@ -1560,9 +1895,9 @@
         })();
 
         const defaultHighlightsData = [
-            { id: 1, text: 'Avoid overthinking the loss – stick to the process...', fullText: 'Avoid overthinking the loss – stick to the process...', source: 'Psychology', date: 'Apr 10, 2024', color: null, reviewed: true },
-            { id: 2, text: 'Remember: when in range-bound market, scalps are...', fullText: 'Remember: when in range-bound market, scalps are...', source: 'Session (Esention)', date: 'Apr 2024', color: null, reviewed: false },
-            { id: 3, text: 'Always reduce size in the middle of high volatility...', fullText: 'Always reduce size in the middle of high volatility...', source: 'Session (Today)', date: 'Apr 10, 2024', color: null, reviewed: false }
+            { id: 1, text: 'Avoid overthinking the loss – stick to the process...', fullText: 'Avoid overthinking the loss – stick to the process and trust your system. Every trade is a learning opportunity, not a personal failure.', source: 'Psychology Notes', sourceNoteId: 3, date: 'Apr 10, 2024', timestamp: new Date('2024-04-10').getTime(), color: null, reviewed: true, priority: 'normal' },
+            { id: 2, text: 'Remember: when in range-bound market, scalps are...', fullText: 'Remember: when in range-bound market, scalps are more effective than swing trades. Focus on quick entries and exits near support/resistance levels.', source: 'Session Review', sourceNoteId: null, date: 'Apr 2024', timestamp: new Date('2024-04-15').getTime(), color: null, reviewed: false, priority: 'high' },
+            { id: 3, text: 'Always reduce size in the middle of high volatility...', fullText: 'Always reduce size in the middle of high volatility periods to protect capital and maintain emotional stability during market turbulence.', source: 'Market Thoughts: NQ Volatility', sourceNoteId: 1, date: 'Apr 22, 2024', timestamp: new Date('2024-04-22T10:30:00').getTime(), color: null, reviewed: false, priority: 'high' }
         ];
 
         let highlightsData = JSON.parse(localStorage.getItem('tm_vault_highlights'));
@@ -1624,62 +1959,355 @@
             // Clear selection if needed
             if (String(currentHighlightId) === String(highlightId)) currentHighlightId = null;
 
-            renderHighlightsPanel();
+            renderHubHighlightsBanner();
+            renderCollectionHighlightsPanel();
             showVaultToast('Highlight deleted');
         }
 
-        function renderHighlightsPanel() {
-            const panel = document.getElementById('highlights-panel');
+        // Format relative time
+        function formatRelativeTime(timestamp) {
+            if (!timestamp) return 'Unknown';
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            return new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Render Hub Highlights Banner (方案2)
+        function renderHubHighlightsBanner() {
+            const banner = document.getElementById('hub-highlights-banner');
+            if (!banner) return;
+
+            if (highlightsData.length === 0) {
+                banner.style.display = 'none';
+                return;
+            }
+
+            banner.style.display = 'block';
+
+            // Get today's highlight (highest priority unreviewed, or most recent)
+            const unreviewed = highlightsData.filter(h => !h.reviewed);
+            const todayHighlight = unreviewed.length > 0 
+                ? unreviewed.sort((a, b) => {
+                    const priorityOrder = { 'high': 3, 'normal': 2, 'low': 1 };
+                    return (priorityOrder[b.priority] || 1) - (priorityOrder[a.priority] || 1);
+                })[0]
+                : highlightsData[0];
+
+            if (!todayHighlight) {
+                banner.style.display = 'none';
+                return;
+            }
+
+            // Update banner content
+            document.getElementById('hub-banner-text').textContent = `"${todayHighlight.fullText || todayHighlight.text}"`;
+            const sourceLink = document.getElementById('hub-banner-source-link');
+            sourceLink.setAttribute('data-note-id', todayHighlight.sourceNoteId || '');
+            sourceLink.setAttribute('data-highlight-id', todayHighlight.id);
+            
+            const metaEl = document.getElementById('hub-banner-meta');
+            const sourceNote = todayHighlight.sourceNoteId ? notesData.find(n => n.id === todayHighlight.sourceNoteId) : null;
+            const sourceName = sourceNote ? sourceNote.title : todayHighlight.source;
+            const timeStr = todayHighlight.timestamp ? formatRelativeTime(todayHighlight.timestamp) : todayHighlight.date;
+            metaEl.innerHTML = `
+                <div>${escapeHtml(sourceName)}</div>
+                <div>${timeStr}</div>
+            `;
+
+            // Show indicator if unreviewed
+            const indicator = document.getElementById('hub-banner-indicator');
+            if (!todayHighlight.reviewed) {
+                indicator.style.display = 'inline-block';
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        // Render Hub Highlights List
+        function renderHubHighlightsList() {
+            const listEl = document.getElementById('hub-highlights-list');
+            if (!listEl) return;
+
+            if (highlightsData.length <= 1) {
+                listEl.innerHTML = '';
+                return;
+            }
+
+            const otherHighlights = highlightsData.slice(1);
+            listEl.innerHTML = otherHighlights.map(h => {
+                const timeStr = h.timestamp ? formatRelativeTime(h.timestamp) : h.date;
+                const unreviewedClass = !h.reviewed ? 'unreviewed' : '';
+                return `
+                    <div class="hub-highlights-list-item ${unreviewedClass}" data-highlight-id="${h.id}" onclick="showHighlightDetail(${h.id})">
+                        <div style="font-size: 14px; line-height: 1.5; margin-bottom: 10px;">"${escapeHtml(h.fullText || h.text)}"</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+                            <a href="#" class="hub-banner-source-link" onclick="event.preventDefault(); event.stopPropagation(); openSourceNoteFromHighlight(${h.id});">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                ${escapeHtml(h.source)}
+                            </a>
+                            <span>${timeStr}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render Collection Highlights Panel (方案3)
+        function renderCollectionHighlightsPanel() {
+            const panel = document.getElementById('collection-highlights-list');
+            const countEl = document.getElementById('collection-highlights-count');
             if (!panel) return;
 
-            const today = highlightsData[0] || null;
-            const unreviewed = highlightsData.filter(h => !h.reviewed);
+            if (highlightsData.length === 0) {
+                panel.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">No highlights yet</div>';
+                if (countEl) countEl.textContent = '0';
+                return;
+            }
 
-            const todayHTML = !today ? `
-                <div style="padding: 12px; color: var(--text-muted); font-size: 13px;">No highlights yet</div>
-            ` : `
-                <div class="mini-card highlight-card-hover" data-highlight-id="${today.id}" style="margin-bottom: 16px; cursor: pointer; border-style: solid; position: relative;" data-highlight-action="open">
-                    <button class="highlight-delete-icon" type="button" data-highlight-action="delete" data-highlight-id="${today.id}" title="Delete highlight">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                    </button>
-                    <div class="mini-meta" style="margin-bottom: 10px;">Today's Highlight</div>
-                    <div class="highlight-quote">${today.text}</div>
-                    <div class="highlight-meta" style="gap: 10px;">
-                        <span>${today.source} · ${today.date}</span>
+            if (countEl) countEl.textContent = highlightsData.length.toString();
+
+            panel.innerHTML = highlightsData.map(h => {
+                const timeStr = h.timestamp ? formatRelativeTime(h.timestamp) : h.date;
+                const unreviewedClass = !h.reviewed ? 'unreviewed' : '';
+                const sourceNote = h.sourceNoteId ? notesData.find(n => n.id === h.sourceNoteId) : null;
+                const sourceName = sourceNote ? sourceNote.title : h.source;
+                
+                return `
+                    <div class="collection-highlight-item ${unreviewedClass}" data-highlight-id="${h.id}" onclick="showHighlightDetail(${h.id})">
+                        <div class="collection-highlight-text">"${escapeHtml(h.text)}"</div>
+                        <div class="collection-highlight-footer">
+                            <a href="#" class="collection-highlight-source-link" onclick="event.preventDefault(); event.stopPropagation(); openSourceNoteFromHighlight(${h.id});">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                </svg>
+                                ${escapeHtml(sourceName)}
+                            </a>
+                            <span>${timeStr}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Toggle Hub Highlights List
+        function toggleHubHighlightsList() {
+            const listEl = document.getElementById('hub-highlights-list');
+            const toggleText = document.getElementById('hub-banner-toggle-text');
+            if (!listEl) return;
+
+            const isVisible = listEl.style.display !== 'none';
+            listEl.style.display = isVisible ? 'none' : 'block';
+            if (toggleText) {
+                toggleText.textContent = isVisible ? '查看全部' : '收起';
+            }
+        }
+
+        // Show Highlight Detail Popup
+        function showHighlightDetail(highlightId) {
+            const highlight = highlightsData.find(h => h.id === highlightId);
+            if (!highlight) return;
+
+            // Remove existing popup
+            document.querySelectorAll('.highlight-detail-popup-overlay').forEach(el => el.remove());
+
+            const overlay = document.createElement('div');
+            overlay.className = 'highlight-detail-popup-overlay';
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            };
+
+            const popup = document.createElement('div');
+            popup.className = 'highlight-detail-popup';
+            popup.onclick = (e) => e.stopPropagation();
+
+            const sourceNote = highlight.sourceNoteId ? notesData.find(n => n.id === highlight.sourceNoteId) : null;
+            const sourceName = sourceNote ? sourceNote.title : highlight.source;
+            const timeStr = highlight.timestamp ? formatRelativeTime(highlight.timestamp) : highlight.date;
+
+            popup.innerHTML = `
+                <div class="highlight-detail-header">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                            <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                        </svg>
+                        <h3 style="margin: 0; font-size: 18px;">Highlight 详情</h3>
+                        ${!highlight.reviewed ? '<span class="unreviewed-indicator"></span>' : ''}
+                    </div>
+                    <button onclick="this.closest('.highlight-detail-popup-overlay').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px; line-height: 1;">×</button>
+                </div>
+                <div class="highlight-detail-body">
+                    <div class="highlight-detail-text">"${escapeHtml(highlight.fullText || highlight.text)}"</div>
+                    <div class="highlight-detail-meta">
+                        <div>
+                            <strong>来源:</strong> ${escapeHtml(sourceName)}
+                        </div>
+                        <div>
+                            <strong>时间:</strong> ${timeStr}
+                        </div>
+                    </div>
+                    <div class="highlight-detail-actions">
+                        ${highlight.sourceNoteId ? `
+                        <button class="btn-sm" onclick="openSourceNoteFromHighlight(${highlight.id}); this.closest('.highlight-detail-popup-overlay').remove();" style="background: var(--accent-blue); color: white; border: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 6px;">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            查看来源笔记
+                        </button>
+                        ` : ''}
+                        <button class="btn-sm" onclick="this.closest('.highlight-detail-popup-overlay').remove();">
+                            关闭
+                        </button>
                     </div>
                 </div>
             `;
 
-            const newHTML = `
-                <div class="section-header" style="margin-top: 10px; margin-bottom: 10px;">
-                    <span class="mini-meta">New Highlights</span>
-                </div>
-                <div class="highlight-list">
-                    ${unreviewed.length === 0 ? `
-                        <div style="padding: 12px; color: var(--text-muted); font-size: 13px;">No new highlights</div>
-                    ` : unreviewed.slice(0, 5).map(h => `
-                        <div class="mini-card highlight-card-hover" data-highlight-id="${h.id}" data-highlight-action="open" style="cursor: pointer; position: relative;">
-                            <button class="highlight-delete-icon" type="button" data-highlight-action="delete" data-highlight-id="${h.id}" title="Delete highlight">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                            </button>
-                            <div class="mini-title">${h.text}</div>
-                            <div class="mini-meta">${h.source} · ${h.date}</div>
-                        </div>
-                    `).join('')}
-                </div>
+            overlay.appendChild(popup);
+            document.body.appendChild(overlay);
+        }
 
-                ${unreviewed.length > 0 ? `
-                <div style="margin-top: 12px; text-align: center;">
-                    <button class="btn-sm" type="button" data-highlight-action="review-modal" style="padding: 6px 16px;">Review All (${unreviewed.length})</button>
-                </div>
-                ` : ''}
-            `;
+        // Open source note from highlight
+        function openSourceNoteFromHighlight(highlightId) {
+            const highlight = highlightId 
+                ? highlightsData.find(h => h.id === highlightId)
+                : (() => {
+                    const link = document.getElementById('hub-banner-source-link');
+                    const id = link ? link.getAttribute('data-highlight-id') : null;
+                    return id ? highlightsData.find(h => h.id === Number(id)) : null;
+                })();
 
-            panel.innerHTML = todayHTML + newHTML;
-
-            if (currentHighlightId != null) {
-                setActiveHighlight(currentHighlightId);
+            if (!highlight) {
+                showVaultToast('Highlight not found', 'info');
+                return;
             }
+
+            // If has sourceNoteId, navigate to note
+            if (highlight.sourceNoteId) {
+                const note = notesData.find(n => n.id === highlight.sourceNoteId);
+                if (!note) {
+                    showVaultToast('Source note not found', 'info');
+                    return;
+                }
+
+                // Switch to collection view and select note
+                switchView('collection');
+                setTimeout(() => {
+                    currentCollection = note.collection || 'All';
+                    setActiveCollectionNav(currentCollection);
+                    const titleEl = document.querySelector('.list-title');
+                    if (titleEl) titleEl.innerHTML = `${currentCollection === 'All' ? 'All Notes' : escapeHtml(currentCollection)} <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
+                    renderNotesList();
+                    setTimeout(() => selectNote(note.id), 30);
+                }, 60);
+            } else {
+                showVaultToast('No source note available', 'info');
+            }
+        }
+
+        // Edit Hub Highlight (only in Hub view)
+        function editHubHighlight() {
+            const banner = document.getElementById('hub-highlights-banner');
+            if (!banner) return;
+
+            // Get current highlight
+            const link = document.getElementById('hub-banner-source-link');
+            const highlightId = link ? link.getAttribute('data-highlight-id') : null;
+            if (!highlightId) return;
+
+            const highlight = highlightsData.find(h => h.id === Number(highlightId));
+            if (!highlight) return;
+
+            // Show edit modal
+            const modal = document.createElement('div');
+            modal.className = 'vault-modal-overlay';
+            modal.innerHTML = `
+                <div class="vault-modal" style="max-width: 500px;">
+                    <div class="vault-modal-header">
+                        <h3>编辑 Highlight 显示方式</h3>
+                        <button onclick="this.closest('.vault-modal-overlay').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px;">×</button>
+                    </div>
+                    <div class="vault-modal-body">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary);">优先级</label>
+                            <select id="highlight-priority" style="width: 100%; padding: 8px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); border-radius: 6px;">
+                                <option value="high" ${highlight.priority === 'high' ? 'selected' : ''}>高</option>
+                                <option value="normal" ${highlight.priority === 'normal' ? 'selected' : ''}>普通</option>
+                                <option value="low" ${highlight.priority === 'low' ? 'selected' : ''}>低</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary);">颜色主题</label>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn-sm" onclick="setHighlightColor(${highlight.id}, 'yellow')" style="background: ${highlight.color === 'yellow' ? 'rgba(250, 163, 86, 0.2)' : 'transparent'};">
+                                    <span style="color: #faa356;">●</span> 黄色
+                                </button>
+                                <button class="btn-sm" onclick="setHighlightColor(${highlight.id}, 'purple')" style="background: ${highlight.color === 'purple' ? 'rgba(137, 87, 229, 0.2)' : 'transparent'};">
+                                    <span style="color: #8957e5;">●</span> 紫色
+                                </button>
+                                <button class="btn-sm" onclick="setHighlightColor(${highlight.id}, 'blue')" style="background: ${highlight.color === 'blue' ? 'rgba(47, 129, 247, 0.2)' : 'transparent'};">
+                                    <span style="color: #2f81f7;">●</span> 蓝色
+                                </button>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="highlight-reviewed" ${highlight.reviewed ? 'checked' : ''} style="cursor: pointer;">
+                                <span style="font-size: 13px; color: var(--text-secondary);">标记为已查看</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="vault-modal-footer">
+                        <button class="btn-sm" onclick="this.closest('.vault-modal-overlay').remove()">取消</button>
+                        <button class="btn-sm" onclick="saveHighlightEdit(${highlight.id}); this.closest('.vault-modal-overlay').remove();" style="background: var(--accent-blue); color: white; border: none;">保存</button>
+                    </div>
+                </div>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        }
+
+        function setHighlightColor(highlightId, color) {
+            const highlight = highlightsData.find(h => h.id === highlightId);
+            if (highlight) {
+                highlight.color = color;
+                persistHighlights();
+                renderHubHighlightsBanner();
+            }
+        }
+
+        function saveHighlightEdit(highlightId) {
+            const highlight = highlightsData.find(h => h.id === highlightId);
+            if (!highlight) return;
+
+            const priority = document.getElementById('highlight-priority')?.value;
+            const reviewed = document.getElementById('highlight-reviewed')?.checked;
+
+            if (priority) highlight.priority = priority;
+            if (reviewed !== undefined) highlight.reviewed = reviewed;
+
+            persistHighlights();
+            renderHubHighlightsBanner();
+            renderCollectionHighlightsPanel();
+            showVaultToast('Highlight 设置已保存');
+        }
+
+        // Legacy function for compatibility
+        function renderHighlightsPanel() {
+            // This function is kept for compatibility but now delegates to new functions
+            renderHubHighlightsBanner();
+            renderCollectionHighlightsPanel();
         }
 
         // ========== SEARCH FUNCTIONALITY ==========
@@ -2161,7 +2789,7 @@
                     <div class="item-title">${displayTitle}</div>
                     <div class="item-meta">${item.meta}</div>
                 </div>
-                <button class="collection-menu" onclick="showActivityMenu('${item.id}', this, arguments[0])">...</button>
+                <button type="button" class="collection-menu">...</button>
                 `;
                 
                 activityLists.forEach(activityList => {
@@ -2269,18 +2897,44 @@
             return list.length ? list[0] : null; // notesData is unshifted => newest first
         }
 
+        // Collection icon SVG helper (used in Hub + Sidebar)
+        function getCollectionIconSvg(iconName, size = 24) {
+            const s = Number(size) || 24;
+            const common = `width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"`;
+            switch ((iconName || 'folder').toString()) {
+                case 'note':
+                    return `<svg ${common}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+                case 'chart':
+                    return `<svg ${common}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>`;
+                case 'idea':
+                    return `<svg ${common}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+                case 'journal':
+                    return `<svg ${common}><path d="21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
+                case 'star':
+                    return `<svg ${common}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+                case 'tag':
+                    return `<svg ${common}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>`;
+                case 'highlight':
+                    return `<svg ${common}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>`;
+                case 'folder':
+                default:
+                    return `<svg ${common}><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+            }
+        }
+
         function updateHubCollectionsUI() {
-            const cards = document.querySelectorAll('#view-hub .collection-card[data-collection-id]');
+            const cards = document.querySelectorAll('#view-hub .collection-card[data-collection-name]');
             if (!cards.length) return;
 
             cards.forEach(card => {
-                const id = card.getAttribute('data-collection-id');
+                const collectionName = card.getAttribute('data-collection-name');
                 const metaEl = card.querySelector('[data-role="collection-meta"]');
                 const previewEl = card.querySelector('[data-role="collection-preview"]');
                 const titleEl = card.querySelector('[data-role="collection-title"]');
+                const iconEl = card.querySelector('.collection-icon');
                 if (!metaEl || !previewEl || !titleEl) return;
 
-                if (id === 'all') {
+                if (collectionName === 'All') {
                     const latest = getLatestNoteForCollection('All');
                     metaEl.textContent = `${notesData.length} Notes`;
                     if (latest) {
@@ -2292,16 +2946,24 @@
                     return;
                 }
 
-                const collection = collectionsData.find(c => c.id === id);
-                if (!collection) return;
+                if (collectionName === 'Highlights') {
+                    const highlights = highlightsData || [];
+                    const unreviewedCount = highlights.filter(h => h.unreviewed).length;
+                    metaEl.textContent = `${highlights.length} Highlights${unreviewedCount > 0 ? ` (${unreviewedCount} new)` : ''}`;
+                    if (highlights.length > 0) {
+                        const latest = highlights[highlights.length - 1];
+                        previewEl.textContent = latest.text.substring(0, 80) + (latest.text.length > 80 ? '...' : '');
+                    } else {
+                        previewEl.textContent = 'No highlights yet.';
+                    }
+                    return;
+                }
 
-                // Ensure title matches config (in case cards were edited)
-                titleEl.textContent = collection.name;
-
-                const count = notesData.filter(n => n.collection === collection.name).length;
+                // For dynamic collections, just update the count and preview
+                const count = notesData.filter(n => n.collection === collectionName).length;
                 metaEl.textContent = `${count} Notes`;
 
-                const latest = getLatestNoteForCollection(collection.name);
+                const latest = getLatestNoteForCollection(collectionName);
                 if (latest) {
                     const previewText = stripHTML(latest.content).slice(0, 80);
                     previewEl.textContent = previewText ? previewText + (stripHTML(latest.content).length > 80 ? '...' : '') : latest.title;
@@ -2643,6 +3305,15 @@
             document.querySelectorAll('.cl-nav-item').forEach(item => item.classList.remove('active'));
             if(el) el.classList.add('active');
             
+            // Reset layout for All Notes
+            document.querySelector('.cl-notes-list').style.display = '';
+            document.querySelector('.cl-main').style.gridColumn = '';
+            // Restore main area if it was replaced by Highlights view
+            if (window.__tmVaultOriginalClMain) {
+                const main = document.querySelector('.cl-main');
+                if (main) main.innerHTML = window.__tmVaultOriginalClMain;
+            }
+            
             // Update list title
             document.querySelector('.list-title').innerHTML = `All Notes <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
             
@@ -2654,10 +3325,32 @@
             currentCollection = collectionName;
             document.querySelectorAll('.cl-nav-item').forEach(item => item.classList.remove('active'));
             if (el) el.classList.add('active');
-            
+
+            // Reset layout for regular collections
+            document.querySelector('.cl-notes-list').style.display = '';
+            document.querySelector('.cl-main').style.gridColumn = '';
+
+            // Special handling for Highlights collection
+            if (collectionName === 'Highlights') {
+                // Hide notes list and expand main area
+                document.querySelector('.cl-notes-list').style.display = 'none';
+                document.querySelector('.cl-main').style.gridColumn = '2 / 4';
+                
+                document.querySelector('.list-title').innerHTML = `Highlights <button class="btn-sm" onclick="createNewHighlight()">+ New Highlight</button>`;
+                renderHighlightsManagement();
+                return;
+            }
+
             // Update list title
+            // Restore main area if it was replaced by Highlights view
+            if (window.__tmVaultOriginalClMain) {
+                const main = document.querySelector('.cl-main');
+                if (main) main.innerHTML = window.__tmVaultOriginalClMain;
+            }
+
             document.querySelector('.list-title').innerHTML = `${collectionName} <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
-            
+
+            // Re-render notes list in the sidebar
             renderNotesList();
         }
 
@@ -2672,10 +3365,32 @@
         // ========== OPEN COLLECTION (FROM HUB CARDS) ==========
         function openCollection(collectionId, evt = null) {
             if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
+
+            // Special handling for Highlights collection
+            if (collectionId === 'highlights') {
+                currentCollection = 'Highlights';
+                switchView('collection');
+                setTimeout(() => {
+                    // Hide notes list and expand main area for Highlights
+                    document.querySelector('.cl-notes-list').style.display = 'none';
+                    document.querySelector('.cl-main').style.gridColumn = '2 / 4';
+                    
+                    setActiveCollectionNav('Highlights');
+                    document.querySelector('.list-title').innerHTML = `Highlights <button class="btn-sm" onclick="createNewHighlight()">+ New Highlight</button>`;
+                    renderHighlightsManagement();
+                    showVaultToast('Opened: Highlights');
+                }, 100);
+                return;
+            }
+
             if (collectionId === 'all') {
                 currentCollection = 'All';
                 switchView('collection');
                 setTimeout(() => {
+                    // Reset layout for All Notes
+                    document.querySelector('.cl-notes-list').style.display = '';
+                    document.querySelector('.cl-main').style.gridColumn = '';
+                    
                     setActiveCollectionNav('All');
                     const titleEl = document.querySelector('.list-title');
                     if (titleEl) titleEl.innerHTML = `All Notes <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
@@ -2685,52 +3400,46 @@
                 return;
             }
 
-            const collection = collectionsData.find(c => c.id === collectionId || c.name === collectionId);
-            if (!collection) return;
-
-            currentCollection = collection.name;
+            // For dynamic collections, collectionId is actually the collection name
+            const collectionName = collectionId === 'all' ? 'All' : collectionId;
+            currentCollection = collectionName;
             switchView('collection');
             setTimeout(() => {
-                setActiveCollectionNav(collection.name);
+                // Reset layout for dynamic collections and restore main area
+                document.querySelector('.cl-notes-list').style.display = '';
+                document.querySelector('.cl-main').style.gridColumn = '';
+                if (window.__tmVaultOriginalClMain) {
+                    const main = document.querySelector('.cl-main');
+                    if (main) main.innerHTML = window.__tmVaultOriginalClMain;
+                }
+
+                setActiveCollectionNav(collectionName);
                 const titleEl = document.querySelector('.list-title');
-                if (titleEl) titleEl.innerHTML = `${collection.name} <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
+                if (titleEl) titleEl.innerHTML = `${collectionName === 'All' ? 'All Notes' : collectionName} <button class="btn-sm" onclick="createNewNote()">+ New Note</button>`;
                 renderNotesList();
-                showVaultToast(`Opened: ${collection.name}`);
+                showVaultToast(`Opened: ${collectionName === 'All' ? 'All Notes' : collectionName}`);
             }, 100);
         }
 
         // ========== COLLECTION MENU ==========
         let activeMenu = null;
         
-        function showCollectionMenu(collectionId, btn, evt = null) {
+        function showCollectionMenu(collectionName, btn, evt = null) {
             if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
             closeActiveMenu();
             
-            const collection = collectionsData.find(c => c.id === collectionId);
-            if (!collection) return;
+            // "All" collection cannot be edited or deleted
+            if (collectionName === 'All') return;
             
             const menu = document.createElement('div');
-            menu.className = 'dropdown-menu';
+            menu.className = 'vault-dropdown-menu';
             menu.innerHTML = `
-                <div class="dropdown-item" onclick="renameCollection('${collectionId}')">
+                <div class="dropdown-item" onclick="renameCollection('${collectionName}')">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     Rename
                 </div>
-                <div class="dropdown-item" onclick="duplicateCollection('${collectionId}')">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    Duplicate
-                </div>
-                <div class="dropdown-item" onclick="archiveCollection('${collectionId}')">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
-                    Archive
-                </div>
-                <div class="dropdown-item" onclick="changeCollectionIcon('${collectionId}')">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"></path><path d="M12 18v4"></path><path d="M4.9 4.9l2.8 2.8"></path><path d="M16.3 16.3l2.8 2.8"></path></svg>
-                    Change Icon
-                </div>
-                <div class="dropdown-divider"></div>
-                <div class="dropdown-item danger" onclick="deleteCollection('${collectionId}')">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <div class="dropdown-item danger" onclick="deleteCollection('${collectionName}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                     Delete
                 </div>
             `;
@@ -2751,9 +3460,27 @@
 
         function closeActiveMenu() {
             if (activeMenu) {
+                // Check if this is an icon menu and if we're in edit mode
+                const isIconMenu = activeMenu.querySelector('.dropdown-item[data-icon]');
+                let editingContainer = null;
+                if (isIconMenu) {
+                    // Find the editing container
+                    editingContainer = document.querySelector('[data-editing="1"]');
+                }
+                
                 activeMenu.remove();
                 activeMenu = null;
                 document.removeEventListener('click', closeMenuOnOutsideClick);
+                
+                // If we closed an icon menu and are still in edit mode, restore focus to input
+                if (isIconMenu && editingContainer) {
+                    const input = editingContainer.querySelector('input[type="text"]');
+                    if (input) {
+                        setTimeout(() => {
+                            input.focus();
+                        }, 50);
+                    }
+                }
             }
             // Also remove any move-submenu instances appended to body
             document.querySelectorAll('.submenu').forEach(s => s.remove());
@@ -2761,68 +3488,284 @@
 
         function closeMenuOnOutsideClick(e) {
             if (activeMenu && !activeMenu.contains(e.target)) {
+                // Don't close menu if clicking on an element that's in edit mode (e.g. rename input)
+                const editingContainer = e.target.closest('[data-editing="1"]');
+                if (editingContainer) {
+                    // If clicking inside edit mode container, don't close menu (let it handle its own events)
+                    return;
+                }
                 closeActiveMenu();
             }
         }
 
         // Collection Actions
-        function renameCollection(id) {
-            const collection = collectionsData.find(c => c.id === id);
-            if (collection) {
-                const newName = prompt('Enter new name:', collection.name);
-                if (newName && newName.trim()) {
-                    collection.name = newName.trim();
-                    showVaultToast('Collection renamed');
-                }
-            }
+        function renameCollection(collectionName) {
             closeActiveMenu();
+            if (collectionName === 'All Notes') return; // Cannot rename 'All Notes'
+
+            // For dynamic collections, we need to find the collection by name
+            // Since collections are now dynamic, we'll work directly with the name
+            const oldName = collectionName;
+
+            // Ensure we edit in Hub card UI or sidebar
+            let card = document.querySelector(`#view-hub .collection-card[data-collection-name="${collectionName}"]`);
+            let sidebarItem = document.querySelector(`.cl-nav-item[data-collection="${collectionName}"]`);
+            if (!card && !sidebarItem) {
+                try { switchView('hub'); } catch (e) {}
+                setTimeout(() => renameCollection(collectionName), 60);
+                return;
+            }
+
+            if (card) {
+                // Edit in hub card
+                card.dataset.editing = '1';
+                const titleEl = card.querySelector('.collection-title');
+                if (!titleEl) return;
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = oldName;
+                input.style.width = '100%';
+                input.style.background = 'var(--bg-card)';
+                input.style.color = 'var(--text-primary)';
+                input.style.border = '1px solid var(--accent-blue)';
+                input.style.borderRadius = '4px';
+                input.style.padding = '2px 4px';
+                input.style.fontSize = 'inherit';
+                input.style.fontFamily = 'inherit';
+                input.style.fontWeight = 'inherit';
+                input.onclick = (e) => e.stopPropagation();
+
+                const exitEditMode = () => {
+                    delete card.dataset.editing;
+                };
+
+                const save = () => {
+                    // Don't save if icon menu is open (user might be selecting an icon)
+                    if (activeMenu && activeMenu.querySelector('.dropdown-item[data-icon]')) {
+                        return;
+                    }
+                    
+                    const newName = input.value.trim();
+                    if (newName && newName !== oldName) {
+                        // Update notes that referenced old collection name
+                        notesData.forEach(n => {
+                            if (n && n.collection === oldName) n.collection = newName;
+                        });
+                        try { localStorage.setItem('tm_vault_notes', JSON.stringify(notesData)); } catch (e) {}
+
+                        // Update collection metadata
+                        const colIndex = collectionsData.findIndex(c => c.name === oldName);
+                        if (colIndex !== -1) {
+                            collectionsData[colIndex].name = newName;
+                            collectionsData[colIndex].id = newName.toLowerCase().replace(/\s+/g, '-');
+                            try { localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData)); } catch (e) {}
+                        }
+
+                        if (currentCollection === oldName) currentCollection = newName;
+
+                        titleEl.textContent = newName;
+                        if (typeof renderCollectionsSidebar === 'function') renderCollectionsSidebar();
+                        if (typeof updateHubCollectionsUI === 'function') updateHubCollectionsUI();
+                        if (typeof renderNotesList === 'function') renderNotesList();
+                        showVaultToast('Collection renamed');
+                    } else {
+                        titleEl.textContent = oldName;
+                    }
+                    exitEditMode();
+                };
+
+                input.addEventListener('blur', save);
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') input.blur();
+                    if (e.key === 'Escape') {
+                        titleEl.textContent = oldName;
+                        exitEditMode();
+                    }
+                });
+
+                titleEl.textContent = '';
+                titleEl.appendChild(input);
+                input.focus();
+                setTimeout(() => input.focus(), 10); // ensure focus
+            } else if (sidebarItem) {
+                // Edit in sidebar
+                sidebarItem.dataset.editing = '1';
+                const nameSpan = sidebarItem.querySelector('.nav-name');
+                if (!nameSpan) return;
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = oldName;
+                input.style.width = '100%';
+                input.style.background = 'var(--bg-dark)';
+                input.style.color = 'var(--text-primary)';
+                input.style.border = '1px solid var(--accent-blue)';
+                input.style.borderRadius = '4px';
+                input.style.padding = '2px 4px';
+                input.style.fontSize = '14px';
+                input.style.fontFamily = 'inherit';
+                input.onclick = (e) => e.stopPropagation();
+
+                const save = () => {
+                    // Don't save if icon menu is open (user might be selecting an icon)
+                    if (activeMenu && activeMenu.querySelector('.dropdown-item[data-icon]')) {
+                        return;
+                    }
+                    
+                    const newName = input.value.trim();
+                    if (newName && newName !== oldName) {
+                        // Update notes that referenced old collection name
+                        notesData.forEach(n => {
+                            if (n && n.collection === oldName) n.collection = newName;
+                        });
+                        try { localStorage.setItem('tm_vault_notes', JSON.stringify(notesData)); } catch (e) {}
+
+                        // Update collection metadata
+                        const colIndex = collectionsData.findIndex(c => c.name === oldName);
+                        if (colIndex !== -1) {
+                            collectionsData[colIndex].name = newName;
+                            collectionsData[colIndex].id = newName.toLowerCase().replace(/\s+/g, '-');
+                            try { localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData)); } catch (e) {}
+                        }
+
+                        if (currentCollection === oldName) currentCollection = newName;
+
+                        if (typeof renderCollectionsSidebar === 'function') renderCollectionsSidebar();
+                        if (typeof updateHubCollectionsUI === 'function') updateHubCollectionsUI();
+                        if (typeof renderNotesList === 'function') renderNotesList();
+                        showVaultToast('Collection renamed');
+                    } else {
+                        renderCollectionsSidebar();
+                    }
+                    delete sidebarItem.dataset.editing;
+                };
+
+                input.addEventListener('blur', save);
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') input.blur();
+                    if (e.key === 'Escape') {
+                        renderCollectionsSidebar();
+                    }
+                });
+
+                nameSpan.replaceWith(input);
+                input.focus();
+                setTimeout(() => input.focus(), 10); // ensure focus
+            }
         }
 
-        function changeCollectionIcon(id) {
-            const collection = collectionsData.find(c => c.id === id);
-            if (!collection) return;
+        // Legacy API kept for compatibility; icon editing is now a dropdown near the icon.
+        function changeCollectionIcon(id, evt) {
+            if (evt && evt.stopPropagation) evt.stopPropagation();
+            return;
+        }
+
+        // Only allow icon editing in "rename edit mode"
+        function maybeEditCollectionIcon(collectionName, iconEl, evt = null) {
+            if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
+            const card = iconEl.closest('.collection-card');
+            const navItem = iconEl.closest('.cl-nav-item');
+            const container = card || navItem;
+            if (!container || container.dataset.editing !== '1') return;
+            showCollectionIconDropdown(collectionName, iconEl, evt);
+        }
+
+        function showCollectionIconDropdown(collectionName, anchorEl, evt = null) {
+            if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
             closeActiveMenu();
 
-            const overlay = document.createElement('div');
-            overlay.className = 'vault-modal-overlay';
-            overlay.innerHTML = `
-                <div class="vault-modal" role="dialog" aria-modal="true">
-                    <div class="vault-modal-header">
-                        <h3 style="margin:0;">Change Icon</h3>
-                        <button class="btn-sm" id="cc-close">Close</button>
-                    </div>
-                    <div class="vault-modal-body" style="display:flex; gap:8px; flex-wrap:wrap;">
-                        <button class="btn-sm tm-icon-choice" data-icon="folder">Folder</button>
-                        <button class="btn-sm tm-icon-choice" data-icon="note">Note</button>
-                        <button class="btn-sm tm-icon-choice" data-icon="chart">Chart</button>
-                        <button class="btn-sm tm-icon-choice" data-icon="idea">Idea</button>
-                        <button class="btn-sm tm-icon-choice" data-icon="journal">Journal</button>
-                    </div>
-                    <div class="vault-modal-footer">
-                        <button class="btn-sm" id="cc-cancel">Cancel</button>
-                    </div>
+            // For dynamic collections, we don't have a persistent collection object
+            // We'll handle icon changes by updating the UI directly
+
+            const options = [
+                { id: 'folder', label: 'Folder' },
+                { id: 'note', label: 'Note' },
+                { id: 'chart', label: 'Chart' },
+                { id: 'idea', label: 'Idea' },
+                { id: 'journal', label: 'Journal' },
+                { id: 'star', label: 'Star' },
+                { id: 'tag', label: 'Tag' },
+                { id: 'archive', label: 'Archive' }
+            ];
+
+            const menu = document.createElement('div');
+            menu.className = 'vault-dropdown-menu';
+            menu.innerHTML = options.map(o => `
+                <div class="dropdown-item" data-icon="${o.id}" style="gap:10px;">
+                    <span style="display:inline-flex; width:18px; height:18px; align-items:center; justify-content:center;">${getCollectionIconSvg(o.id, 18)}</span>
+                    <span>${o.label}</span>
                 </div>
-            `;
+            `).join('');
 
-            document.body.appendChild(overlay);
+            const rect = anchorEl ? anchorEl.getBoundingClientRect() : { bottom: window.innerHeight / 2, left: window.innerWidth / 2, top: window.innerHeight / 2 };
+            menu.style.position = 'fixed';
+            let left = rect.left;
+            let top = rect.bottom + 6;
+            const approxW = 220;
+            const approxH = 320;
+            if (left + approxW > window.innerWidth - 8) left = Math.max(8, window.innerWidth - approxW - 8);
+            if (top + approxH > window.innerHeight - 8) top = Math.max(8, rect.top - approxH);
+            menu.style.left = `${left}px`;
+            menu.style.top = `${top}px`;
 
-            function closeOverlay() { overlay.remove(); }
+            menu.querySelectorAll('.dropdown-item[data-icon]').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const iconName = item.getAttribute('data-icon') || 'folder';
 
-            overlay.querySelectorAll('.tm-icon-choice').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const icon = btn.getAttribute('data-icon');
-                    collection.icon = icon || 'folder';
-                    try { localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData)); } catch (e) {}
-                    renderCollectionsSidebar();
-                    showVaultToast('Collection icon updated');
-                    closeOverlay();
+                    // Update collection metadata
+                    const colIndex = collectionsData.findIndex(c => c.name === collectionName);
+                    if (colIndex !== -1) {
+                        collectionsData[colIndex].icon = iconName;
+                        try { localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData)); } catch (e) {}
+                    } else {
+                        // If it doesn't exist in collectionsData (e.g. implicitly created from notes), add it
+                         collectionsData.push({
+                            id: collectionName.toLowerCase().replace(/\s+/g, '-'),
+                            name: collectionName,
+                            icon: iconName,
+                            color: '#8b949e',
+                            unsorted: 0,
+                            preview: 'New collection...'
+                        });
+                        try { localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData)); } catch (e) {}
+                    }
+
+                    const hubCard = document.querySelector(`#view-hub .collection-card[data-collection-name="${collectionName}"]`);
+                    if (hubCard) {
+                        const iconContainer = hubCard.querySelector('.collection-icon');
+                        if (iconContainer) iconContainer.innerHTML = getCollectionIconSvg(iconName, 24);
+                    }
+                    // Update sidebar icon
+                    const sidebarItem = document.querySelector(`.cl-nav-item[data-collection="${collectionName}"]`);
+                    if (sidebarItem) {
+                        const iconContainer = sidebarItem.querySelector('.collection-icon');
+                        if (iconContainer) iconContainer.innerHTML = getCollectionIconSvg(iconName, 16);
+                    }
+                    showVaultToast('Icon updated');
+                    closeActiveMenu();
+                    
+                    // Ensure edit mode is preserved - restore focus to input if in edit mode
+                    const editingContainer = hubCard || sidebarItem;
+                    if (editingContainer && editingContainer.dataset.editing === '1') {
+                        const input = editingContainer.querySelector('input[type="text"]');
+                        if (input) {
+                            // Use setTimeout to ensure the menu close doesn't interfere
+                            setTimeout(() => {
+                                input.focus();
+                            }, 50);
+                        }
+                    }
                 });
             });
 
-            const closeBtn = overlay.querySelector('#cc-close');
-            const cancelBtn = overlay.querySelector('#cc-cancel');
-            if (closeBtn) closeBtn.addEventListener('click', closeOverlay);
-            if (cancelBtn) cancelBtn.addEventListener('click', closeOverlay);
+            document.body.appendChild(menu);
+            activeMenu = menu;
+            setTimeout(() => {
+                document.addEventListener('click', closeMenuOnOutsideClick);
+            }, 10);
         }
 
         function duplicateCollection(id) {
@@ -2843,15 +3786,59 @@
             closeActiveMenu();
         }
 
-        function deleteCollection(id) {
-            if (confirm('Are you sure you want to delete this collection?')) {
-                const index = collectionsData.findIndex(c => c.id === id);
-                if (index !== -1) {
-                    collectionsData.splice(index, 1);
-                    showVaultToast('Collection deleted');
-                }
+        function deleteCollection(collectionName) {
+            if (collectionName === 'All Notes') return; // Cannot delete 'All Notes'
+
+            if (!confirm(`Delete collection "${collectionName}"? All notes in this collection will be permanently deleted.`)) {
+                closeActiveMenu();
+                return;
             }
+
+            // Remove all notes in this collection
+            const initialLength = notesData.length;
+            notesData = notesData.filter(n => n.collection !== collectionName);
+            const deletedCount = initialLength - notesData.length;
+
+            // Remove from collectionsData
+            collectionsData = collectionsData.filter(c => c.name !== collectionName);
+            try { localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData)); } catch (e) {}
+
+            // If current collection was deleted, switch to 'All'
+            if (currentCollection === collectionName) currentCollection = 'All';
+
+            try { localStorage.setItem('tm_vault_notes', JSON.stringify(notesData)); } catch (e) {}
+
+            // Hide hub card if present
+            const hubCard = document.querySelector(`#view-hub .collection-card[data-collection-name="${collectionName}"]`);
+            if (hubCard) hubCard.style.display = 'none';
+
+            if (typeof renderCollectionsSidebar === 'function') renderCollectionsSidebar();
+            if (typeof updateHubCollectionsUI === 'function') updateHubCollectionsUI();
+            if (typeof renderNotesList === 'function') renderNotesList();
+
+            showVaultToast(`Collection deleted (${deletedCount} notes removed)`);
             closeActiveMenu();
+        }
+
+        function createCollectionFromName(name) {
+            closeActiveMenu();
+            // Create a new collection with the given name
+            const newId = 'extra-' + Date.now();
+            const newCollection = {
+                id: newId,
+                name: name,
+                icon: 'folder',
+                color: '#8b949e',
+                unsorted: 0,
+                preview: 'New collection...'
+            };
+            collectionsData.push(newCollection);
+            try { localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData)); } catch (e) {}
+            
+            // Update UI
+            renderCollectionsSidebar();
+            updateHubCollectionsUI();
+            showVaultToast('Collection created: ' + name);
         }
 
         // ========== ACTIVITY MENU ==========
@@ -2860,7 +3847,7 @@
             closeActiveMenu();
             
             const menu = document.createElement('div');
-            menu.className = 'dropdown-menu';
+            menu.className = 'vault-dropdown-menu';
             menu.innerHTML = `
                 <div class="dropdown-item" onclick="openActivityItem('${itemId}'); closeActiveMenu();">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
@@ -2907,13 +3894,8 @@
 
         // ========== HIGHLIGHT FUNCTIONS ==========
         function viewHighlight(id) {
-            const highlight = highlightsData.find(h => h.id === id);
-            if (!highlight) return;
-
-            setActiveHighlight(id);
-            
-            // Show highlight modal
-            showHighlightModal(highlight);
+            // Use new popup function
+            showHighlightDetail(id);
         }
 
         function showHighlightModal(highlight) {
@@ -3139,7 +4121,7 @@
             if (!note) return;
             
             const menu = document.createElement('div');
-            menu.className = 'dropdown-menu';
+            menu.className = 'vault-dropdown-menu';
             menu.innerHTML = `
                 <div class="dropdown-item" onclick="saveCurrentNote()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
@@ -3361,10 +4343,17 @@
             url.searchParams.set('view', viewName);
             window.history.pushState({}, '', url);
 
+            // Show/hide edit button based on view
+            const editBtn = document.querySelector('.hub-banner-edit-btn');
+            if (editBtn) {
+                editBtn.style.display = (viewName === 'hub') ? 'flex' : 'none';
+            }
+
             // Initialize collection view
             if (viewName === 'collection') {
                 setTimeout(() => {
                     renderNotesList();
+                    renderCollectionHighlightsPanel(); // Render highlights panel
                     initImageDragDrop(); // Re-initialize image drag & drop for note content
                     // Re-init text editor for note content
                     if(typeof TMTextEditor !== 'undefined') {
@@ -3386,13 +4375,17 @@
                                     text: text.substring(0, 80) + (text.length > 80 ? '...' : ''),
                                     fullText: text,
                                     source: noteTitle,
+                                    sourceNoteId: currentNoteId,
                                     color: color,
                                     date: date,
-                                    reviewed: false
+                                    timestamp: Date.now(),
+                                    reviewed: false,
+                                    priority: 'normal'
                                 };
                                 highlightsData.unshift(newHighlight);
                                 persistHighlights();
-                                renderHighlightsPanel();
+                                renderHubHighlightsBanner();
+                                renderCollectionHighlightsPanel();
                                 
                                 // Show toast notification
                                 showVaultToast('✨ Added to Highlights');
@@ -3452,7 +4445,8 @@
             renderActivityList();
             updateHubCollectionsUI();
             renderCollectionsSidebar();
-            renderHighlightsPanel();
+            renderHubHighlightsBanner(); // Render hub banner
+            renderCollectionHighlightsPanel(); // Render collection panel
             initImageDragDrop(); // Initialize image drag & drop support
 
             // Init view from URL
@@ -3461,6 +4455,10 @@
                 switchView('collection');
             }
 
+            // Save original main area HTML so we can restore after viewing Highlights
+            try {
+                window.__tmVaultOriginalClMain = document.querySelector('.cl-main')?.innerHTML || '';
+            } catch (e) { window.__tmVaultOriginalClMain = ''; }
 
             
             // Persistence Listeners for Title and Content
@@ -3755,84 +4753,73 @@
             showVaultToast('Collection created: ' + name);
         }
 
-        // Render the collection navigation sidebar dynamically from `collectionsData`.
+        // Render the collection navigation sidebar dynamically from notesData.
         function renderCollectionsSidebar() {
             const container = document.getElementById('collection-nav-list');
             if (!container) return;
-            // defined collections are the persisted ones (collectionsData) in their current order
-            const persisted = collectionsData.slice();
-            const defaultIds = defaultCollections.map(d => d.id);
-            const defaultPart = persisted.filter(c => defaultIds.includes(c.id));
-            const userPart = persisted.filter(c => !defaultIds.includes(c.id));
 
-            // any collections referenced by notes but not present in persisted should be shown after defaults and before user-created ones
-            const noteNames = [...new Set(notesData.map(n => n.collection).filter(Boolean))];
-            const persistedNames = persisted.map(p => p.name);
-            const extras = noteNames.filter(nm => !persistedNames.includes(nm));
+            // Get all unique collections from notesData AND collectionsData
+            const noteCollections = notesData.map(n => n.collection).filter(Boolean);
+            const definedCollections = collectionsData.map(c => c.name).filter(Boolean);
+            const allCollections = [...new Set([...definedCollections, ...noteCollections])]; // Prioritize definedCollections order
 
             container.innerHTML = '';
 
             // create nav item element
-            function createItemEl({ id, name, icon, draggable = false, isActive = false, clickHandler = null }) {
+            function createItemEl({ name, icon = 'folder', isActive = false, clickHandler = null }) {
                 const el = document.createElement('div');
                 el.className = 'cl-nav-item' + (isActive ? ' active' : '');
                 el.setAttribute('data-collection', name);
-                if (id) el.setAttribute('data-collection-id', id);
                 el.style.cursor = 'pointer';
-                const svg = icon === 'note' ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>' : (icon === 'chart' ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>');
-                el.innerHTML = svg + ' ' + escapeHtml(name);
-                if (clickHandler) el.addEventListener('click', function () { clickHandler(this); });
-
-                if (draggable && id) {
-                    el.setAttribute('draggable', 'true');
-                    el.addEventListener('dragstart', (e) => {
-                        // set multiple types for broader compatibility
-                        try { e.dataTransfer.setData('application/x-collection-id', id); } catch (err) {}
-                        try { e.dataTransfer.setData('text/plain', id); } catch (err) {}
-                        e.dataTransfer.effectAllowed = 'move';
-                        el.classList.add('dragging');
-                        window.__tmDraggingCollection = true;
-                    });
-                    el.addEventListener('dragover', (e) => {
-                        e.preventDefault();
-                        e.dataTransfer.dropEffect = 'move';
-                        el.classList.add('drag-over');
-                    });
-                    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
-                    el.addEventListener('drop', (e) => {
-                        e.preventDefault();
+                el.draggable = true; // Make draggable
+                el.setAttribute('data-draggable-collection', name);
+                
+                // Create icon element with click handler for editing (only for non-All collections)
+                const iconEl = document.createElement('span');
+                iconEl.className = 'collection-icon';
+                iconEl.innerHTML = getCollectionIconSvg(icon, 16);
+                if (name !== 'All') {
+                    iconEl.style.cursor = 'pointer';
+                    iconEl.addEventListener('mousedown', (e) => {
                         e.stopPropagation();
-                        const draggedId = e.dataTransfer.getData('application/x-collection-id') || e.dataTransfer.getData('text/plain');
-                        if (!draggedId || draggedId === id) return;
-                        reorderCollections(draggedId, id);
-                    });
-                    el.addEventListener('dragend', () => {
-                        container.querySelectorAll('.cl-nav-item').forEach(n => n.classList.remove('dragging','drag-over'));
-                        window.__tmDraggingCollection = false;
+                        maybeEditCollectionIcon(name, iconEl, e);
                     });
                 }
-                // add a three-dot menu button that appears on hover (for all collections)
-                const menuBtn = document.createElement('button');
-                menuBtn.className = 'collection-menu';
-                menuBtn.setAttribute('aria-label', 'Collection menu');
-                menuBtn.style.marginLeft = 'auto';
-                menuBtn.style.display = 'flex';
-                menuBtn.style.alignItems = 'center';
-                // store both id and name for fallback
-                if (id) menuBtn.dataset.collectionId = id;
-                menuBtn.dataset.collectionName = name;
-                menuBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg>';
-                menuBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const target = menuBtn.dataset.collectionId || menuBtn.dataset.collectionName;
-                    if (typeof showCollectionMenu === 'function') showCollectionMenu(target, menuBtn, e);
-                });
-                // append menu button to nav item
-                el.appendChild(menuBtn);
+                
+                // Create name span
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'nav-name';
+                nameSpan.textContent = name;
+                
+                // Assemble elements
+                el.appendChild(iconEl);
+                el.appendChild(document.createTextNode(' '));
+                el.appendChild(nameSpan);
+                
+                if (clickHandler) el.addEventListener('click', function () { clickHandler(this); });
+
+                // Add menu button for all collections except "All" and "Highlights"
+                if (name !== 'All' && name !== 'Highlights') {
+                    const menuBtn = document.createElement('button');
+                    menuBtn.type = 'button';
+                    menuBtn.className = 'collection-menu';
+                    menuBtn.setAttribute('aria-label', 'Collection menu');
+                    menuBtn.style.marginLeft = 'auto';
+                    menuBtn.style.display = 'flex';
+                    menuBtn.style.alignItems = 'center';
+                    menuBtn.dataset.collectionName = name;
+                    menuBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg>';
+                    menuBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const target = menuBtn.dataset.collectionName;
+                        if (typeof showCollectionMenu === 'function') showCollectionMenu(target, menuBtn, e);
+                    });
+                    el.appendChild(menuBtn);
+                }
                 return el;
             }
 
-            // Home / All Notes at top (not draggable)
+            // Home / All Notes at top (special case)
             const homeSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>';
             const allEl = document.createElement('div');
             allEl.className = 'cl-nav-item' + (currentCollection === 'All' ? ' active' : '');
@@ -3842,74 +4829,94 @@
             allEl.addEventListener('click', function () { selectAllNotes(this); });
             container.appendChild(allEl);
 
-            // Render default/persisted collections (defaultPart) first — draggable
-            defaultPart.forEach(d => {
-                const isActive = currentCollection === d.name;
-                const item = createItemEl({ id: d.id, name: d.name, icon: d.icon, draggable: true, isActive, clickHandler: (self) => selectCollection(d.name, self) });
+            // Highlights (special case, like All Notes)
+            const highlightsSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>';
+            const highlightsEl = document.createElement('div');
+            highlightsEl.className = 'cl-nav-item' + (currentCollection === 'Highlights' ? ' active' : '');
+            highlightsEl.setAttribute('data-collection', 'Highlights');
+            highlightsEl.style.cursor = 'pointer';
+            highlightsEl.innerHTML = highlightsSvg + ' Highlights';
+            highlightsEl.addEventListener('click', function () { selectCollection('Highlights', this); });
+            container.appendChild(highlightsEl);
+
+            // Render all collections from notesData
+            allCollections.forEach(name => {
+                if (name === 'All' || name === 'Highlights') return; // Skip All and Highlights, already added above
+                const isActive = currentCollection === name;
+                // Find icon from collectionsData
+                const colData = collectionsData.find(c => c.name === name);
+                const icon = colData ? colData.icon : 'folder';
+                const item = createItemEl({ name, icon, isActive, clickHandler: (self) => selectCollection(name, self) });
                 container.appendChild(item);
             });
-
-            // Render extras (collections found only in notes) after defaults — not draggable
-            extras.forEach(name => {
-                const item = createItemEl({ id: null, name, icon: 'folder', draggable: false, isActive: currentCollection === name, clickHandler: (self) => selectCollection(name, self) });
-                container.appendChild(item);
-            });
-
-            // Render user-created collections (those not in defaultIds) at the bottom — draggable
-            userPart.forEach(d => {
-                const isActive = currentCollection === d.name;
-                const item = createItemEl({ id: d.id, name: d.name, icon: d.icon, draggable: true, isActive, clickHandler: (self) => selectCollection(d.name, self) });
-                container.appendChild(item);
-            });
-
-            // container-level handlers: allow drop to move to end (only inside this sidebar)
-            // ensure we add these only once
-            if (!window.__tmCollectionDnDInitialized) {
-                container.addEventListener('dragover', (e) => { e.preventDefault(); });
-                container.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const draggedId = e.dataTransfer.getData('application/x-collection-id') || e.dataTransfer.getData('text/plain');
-                    if (!draggedId) return;
-                    const last = collectionsData[collectionsData.length - 1];
-                    if (last && last.id !== draggedId) reorderCollections(draggedId, null);
-                });
-
-                // If dragging a collection and user drops outside the sidebar, prevent other drop handlers from acting.
-                document.addEventListener('dragover', (e) => {
-                    if (window.__tmDraggingCollection) e.preventDefault();
-                });
-                document.addEventListener('drop', (e) => {
-                    if (window.__tmDraggingCollection && !e.target.closest('#collection-nav-list')) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // ignore drop outside and reset flag
-                        window.__tmDraggingCollection = false;
-                        showVaultToast('Drop inside the collections sidebar to reorder', 'info');
-                    }
-                });
-                window.__tmCollectionDnDInitialized = true;
-            }
-
-            // Reorder helper
-            function reorderCollections(draggedId, targetId) {
-                const fromIdx = collectionsData.findIndex(c => c.id === draggedId);
-                if (fromIdx === -1) return;
-                const item = collectionsData.splice(fromIdx, 1)[0];
-                if (targetId == null) {
-                    // append to end
-                    collectionsData.push(item);
-                } else {
-                    const toIdx = collectionsData.findIndex(c => c.id === targetId);
-                    const insertAt = toIdx === -1 ? collectionsData.length : toIdx;
-                    collectionsData.splice(insertAt, 0, item);
-                }
-                try { localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData)); } catch (e) {}
-                renderCollectionsSidebar();
-                showVaultToast('Collection moved');
-            }
 
             setActiveCollectionNav(currentCollection);
+
+            // Add drag and drop functionality
+            let draggedElement = null;
+
+            container.addEventListener('dragstart', function(e) {
+                if (e.target.classList.contains('cl-nav-item') && e.target.getAttribute('data-draggable-collection')) {
+                    draggedElement = e.target;
+                    e.target.style.opacity = '0.5';
+                } else {
+                    e.preventDefault();
+                }
+            });
+
+            container.addEventListener('dragend', function(e) {
+                if (draggedElement) {
+                    draggedElement.style.opacity = '';
+                    draggedElement = null;
+                }
+            });
+
+            container.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(container, e.clientY);
+                const draggable = document.querySelector('.cl-nav-item[style*="opacity: 0.5"]');
+                if (afterElement == null) {
+                    container.appendChild(draggable);
+                } else {
+                    container.insertBefore(draggable, afterElement);
+                }
+            });
+
+            container.addEventListener('drop', function(e) {
+                e.preventDefault();
+                // Update collectionsData order
+                const collectionItems = container.querySelectorAll('.cl-nav-item[data-draggable-collection]');
+                const newOrder = Array.from(collectionItems).map(item => item.getAttribute('data-draggable-collection'));
+                
+                // Reorder collectionsData based on new order
+                const reorderedCollections = [];
+                newOrder.forEach(name => {
+                    const existing = collectionsData.find(c => c.name === name);
+                    if (existing) {
+                        reorderedCollections.push(existing);
+                    }
+                });
+                
+                // Save new order to localStorage
+                collectionsData = reorderedCollections;
+                localStorage.setItem('tm_vault_collections', JSON.stringify(collectionsData));
+                
+                showVaultToast('Collection order updated');
+            });
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.cl-nav-item[data-draggable-collection]:not([style*="opacity: 0.5"])')];
+
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
         }
 
         // ========== MOVE NOTE TO COLLECTION ==========
@@ -4322,13 +5329,17 @@
                             text: text.substring(0, 80) + (text.length > 80 ? '...' : ''),
                             fullText: text,
                             source: noteTitle,
+                            sourceNoteId: currentNoteId,
                             color: color,
                             date: date,
-                            reviewed: false
+                            timestamp: Date.now(),
+                            reviewed: false,
+                            priority: 'normal'
                         };
                         highlightsData.unshift(newHighlight);
                         persistHighlights();
-                        renderHighlightsPanel();
+                        renderHubHighlightsBanner();
+                        renderCollectionHighlightsPanel();
                         
                         // Show toast notification
                         showVaultToast('✨ Added to Highlights');
@@ -4525,6 +5536,315 @@ ${keyPoints.map(p => `<li>${p.trim()}</li>`).join('')}
                 showVaultToast('Discarded', 'info');
             }
         };
+
+        // ========== HIGHLIGHTS MANAGEMENT ==========
+        function renderHighlightsManagement() {
+            const mainContent = document.querySelector('.cl-main');
+            if (!mainContent) return;
+
+            // Get highlights data
+            const highlights = highlightsData || [];
+
+            // Create highlights management layout (similar to demo4)
+            mainContent.innerHTML = `
+                <div class="highlights-management-container">
+                    <div class="highlights-sidebar">
+                        <div class="highlights-sidebar-title">
+                            <span style="color: var(--accent-purple);">💡</span>
+                            Highlights
+                            <span class="highlights-count">${highlights.length}</span>
+                        </div>
+                        <div class="highlights-tags">
+                            ${highlights.map((highlight, index) => `
+                                <div class="highlight-tag ${highlight.unreviewed ? 'unreviewed' : ''}"
+                                     onclick="showHighlightDetail(${highlight.id})"
+                                     data-highlight-id="${highlight.id}">
+                                    <div class="highlight-tag-text">${highlight.text.substring(0, 60)}${highlight.text.length > 60 ? '...' : ''}</div>
+                                    <div class="highlight-tag-meta">
+                                        <span class="highlight-tag-time">${formatRelativeTime(highlight.timestamp)}</span>
+                                        ${highlight.unreviewed ? '<div class="unreviewed-indicator"></div>' : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="highlights-main">
+                        <div class="highlights-welcome">
+                            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                                <div style="font-size: 48px; margin-bottom: 20px;">💡</div>
+                                <h3 style="margin: 0 0 10px 0; color: var(--text-primary);">Select a Highlight</h3>
+                                <p style="margin: 0; font-size: 14px;">Click on any highlight in the sidebar to view its details</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add CSS for highlights management
+            if (!document.getElementById('highlights-management-styles')) {
+                const style = document.createElement('style');
+                style.id = 'highlights-management-styles';
+                style.textContent = `
+                    .highlights-management-container {
+                        display: grid;
+                        grid-template-columns: 320px 1fr;
+                        gap: 20px;
+                        height: 100%;
+                    }
+
+                    .highlights-sidebar {
+                        background: var(--bg-card);
+                        border: 1px solid var(--border);
+                        border-radius: 12px;
+                        padding: 20px;
+                        overflow-y: auto;
+                    }
+
+                    .highlights-sidebar-title {
+                        font-size: 16px;
+                        font-weight: 600;
+                        margin-bottom: 20px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+
+                    .highlights-count {
+                        background: var(--accent-purple);
+                        color: white;
+                        font-size: 11px;
+                        padding: 2px 8px;
+                        border-radius: 10px;
+                        font-weight: 600;
+                    }
+
+                    .highlights-tags {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                    }
+
+                    .highlight-tag {
+                        background: rgba(137, 87, 229, 0.1);
+                        border: 1px solid rgba(137, 87, 229, 0.2);
+                        border-radius: 8px;
+                        padding: 12px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        position: relative;
+                    }
+
+                    .highlight-tag:hover {
+                        background: rgba(137, 87, 229, 0.15);
+                        border-color: rgba(137, 87, 229, 0.4);
+                        transform: translateX(2px);
+                    }
+
+                    .highlight-tag.unreviewed {
+                        background: rgba(250, 163, 86, 0.15);
+                        border-color: rgba(250, 163, 86, 0.3);
+                        border-left: 3px solid var(--accent-yellow);
+                    }
+
+                    .highlight-tag.active {
+                        background: rgba(137, 87, 229, 0.2);
+                        border-color: var(--accent-purple);
+                        box-shadow: 0 0 0 2px rgba(137, 87, 229, 0.1);
+                    }
+
+                    .highlight-tag-text {
+                        font-size: 13px;
+                        line-height: 1.4;
+                        color: var(--text-primary);
+                        margin-bottom: 8px;
+                    }
+
+                    .highlight-tag-meta {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        font-size: 11px;
+                        color: var(--text-muted);
+                    }
+
+                    .highlight-tag-time {
+                        color: var(--text-muted);
+                    }
+
+                    .highlights-main {
+                        background: var(--bg-card);
+                        border: 1px solid var(--border);
+                        border-radius: 12px;
+                        overflow: hidden;
+                    }
+
+                    .highlights-welcome {
+                        height: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .highlight-detail-view {
+                        padding: 30px;
+                        height: 100%;
+                        overflow-y: auto;
+                    }
+
+                    .highlight-detail-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        margin-bottom: 20px;
+                    }
+
+                    .highlight-detail-text {
+                        font-size: 16px;
+                        line-height: 1.6;
+                        color: var(--text-primary);
+                        margin-bottom: 20px;
+                        padding: 20px;
+                        background: rgba(137, 87, 229, 0.05);
+                        border-left: 4px solid var(--accent-purple);
+                        border-radius: 8px;
+                    }
+
+                    .highlight-detail-meta {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        font-size: 12px;
+                        color: var(--text-muted);
+                        padding-top: 15px;
+                        border-top: 1px solid var(--border);
+                    }
+
+                    .highlight-detail-actions {
+                        display: flex;
+                        gap: 10px;
+                        margin-top: 20px;
+                    }
+
+                    .unreviewed-indicator {
+                        display: inline-block;
+                        width: 8px;
+                        height: 8px;
+                        background: var(--accent-purple);
+                        border-radius: 50%;
+                        animation: pulse 2s infinite;
+                    }
+
+                    @keyframes pulse {
+                        0%, 100% { opacity: 1; }
+                        50% { opacity: 0.5; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        function showHighlightDetail(highlightId) {
+            const highlights = highlightsData || [];
+            const highlight = highlights.find(h => h.id === highlightId);
+            if (!highlight) return;
+
+            // Update active tag
+            document.querySelectorAll('.highlight-tag').forEach(tag => {
+                tag.classList.remove('active');
+            });
+            const activeTag = document.querySelector(`[data-highlight-id="${highlightId}"]`);
+            if (activeTag) activeTag.classList.add('active');
+
+            // Show detail view
+            const mainArea = document.querySelector('.highlights-main');
+            if (!mainArea) return;
+
+            mainArea.innerHTML = `
+                <div class="highlight-detail-view">
+                    <div class="highlight-detail-header">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                                <span style="color: var(--accent-purple); font-size: 18px;">💡</span>
+                                <span style="font-size: 14px; color: var(--text-muted);">Highlight</span>
+                                ${highlight.unreviewed ? '<div class="unreviewed-indicator"></div>' : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-detail-text">
+                        ${highlight.text}
+                    </div>
+
+                    <div class="highlight-detail-meta">
+                        <div>
+                            <strong>Source:</strong> ${highlight.sourceNoteTitle || 'Unknown'}
+                        </div>
+                        <div>
+                            ${formatRelativeTime(highlight.timestamp)}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Mark as reviewed if it was unreviewed
+            if (highlight.unreviewed) {
+                highlight.unreviewed = false;
+                persistHighlights();
+
+                // Update the tag styling
+                if (activeTag) {
+                    activeTag.classList.remove('unreviewed');
+                    activeTag.querySelector('.unreviewed-indicator')?.remove();
+                }
+
+                // Update sidebar count
+                updateHighlightsCount();
+            }
+        }
+
+        function updateHighlightsCount() {
+            const highlights = highlightsData || [];
+            const countEl = document.querySelector('.highlights-count');
+            if (countEl) {
+                countEl.textContent = highlights.length;
+            }
+        }
+
+        function createNewHighlight() {
+            // For demo purposes, create a sample highlight
+            const newHighlight = {
+                id: nextHighlightId(),
+                text: "This is a new highlight. You can edit this text to add your own insights and thoughts.",
+                sourceNoteTitle: "Sample Note",
+                timestamp: Date.now(),
+                unreviewed: true
+            };
+
+            highlightsData.push(newHighlight);
+            persistHighlights();
+
+            // Refresh the management view
+            renderHighlightsManagement();
+
+            // Show the new highlight
+            setTimeout(() => showHighlightDetail(newHighlight.id), 100);
+
+            showVaultToast('Highlight created', 'success');
+        }
+
+        function editHighlight(highlightId) {
+            const highlights = highlightsData || [];
+            const highlight = highlights.find(h => h.id === highlightId);
+            if (!highlight) return;
+
+            const newText = prompt('Edit highlight text:', highlight.text);
+            if (newText && newText !== highlight.text) {
+                highlight.text = newText;
+                persistHighlights();
+                showHighlightDetail(highlightId);
+                showVaultToast('Highlight updated', 'success');
+            }
+        }
     </script>
 </body>
 </html>

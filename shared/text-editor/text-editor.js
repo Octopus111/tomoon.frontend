@@ -45,7 +45,13 @@ const TMTextEditor = (function() {
         blue: 'rgba(59, 130, 246, 0.4)',
         purple: 'rgba(139, 92, 246, 0.4)',
         pink: 'rgba(236, 72, 153, 0.4)',
-        red: 'rgba(239, 68, 68, 0.4)'
+        red: 'rgba(239, 68, 68, 0.4)',
+        orange: 'rgba(249, 115, 22, 0.4)',
+        cyan: 'rgba(6, 182, 212, 0.4)',
+        gray: 'rgba(107, 114, 128, 0.4)',
+        lime: 'rgba(132, 204, 22, 0.4)',
+        indigo: 'rgba(99, 102, 241, 0.4)',
+        rose: 'rgba(244, 63, 94, 0.4)'
     };
 
     // Luna AI Actions (Notion AI Style) - Grouped
@@ -239,26 +245,6 @@ const TMTextEditor = (function() {
 
             <div class="tm-toolbar-divider"></div>
 
-            <!-- Highlight -->
-            <div class="tm-toolbar-dropdown">
-                <button class="tm-toolbar-btn tm-highlight-btn" data-action="highlight-dropdown" data-tooltip="Highlight">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                    </svg>
-                </button>
-                <div class="tm-dropdown-menu tm-highlight-menu" id="tm-highlight-menu">
-                    <div class="tm-color-grid">
-                        <div class="tm-color-swatch" style="background: #fef08a;" data-color="yellow" title="Yellow"></div>
-                        <div class="tm-color-swatch" style="background: #86efac;" data-color="green" title="Green"></div>
-                        <div class="tm-color-swatch" style="background: #93c5fd;" data-color="blue" title="Blue"></div>
-                        <div class="tm-color-swatch" style="background: #c4b5fd;" data-color="purple" title="Purple"></div>
-                        <div class="tm-color-swatch" style="background: #f9a8d4;" data-color="pink" title="Pink"></div>
-                        <div class="tm-color-swatch" style="background: #fca5a5;" data-color="red" title="Red"></div>
-                        <div class="tm-color-swatch tm-color-none" data-color="none" title="Remove"></div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Text Color -->
             <div class="tm-toolbar-dropdown">
                 <button class="tm-toolbar-btn tm-textcolor-btn" data-action="color-dropdown" data-tooltip="Text Color">
@@ -279,7 +265,46 @@ const TMTextEditor = (function() {
                         <div class="tm-color-swatch" style="background: #ec4899;" data-text-color="#ec4899" title="Pink"></div>
                         <div class="tm-color-swatch" style="background: #6b7280;" data-text-color="#6b7280" title="Gray"></div>
                         <div class="tm-color-swatch" style="background: #e6edf3;" data-text-color="#e6edf3" title="White"></div>
-                        <div class="tm-color-swatch tm-color-none" data-text-color="none" title="Remove Color"></div>
+                        <div class="tm-color-swatch" style="background: #06b6d4;" data-text-color="#06b6d4" title="Cyan"></div>
+                        <div class="tm-color-swatch" style="background: #84cc16;" data-text-color="#84cc16" title="Lime"></div>
+                        <div class="tm-color-swatch" style="background: #6366f1;" data-text-color="#6366f1" title="Indigo"></div>
+                        <div class="tm-color-swatch" style="background: #f43f5e;" data-text-color="#f43f5e" title="Rose"></div>
+                        <div class="tm-color-swatch" style="background: #64748b;" data-text-color="#64748b" title="Slate"></div>
+                        <div class="tm-color-swatch" style="background: #a855f7;" data-text-color="#a855f7" title="Violet"></div>
+                        <div class="tm-color-swatch" style="background: #14b8a6;" data-text-color="#14b8a6" title="Teal"></div>
+                    </div>
+                    <div class="tm-color-picker-section">
+                        <label class="tm-color-picker-label" for="tm-text-color-picker">更多颜色</label>
+                        <input type="color" id="tm-text-color-picker" class="tm-color-picker-input" value="#000000">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Highlight -->
+            <div class="tm-toolbar-dropdown">
+                <button class="tm-toolbar-btn tm-highlight-btn" data-action="highlight-dropdown" data-tooltip="Highlight">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                    </svg>
+                </button>
+                <div class="tm-dropdown-menu tm-highlight-menu" id="tm-highlight-menu">
+                    <div class="tm-color-grid">
+                        <div class="tm-color-swatch" style="background: #fef08a;" data-color="yellow" title="Yellow"></div>
+                        <div class="tm-color-swatch" style="background: #86efac;" data-color="green" title="Green"></div>
+                        <div class="tm-color-swatch" style="background: #93c5fd;" data-color="blue" title="Blue"></div>
+                        <div class="tm-color-swatch" style="background: #c4b5fd;" data-color="purple" title="Purple"></div>
+                        <div class="tm-color-swatch" style="background: #f9a8d4;" data-color="pink" title="Pink"></div>
+                        <div class="tm-color-swatch" style="background: #fca5a5;" data-color="red" title="Red"></div>
+                        <div class="tm-color-swatch" style="background: #fdba74;" data-color="orange" title="Orange"></div>
+                        <div class="tm-color-swatch" style="background: #67e8f9;" data-color="cyan" title="Cyan"></div>
+                        <div class="tm-color-swatch" style="background: #d1d5db;" data-color="gray" title="Gray"></div>
+                        <div class="tm-color-swatch" style="background: #bef264;" data-color="lime" title="Lime"></div>
+                        <div class="tm-color-swatch" style="background: #a5b4fc;" data-color="indigo" title="Indigo"></div>
+                        <div class="tm-color-swatch" style="background: #fb7185;" data-color="rose" title="Rose"></div>
+                    </div>
+                    <div class="tm-color-picker-section">
+                        <label class="tm-color-picker-label" for="tm-highlight-color-picker">更多颜色</label>
+                        <input type="color" id="tm-highlight-color-picker" class="tm-color-picker-input" value="#000000">
                     </div>
                 </div>
             </div>
@@ -473,6 +498,26 @@ const TMTextEditor = (function() {
         const lunaSubmit = document.getElementById('tm-luna-submit');
         if (lunaSubmit) {
             lunaSubmit.addEventListener('click', submitLunaQuestion);
+        }
+
+        // Color picker events
+        const highlightColorPicker = document.getElementById('tm-highlight-color-picker');
+        if (highlightColorPicker) {
+            highlightColorPicker.addEventListener('change', (e) => {
+                restoreSelection();
+                applyHighlight(e.target.value);
+                hideAllDropdowns();
+                hideToolbar();
+            });
+        }
+
+        const textColorPicker = document.getElementById('tm-text-color-picker');
+        if (textColorPicker) {
+            textColorPicker.addEventListener('change', (e) => {
+                restoreSelection();
+                applyTextColor(e.target.value);
+                hideAllDropdowns();
+            });
         }
 
         document.addEventListener('keydown', handleKeyboardShortcuts);
@@ -1440,7 +1485,7 @@ const TMTextEditor = (function() {
             }
         } else {
             // Apply highlight using <mark> tag
-            const bgColor = highlightColors[color];
+            const bgColor = highlightColors[color] || color;
             const mark = document.createElement('mark');
             mark.style.backgroundColor = bgColor;
             mark.style.color = 'inherit';

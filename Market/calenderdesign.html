@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1400, initial-scale=0.25, maximum-scale=3, user-scalable=yes">
+    <title>Economic Calendar - ToMoon</title>
+    <style>
+        :root {
+            --bg-dark: #090a0d;
+            --bg-card: #14161b;
+            --bg-panel: #1c1f26;
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.3);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f1f5f9;
+            --text-muted: #64748b;
+            --border: #2d333f;
+            
+            /* Impact Colors */
+            --impact-high: #ef4444;
+            --impact-medium: #f59e0b;
+            --impact-low: #3b82f6;
+            --impact-holiday: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .content-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* --- New Header Style --- */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 24px;
+        }
+
+        .title-section h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title-section p {
+            margin: 4px 0 0 0;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* --- Refined Card --- */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* --- Modern Controls Area --- */
+        .controls-toolbar {
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .toolbar-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-group {
+            display: flex;
+            align-items: center;
+            background: var(--bg-panel);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .date-display {
+            font-weight: 600;
+            padding: 0 16px;
+            font-size: 14px;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            height: 36px;
+            padding: 0 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel);
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #2d333f;
+            border-color: var(--text-muted);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-icon {
+            padding: 0;
+            width: 36px;
+            justify-content: center;
+        }
+
+        /* --- Day Tabs Re-design --- */
+        .day-tabs {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .day-tab {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .day-tab .day-name {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .day-tab .day-date {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .day-tab:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: var(--text-muted);
+        }
+
+        .day-tab.active {
+            background: var(--primary-glow);
+            border-color: var(--primary);
+            position: relative;
+        }
+
+        .day-tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 20%;
+            right: 20%;
+            height: 2px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* --- Modern Filter Section --- */
+        .filter-bar {
+            padding: 12px 20px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* Custom Checkbox Pills */
+        .pill-checkbox {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .pill-checkbox input { display: none; }
+
+        .pill-content {
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .pill-checkbox input:checked + .pill-content.low { background: rgba(59, 130, 246, 0.15); color: var(--impact-low); border-color: var(--impact-low); }
+        .pill-checkbox input:checked + .pill-content.medium { background: rgba(245, 158, 11, 0.15); color: var(--impact-medium); border-color: var(--impact-medium); }
+        .pill-checkbox input:checked + .pill-content.high { background: rgba(239, 68, 68, 0.15); color: var(--impact-high); border-color: var(--impact-high); }
+        .pill-checkbox input:checked + .pill-content.holiday { background: rgba(148, 163, 184, 0.15); color: var(--text-main); border-color: var(--text-muted); }
+
+        .select-modern {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            outline: none;
+        }
+
+        /* --- Table Styling (As requested to keep layout, but refined looks) --- */
+        .event-scroll {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .event-list { width: 100%; border-collapse: collapse; }
+
+        .event-group-header {
+            position: sticky;
+            top: 0;
+            background: #1a1d24;
+            z-index: 10;
+        }
+        .group-header-cell {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .header-row td {
+            background: var(--bg-card);
+            padding: 12px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .event-row {
+            border-bottom: 1px solid var(--border);
+            transition: 0.1s;
+        }
+        .event-row:hover { background: rgba(255,255,255,0.02); }
+
+        .event-cell { padding: 16px 20px; font-size: 13px; }
+        .cell-data { font-family: 'Roboto Mono', monospace; font-weight: 600; text-align: right; }
+
+        .impact-indicator {
+            width: 4px;
+            height: 16px;
+            border-radius: 2px;
+            margin-right: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="main-content">
+        <div class="content-container">
+            
+            <div class="calendar-header">
+                <div class="title-section">
+                    <h1>Economic Calendar</h1>
+                    <p>Track high-impact financial events in real-time</p>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <select class="select-modern">
+                        <option>21:29 Asia/Shanghai (GMT+8)</option>
+                        <option>UTC (GMT+0)</option>
+                    </select>
+                    <button class="btn btn-primary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Export
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                
+                <div class="controls-toolbar">
+                    <div class="toolbar-top">
+                        <button class="btn" id="today-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            Select Day
+                        </button>
+
+                        <div class="nav-group">
+                            <button class="btn btn-icon" style="border:none; background:transparent;" id="week-prev-btn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </button>
+                            <span class="date-display" id="week-range-display">26 Jan - 30 Jan 2026</span>
+                            <button class="btn btn-icon" style="border:none; background:transparent;" id="week-next-btn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
+                        </div>
+
+                        <div style="width: 120px;"></div> </div>
+
+                    <div class="day-tabs">
+                        <div class="day-tab active" id="tab-26">
+                            <span class="day-name">Mon</span>
+                            <span class="day-date">26</span>
+                        </div>
+                        <div class="day-tab" id="tab-27">
+                            <span class="day-name">Tue</span>
+                            <span class="day-date">27</span>
+                        </div>
+                        <div class="day-tab" id="tab-28">
+                            <span class="day-name">Wed</span>
+                            <span class="day-date">28</span>
+                        </div>
+                        <div class="day-tab" id="tab-29">
+                            <span class="day-name">Thu</span>
+                            <span class="day-date">29</span>
+                        </div>
+                        <div class="day-tab" id="tab-30">
+                            <span class="day-name">Fri</span>
+                            <span class="day-date">30</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <span class="filter-label">Impact</span>
+                        <label class="pill-checkbox">
+                            <input type="checkbox">
+                            <div class="pill-content holiday">Holidays</div>
+                        </label>
+                        <label class="pill-checkbox">
+                            <input type="checkbox" checked>
+                            <div class="pill-content low">Low</div>
+                        </label>
+                        <label class="pill-checkbox">
+                            <input type="checkbox" checked>
+                            <div class="pill-content medium">Medium</div>
+                        </label>
+                        <label class="pill-checkbox">
+                            <input type="checkbox" checked>
+                            <div class="pill-content high">High</div>
+                        </label>
+                    </div>
+
+                    <div class="filter-group">
+                        <span class="filter-label">Visibility</span>
+                        <label class="pill-checkbox">
+                            <input type="checkbox">
+                            <div class="pill-content holiday">Hide Past</div>
+                        </label>
+                        <label class="pill-checkbox">
+                            <input type="checkbox">
+                            <div class="pill-content holiday">Restricted Only</div>
+                        </label>
+                    </div>
+
+                    <div class="filter-group" style="margin-left: auto;">
+                        <span class="filter-label">Instrument</span>
+                        <select class="select-modern">
+                            <option>All Assets</option>
+                            <option>USD Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="event-scroll">
+                    <table class="event-list">
+                        <tbody>
+                            <tr class="event-group-header">
+                                <td colspan="7" class="group-header-cell">Mon 19 Jan</td>
+                            </tr>
+                            <tr class="header-row">
+                                <td style="width: 40%;">Description:</td>
+                                <td style="width: 10%;">Instrument:</td>
+                                <td style="width: 10%;">Date:</td>
+                                <td style="width: 10%; text-align: right;">Actual:</td>
+                                <td style="width: 10%; text-align: right;">Forecast:</td>
+                                <td style="width: 10%; text-align: right;">Previous:</td>
+                                <td style="width: 10%; text-align: right;">Actions:</td>
+                            </tr>
+                            <tr class="event-row">
+                                <td class="event-cell"><div style="display:flex; align-items:center;"><div class="impact-indicator" style="background:var(--impact-medium)"></div>Industrial Production m/m</div></td>
+                                <td class="event-cell" style="font-weight:700;">JPY</td>
+                                <td class="event-cell">12:30</td>
+                                <td class="event-cell cell-data">-1.0%</td>
+                                <td class="event-cell cell-data">-1.0%</td>
+                                <td class="event-cell cell-data">1.5%</td>
+                                <td class="event-cell" style="text-align:right;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </td>
+                            </tr>
+                            <tr class="event-row">
+                                <td class="event-cell"><div style="display:flex; align-items:center;"><div class="impact-indicator" style="background:var(--impact-high)"></div>Retail Sales y/y</div></td>
+                                <td class="event-cell" style="font-weight:700;">CNY</td>
+                                <td class="event-cell">14:00</td>
+                                <td class="event-cell cell-data" style="color:var(--danger)">7.4%</td>
+                                <td class="event-cell cell-data">8.0%</td>
+                                <td class="event-cell cell-data">10.1%</td>
+                                <td class="event-cell" style="text-align:right;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="text-align: right; color: var(--text-muted); font-size: 11px; margin-top: 12px; letter-spacing: 0.5px;">
+                SOURCE: <a href="#" style="color: var(--text-muted);">FOREXFACTORY.COM</a>
+            </div>
+            
+        </div>
+    </main>
+
+</body>
+</html>

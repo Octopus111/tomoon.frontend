@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1400, initial-scale=0.25, maximum-scale=3, user-scalable=yes">
+    <title>Highlight 演示方案 - ToMoon Vault</title>
+    <style>
+        :root {
+            --bg-dark: #0f1115;
+            --bg-card: #161b22;
+            --bg-card-hover: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #2f81f7;
+            --accent-purple: #8957e5;
+            --accent-green: #238636;
+            --accent-yellow: #faa356;
+            --border: #30363d;
+            --border-hover: #8b949e;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .demo-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .demo-title {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .demo-subtitle {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .demo-section {
+            margin-bottom: 60px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .demo-section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .demo-section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--accent-purple);
+            border-radius: 2px;
+        }
+
+        .demo-description {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* 方案1：侧边栏卡片式 */
+        .demo-1-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            min-height: 600px;
+        }
+
+        .demo-1-sidebar {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .demo-1-sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .demo-1-sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-1-highlight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-yellow);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .demo-1-highlight-card:hover {
+            border-color: var(--accent-yellow);
+            background: var(--bg-card-hover);
+            transform: translateX(4px);
+        }
+
+        .demo-1-highlight-card.unreviewed {
+            border-left-color: var(--accent-purple);
+            box-shadow: 0 0 0 2px rgba(137, 87, 229, 0.1);
+        }
+
+        .demo-1-highlight-text {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .demo-1-highlight-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .demo-1-source-link {
+            color: var(--accent-blue);
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .demo-1-source-link:hover {
+            color: var(--accent-purple);
+            text-decoration: underline;
+        }
+
+        .demo-1-time {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* 方案2：顶部横幅式 */
+        .demo-2-banner {
+            background: linear-gradient(135deg, rgba(137, 87, 229, 0.15) 0%, rgba(250, 163, 86, 0.1) 100%);
+            border: 2px solid var(--accent-purple);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-2-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-yellow);
+        }
+
+        .demo-2-banner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .demo-2-banner-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-2-toggle-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .demo-2-toggle-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .demo-2-highlight-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .demo-2-highlight-text {
+            flex: 1;
+            font-size: 15px;
+            line-height: 1.6;
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .demo-2-highlight-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .demo-2-highlight-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-end;
+        }
+
+        .demo-2-list {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .demo-2-list.active {
+            display: block;
+        }
+
+        .demo-2-list-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-purple);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        /* 方案3：右侧面板式 */
+        .demo-3-container {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 20px;
+            min-height: 600px;
+        }
+
+        .demo-3-main {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 30px;
+        }
+
+        .demo-3-panel {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .demo-3-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .demo-3-panel-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-3-badge {
+            background: var(--accent-purple);
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .demo-3-highlight-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .demo-3-highlight-item:hover {
+            border-color: var(--accent-yellow);
+            background: var(--bg-card-hover);
+        }
+
+        .demo-3-highlight-item.unreviewed {
+            border-left: 3px solid var(--accent-purple);
+        }
+
+        .demo-3-highlight-text {
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .demo-3-highlight-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .demo-3-source-link {
+            color: var(--accent-blue);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* 方案4：集成标签式 */
+        .demo-4-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+            min-height: 600px;
+        }
+
+        .demo-4-sidebar {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .demo-4-sidebar-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-4-highlight-tag {
+            display: inline-block;
+            background: rgba(137, 87, 229, 0.15);
+            border: 1px solid rgba(137, 87, 229, 0.3);
+            color: #c4b5fd;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .demo-4-highlight-tag:hover {
+            background: rgba(137, 87, 229, 0.25);
+            border-color: rgba(137, 87, 229, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .demo-4-highlight-tag.unreviewed {
+            background: rgba(250, 163, 86, 0.2);
+            border-color: rgba(250, 163, 86, 0.4);
+            color: #faa356;
+            box-shadow: 0 0 8px rgba(250, 163, 86, 0.2);
+        }
+
+        .demo-4-highlight-tag::after {
+            content: attr(data-count);
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--accent-purple);
+            color: white;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 10px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .demo-4-main {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 30px;
+        }
+
+        .demo-4-highlight-detail {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent-yellow);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .demo-4-highlight-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .demo-4-highlight-text {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .demo-4-highlight-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* 通用样式 */
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-sm:hover {
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+            background: var(--bg-card-hover);
+        }
+
+        .icon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+        }
+
+        .edit-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--accent-blue);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            opacity: 0.8;
+        }
+
+        .unreviewed-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <div class="demo-title">Highlight 展示方案演示</div>
+            <div class="demo-subtitle">4种不同的 highlight 展示和交互方案，供选择最适合的设计</div>
+        </div>
+
+        <!-- 方案1：侧边栏卡片式 -->
+        <div class="demo-section">
+            <div class="demo-section-title">方案1：侧边栏卡片式</div>
+            <div class="demo-description">
+                在 Collection 页面左侧显示 highlight 列表，采用卡片式设计，每个 highlight 显示完整信息包括时间、来源笔记链接。
+                优点：信息完整，易于浏览，不占用主要内容区域。适合需要快速查看多个 highlights 的场景。
+            </div>
+            <div class="demo-1-container">
+                <div class="demo-1-sidebar">
+                    <div class="demo-1-sidebar-header">
+                        <div class="demo-1-sidebar-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                                <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                            </svg>
+                            Highlights
+                            <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">(3)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Highlight 卡片 -->
+                    <div class="demo-1-highlight-card unreviewed" data-highlight-id="1">
+                        <div class="demo-1-highlight-text">
+                            "Always reduce size in the middle of high volatility periods to protect capital..."
+                        </div>
+                        <div class="demo-1-highlight-meta">
+                            <a href="#" class="demo-1-source-link" onclick="alert('跳转到来源笔记: Market Thoughts: NQ Volatility'); return false;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                Market Thoughts: NQ Volatility
+                            </a>
+                            <div class="demo-1-time">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                2 hours ago
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="demo-1-highlight-card unreviewed" data-highlight-id="2">
+                        <div class="demo-1-highlight-text">
+                            "Remember: when in range-bound market, scalps are more effective than swing trades..."
+                        </div>
+                        <div class="demo-1-highlight-meta">
+                            <a href="#" class="demo-1-source-link" onclick="alert('跳转到来源笔记: Session Review'); return false;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                Session Review
+                            </a>
+                            <div class="demo-1-time">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                Yesterday
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="demo-1-highlight-card" data-highlight-id="3">
+                        <div class="demo-1-highlight-text">
+                            "Avoid overthinking the loss – stick to the process and trust your system..."
+                        </div>
+                        <div class="demo-1-highlight-meta">
+                            <a href="#" class="demo-1-source-link" onclick="alert('跳转到来源笔记: Psychology Notes'); return false;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                Psychology Notes
+                            </a>
+                            <div class="demo-1-time">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                Apr 10, 2024
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 30px; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                    主要内容区域（笔记编辑区）
+                </div>
+            </div>
+            <div style="margin-top: 15px; padding: 12px; background: rgba(47, 129, 247, 0.1); border: 1px solid rgba(47, 129, 247, 0.3); border-radius: 6px; font-size: 12px; color: var(--text-secondary);">
+                <strong>编辑功能：</strong>在 Vault 主页可以编辑 highlight 的显示样式（颜色、重要性标记、分组等），Collection 页面仅显示，不可编辑。
+            </div>
+        </div>
+
+        <!-- 方案2：顶部横幅式 -->
+        <div class="demo-section">
+            <div class="demo-section-title">方案2：顶部横幅式</div>
+            <div class="demo-description">
+                在 Collection 页面顶部显示最重要的 highlight，采用醒目的横幅设计，可展开查看所有 highlights。
+                优点：最突出，第一时间吸引注意力，适合提醒重要内容。适合需要强调特定 highlight 的场景。
+            </div>
+            
+            <div class="demo-2-banner">
+                <div class="demo-2-banner-header">
+                    <div class="demo-2-banner-title">
+                        <span class="unreviewed-indicator"></span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                            <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                        </svg>
+                        Today's Highlight
+                    </div>
+                    <button class="demo-2-toggle-btn" onclick="toggleDemo2List()">查看全部 (3)</button>
+                </div>
+                <div class="demo-2-highlight-content">
+                    <div class="demo-2-highlight-text">
+                        "Always reduce size in the middle of high volatility periods to protect capital and maintain emotional stability during market turbulence."
+                    </div>
+                    <div class="demo-2-highlight-actions">
+                        <a href="#" class="demo-1-source-link" onclick="alert('跳转到来源笔记'); return false;" style="margin-bottom: 8px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            查看来源
+                        </a>
+                        <div class="demo-2-highlight-meta">
+                            <div>Market Thoughts: NQ Volatility</div>
+                            <div>2 hours ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-2-list" id="demo2-list">
+                <div class="demo-2-list-item">
+                    <div style="font-size: 14px; line-height: 1.5; margin-bottom: 10px;">"Remember: when in range-bound market, scalps are more effective than swing trades..."</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+                        <a href="#" class="demo-1-source-link" onclick="alert('跳转到来源笔记'); return false;">Session Review</a>
+                        <span>Yesterday</span>
+                    </div>
+                </div>
+                <div class="demo-2-list-item">
+                    <div style="font-size: 14px; line-height: 1.5; margin-bottom: 10px;">"Avoid overthinking the loss – stick to the process and trust your system..."</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+                        <a href="#" class="demo-1-source-link" onclick="alert('跳转到来源笔记'); return false;">Psychology Notes</a>
+                        <span>Apr 10, 2024</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; padding: 12px; background: rgba(47, 129, 247, 0.1); border: 1px solid rgba(47, 129, 247, 0.3); border-radius: 6px; font-size: 12px; color: var(--text-secondary);">
+                <strong>编辑功能：</strong>在 Vault 主页可以设置哪个 highlight 显示在顶部横幅，调整颜色和重要性。
+            </div>
+        </div>
+
+        <!-- 方案3：右侧面板式 -->
+        <div class="demo-section">
+            <div class="demo-section-title">方案3：右侧面板式</div>
+            <div class="demo-description">
+                在 Collection 页面右侧显示 highlight 面板，类似通知中心的设计，紧凑且不干扰主要内容。
+                优点：节省空间，易于快速浏览，可以显示更多 highlights。适合需要同时查看多个 highlights 的场景。
+            </div>
+            <div class="demo-3-container">
+                <div class="demo-3-main">
+                    <div style="color: var(--text-muted); text-align: center; padding: 40px;">
+                        主要内容区域（笔记编辑区）
+                    </div>
+                </div>
+                <div class="demo-3-panel">
+                    <div class="demo-3-panel-header">
+                        <div class="demo-3-panel-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                                <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                            </svg>
+                            Highlights
+                            <span class="demo-3-badge">3</span>
+                        </div>
+                    </div>
+
+                    <div class="demo-3-highlight-item unreviewed">
+                        <div class="demo-3-highlight-text">
+                            "Always reduce size in the middle of high volatility periods..."
+                        </div>
+                        <div class="demo-3-highlight-footer">
+                            <a href="#" class="demo-3-source-link" onclick="alert('跳转到来源笔记'); return false;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                </svg>
+                                Market Thoughts
+                            </a>
+                            <span>2h ago</span>
+                        </div>
+                    </div>
+
+                    <div class="demo-3-highlight-item unreviewed">
+                        <div class="demo-3-highlight-text">
+                            "Remember: when in range-bound market, scalps are more effective..."
+                        </div>
+                        <div class="demo-3-highlight-footer">
+                            <a href="#" class="demo-3-source-link" onclick="alert('跳转到来源笔记'); return false;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                </svg>
+                                Session Review
+                            </a>
+                            <span>Yesterday</span>
+                        </div>
+                    </div>
+
+                    <div class="demo-3-highlight-item">
+                        <div class="demo-3-highlight-text">
+                            "Avoid overthinking the loss – stick to the process..."
+                        </div>
+                        <div class="demo-3-highlight-footer">
+                            <a href="#" class="demo-3-source-link" onclick="alert('跳转到来源笔记'); return false;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                </svg>
+                                Psychology
+                            </a>
+                            <span>Apr 10</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 15px; padding: 12px; background: rgba(47, 129, 247, 0.1); border: 1px solid rgba(47, 129, 247, 0.3); border-radius: 6px; font-size: 12px; color: var(--text-secondary);">
+                <strong>编辑功能：</strong>在 Vault 主页可以调整面板中 highlight 的排序、分组和显示样式。
+            </div>
+        </div>
+
+        <!-- 综合方案：方案2+3+4结合（优化版） -->
+        <div class="demo-section" style="border: 2px solid var(--accent-purple); background: rgba(137, 87, 229, 0.05);">
+            <div class="demo-section-title" style="color: var(--accent-purple);">
+                ⭐ 综合方案：方案2 + 3 + 4 结合（优化版）
+            </div>
+            <div class="demo-description" style="font-size: 15px; line-height: 1.8;">
+                <strong>Vault 主页：</strong>顶部横幅式 highlight，第一时间吸引注意力，可展开查看所有 highlights，支持编辑显示方式。<br>
+                <strong>Collection 页面：</strong>右侧显示"快速跳转"按钮，点击后跳转到 Vault 主页查看和管理 highlights。<br>
+                <strong>交互方式：</strong>在 Vault 主页点击 highlight 后弹出详细信息窗口，显示完整内容、来源和时间。
+            </div>
+
+            <!-- Vault 主页演示 -->
+            <div style="margin-bottom: 40px;">
+                <h3 style="font-size: 18px; margin-bottom: 15px; color: var(--text-primary);">Vault 主页 - 顶部横幅式</h3>
+                <div class="demo-2-banner" style="margin-bottom: 0;">
+                    <div class="demo-2-banner-header">
+                        <div class="demo-2-banner-title">
+                            <span class="unreviewed-indicator"></span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                                <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                            </svg>
+                            Today's Highlight
+                        </div>
+                        <button class="demo-2-toggle-btn" onclick="toggleCombinedDemoList()">查看全部 (3)</button>
+                    </div>
+                    <div class="demo-2-highlight-content">
+                        <div class="demo-2-highlight-text">
+                            "Always reduce size in the middle of high volatility periods to protect capital and maintain emotional stability during market turbulence."
+                        </div>
+                        <div class="demo-2-highlight-actions">
+                            <a href="#" class="demo-1-source-link" onclick="alert('跳转到来源笔记: Market Thoughts: NQ Volatility'); return false;" style="margin-bottom: 8px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                查看来源
+                            </a>
+                            <div class="demo-2-highlight-meta">
+                                <div>Market Thoughts: NQ Volatility</div>
+                                <div>2 hours ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-2-list" id="combined-demo-list" style="margin-top: 20px;">
+                    <div class="demo-2-list-item" onclick="showCombinedHighlightDetail(2)">
+                        <div style="font-size: 14px; line-height: 1.5; margin-bottom: 10px;">"Remember: when in range-bound market, scalps are more effective than swing trades..."</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+                            <a href="#" class="demo-1-source-link" onclick="event.preventDefault(); event.stopPropagation(); alert('跳转到来源笔记'); return false;">Session Review</a>
+                            <span>Yesterday</span>
+                        </div>
+                    </div>
+                    <div class="demo-2-list-item" onclick="showCombinedHighlightDetail(3)" style="cursor: pointer;">
+                        <div style="font-size: 14px; line-height: 1.5; margin-bottom: 10px;">"Avoid overthinking the loss – stick to the process and trust your system..."</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+                            <a href="#" class="demo-1-source-link" onclick="event.preventDefault(); event.stopPropagation(); alert('跳转到来源笔记'); return false;">Psychology Notes</a>
+                            <span>Apr 10, 2024</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collection 页面演示（优化版：快速跳转按钮） -->
+            <div>
+                <h3 style="font-size: 18px; margin-bottom: 15px; color: var(--text-primary);">Collection 页面 - 快速跳转按钮</h3>
+                <div class="demo-3-container">
+                    <div class="demo-3-main">
+                        <div style="color: var(--text-muted); text-align: center; padding: 40px;">
+                            主要内容区域（笔记编辑区）<br>
+                            <span style="font-size: 12px; margin-top: 10px; display: block;">右侧显示快速跳转按钮，点击后跳转到 Vault 主页管理 highlights</span>
+                        </div>
+                    </div>
+                    <div class="demo-3-panel">
+                        <div class="widget-box" style="border: none; background: transparent; padding: 0;">
+                            <div class="widget-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                                        <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                                    </svg>
+                                    Highlights
+                                </div>
+                                <span class="demo-3-badge">3</span>
+                            </div>
+                            <div style="padding: 15px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; text-align: center;">
+                                <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 15px;">
+                                    有 <strong style="color: var(--accent-purple);">3</strong> 个 highlights 待查看
+                                </div>
+                                <button onclick="alert('跳转到 Vault 主页查看和管理 highlights');" style="width: 100%; padding: 10px; background: var(--accent-purple); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;" onmouseover="this.style.background='rgba(137, 87, 229, 0.8)'" onmouseout="this.style.background='var(--accent-purple)'">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                                    </svg>
+                                    查看 Highlights
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: rgba(137, 87, 229, 0.15); border: 1px solid rgba(137, 87, 229, 0.3); border-radius: 8px; font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+                <strong style="color: var(--accent-purple);">✨ 优化方案特点：</strong><br>
+                • <strong>Vault 主页：</strong>顶部横幅第一时间吸引注意力，可展开查看全部 highlights，支持编辑显示方式<br>
+                • <strong>Collection 页面：</strong>右侧显示快速跳转按钮，显示 highlights 数量，点击跳转到 Vault 主页<br>
+                • <strong>功能分离：</strong>查看和编辑功能集中在 Vault 主页，避免在 Collection 页面产生混淆<br>
+                • <strong>交互体验：</strong>在 Vault 主页点击 highlight 弹出详情窗口，显示完整信息并可跳转到来源笔记<br>
+                • <strong>时间显示：</strong>智能显示相对时间（2h ago）或绝对时间（Apr 10, 2024）<br>
+                • <strong>未读标记：</strong>未查看的 highlight 有紫色边框和脉冲指示器，提醒用户关注
+            </div>
+        </div>
+
+        <!-- 替代方案A：只在 Vault 主页显示 -->
+        <div class="demo-section">
+            <div class="demo-section-title">替代方案A：只在 Vault 主页显示</div>
+            <div class="demo-description">
+                所有 highlight 功能集中在 Vault 主页，Collection 页面不显示 highlights。
+                优点：功能集中，概念清晰，不会产生"可看不可编辑"的困惑。适合希望功能分离明确的场景。
+            </div>
+            <div style="padding: 20px; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px;">
+                <div class="demo-2-banner" style="margin-bottom: 0;">
+                    <div class="demo-2-banner-header">
+                        <div class="demo-2-banner-title">
+                            <span class="unreviewed-indicator"></span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                                <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                            </svg>
+                            Today's Highlight
+                        </div>
+                        <button class="demo-2-toggle-btn" onclick="toggleDemo2List()">查看全部 (3)</button>
+                    </div>
+                    <div class="demo-2-highlight-content">
+                        <div class="demo-2-highlight-text">
+                            "Always reduce size in the middle of high volatility periods to protect capital and maintain emotional stability during market turbulence."
+                        </div>
+                        <div class="demo-2-highlight-actions">
+                            <a href="#" class="demo-1-source-link" onclick="alert('跳转到来源笔记'); return false;" style="margin-bottom: 8px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                查看来源
+                            </a>
+                            <div class="demo-2-highlight-meta">
+                                <div>Market Thoughts: NQ Volatility</div>
+                                <div>2 hours ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="padding: 12px; background: rgba(47, 129, 247, 0.1); border: 1px solid rgba(47, 129, 247, 0.3); border-radius: 6px; font-size: 12px; color: var(--text-secondary);">
+                <strong>说明：</strong>Collection 页面不显示 highlights，所有功能集中在 Vault 主页，避免功能混淆。
+            </div>
+        </div>
+
+        <!-- 替代方案B：Collection 页面显示当前笔记的 highlights -->
+        <div class="demo-section">
+            <div class="demo-section-title">替代方案B：显示当前笔记的 Highlights</div>
+            <div class="demo-description">
+                在 Collection 页面右侧显示当前选中笔记的 highlights，作为笔记的上下文信息。
+                优点：更相关，只显示与当前笔记相关的 highlights，不会干扰编辑流程。
+            </div>
+            <div class="demo-3-container">
+                <div class="demo-3-main">
+                    <div style="color: var(--text-muted); text-align: center; padding: 40px;">
+                        当前笔记：Market Thoughts: NQ Volatility<br>
+                        <span style="font-size: 12px; margin-top: 10px; display: block;">右侧显示此笔记的 highlights</span>
+                    </div>
+                </div>
+                <div class="demo-3-panel">
+                    <div class="widget-box" style="border: none; background: transparent; padding: 0;">
+                        <div class="widget-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                                    <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                                </svg>
+                                此笔记的 Highlights
+                            </div>
+                            <span class="demo-3-badge">1</span>
+                        </div>
+                        <div class="demo-3-highlight-item unreviewed" onclick="showCombinedHighlightDetail(1)">
+                            <div class="demo-3-highlight-text">
+                                "Always reduce size in the middle of high volatility periods..."
+                            </div>
+                            <div class="demo-3-highlight-footer">
+                                <span style="color: var(--text-muted); font-size: 11px;">2h ago</span>
+                            </div>
+                        </div>
+                        <div style="padding: 15px; text-align: center; margin-top: 15px;">
+                            <button onclick="alert('跳转到 Vault 主页查看所有 highlights');" style="padding: 6px 12px; background: transparent; border: 1px solid var(--border); color: var(--text-secondary); border-radius: 6px; cursor: pointer; font-size: 12px;">
+                                查看所有 Highlights →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 15px; padding: 12px; background: rgba(47, 129, 247, 0.1); border: 1px solid rgba(47, 129, 247, 0.3); border-radius: 6px; font-size: 12px; color: var(--text-secondary);">
+                <strong>说明：</strong>只显示当前选中笔记的 highlights，作为上下文信息。点击可查看详情，或跳转到 Vault 主页管理所有 highlights。
+            </div>
+        </div>
+
+        <!-- 方案4：集成标签式 -->
+        <div class="demo-section">
+            <div class="demo-section-title">方案4：集成标签式</div>
+            <div class="demo-description">
+                在 Collection 页面左侧显示 highlight 标签，点击标签后在主区域显示详细信息。
+                优点：最节省空间，可以快速切换查看不同的 highlights，适合 highlight 较多的场景。
+            </div>
+            <div class="demo-4-container">
+                <div class="demo-4-sidebar">
+                    <div class="demo-4-sidebar-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                            <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                        </svg>
+                        Highlights
+                    </div>
+                    <div>
+                        <div class="demo-4-highlight-tag unreviewed" data-count="2" onclick="showDemo4Detail(1)" style="cursor: pointer;">
+                            High Volatility
+                        </div>
+                        <div class="demo-4-highlight-tag unreviewed" data-count="1" onclick="showDemo4Detail(2)" style="cursor: pointer;">
+                            Range Trading
+                        </div>
+                        <div class="demo-4-highlight-tag" data-count="1" onclick="showDemo4Detail(3)" style="cursor: pointer;">
+                            Psychology
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-4-main">
+                    <div class="demo-4-highlight-detail" id="demo4-detail">
+                        <div class="demo-4-highlight-detail-header">
+                            <div style="font-size: 16px; font-weight: 600;">High Volatility</div>
+                            <span class="unreviewed-indicator"></span>
+                        </div>
+                        <div class="demo-4-highlight-text">
+                            "Always reduce size in the middle of high volatility periods to protect capital and maintain emotional stability during market turbulence."
+                        </div>
+                        <div class="demo-4-highlight-meta">
+                            <a href="#" class="demo-1-source-link" onclick="alert('跳转到来源笔记'); return false;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                Market Thoughts: NQ Volatility
+                            </a>
+                            <div class="demo-1-time">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                2 hours ago
+                            </div>
+                        </div>
+                    </div>
+                    <div style="color: var(--text-muted); text-align: center; padding: 20px; font-size: 14px;">
+                        笔记编辑区域
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 15px; padding: 12px; background: rgba(47, 129, 247, 0.1); border: 1px solid rgba(47, 129, 247, 0.3); border-radius: 6px; font-size: 12px; color: var(--text-secondary);">
+                <strong>编辑功能：</strong>在 Vault 主页可以编辑标签名称、分组规则和显示样式。
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 方案2：切换列表显示
+        function toggleDemo2List() {
+            const list = document.getElementById('demo2-list');
+            list.classList.toggle('active');
+        }
+
+        // 综合方案：切换列表显示
+        function toggleCombinedDemoList() {
+            const list = document.getElementById('combined-demo-list');
+            if (list) {
+                list.style.display = list.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // 综合方案：Highlight 详情数据
+        const combinedHighlightDetails = {
+            1: {
+                text: 'Always reduce size in the middle of high volatility periods to protect capital and maintain emotional stability during market turbulence.',
+                source: 'Market Thoughts: NQ Volatility',
+                time: '2 hours ago',
+                unreviewed: true,
+                hasSource: true
+            },
+            2: {
+                text: 'Remember: when in range-bound market, scalps are more effective than swing trades. Focus on quick entries and exits near support/resistance levels.',
+                source: 'Session Review',
+                time: 'Yesterday',
+                unreviewed: true,
+                hasSource: true
+            },
+            3: {
+                text: 'Avoid overthinking the loss – stick to the process and trust your system. Every trade is a learning opportunity, not a personal failure.',
+                source: 'Psychology Notes',
+                time: 'Apr 10, 2024',
+                unreviewed: false,
+                hasSource: true
+            }
+        };
+
+        // 综合方案：显示 Highlight 详情弹出窗口
+        function showCombinedHighlightDetail(id) {
+            const detail = combinedHighlightDetails[id];
+            if (!detail) return;
+
+            // 移除现有的弹出窗口
+            document.querySelectorAll('.combined-highlight-popup-overlay').forEach(el => el.remove());
+
+            const overlay = document.createElement('div');
+            overlay.className = 'combined-highlight-popup-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.2s ease-out;
+            `;
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            };
+
+            const popup = document.createElement('div');
+            popup.className = 'combined-highlight-popup';
+            popup.style.cssText = `
+                position: relative;
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                width: 90%;
+                max-width: 600px;
+                max-height: 80vh;
+                overflow-y: auto;
+                z-index: 10001;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                animation: slideUp 0.25s ease-out;
+            `;
+            popup.onclick = (e) => e.stopPropagation();
+
+            popup.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border);">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-yellow);">
+                            <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+                        </svg>
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 600;">Highlight 详情</h3>
+                        ${detail.unreviewed ? '<span class="unreviewed-indicator"></span>' : ''}
+                    </div>
+                    <button onclick="this.closest('.combined-highlight-popup-overlay').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px; line-height: 1; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">×</button>
+                </div>
+                <div style="padding: 20px;">
+                    <div style="font-size: 16px; line-height: 1.6; margin-bottom: 20px; color: var(--text-primary); font-style: italic; border-left: 3px solid var(--accent-yellow); padding-left: 15px;">
+                        "${detail.text}"
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-muted); margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border);">
+                        <div>
+                            <strong>来源:</strong> ${detail.source}
+                        </div>
+                        <div>
+                            <strong>时间:</strong> ${detail.time}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        ${detail.hasSource ? `
+                        <button onclick="alert('跳转到来源笔记: ${detail.source}'); this.closest('.combined-highlight-popup-overlay').remove();" style="background: var(--accent-blue); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            查看来源笔记
+                        </button>
+                        ` : ''}
+                        <button onclick="this.closest('.combined-highlight-popup-overlay').remove();" style="background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                            关闭
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            overlay.appendChild(popup);
+            document.body.appendChild(overlay);
+        }
+
+        // 方案4：显示详情
+        const demo4Details = {
+            1: {
+                title: 'High Volatility',
+                text: '"Always reduce size in the middle of high volatility periods to protect capital and maintain emotional stability during market turbulence."',
+                source: 'Market Thoughts: NQ Volatility',
+                time: '2 hours ago',
+                unreviewed: true
+            },
+            2: {
+                title: 'Range Trading',
+                text: '"Remember: when in range-bound market, scalps are more effective than swing trades. Focus on quick entries and exits near support/resistance levels."',
+                source: 'Session Review',
+                time: 'Yesterday',
+                unreviewed: true
+            },
+            3: {
+                title: 'Psychology',
+                text: '"Avoid overthinking the loss – stick to the process and trust your system. Every trade is a learning opportunity, not a personal failure."',
+                source: 'Psychology Notes',
+                time: 'Apr 10, 2024',
+                unreviewed: false
+            }
+        };
+
+        function showDemo4Detail(id) {
+            const detail = demo4Details[id];
+            const detailEl = document.getElementById('demo4-detail');
+            detailEl.innerHTML = `
+                <div class="demo-4-highlight-detail-header">
+                    <div style="font-size: 16px; font-weight: 600;">${detail.title}</div>
+                    ${detail.unreviewed ? '<span class="unreviewed-indicator"></span>' : ''}
+                </div>
+                <div class="demo-4-highlight-text">${detail.text}</div>
+                <div class="demo-4-highlight-meta">
+                    <a href="#" class="demo-1-source-link" onclick="alert('跳转到来源笔记: ${detail.source}'); return false;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        ${detail.source}
+                    </a>
+                    <div class="demo-1-time">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        ${detail.time}
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
