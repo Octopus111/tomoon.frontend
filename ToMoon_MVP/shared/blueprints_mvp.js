@@ -12,6 +12,20 @@
       holdingDuration: 'Intraday Only',
       tags: ['NQ', 'Gap', 'Breakout'],
       strategyType: 'Breakout',
+      entryCriteria: [
+        'Opening range breaks with volume confirmation',
+        'Gap fill rejection at key level',
+        'No trade during high-impact news window'
+      ],
+      exitCriteria: [
+        'Take profit at predefined R multiple',
+        'Exit on failed breakout / momentum stall',
+        'Hard stop at invalidation level'
+      ],
+      noiseFilters: [
+        'Skip trades when spread widens',
+        'Avoid chop: require trend bias / ADX (+DI/-DI) confirmation'
+      ],
       profitMethod: 'Fixed Target',
       stopLossMethod: 'Fixed Stop',
       maxRiskPerTrade: '$200',
@@ -31,6 +45,20 @@
       holdingDuration: 'Multi-Day Hold',
       tags: ['GC', 'Swing'],
       strategyType: 'Trend Following',
+      entryCriteria: [
+        'Pullback to structure support/resistance',
+        'Trend direction confirmed (ADX/+DI/-DI or MA slope)',
+        'Risk fits max risk per trade'
+      ],
+      exitCriteria: [
+        'Structure-based exit (swing high/low break)',
+        'Partial at 1R, trail remainder',
+        'Time stop if thesis invalidates'
+      ],
+      noiseFilters: [
+        'No new entries before major news',
+        'Avoid late entries after extended move'
+      ],
       profitMethod: 'Structure Exit',
       stopLossMethod: 'ATR Stop',
       maxRiskPerTrade: '$150',
@@ -49,6 +77,20 @@
       holdingDuration: 'Intraday Only',
       tags: ['ES', 'Range'],
       strategyType: 'Mean Reversion',
+      entryCriteria: [
+        'Fade range extremes at validated level',
+        'Confirm with rejection / absorption',
+        'Define stop beyond range boundary'
+      ],
+      exitCriteria: [
+        'Target mid-range / opposite extreme',
+        'Exit if range breaks and holds',
+        'Reduce size into volatility expansion'
+      ],
+      noiseFilters: [
+        'Skip if range is too wide for risk',
+        'Avoid entries into high-impact events'
+      ],
       profitMethod: 'Fixed Target',
       stopLossMethod: 'Structure Stop',
       maxRiskPerTrade: '$250',

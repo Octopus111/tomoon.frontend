@@ -205,7 +205,9 @@ let liveSessionState = {
     pnl: 0,
     tradeCount: 0,
     account: null,
+    accountId: null,
     blueprint: null,
+    blueprintId: null,
     riskLimit: null,
     riskUsed: 0
 };
@@ -314,7 +316,9 @@ function startLiveSession(sessionData) {
         pnl: 0,
         tradeCount: 0,
         account: sessionData.account || 'Main',
+        accountId: sessionData.accountId || null,
         blueprint: sessionData.blueprint || 'No Blueprint',
+        blueprintId: sessionData.blueprintId || null,
         riskLimit: Number.isFinite(riskLimit) ? riskLimit : null,
         riskUsed: 0
     };
