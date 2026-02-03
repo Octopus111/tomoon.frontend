@@ -1,7 +1,6 @@
 /**
  * ToMoon MVP Topbar Module
- * MVP版本顶部栏模块 - 精简版
- * * Update: Premium "Command Pill" Design for Live Sessions
+ * MVP版本顶部栏模块 - Redesigned Live Hub
  */
 
 // --- Topbar CSS Styles ---
@@ -13,7 +12,7 @@ const topbarStyles = `
         left: var(--sidebar-width, 60px);
         right: 0;
         height: var(--topbar-height, 60px);
-        background: var(--bg-card, #161a22); /* Deep dark background */
+        background: var(--bg-card, #161a22);
         border-bottom: 1px solid var(--border, #2a3142);
         z-index: 90;
         display: flex;
@@ -42,153 +41,272 @@ const topbarStyles = `
         letter-spacing: -0.01em;
     }
 
-    /* --- 水平手风琴式 Session 布局 --- */
-    .session-stack {
-        display: none; 
-        align-items: center;
-        gap: 8px;
-        margin-right: 12px;
-        height: 40px;
-    }
-
-    .session-stack.active {
-        display: flex;
-    }
-
-    .session-pill {
-        display: flex;
-        align-items: center;
-        height: 36px;
-        padding: 0 12px;
-        background: rgba(30, 41, 59, 0.5);
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        cursor: pointer;
-        overflow: hidden; /* 必须，确保收缩时隐藏文字 */
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        white-space: nowrap;
-        min-width: 36px; /* 收缩时的圆形宽度 */
-    }
-
-    /* 展开状态的 Pill */
-    .session-pill.expanded {
-        flex: 0 0 auto;
-        background: rgba(59, 130, 246, 0.1);
-        border-color: var(--primary);
-        padding: 0 16px;
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
-    }
-
-    /* 收缩状态的 Pill (非活跃) */
-    .session-pill.collapsed {
-        width: 36px; /* 挤压后的宽度 */
-        padding: 0;
-        justify-content: center;
-        opacity: 0.6;
-    }
-
-    .session-pill.collapsed:hover {
-        opacity: 1;
-        background: rgba(255, 255, 255, 0.05);
-    }
-
-    /* 内部元素的显示/隐藏切换 */
-    .pill-content {
+    /* --- Live Hub (Global Aggregator) --- */
+    .live-hub-trigger {
         display: flex;
         align-items: center;
         gap: 12px;
-        transition: opacity 0.3s;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: default;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid transparent;
+        transition: all 0.2s;
+        height: 40px;
+        box-sizing: border-box;
+    }
+    .live-hub-trigger:hover, .live-hub-trigger.active {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--border);
     }
 
-    .session-pill.collapsed .pill-content {
-        display: none; /* 完全隐藏展开内容 */
-    }
-
-    .session-pill.collapsed .mini-label {
-        display: block; /* 只显示首字母 */
-        font-weight: 700;
+    .hub-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        cursor: pointer;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
         color: var(--text-muted);
+        transition: background 0.2s, border-color 0.2s;
     }
-
-    .mini-label {
-        display: none;
-    }
-
-    .live-dot {
-        width: 6px;
-        height: 6px;
-        background: var(--danger);
-        border-radius: 50%;
-        box-shadow: 0 0 8px var(--danger);
-        animation: pulse 2s infinite;
-    }
-
-    .data-group {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.2;
-    }
-
-    .session-name {
-        font-size: 12px;
-        font-weight: 600;
+    .hub-toggle:hover {
+        background: rgba(255,255,255,0.05);
+        border-color: var(--border);
         color: var(--text-main);
     }
 
-    .session-time {
-        font-size: 10px;
+    .hub-content-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
         color: var(--text-muted);
     }
 
-    .risk-micro-bar {
-        width: 40px;
-        height: 3px;
-        background: #333;
-        border-radius: 2px;
-        overflow: hidden;
+    .hub-val {
+        color: var(--text-main);
+        font-weight: 600;
     }
+    .hub-val.stable { color: var(--success); }
+    .hub-val.caution { color: var(--warning); }
+    .hub-val.pressure { color: var(--danger); }
 
-    .risk-micro-fill {
-        height: 100%;
-        background: var(--success);
-        width: 100%;
-        transition: width 0.3s, background 0.3s;
-    }
+    .hub-sep { opacity: 0.3; }
 
-    .risk-micro-fill.warning { background: #f59e0b; }
-    .risk-micro-fill.danger { background: #ef4444; }
-
-    .btn-go {
+    .hub-badge {
         background: var(--primary);
         color: white;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 50px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
+        font-size: 10px;
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-weight: 700;
+        min-width: 16px;
+        text-align: center;
+        display: none; /* Hidden by default */
+    }
+    .hub-badge.visible { display: inline-block; }
+
+    .hub-arrow {
+        color: var(--text-muted);
+        transition: transform 0.2s;
+    }
+    .live-hub-trigger.active .hub-arrow {
+        transform: rotate(180deg);
     }
 
-    @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.4; }
-        100% { opacity: 1; }
+    /* Dropdown UI */
+    .live-hub-dropdown {
+        position: fixed;
+        top: 65px;
+        right: 24px;
+        width: 360px;
+        background: var(--bg-card, #161a22);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        z-index: 1000;
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        animation: slideInDown 0.2s ease-out;
+    }
+    .live-hub-dropdown.active { display: flex; }
+
+    /* A. Overall Risk Section */
+    .hub-section-overall {
+        padding: 16px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(255,255,255,0.02);
+    }
+    .hub-account-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .hub-risk-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .hub-risk-tag {
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+    .hub-risk-tag.stable { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    .hub-risk-tag.caution { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .hub-risk-tag.pressure { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+    .hub-limit-info {
+        font-family: 'SF Mono', monospace;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+    .hub-limit-val { color: var(--text-main); font-weight: 600; }
+
+    .hub-risk-bar-bg {
+        height: 6px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 3px;
+        margin-bottom: 8px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .hub-risk-bar-mark {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: rgba(255,255,255,0.16);
+        transform: translateX(-1px);
+        pointer-events: none;
+    }
+    .hub-risk-bar-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 3px;
+        transition: width 0.4s ease;
+    }
+    .hub-risk-bar-fill.stable { background: var(--success); }
+    .hub-risk-bar-fill.caution { background: var(--warning); }
+    .hub-risk-bar-fill.pressure { background: var(--danger); }
+
+    .hub-context-line {
+        font-size: 11px;
+        color: var(--text-muted);
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4px;
+    }
+    .hub-context-strong { color: var(--text-main); font-weight: 600; }
+
+    .hub-mini-kpis {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .hub-mini-kpi {
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+    }
+    .hub-mini-kpi .k {
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
+    .hub-mini-kpi .v {
+        margin-top: 2px;
+        font-family: 'SF Mono', monospace;
+        font-size: 12px;
+        color: var(--text-main);
+        font-weight: 700;
+    }
+
+    /* B. Sessions List Section */
+    .hub-section-sessions {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .hub-session-item {
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        cursor: pointer;
+        transition: background 0.2s;
+        text-decoration: none;
+        display: block;
+    }
+    .hub-session-item:last-child { border-bottom: none; }
+    .hub-session-item:hover { background: rgba(255,255,255,0.04); }
+
+    .hub-sess-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+    .hub-sess-name { font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .hub-sess-pnl { font-family: 'SF Mono', monospace; font-size: 13px; font-weight: 600; }
+    .hub-sess-pnl.positive { color: var(--success); }
+    .hub-sess-pnl.negative { color: var(--danger); }
+
+    .hub-sess-mid {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .hub-view {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-muted);
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.02);
+        padding: 3px 8px;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+    
+    .hub-new-trade {
+        color: var(--primary);
+        font-weight: 600;
+        font-size: 11px;
+        margin-left: 6px;
+        background: rgba(59, 130, 246, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .empty-hub-state {
+        padding: 30px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 13px;
     }
 
     @keyframes slideInDown {
-        from { transform: translateY(-20px); opacity: 0; }
+        from { transform: translateY(-10px); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
-    }
-
-    /* Mobile Handling */
-    @media (max-width: 900px) {
-        .cmd-section-info, .cmd-section-risk { display: none; }
-        .live-command-bar { gap: 8px; padding-right: 4px; }
     }
 
     @media (max-width: 768px) {
         .topbar { padding: 0 16px 0 60px; }
-        .topbar-title { display: none; } /* Hide title on mobile to fit bar */
+        .topbar-title { display: none; }
     }
 
     /* Standard Elements */
@@ -196,34 +314,33 @@ const topbarStyles = `
     .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 12px; cursor: pointer; }
 `;
 
-// Live Session State (Logic Unchanged)
+// Session Management (Logic Preserved & Enhanced for Aggregation)
 let liveSessionState = {
     active: false,
-    sessionId: null,
-    sessionName: '',
-    startTime: null,
-    pnl: 0,
-    tradeCount: 0,
-    account: null,
-    accountId: null,
-    blueprint: null,
-    blueprintId: null,
-    riskLimit: null,
-    riskUsed: 0
+    sessionId: null
 };
 
 const LIVE_SESSION_KEY = 'toMoon_live_session';
 const LIVE_SESSIONS_KEY = 'toMoon_live_sessions';
 const LIVE_FOCUS_KEY = 'toMoon_live_focus_session_id';
 
+// Risk Thresholds (Simulated "Per Account" configuration)
+const RISK_CFG_DEFAULT = {
+    cautionStart: 0.65, // 65%
+    pressureStart: 0.85 // 85%
+};
+
+const RISK_CFG_STORAGE_KEY = 'toMoon_riskguard_cfg_by_account';
+const RISK_USAGE_HISTORY_PREFIX = 'toMoon_riskguard_usage_hist_';
+
 function normalizeSessionDates(session) {
     const s = { ...session };
     if (s.startTime) s.startTime = new Date(s.startTime);
     if (s.endTime) s.endTime = new Date(s.endTime);
+    if (s.lastTradeTime) s.lastTradeTime = new Date(s.lastTradeTime);
+    if (s.lastUpdateTime) s.lastUpdateTime = new Date(s.lastUpdateTime);
     return s;
 }
-
-// --- Data Logic (Preserved) ---
 
 function getLiveSessions() {
     const stored = localStorage.getItem(LIVE_SESSIONS_KEY);
@@ -233,16 +350,12 @@ function getLiveSessions() {
             if (Array.isArray(arr)) return arr.map(normalizeSessionDates);
         } catch (e) { console.error('Failed to parse live sessions', e); }
     }
-    // Backward compat
+    // Backward compat fallback
     const legacy = localStorage.getItem(LIVE_SESSION_KEY);
     if (legacy) {
         try {
             const s = normalizeSessionDates(JSON.parse(legacy));
-            if (s && s.active) {
-                localStorage.setItem(LIVE_SESSIONS_KEY, JSON.stringify([s]));
-                localStorage.setItem(LIVE_FOCUS_KEY, s.sessionId || '');
-                return [s];
-            }
+            if (s && s.active) return [s];
         } catch (e) {}
     }
     return [];
@@ -255,38 +368,15 @@ function saveLiveSessions(sessions, focusSessionId = null) {
     if (focusSessionId !== null) {
         localStorage.setItem(LIVE_FOCUS_KEY, focusSessionId || '');
     }
-
-    const focusId = focusSessionId !== null ? focusSessionId : (localStorage.getItem(LIVE_FOCUS_KEY) || '');
-    const focused = arr.find(s => String(s.sessionId) === String(focusId)) || arr[0] || null;
-    if (focused && focused.active) {
-        localStorage.setItem(LIVE_SESSION_KEY, JSON.stringify(focused));
-        liveSessionState = focused;
-    } else {
-        localStorage.removeItem(LIVE_SESSION_KEY);
-        liveSessionState = { ...liveSessionState, active: false };
-    }
-    updateLiveSessionBar();
+    updateLiveHub();
 }
 
 function getLiveSessionState() {
     const sessions = getLiveSessions();
-    if (sessions.length === 0) return { ...liveSessionState };
-
+    if (sessions.length === 0) return { active: false };
     const focusId = localStorage.getItem(LIVE_FOCUS_KEY) || '';
-    let focus = null;
-
-    // First try to find the focused session
-    if (focusId) {
-        focus = sessions.find(s => String(s.sessionId) === String(focusId));
-    }
-
-    // If focused session not found or no focus set, use the first session but don't change localStorage
-    if (!focus) {
-        focus = sessions[0];
-        // Don't automatically set focus to first session - let it be explicitly set
-    }
-
-    return focus ? normalizeSessionDates(focus) : { ...liveSessionState };
+    const focus = sessions.find(s => String(s.sessionId) === String(focusId)) || sessions[0];
+    return focus ? normalizeSessionDates(focus) : { active: false };
 }
 
 function saveLiveSessionState(state) {
@@ -295,15 +385,13 @@ function saveLiveSessionState(state) {
         saveLiveSessions([state], state.sessionId || null);
         return;
     }
-    const focusId = localStorage.getItem(LIVE_FOCUS_KEY) || '';
-    const idx = sessions.findIndex(s => String(s.sessionId) === String(focusId));
+    const idx = sessions.findIndex(s => String(s.sessionId) === String(state.sessionId));
     if (idx >= 0) {
         sessions[idx] = state;
-        saveLiveSessions(sessions, focusId);
     } else {
         sessions.push(state);
-        saveLiveSessions(sessions, state.sessionId || null);
     }
+    saveLiveSessions(sessions, state.sessionId);
 }
 
 function startLiveSession(sessionData) {
@@ -315,11 +403,11 @@ function startLiveSession(sessionData) {
         startTime: new Date(),
         pnl: 0,
         tradeCount: 0,
-        account: sessionData.account || 'Main',
-        accountId: sessionData.accountId || null,
+        account: sessionData.account || 'Main Account',
+        accountId: sessionData.accountId || 'main',
         blueprint: sessionData.blueprint || 'No Blueprint',
         blueprintId: sessionData.blueprintId || null,
-        riskLimit: Number.isFinite(riskLimit) ? riskLimit : null,
+        riskLimit: Number.isFinite(riskLimit) ? riskLimit : 2000, 
         riskUsed: 0
     };
 
@@ -333,177 +421,325 @@ function startLiveSession(sessionData) {
 function endLiveSession(sessionId = null) {
     const sessions = getLiveSessions();
     if (sessions.length === 0) return null;
-
     const targetId = sessionId || (localStorage.getItem(LIVE_FOCUS_KEY) || '') || (sessions[0]?.sessionId);
     const idx = sessions.findIndex(s => String(s.sessionId) === String(targetId));
     if (idx < 0) return null;
 
-    const currentState = sessions[idx];
-    if (!currentState || !currentState.active) return null;
-
-    const endedSession = {
-        ...currentState,
-        endTime: new Date(),
-        status: 'pending_review'
-    };
-
-    let pendingSessions = [];
-    try {
-        pendingSessions = JSON.parse(localStorage.getItem('toMoon_pending_sessions') || '[]');
-    } catch(e) { pendingSessions = []; }
-
-    pendingSessions.push(endedSession);
-    localStorage.setItem('toMoon_pending_sessions', JSON.stringify(pendingSessions));
-
+    const endedSession = { ...sessions[idx], endTime: new Date(), status: 'pending_review' };
     sessions.splice(idx, 1);
-    const newFocus = sessions.length ? sessions[sessions.length - 1].sessionId : '';
-    saveLiveSessions(sessions, newFocus);
+    saveLiveSessions(sessions, sessions.length ? sessions[0].sessionId : '');
 
     window.dispatchEvent(new CustomEvent('liveSessionEnded', { detail: endedSession }));
-    window.dispatchEvent(new Event('pendingSessionsUpdated'));
-
     return endedSession;
 }
 
 function updateLiveSessionPnL(pnl, tradeCount, sessionId = null) {
     const sessions = getLiveSessions();
     if (sessions.length === 0) return;
+    const targetId = sessionId || sessions[0].sessionId;
+    const s = sessions.find(s => String(s.sessionId) === String(targetId));
+    if (s) {
+        const prevTrades = Number(s.tradeCount || 0);
+        const nextTrades = tradeCount !== undefined ? Number(tradeCount) : prevTrades;
 
-    const targetId = sessionId || (localStorage.getItem(LIVE_FOCUS_KEY) || '') || sessions[0].sessionId;
-    const idx = sessions.findIndex(s => String(s.sessionId) === String(targetId));
-    if (idx < 0) return;
+        s.pnl = pnl;
+        if (tradeCount !== undefined) s.tradeCount = nextTrades;
 
-    sessions[idx].pnl = pnl;
-    sessions[idx].tradeCount = tradeCount ?? sessions[idx].tradeCount;
-    // Note: Risk Used should also be updated here ideally, but for MVP we assume pnl reflects risk roughly or separate call
-    saveLiveSessions(sessions, targetId);
-}
+        const now = new Date();
+        s.lastUpdateTime = now;
 
-// --- UI Logic (REDESIGNED) ---
+        if (Number.isFinite(nextTrades) && nextTrades > prevTrades) {
+            const delta = Math.max(1, nextTrades - prevTrades);
+            s.newTrades = Number(s.newTrades || 0) + delta;
+            s.lastTradeTime = now;
+        }
 
-/**
- * Updates the new "Command Pill" style bar
- */
-function updateLiveSessionBar() {
-    const stack = document.getElementById('session-stack');
-    if (!stack) return;
-    
-    const sessions = getLiveSessions();
-    const state = getLiveSessionState(); // 当前选中的 Session
-
-    if (sessions.length > 0) {
-        stack.classList.add('active');
-        
-        // 获取现有的 pill map
-        const existingPills = {};
-        stack.querySelectorAll('.session-pill').forEach(pill => {
-            const sessionId = pill.dataset.sessionId;
-            if (sessionId) existingPills[sessionId] = pill;
-        });
-        
-        // 当前 session IDs
-        const currentSessionIds = new Set(sessions.map(sess => String(sess.sessionId)));
-        
-        // 移除不再存在的 pill
-        Object.keys(existingPills).forEach(sessionId => {
-            if (!currentSessionIds.has(sessionId)) {
-                existingPills[sessionId].remove();
-            }
-        });
-        
-        // 更新或创建 pill
-        sessions.forEach(sess => {
-            const sessionIdStr = String(sess.sessionId);
-            const isFocused = (sessionIdStr === String(state.sessionId));
-            const pillId = `pill-${sessionIdStr}`;
-            
-            let pill = existingPills[sessionIdStr];
-            if (!pill) {
-                // 创建新 pill
-                pill = document.createElement('div');
-                pill.id = pillId;
-                pill.dataset.sessionId = sessionIdStr;
-                pill.className = `session-pill ${isFocused ? 'expanded' : 'collapsed'}`;
-                
-                // 获取首字母作为收缩时的标签
-                const initial = sess.sessionName ? sess.sessionName.charAt(0).toUpperCase() : 'S';
-                
-                pill.innerHTML = `
-                    <div class="mini-label">${initial}</div>
-                    
-                    <div class="pill-content">
-                        <div class="live-dot"></div>
-                        <div class="data-group">
-                            <span class="session-name">${sess.sessionName}</span>
-                            <span class="session-time" id="time-${sess.sessionId}">${getSessionDuration(sess.startTime)}</span>
-                        </div>
-                        <div class="risk-micro-bar">
-                            <div class="risk-micro-fill" id="risk-${sess.sessionId}"></div>
-                        </div>
-                        <div class="btn-go" onclick="window.location.href='../execute/index.html?session=${sess.sessionId}'">Go</div>
-                    </div>
-                `;
-                
-                // 点击切换手风琴状态 (避免与Go按钮冲突)
-                pill.onclick = (e) => {
-                    // 如果点击的是Go按钮或其子元素，不切换focus
-                    if (e.target.closest('.btn-go')) {
-                        return;
-                    }
-                    if (!isFocused) {
-                        saveLiveSessions(sessions, sess.sessionId); // 切换 Focus 并触发重绘
-                    }
-                };
-                
-                stack.appendChild(pill);
-            } else {
-                // 更新现有 pill 的类
-                pill.className = `session-pill ${isFocused ? 'expanded' : 'collapsed'}`;
-                
-                // 更新内容
-                const initial = sess.sessionName ? sess.sessionName.charAt(0).toUpperCase() : 'S';
-                const miniLabel = pill.querySelector('.mini-label');
-                if (miniLabel) miniLabel.textContent = initial;
-                
-                const sessionNameEl = pill.querySelector('.session-name');
-                if (sessionNameEl) sessionNameEl.textContent = sess.sessionName;
-                
-                const timeEl = pill.querySelector('.session-time');
-                if (timeEl) timeEl.textContent = getSessionDuration(sess.startTime);
-                
-                const riskFill = pill.querySelector('.risk-micro-fill');
-                if (riskFill) {
-                    const riskPercentage = calculateRisk(sess);
-                    let riskClass = 'risk-micro-fill';
-                    if (riskPercentage < 30) riskClass += ' danger';
-                    else if (riskPercentage < 60) riskClass += ' warning';
-                    riskFill.className = riskClass;
-                    riskFill.style.width = `${riskPercentage}%`;
-                }
-            }
-        });
-        
-    } else {
-        stack.classList.remove('active');
-        // 清空所有 pill
-        stack.innerHTML = '';
+        // Mock simple risk calculation
+        if (pnl < 0) s.riskUsed = Math.abs(pnl);
+        saveLiveSessions(sessions, targetId);
     }
 }
 
-function getSessionDuration(startTime) {
-    if (!startTime) return '00:00:00';
-    const now = new Date();
-    const diff = Math.floor((now - new Date(startTime)) / 1000);
-    const h = Math.floor(diff / 3600);
-    const m = Math.floor((diff % 3600) / 60);
-    const s = diff % 60;
-    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+// --- Live Hub UI Logic ---
+
+let isHubOpen = false;
+
+function toggleLiveHub() {
+    isHubOpen = !isHubOpen;
+    if (isHubOpen) {
+        // Opening implies the user has "seen" the new-trade indicators.
+        clearNewTradesForCurrentAccount();
+    }
+    updateLiveHub();
 }
 
-function calculateRisk(sess) {
-    if (!sess.riskLimit || sess.riskLimit <= 0) return 100;
-    const remaining = Math.max(0, sess.riskLimit - Math.abs(sess.riskUsed || 0));
-    return (remaining / sess.riskLimit) * 100;
+function closeLiveHub(e) {
+    const hub = document.getElementById('live-hub-dropdown');
+    const trigger = document.getElementById('live-hub-trigger');
+    if (isHubOpen && hub && trigger && !hub.contains(e.target) && !trigger.contains(e.target)) {
+        isHubOpen = false;
+        updateLiveHub();
+    }
+}
+
+function getDifficultyColor(pct) {
+    const cfg = getRiskGuardConfig(getCurrentAccountId());
+    if (pct >= cfg.pressureStart) return 'pressure';
+    if (pct >= cfg.cautionStart) return 'caution';
+    return 'stable';
+}
+
+function fmtMoney(n) {
+    return '$' + Math.abs(Number(n) || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function fmtSignedMoney(n) {
+    const num = Number(n) || 0;
+    const sign = num >= 0 ? '+' : '-';
+    return sign + fmtMoney(Math.abs(num));
+}
+
+function getRiskGuardConfig(accountId) {
+    const id = String(accountId || 'main');
+    try {
+        const raw = localStorage.getItem(RISK_CFG_STORAGE_KEY);
+        if (!raw) return { ...RISK_CFG_DEFAULT };
+        const obj = JSON.parse(raw);
+        const cfg = obj && obj[id] ? obj[id] : null;
+        const cautionStart = Number(cfg && cfg.cautionStart);
+        const pressureStart = Number(cfg && cfg.pressureStart);
+        if (Number.isFinite(cautionStart) && Number.isFinite(pressureStart) && cautionStart >= 0 && pressureStart >= 0) {
+            return { cautionStart, pressureStart };
+        }
+    } catch (_) {
+        // ignore
+    }
+    return { ...RISK_CFG_DEFAULT };
+}
+
+function getCurrentAccountId() {
+    const focus = getLiveSessionState();
+    return (focus && focus.accountId) ? String(focus.accountId) : 'main';
+}
+
+function getCurrentAccountName() {
+    const focus = getLiveSessionState();
+    return (focus && focus.account) ? String(focus.account) : 'Main Account';
+}
+
+function getSessionsForCurrentAccount() {
+    const accountId = getCurrentAccountId();
+    return getLiveSessions().filter(s => String(s.accountId || 'main') === String(accountId));
+}
+
+function getSessionActivityTs(s) {
+    const t = (s && (s.lastTradeTime || s.lastUpdateTime || s.startTime)) ? new Date(s.lastTradeTime || s.lastUpdateTime || s.startTime).getTime() : 0;
+    return Number.isFinite(t) ? t : 0;
+}
+
+function formatLastUpdate(ts) {
+    const now = Date.now();
+    const diff = Math.max(0, now - (Number(ts) || now));
+    const secs = Math.floor(diff / 1000);
+    return secs <= 1 ? 'Just now' : `${secs}s ago`;
+}
+
+function pushRiskUsageHistory(accountId, used) {
+    const id = String(accountId || 'main');
+    const key = RISK_USAGE_HISTORY_PREFIX + id;
+    const now = Date.now();
+    try {
+        const raw = localStorage.getItem(key);
+        const arr = raw ? JSON.parse(raw) : [];
+        const next = Array.isArray(arr) ? arr : [];
+        const last = next.length ? next[next.length - 1] : null;
+        if (!last || (now - Number(last.t || 0)) >= 30000) {
+            next.push({ t: now, u: Number(used) || 0 });
+        }
+        const cutoff = now - (30 * 60 * 1000);
+        const trimmed = next.filter(p => p && Number(p.t) >= cutoff);
+        localStorage.setItem(key, JSON.stringify(trimmed));
+    } catch (_) {
+        // ignore
+    }
+}
+
+function getRiskUsageTrend30m(accountId, usedNow) {
+    const id = String(accountId || 'main');
+    const key = RISK_USAGE_HISTORY_PREFIX + id;
+    try {
+        const raw = localStorage.getItem(key);
+        const arr = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(arr) || arr.length < 2) return null;
+        const oldest = arr[0];
+        const delta = (Number(usedNow) || 0) - (Number(oldest.u) || 0);
+        if (!Number.isFinite(delta)) return null;
+        return delta;
+    } catch (_) {
+        return null;
+    }
+}
+
+function clearNewTradesForCurrentAccount() {
+    const accountId = getCurrentAccountId();
+    const sessions = getLiveSessions();
+    let changed = false;
+    sessions.forEach(s => {
+        if (String(s.accountId || 'main') !== String(accountId)) return;
+        if (s.newTrades && Number(s.newTrades) > 0) {
+            s.newTrades = 0;
+            changed = true;
+        }
+    });
+    if (changed) saveLiveSessions(sessions, localStorage.getItem(LIVE_FOCUS_KEY) || '');
+}
+
+function getSessionDuration(startTime) {
+    if (!startTime) return '0m';
+    const mins = Math.floor((new Date() - new Date(startTime)) / 60000);
+    if (mins < 60) return `${mins}m`;
+    const hrs = Math.floor(mins / 60);
+    return `${hrs}h ${mins%60}m`;
+}
+
+function updateLiveHub() {
+    const trigger = document.getElementById('live-hub-trigger');
+    const drop = document.getElementById('live-hub-dropdown');
+    const sessions = getSessionsForCurrentAccount();
+    const count = sessions.length;
+    
+    // Safety check
+    if (!trigger || !drop) return;
+
+    // 1) Account-level Overall (RiskGuard belongs to Account, not Session)
+    const accountId = getCurrentAccountId();
+    const accountName = getCurrentAccountName();
+    const limit = count > 0 ? Number(sessions[0].riskLimit || 2000) : 0;
+    const used = sessions.reduce((sum, s) => sum + Number(s.riskUsed || 0), 0);
+    const remaining = Math.max(0, (Number(limit) || 0) - used);
+
+    const pct = (Number(limit) || 0) > 0 ? (used / limit) : 0;
+    const status = getDifficultyColor(pct);
+    const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+    
+    // 2. Render Collapsed State
+    const hasSessions = count > 0;
+    const badgeCount = sessions.reduce((sum, s) => sum + Number(s.newTrades || 0), 0);
+
+    // 2) Collapsed: only 2 messages (RiskGuard status + Live Sessions count)
+    trigger.innerHTML = `
+        <div class="hub-content-box">
+            <span>RiskGuard: <span class="hub-val ${hasSessions ? status : 'stable'}">${hasSessions ? statusLabel : 'Stable'}</span></span>
+            <span class="hub-sep">·</span>
+            <span>Live Sessions</span>
+            <span class="hub-sep">·</span>
+            <span class="hub-val">${count}</span>
+        </div>
+        ${badgeCount > 0 ? `<div class="hub-badge visible">+${badgeCount}</div>` : ''}
+        <div class="hub-toggle" title="Toggle Live Hub" aria-label="Toggle Live Hub" role="button" tabindex="0">
+            <svg class="hub-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 1 5 5 9 1"></polyline>
+            </svg>
+        </div>
+    `;
+    
+    trigger.classList.toggle('active', isHubOpen);
+    drop.classList.toggle('active', isHubOpen);
+
+    if (!isHubOpen) return; // Stop rendering inner content if closed
+
+    // 3) Expanded View: single container, divider sections (Overall -> Sessions)
+    const cfg = getRiskGuardConfig(accountId);
+    const lastActivityTs = sessions.reduce((mx, s) => Math.max(mx, getSessionActivityTs(s)), 0);
+    const lastUpdateLabel = hasSessions ? formatLastUpdate(lastActivityTs) : '—';
+
+    pushRiskUsageHistory(accountId, used);
+    const trend30m = getRiskUsageTrend30m(accountId, used);
+    const trendLabel = (trend30m == null) ? '' : `${fmtSignedMoney(trend30m)} in last 30m`;
+
+    const riskySess = sessions.length ? [...sessions].sort((a,b) => Number(b.riskUsed||0) - Number(a.riskUsed||0))[0] : null;
+    const shouldShowMainExposure = sessions.length >= 2 && (status !== 'stable' || badgeCount > 0);
+
+    const ctxLeft = shouldShowMainExposure && riskySess
+        ? `Main Exposure: <span class="hub-context-strong">${riskySess.sessionName || 'Session'}</span>`
+        : `Remaining: <span class="hub-context-strong">${fmtMoney(remaining)}</span>`;
+    const ctxRight = (!shouldShowMainExposure && trendLabel)
+        ? `Trend: <span class="hub-context-strong">${trendLabel}</span>`
+        : `Last update: <span class="hub-context-strong">${lastUpdateLabel}</span>`;
+
+    const overallHtml = `
+        <div class="hub-section-overall">
+            <div class="hub-account-row">
+                <span>${accountName} · ${accountId}</span>
+                <span>${hasSessions ? `Last update: ${lastUpdateLabel}` : 'No Live Sessions'}</span>
+            </div>
+            <div class="hub-risk-row">
+                <div class="hub-risk-tag ${hasSessions ? status : 'stable'}">${hasSessions ? statusLabel : 'Stable'}</div>
+                <div class="hub-limit-info">
+                    <span class="hub-limit-val">${fmtMoney(used)}</span> / ${fmtMoney(limit || 0)}
+                </div>
+            </div>
+            <div class="hub-risk-bar-bg">
+                <div class="hub-risk-bar-mark" style="left:${Math.max(0, Math.min(100, cfg.cautionStart * 100))}%"></div>
+                <div class="hub-risk-bar-mark" style="left:${Math.max(0, Math.min(100, cfg.pressureStart * 100))}%"></div>
+                <div class="hub-risk-bar-fill ${hasSessions ? status : 'stable'}" style="width: ${Math.max(0, Math.min(100, pct * 100))}%"></div>
+            </div>
+            <div class="hub-mini-kpis">
+                <div class="hub-mini-kpi"><div class="k">Limit</div><div class="v">${fmtMoney(limit || 0)}</div></div>
+                <div class="hub-mini-kpi"><div class="k">Used</div><div class="v">${fmtMoney(used)}</div></div>
+                <div class="hub-mini-kpi"><div class="k">Remaining</div><div class="v">${fmtMoney(remaining)}</div></div>
+            </div>
+            <div class="hub-context-line">
+                <span>${ctxLeft}</span>
+                <span>${ctxRight}</span>
+            </div>
+        </div>
+    `;
+
+    // Section B: Sessions list (execution only; no risk status)
+    // Sort: new trades -> recent activity -> start time
+    const sorted = [...sessions].sort((a, b) => {
+        const an = Number(a.newTrades || 0);
+        const bn = Number(b.newTrades || 0);
+        if (an !== bn) return bn - an;
+        const aa = getSessionActivityTs(a);
+        const ba = getSessionActivityTs(b);
+        if (aa !== ba) return ba - aa;
+        const at = a && a.startTime ? +new Date(a.startTime) : 0;
+        const bt = b && b.startTime ? +new Date(b.startTime) : 0;
+        return bt - at;
+    });
+    
+    const listHtml = sorted.length > 0 ? sorted.map(s => {
+        const pnl = Number(s.pnl || 0);
+        const pnlClass = pnl >= 0 ? 'positive' : 'negative';
+        const pnlTxt = fmtSignedMoney(pnl);
+        const dur = getSessionDuration(s.startTime);
+        
+        // Click to view session
+        const href = `../execute/index.html?view=sessions&session=${s.sessionId}`;
+        
+        return `
+        <a class="hub-session-item" href="${href}">
+            <div class="hub-sess-top">
+                <div class="hub-sess-name">${s.sessionName || 'Live Session'}</div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    ${Number(s.newTrades || 0) > 0 ? `<div class="hub-new-trade">+${Number(s.newTrades || 0)} new</div>` : ''}
+                    <div class="hub-sess-pnl ${pnlClass}">${pnlTxt}</div>
+                    <span class="hub-view">View</span>
+                </div>
+            </div>
+            <div class="hub-sess-mid">
+                <div>
+                    <span>${dur}</span> · <span>${s.blueprint || 'No Blueprint'}</span>
+                </div>
+                <div style="opacity:0.7;">${formatLastUpdate(getSessionActivityTs(s))}</div>
+            </div>
+        </a>
+        `;
+    }).join('') : `<div class="empty-hub-state">No Active Sessions</div>`;
+
+    drop.innerHTML = overallHtml + `<div class="hub-section-sessions">${listHtml}</div>`;
 }
 
 function injectTopbarStyles() {
@@ -515,7 +751,7 @@ function injectTopbarStyles() {
 }
 
 /**
- * Init Topbar with New Structure
+ * Init Topbar
  */
 function initTopbar(options = {}) {
     const existingTopbar = document.getElementById('topbar');
@@ -524,7 +760,7 @@ function initTopbar(options = {}) {
             const titleEl = document.getElementById('topbar-page-title');
             if (titleEl) titleEl.textContent = options.title;
         }
-        updateLiveSessionBar();
+        updateLiveHub();
         return;
     }
     
@@ -533,15 +769,21 @@ function initTopbar(options = {}) {
     const pageTitle = options.title || 'ToMoon';
     const basePath = options.basePath || '..';
     
-    // HTML Structure for the "Command Pill"
+    // New HTML Structure
     const topbarHTML = `
         <div class="topbar-left">
             <h2 id="topbar-page-title" class="topbar-title">${pageTitle}</h2>
         </div>
         
         <div class="topbar-right">
-            <div id="session-stack" class="session-stack">
+            <!-- Global Live Hub -->
+            <div id="live-hub-trigger" class="live-hub-trigger">
+                <!-- Populated by JS -->
             </div>
+            <div id="live-hub-dropdown" class="live-hub-dropdown">
+                <!-- Dropdown Content -->
+            </div>
+
             <div class="topbar-divider"></div>
             
             <div class="user-avatar" onclick="window.location.href='${basePath}/settings/index.html'">
@@ -562,19 +804,30 @@ function initTopbar(options = {}) {
         document.body.insertAdjacentElement('afterbegin', topbar);
     }
     
-    updateLiveSessionBar();
+    // Global click listener for dropdown close
+    document.addEventListener('click', closeLiveHub);
+
+    // Arrow is the primary affordance/interaction
+    document.addEventListener('click', function(e) {
+        const toggle = e && e.target ? e.target.closest('.hub-toggle') : null;
+        if (!toggle) return;
+        const trigger = document.getElementById('live-hub-trigger');
+        if (!trigger || !trigger.contains(toggle)) return;
+        toggleLiveHub();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (!isHubOpen) return;
+        if (e.key === 'Escape') {
+            isHubOpen = false;
+            updateLiveHub();
+        }
+    });
+    
+    updateLiveHub();
     
     // Timer Loop
     setInterval(() => {
-        const sessions = getLiveSessions();
-        sessions.forEach(sess => {
-            if (sess.active) {
-                const timerEl = document.getElementById(`time-${sess.sessionId}`);
-                if (timerEl) {
-                    timerEl.textContent = getSessionDuration(sess.startTime);
-                }
-            }
-        });
+        updateLiveHub();
     }, 1000);
 }
 
@@ -614,7 +867,7 @@ if (typeof module !== 'undefined' && module.exports) {
         startLiveSession,
         endLiveSession,
         updateLiveSessionPnL,
-        updateLiveSessionBar,
+        updateLiveSessionBar: updateLiveHub, // Alias for compat
         showTopbarToast
     };
 } else {
@@ -626,6 +879,6 @@ if (typeof module !== 'undefined' && module.exports) {
     window.startLiveSession = startLiveSession;
     window.endLiveSession = endLiveSession;
     window.updateLiveSessionPnL = updateLiveSessionPnL;
-    window.updateLiveSessionBar = updateLiveSessionBar;
+    window.updateLiveSessionBar = updateLiveHub;
     window.showTopbarToast = showTopbarToast;
 }

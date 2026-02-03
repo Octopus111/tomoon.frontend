@@ -1,0 +1,2814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1400, initial-scale=0.25, maximum-scale=3, user-scalable=yes">
+    <title>ToMoon - Home</title>
+    <style>
+        :root {
+            --bg-primary: #0d0f14;
+            --bg-card: #161a22;
+            --bg-panel: #1c212b;
+            --border: #2a3142;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .text-muted { color: var(--text-muted); }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+
+        /* ========== Hero Module (New State Machine) ========== */
+        .hero-module {
+            min-height: 480px;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(13, 15, 20, 0.8) 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hero-module::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-state {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease-out;
+            width: 100%;
+        }
+
+        .hero-state.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- State A: Setup (Pre-Session) --- */
+        .setup-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .hero-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        .setup-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .setup-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .setup-card:hover {
+            border-color: #4b5563;
+        }
+
+        .setup-card.completed {
+            border-color: rgba(34, 197, 94, 0.5);
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .step-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-num {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .setup-card.completed .step-num {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        /* Account Selection */
+        .account-selector {
+            margin-top: auto;
+        }
+
+        .account-option {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .account-option:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .account-option.active {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .snapshot-view {
+            margin-top: 10px;
+        }
+
+        .risk-snapshot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .risk-chip {
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .risk-chip-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .risk-chip-value {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .risk-used-row {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .risk-used-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 4px;
+        }
+
+        .risk-used-value {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .risk-remaining-value {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.05;
+        }
+
+        .riskguard-warning {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            background: rgba(245, 158, 11, 0.08);
+            color: var(--warning);
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .riskguard-warning a {
+            color: var(--warning);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .riskguard-warning a:hover {
+            text-decoration: underline;
+        }
+
+        .risk-bar-container {
+            margin-top: 12px;
+        }
+
+        .risk-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .risk-fill {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        /* Blueprint Selection */
+        .blueprint-placeholder-btn {
+            width: 100%;
+            height: 100%;
+            min-height: 80px;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .blueprint-placeholder-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .blueprint-brief {
+            margin-top: 12px;
+        }
+
+        .bp-criteria-list {
+            margin: 12px 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .bp-criteria-list li {
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .bp-criteria-list li::before {
+            content: '•';
+            color: var(--primary);
+        }
+
+        .hero-footer {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .cta-row {
+            display: inline-flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .start-cta {
+            padding: 16px 64px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 100px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s;
+        }
+
+        .start-cta:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .start-cta:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
+        }
+
+        .footer-summary {
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            min-height: 20px;
+        }
+
+        .footer-hint {
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+            min-height: 18px;
+        }
+
+        /* --- State B: Blueprint Selector --- */
+        .bp-selector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .bp-select-layout {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 18px;
+            align-items: start;
+            min-height: 420px;
+        }
+
+        .bp-toolbar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .bp-search {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .bp-filter {
+            display: inline-flex;
+            gap: 6px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            padding: 4px;
+            border-radius: 999px;
+        }
+
+        .bp-filter-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            color: var(--text-muted);
+            border: none;
+            background: transparent;
+            transition: all 0.2s;
+        }
+
+        .bp-filter-btn.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--text-main);
+        }
+
+        .bp-panel {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            position: sticky;
+            top: 84px;
+        }
+
+        .bp-panel-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .checklist {
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .check-item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .check-item input {
+            margin-top: 2px;
+        }
+
+        .inline-error {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            background: rgba(239, 68, 68, 0.08);
+            color: #fecaca;
+            font-size: 12px;
+            display: none;
+        }
+
+        .bp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        
+        .bp-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bp-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* --- State C: Live Overlay --- */
+        .live-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .live-title-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .live-badge {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+
+        .live-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            background: var(--bg-panel);
+            padding: 4px;
+            border-radius: 8px;
+            width: fit-content;
+        }
+
+        .live-tab {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .live-tab.active {
+            background: var(--bg-card);
+            color: var(--text-main);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .live-content-area {
+            flex: 1;
+            min-height: 200px;
+        }
+
+        .live-bottom-bar {
+            margin-top: auto;
+            position: sticky;
+            bottom: 0;
+            padding-top: 14px;
+            background: linear-gradient(to top, rgba(13, 15, 20, 0.95), rgba(13, 15, 20, 0));
+        }
+
+        .live-actions {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.02);
+        }
+        
+        .quick-log-btn {
+            width: 100%;
+            padding: 12px;
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.02);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+            transition: all 0.2s;
+        }
+
+        .quick-log-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+
+        /* ========== Dashboard Grid ========== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title-icon {
+            width: 20px;
+            height: 20px;
+            stroke: var(--primary);
+        }
+
+        .card-action {
+            font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+
+        .card-action:hover {
+            color: #60a5fa;
+        }
+
+        /* ========== Live Sessions Overview ========== */
+        .sessions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .session-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .session-item:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .session-item.live {
+            border-left: 3px solid var(--success);
+        }
+
+        .session-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .session-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+            50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+        }
+
+        .session-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .session-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .session-right {
+            text-align: right;
+        }
+
+        .session-pnl {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .session-pnl.positive { color: var(--success); }
+        .session-pnl.negative { color: var(--danger); }
+
+        .session-duration {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'SF Mono', monospace;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 16px;
+        }
+
+        .session-action-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .session-action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .session-action-btn.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .session-action-btn.primary:hover {
+            background: #2563eb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* ========== Market Overview ========== */
+        .market-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .market-stat {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .market-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .market-stat-value.highlight {
+            color: var(--warning);
+        }
+
+        .market-stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .next-event {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, transparent 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+        }
+
+        .next-event-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(245, 158, 11, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--warning);
+            font-size: 20px;
+        }
+
+        .next-event-info {
+            flex: 1;
+        }
+
+        .next-event-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .next-event-time {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .next-event-impact {
+            padding: 4px 10px;
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 4px;
+        }
+
+        .next-event-impact.medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .next-event-impact.low {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        /* ========== Session Wizard Modal ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 540px;
+            max-width: 95vw;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Wizard Steps */
+        .wizard-steps {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .wizard-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wizard-step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .wizard-step.active .wizard-step-number {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .wizard-step.completed .wizard-step-number {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .wizard-step-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .wizard-step.active .wizard-step-label {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .wizard-step-divider {
+            width: 40px;
+            height: 1px;
+            background: var(--border);
+            margin: 0 4px;
+        }
+
+        /* Step Content */
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-description {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .select-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .select-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .select-card:hover {
+            border-color: var(--primary);
+        }
+
+        .select-card.selected {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .select-card-indicator {
+            width: 8px;
+            height: 44px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .select-card-info {
+            flex: 1;
+        }
+
+        .select-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .select-card-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .select-card-check {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            transition: all 0.2s;
+        }
+
+        .select-card.selected .select-card-check {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Risk Guard Summary */
+        .risk-summary {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .risk-summary-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .risk-summary-title svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--warning);
+        }
+
+        .risk-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .risk-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .risk-item-label {
+            color: var(--text-muted);
+        }
+
+        .risk-item-value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .risk-item-value.warning {
+            color: var(--warning);
+        }
+
+        .risk-item-value.danger {
+            color: var(--danger);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-muted);
+            color: var(--text-main);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.14);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fecaca;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.22);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Create Blueprint Link */
+        .create-blueprint-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .create-blueprint-link:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar"></aside>
+<!-- Cache-bust for local static servers (avoid stale JS after edits) -->
+<script src="../shared/sidebar_mvp.js?v=20260127-3"></script>
+<script src="../shared/topbar_mvp.js?v=20260127-3"></script>
+<script src="../shared/blueprints_mvp.js?v=20260127-3"></script>
+<script>
+    initSidebar('home', null, { title: 'Home' });
+    initTopbar({ title: 'Home', basePath: '..' });
+</script>
+
+<main class="main-content">
+    
+    <!-- Hero Module (State Machine) -->
+    <section class="hero-module" id="hero-module">
+        
+        <!-- View A: Pre-Session Setup -->
+        <div class="hero-state active" id="hero-view-setup">
+            <div class="setup-header">
+                <h1 class="hero-title">Before you place a trade — start here</h1>
+                <p class="hero-subtitle">Session = Account + Blueprint. Everything else is noise.</p>
+            </div>
+
+            <div class="setup-grid">
+                <!-- Step 1: Account -->
+                <div class="setup-card" id="card-account">
+                    <div class="step-label"><span class="step-num">1</span> Choose Account</div>
+                    
+                    <!-- Selection Mode -->
+                    <div class="account-selector" id="account-selector">
+                        <div class="account-option" data-account="main" onclick="HeroModule.selectAccount('main')">
+                            <div style="font-weight:600">Main Account</div>
+                            <div class="text-muted">$50,000</div>
+                        </div>
+                        <div class="account-option" data-account="trading-b" onclick="HeroModule.selectAccount('trading-b')">
+                             <div style="font-weight:600">Trading Account B</div>
+                             <div class="text-muted">$5,000</div>
+                         </div>
+                    </div>
+
+                    <!-- Selected Mode (Snapshot) -->
+                    <div class="snapshot-view" id="account-snapshot" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                            <span style="font-weight:600; font-size:16px;" id="selected-account-name">Main Account</span>
+                            <button class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="HeroModule.resetAccount()">Change</button>
+                        </div>
+
+                        <div class="risk-snapshot-grid">
+                            <div class="risk-chip">
+                                <div class="risk-chip-label">Daily Loss Limit</div>
+                                <div class="risk-chip-value" id="acc-daily-limit">—</div>
+                            </div>
+                            <div class="risk-chip">
+                                <div class="risk-chip-label">Weekly Loss Limit</div>
+                                <div class="risk-chip-value" id="acc-weekly-limit">—</div>
+                            </div>
+                        </div>
+
+                        <div class="risk-used-row">
+                            <div>
+                                <div class="risk-used-label">Used Today</div>
+                                <div class="risk-used-value" id="acc-used">—</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="risk-used-label">Remaining Today</div>
+                                <div class="risk-remaining-value text-success" id="acc-remaining">—</div>
+                            </div>
+                        </div>
+
+                        <div class="risk-used-row" style="margin-top:12px;">
+                            <div>
+                                <div class="risk-used-label">Used This Week</div>
+                                <div class="risk-used-value" id="acc-weekly-used">—</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="risk-used-label">Remaining This Week</div>
+                                <div class="risk-used-value" id="acc-weekly-remaining">—</div>
+                            </div>
+                        </div>
+
+                        <div class="risk-bar-container">
+                            <div class="risk-bar"><div class="risk-fill" id="acc-risk-fill" style="width:0%"></div></div>
+                            <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:4px;">
+                                <span class="text-muted" id="acc-risk-pct">—</span>
+                                <span class="text-muted">Remaining %</span>
+                            </div>
+                        </div>
+
+                        <div class="riskguard-warning" id="acc-riskguard-warning" style="display:none;">
+                            <span>Set RiskGuard in Settings</span>
+                            <a href="../settings/index.html">Open Settings →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Blueprint -->
+                <div class="setup-card" id="card-blueprint">
+                    <div class="step-label"><span class="step-num">2</span> Select Blueprint</div>
+                    
+                    <button class="blueprint-placeholder-btn" id="bp-select-btn" onclick="HeroModule.goToBlueprintSelection()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                             <line x1="12" y1="8" x2="12" y2="16"></line>
+                             <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        Select Strategy Blueprint
+                    </button>
+
+                    <!-- Selected Mode (Brief) -->
+                    <div class="blueprint-brief" id="bp-brief" style="display:none;">
+                         <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                             <span style="font-weight:600; font-size:16px;" id="selected-bp-name">Gold Swing</span>
+                             <button class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="HeroModule.resetBlueprint()">Change</button>
+                         </div>
+                         <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:12px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                <div>
+                                    <div style="font-size:12px; color:#94a3b8; margin-bottom:6px; font-weight:600; text-transform:uppercase;">Entry Criteria</div>
+                                    <ul class="bp-criteria-list" id="selected-bp-entry"></ul>
+                                    <div class="text-muted" style="font-size:12px;" id="selected-bp-entry-more"></div>
+                                </div>
+                                <div>
+                                    <div style="font-size:12px; color:#94a3b8; margin-bottom:6px; font-weight:600; text-transform:uppercase;">Exit Criteria</div>
+                                    <ul class="bp-criteria-list" id="selected-bp-exit"></ul>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-footer">
+                <div class="cta-row">
+                    <button class="start-cta" id="btn-start-session" disabled onclick="HeroModule.goToCreatingSession()">
+                        Confirm & Start Session
+                    </button>
+                    <button class="btn-secondary" id="btn-manual-session" onclick="HeroModule.startManualSession()">Start Manual Session</button>
+                </div>
+                <div class="footer-summary" id="setup-summary-text"></div>
+                <div class="footer-hint" id="setup-hint-text"></div>
+            </div>
+        </div>
+
+        <!-- View B: Blueprint Selection (Cards) -->
+        <div class="hero-state" id="hero-view-blueprint">
+            <div class="bp-selector-header">
+                <h2 style="font-size:24px; font-weight:600;">Creating Session</h2>
+                <button class="btn-secondary" onclick="HeroModule.goBackToSetup()">Back</button>
+            </div>
+
+            <div class="bp-select-layout">
+                <div>
+                    <div class="bp-toolbar">
+                        <input class="bp-search" id="bp-search" placeholder="Search blueprints…" oninput="HeroModule.updateBlueprintGrid()" />
+                        <div class="bp-filter" role="tablist">
+                            <button class="bp-filter-btn active" id="bp-filter-all" onclick="HeroModule.setBpFilter('all', this)">All</button>
+                            <button class="bp-filter-btn" id="bp-filter-recent" onclick="HeroModule.setBpFilter('recent', this)">Recent</button>
+                            <button class="bp-filter-btn" id="bp-filter-pinned" onclick="HeroModule.setBpFilter('pinned', this)">Pinned</button>
+                        </div>
+                    </div>
+                    <div class="bp-grid" id="blueprint-grid-container">
+                        <!-- Cards Injected JS -->
+                    </div>
+                </div>
+
+                <div class="bp-panel">
+                    <div class="bp-panel-title">Pre-flight Check</div>
+
+                    <div id="bp-panel-empty" class="text-muted" style="font-size:13px;">
+                        Select a blueprint on the left.
+                    </div>
+
+                    <div id="bp-panel-content" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                            <div>
+                                <div style="font-size:16px; font-weight:800;" id="bp-panel-name">—</div>
+                                <div class="text-muted" style="font-size:12px; margin-top:4px;" id="bp-panel-meta">—</div>
+                            </div>
+                            <button class="btn-secondary" style="padding:6px 10px; font-size:12px;" onclick="HeroModule.togglePinSelected()" id="bp-panel-pin-btn">Pin</button>
+                        </div>
+
+                        <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div class="risk-chip">
+                                <div class="risk-chip-label">Min RR</div>
+                                <div class="risk-chip-value" id="bp-panel-minrr">—</div>
+                            </div>
+                            <div class="risk-chip">
+                                <div class="risk-chip-label">Max Risk / Trade</div>
+                                <div class="risk-chip-value" id="bp-panel-maxrisk">—</div>
+                            </div>
+                        </div>
+
+                        <div class="checklist" id="bp-checklist">
+                            <label class="check-item">
+                                <input type="checkbox" onchange="HeroModule.onChecklistChanged()" />
+                                <span>I know my remaining loss today</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" onchange="HeroModule.onChecklistChanged()" />
+                                <span>I will follow entry criteria</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" onchange="HeroModule.onChecklistChanged()" />
+                                <span>If I deviate, I will log it</span>
+                            </label>
+                        </div>
+
+                        <div class="cta-row" style="margin-top:14px; width:100%;">
+                            <button class="btn btn-success" id="bp-start-now" onclick="HeroModule.startNow()" style="flex:1;">Start Now</button>
+                            <button class="btn-secondary" onclick="HeroModule.goBackToSetup()">Back</button>
+                        </div>
+
+                        <div class="inline-error" id="bp-start-error"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View C: Live Session -->
+        <div class="hero-state" id="hero-view-live">
+            <div class="live-header-bar">
+                <div class="live-title-group">
+                    <span class="live-badge">LIVE</span>
+                    <h2 style="font-size:24px; font-weight:700;" id="live-session-title">Session Name</h2>
+                    <span style="color:var(--text-muted); font-size:14px; font-family:'SF Mono', monospace;" id="live-timer">00:00:00</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:20px;">
+                    <div style="text-align:right;">
+                         <div style="font-size:12px; color:var(--text-muted);">Unrealized P&L</div>
+                         <div style="font-size:20px; font-weight:700; color:var(--success);" id="live-pnl-display">+$0.00</div>
+                    </div>
+                    <button class="btn btn-danger" onclick="HeroModule.endSession()">End Session</button>
+                </div>
+            </div>
+
+            <div class="live-tabs">
+                <div class="live-tab active" onclick="HeroModule.switchLiveTab('criteria', this)">Impact & Criteria</div>
+                <div class="live-tab" onclick="HeroModule.switchLiveTab('pnl', this)">Order Flow & PnL</div>
+            </div>
+
+            <div class="live-content-area" id="live-content-criteria">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+                    <div style="background:var(--bg-panel); padding:16px; border-radius:12px;">
+                        <h4 style="margin-bottom:12px; color:var(--success);">Entry Criteria</h4>
+                        <ul class="bp-criteria-list" style="font-size:14px;" id="live-entry-list"></ul>
+                    </div>
+                    <div style="background:var(--bg-panel); padding:16px; border-radius:12px;">
+                        <h4 style="margin-bottom:12px; color:var(--danger);">Exit Criteria</h4>
+                        <ul class="bp-criteria-list" style="font-size:14px;" id="live-exit-list"></ul>
+                    </div>
+                </div>
+                <div style="margin-top:18px; background:var(--bg-panel); padding:16px; border-radius:12px;">
+                    <h4 style="margin-bottom:12px; color:var(--warning);">Noise Filters</h4>
+                    <ul class="bp-criteria-list" style="font-size:14px;" id="live-noise-list"></ul>
+                </div>
+            </div>
+            
+            <div class="live-content-area" id="live-content-pnl" style="display:none;">
+                <div style="height:200px; background:rgba(255,255,255,0.02); border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">
+                    [ Real-time PnL Chart Visualization ]
+                </div>
+            </div>
+
+            <div class="live-bottom-bar">
+                <div class="live-actions">
+                    <button class="quick-log-btn" onclick="quickLog()" style="margin-top:0;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        Quick Moonlog
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Original Session Flow (Hidden but kept for now? or Removed. User said replace hero. I removed the old hero, so I removed flow too. Good.) -->
+
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        
+        <!-- Live Sessions Overview -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg class="card-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    Live Sessions
+                </h3>
+                <a href="../execute/index.html?view=sessions" class="card-action">
+                    View all
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            </div>
+            
+            <div class="sessions-list" id="sessions-list">
+                <!-- Sessions will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Today's Market -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg class="card-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    Today's Market
+                </h3>
+                <a href="../market/index.html" class="card-action">
+                    View Calendar
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            </div>
+            
+            <div class="market-stats">
+                <div class="market-stat">
+                    <div class="market-stat-value">12</div>
+                    <div class="market-stat-label">Scheduled Events</div>
+                </div>
+                <div class="market-stat">
+                    <div class="market-stat-value highlight">3</div>
+                    <div class="market-stat-label">High Impact</div>
+                </div>
+                <div class="market-stat">
+                    <div class="market-stat-value">2h 15m</div>
+                    <div class="market-stat-label">Until Next</div>
+                </div>
+            </div>
+            
+            <div class="next-event">
+                <div class="next-event-icon">📊</div>
+                <div class="next-event-info">
+                    <div class="next-event-title">US CPI YoY (Jan)</div>
+                    <div class="next-event-time">Today 08:30 EST • Bureau of Labor Statistics</div>
+                </div>
+                <span class="next-event-impact">HIGH</span>
+            </div>
+        </div>
+        
+    </div>
+</main>
+
+<!-- Session Wizard Modal -->
+<div class="modal-overlay" id="session-wizard-modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 class="modal-title">Start New Session</h2>
+            <button class="modal-close" onclick="closeSessionWizard()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <!-- Wizard Steps Indicator -->
+            <div class="wizard-steps">
+                <div class="wizard-step active" data-step="1">
+                    <div class="wizard-step-number">1</div>
+                    <span class="wizard-step-label">Account</span>
+                </div>
+                <div class="wizard-step-divider"></div>
+                <div class="wizard-step" data-step="2">
+                    <div class="wizard-step-number">2</div>
+                    <span class="wizard-step-label">Blueprint</span>
+                </div>
+                <div class="wizard-step-divider"></div>
+                <div class="wizard-step" data-step="3">
+                    <div class="wizard-step-number">3</div>
+                    <span class="wizard-step-label">Risk Limit</span>
+                </div>
+            </div>
+            
+            <!-- Step 1: Choose Account -->
+            <div class="step-content active" id="step-1">
+                <h3 class="step-title">Choose Account</h3>
+                <p class="step-description">Select the trading account for this session.</p>
+                
+                <div class="select-cards" id="account-cards">
+                    <div class="select-card selected" data-account="main" onclick="selectAccount(this)">
+                        <div class="select-card-indicator" style="background: #3b82f6;"></div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Main Account</div>
+                            <div class="select-card-meta">Balance: $25,430.00 • Risk: Normal</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                    <div class="select-card" data-account="trading-a" onclick="selectAccount(this)">
+                        <div class="select-card-indicator" style="background: #22c55e;"></div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Trading Account A</div>
+                            <div class="select-card-meta">Balance: $10,250.00 • Risk: Conservative</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                    <div class="select-card" data-account="trading-b" onclick="selectAccount(this)">
+                        <div class="select-card-indicator" style="background: #f59e0b;"></div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Trading Account B</div>
+                            <div class="select-card-meta">Balance: $5,000.00 • Risk: Aggressive</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Select Blueprint -->
+            <div class="step-content" id="step-2">
+                <h3 class="step-title">Select Blueprint</h3>
+                <p class="step-description">Choose a trading blueprint to follow during this session.</p>
+                
+                <div class="select-cards" id="blueprint-cards">
+                    <div class="select-card selected" data-blueprint="momentum" onclick="selectBlueprint(this)">
+                        <div class="select-card-indicator" style="background: #3b82f6;"></div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Momentum Breakout</div>
+                            <div class="select-card-meta">Win Rate: 65% • Avg RR: 1:2.5</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                    <div class="select-card" data-blueprint="scalping" onclick="selectBlueprint(this)">
+                        <div class="select-card-indicator" style="background: #22c55e;"></div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Scalping Strategy</div>
+                            <div class="select-card-meta">Win Rate: 72% • Avg RR: 1:1.5</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                    <div class="select-card" data-blueprint="swing" onclick="selectBlueprint(this)">
+                        <div class="select-card-indicator" style="background: #f59e0b;"></div>
+                        <div class="select-card-info">
+                            <div class="select-card-title">Swing Trading</div>
+                            <div class="select-card-meta">Win Rate: 58% • Avg RR: 1:3.0</div>
+                        </div>
+                        <div class="select-card-check">✓</div>
+                    </div>
+                </div>
+                
+                <a href="../execute/index.html?view=blueprint&action=create" class="create-blueprint-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Create New Blueprint
+                </a>
+            </div>
+            
+            <!-- Step 3: Set Risk Limit -->
+            <div class="step-content" id="step-3">
+                <h3 class="step-title">Confirm Risk Guard</h3>
+                <p class="step-description">Review and confirm your risk limits for this session.</p>
+                
+                <div class="risk-summary">
+                    <div class="risk-summary-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        Risk Guard Settings
+                    </div>
+                    
+                    <div class="risk-items">
+                        <div class="risk-item">
+                            <span class="risk-item-label">Daily Loss Limit</span>
+                            <span class="risk-item-value">$500.00</span>
+                        </div>
+                        <div class="risk-item">
+                            <span class="risk-item-label">Max Position Size</span>
+                            <span class="risk-item-value">2%</span>
+                        </div>
+                        <div class="risk-item">
+                            <span class="risk-item-label">Max Open Trades</span>
+                            <span class="risk-item-value">3</span>
+                        </div>
+                        <div class="risk-item">
+                            <span class="risk-item-label">Current Daily P&L</span>
+                            <span class="risk-item-value">$0.00</span>
+                        </div>
+                        <div class="risk-item">
+                            <span class="risk-item-label">Remaining Risk</span>
+                            <span class="risk-item-value warning">$500.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="wizard-back-btn" onclick="wizardBack()" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Back
+            </button>
+            <button class="btn btn-primary" id="wizard-next-btn" onclick="wizardNext()">
+                Next
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== Session Wizard State ==========
+    let wizardState = {
+        currentStep: 1,
+        totalSteps: 3,
+        account: 'main',
+        blueprint: 'momentum',
+        accountData: {
+            'main': { name: 'Main Account', balance: 25430, riskLimit: 500 },
+            'trading-a': { name: 'Trading Account A', balance: 10250, riskLimit: 200 },
+            'trading-b': { name: 'Trading Account B', balance: 5000, riskLimit: 100 }
+        },
+        blueprintData: {
+            'momentum': { name: 'Momentum Breakout' },
+            'scalping': { name: 'Scalping Strategy' },
+            'swing': { name: 'Swing Trading' }
+        }
+    };
+
+    // Blueprint registry (shared with Execute)
+    function mvpGetBlueprintRegistry() {
+        if (window.TM_MVP_BLUEPRINTS) return window.TM_MVP_BLUEPRINTS;
+        return null;
+    }
+
+    function mvpBuildWizardBlueprintDataFromRegistry(registry) {
+        // wizard expects a map: key -> { name }
+        const out = {};
+        if (!registry) return out;
+        Object.keys(registry).forEach(id => {
+            const bp = registry[id];
+            if (bp && bp.name) out[id] = { name: bp.name };
+        });
+        return out;
+    }
+
+    function mvpBlueprintIcon(bp) {
+        const name = String((bp && bp.name) || '').toLowerCase();
+        const sym = String((bp && bp.market && bp.market.symbol) || '').toUpperCase();
+        let color = '#3b82f6'; // default blue
+        if (sym === 'NQ' || name.includes('momentum') || name.includes('break')) color = '#3b82f6';
+        else if (sym === 'ES' || name.includes('range')) color = '#22c55e';
+        else if (sym === 'GC' || name.includes('gold')) color = '#f59e0b';
+        else if (name.includes('scalp')) color = '#8b5cf6';
+        else if (name.includes('swing')) color = '#ef4444';
+        return `<div class="select-card-indicator" style="background: ${color};"></div>`;
+    }
+
+    function mvpFmtWinRate(bp) {
+        const wr = Number(bp && bp.winRate);
+        if (!Number.isFinite(wr)) return '—';
+        return `${wr}%`;
+    }
+
+    function mvpFmtAvgRR(bp) {
+        const rr = Number(bp && bp.avgRR);
+        if (!Number.isFinite(rr)) return '—';
+        return `1:${rr.toFixed(1)}`;
+    }
+
+    function mvpRenderBlueprintCards() {
+        const container = document.getElementById('blueprint-cards');
+        if (!container) return;
+
+        const registry = mvpGetBlueprintRegistry();
+        if (!registry || typeof window.tmGetMvpBlueprintsList !== 'function') return;
+
+        const list = window.tmGetMvpBlueprintsList();
+        if (!Array.isArray(list) || list.length === 0) return;
+
+        // Use first item as default if current selection not found
+        const currentId = String(wizardState.blueprint || '');
+        const hasCurrent = list.some(bp => String(bp.id || '') === currentId);
+        const selectedId = hasCurrent ? currentId : String(list[0].id);
+        wizardState.blueprint = selectedId;
+
+        // Rebuild blueprintData map for startSession() payload
+        wizardState.blueprintData = mvpBuildWizardBlueprintDataFromRegistry(registry);
+
+        container.innerHTML = list.map(bp => {
+            const id = String(bp.id || '');
+            const selected = id === selectedId ? 'selected' : '';
+            const icon = mvpBlueprintIcon(bp);
+            const meta = `Win Rate: ${mvpFmtWinRate(bp)} • Avg RR: ${mvpFmtAvgRR(bp)}`;
+            return `
+                <div class="select-card ${selected}" data-blueprint="${id}" onclick="selectBlueprint(this)">
+                    <div class="select-card-icon">${icon}</div>
+                    <div class="select-card-info">
+                        <div class="select-card-title">${bp.name || 'Blueprint'}</div>
+                        <div class="select-card-meta">${meta}</div>
+                    </div>
+                    <div class="select-card-check">✓</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ========== Wizard Functions ==========
+    function openSessionWizard() {
+        wizardState.currentStep = 1;
+        updateWizardUI();
+        document.getElementById('session-wizard-modal').classList.add('active');
+    }
+
+    function closeSessionWizard() {
+        document.getElementById('session-wizard-modal').classList.remove('active');
+    }
+
+    function wizardNext() {
+        if (wizardState.currentStep < wizardState.totalSteps) {
+            wizardState.currentStep++;
+            updateWizardUI();
+        } else {
+            // Final step - Start Session
+            startSession();
+        }
+    }
+
+    function wizardBack() {
+        if (wizardState.currentStep > 1) {
+            wizardState.currentStep--;
+            updateWizardUI();
+        }
+    }
+
+    function updateWizardUI() {
+        const step = wizardState.currentStep;
+        
+        // Update step indicators
+        document.querySelectorAll('.wizard-step').forEach((el, idx) => {
+            const stepNum = idx + 1;
+            el.classList.remove('active', 'completed');
+            if (stepNum === step) {
+                el.classList.add('active');
+            } else if (stepNum < step) {
+                el.classList.add('completed');
+            }
+        });
+        
+        // Update step content
+        document.querySelectorAll('.step-content').forEach((el, idx) => {
+            el.classList.remove('active');
+            if (idx + 1 === step) {
+                el.classList.add('active');
+            }
+        });
+        
+        // Update buttons
+        const backBtn = document.getElementById('wizard-back-btn');
+        const nextBtn = document.getElementById('wizard-next-btn');
+        
+        backBtn.style.display = step > 1 ? 'inline-flex' : 'none';
+        
+        if (step === wizardState.totalSteps) {
+            nextBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                Start Session
+            `;
+            nextBtn.className = 'btn btn-success';
+        } else {
+            nextBtn.innerHTML = `
+                Next
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            `;
+            nextBtn.className = 'btn btn-primary';
+        }
+        
+        // Update Risk Summary if on step 3
+        if (step === 3) {
+            updateRiskSummary();
+        }
+
+        // Step 2: ensure blueprint list is synced with Execute
+        if (step === 2) {
+            mvpRenderBlueprintCards();
+        }
+    }
+
+    function selectAccount(el) {
+        document.querySelectorAll('#account-cards .select-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        el.classList.add('selected');
+        wizardState.account = el.dataset.account;
+    }
+
+    function selectBlueprint(el) {
+        document.querySelectorAll('#blueprint-cards .select-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        el.classList.add('selected');
+        wizardState.blueprint = el.dataset.blueprint;
+    }
+
+    function updateRiskSummary() {
+        const accountData = wizardState.accountData[wizardState.account];
+        // Update risk items if needed
+    }
+
+    function startSession() {
+        const accountData = wizardState.accountData[wizardState.account];
+        const blueprintData = wizardState.blueprintData[wizardState.blueprint];
+        
+        // Start live session via topbar module
+        if (typeof startLiveSession === 'function') {
+            const state = startLiveSession({
+                name: `${blueprintData.name} Session`,
+                account: accountData.name,
+                blueprint: blueprintData.name,
+                riskLimit: accountData.riskLimit
+            });
+
+            // 真实对接：启动后直接跳到 Execute → Sessions（LIVE 立即可见）
+            const live = (state && state.sessionId)
+                ? state
+                : (typeof getLiveSessionState === 'function' ? getLiveSessionState() : null);
+
+            if (live && live.active && live.sessionId) {
+                window.location.href = `../execute/index.html?view=sessions&session=${encodeURIComponent(live.sessionId)}`;
+                return;
+            }
+        }
+        
+        closeSessionWizard();
+        
+        // Show toast
+        if (typeof showTopbarToast === 'function') {
+            showTopbarToast('Session started! Good luck trading! 🚀');
+        }
+        
+        // Refresh sessions list
+        renderSessions();
+        
+        // Optional: Redirect to Execute page
+        // window.location.href = '../execute/index.html?view=sessions';
+    }
+
+    // ========== Sessions List ==========
+    function renderSessions() {
+        const container = document.getElementById('sessions-list');
+        if (!container) return;
+
+        const sessions = (typeof getLiveSessions === 'function')
+            ? (Array.isArray(getLiveSessions()) ? getLiveSessions() : [])
+            : (typeof getLiveSessionState === 'function' && getLiveSessionState() && getLiveSessionState().active ? [getLiveSessionState()] : []);
+
+        if (!sessions || sessions.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <p>No active sessions</p>
+                    <p style="font-size: 12px; margin-top: 8px;">Click "Start Session" to begin trading</p>
+                </div>
+            `;
+            return;
+        }
+
+        const sorted = sessions.slice().sort((a, b) => {
+            const ta = a && a.startTime ? +new Date(a.startTime) : 0;
+            const tb = b && b.startTime ? +new Date(b.startTime) : 0;
+            return tb - ta;
+        });
+
+        const preview = sorted.slice(0, 3);
+        const more = Math.max(0, sorted.length - preview.length);
+
+        container.innerHTML = `
+            ${preview.map(s => {
+                const duration = typeof getSessionDuration === 'function'
+                    ? getSessionDuration(s.startTime)
+                    : '00:00:00';
+                const pnl = Number(s.pnl || 0);
+                const pnlSign = pnl >= 0 ? '+' : '-';
+                const pnlClass = pnl >= 0 ? 'positive' : 'negative';
+                const trades = Number(s.tradeCount || 0);
+                return `
+                    <div class="session-item live" onclick="goToSession('${String(s.sessionId || '')}')">
+                        <div class="session-left">
+                            <div class="session-status"></div>
+                            <div class="session-info">
+                                <h4>${s.sessionName || 'Live Session'}</h4>
+                                <p>${s.account || 'Main Account'} • ${trades} trades</p>
+                            </div>
+                        </div>
+                        <div class="session-right">
+                            <div class="session-pnl ${pnlClass}">${pnlSign}$${Math.abs(pnl).toFixed(2)}</div>
+                            <div class="session-duration">${duration}</div>
+                        </div>
+                        <div class="session-actions">
+                            <button class="session-action-btn" onclick="event.stopPropagation(); quickLog()">Quick Log</button>
+                            <button class="session-action-btn primary" onclick="event.stopPropagation(); goToSession('${String(s.sessionId || '')}')">View</button>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+            ${more > 0 ? `
+                <div style="margin-top: 10px; color: var(--text-muted); font-size: 12px;">
+                    还有 <strong style="color: var(--text-main);">${more}</strong> 个 Live Sessions 正在运行，
+                    <a href="../execute/index.html?view=sessions" style="color: var(--primary); text-decoration: none;">去 Sessions 查看全部 →</a>
+                </div>
+            ` : ''}
+        `;
+    }
+
+    function goToSession(sessionId) {
+        window.location.href = `../execute/index.html?view=sessions&session=${sessionId}`;
+    }
+
+    function quickLog() {
+        // Quick journal functionality
+        alert('Quick Log - Coming soon!');
+    }
+
+    // ========== Initialize ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sync Blueprint list from shared registry (Execute uses same source)
+        mvpRenderBlueprintCards();
+
+        renderSessions();
+        
+        // Update sessions list periodically
+        setInterval(renderSessions, 2500);
+
+        // Cross-tab/page sync (Execute auto-sim + Start/End session)
+        window.addEventListener('storage', function (e) {
+            if (e.key === 'toMoon_live_sessions' || e.key === 'toMoon_live_session' || e.key === 'toMoon_live_focus_session_id') {
+                renderSessions();
+            }
+        });
+    });
+
+    // Listen for session events
+    window.addEventListener('liveSessionStarted', () => { renderSessions(); HeroModule.init(); });
+    window.addEventListener('liveSessionEnded', () => { renderSessions(); HeroModule.init(); });
+
+    // ========== Hero Module Logic (New) ==========
+    const HeroModule = {
+        STORAGE: {
+            pinned: 'toMoon_bp_pinned_v1',
+            recent: 'toMoon_bp_recent_v1',
+            riskGuard: 'toMoon_riskguard_config_v1'
+        },
+
+        state: {
+            accountId: null,
+            blueprintId: null,
+            liveSession: null,
+            bpFilter: 'all',
+            bpSearch: ''
+        },
+
+        init: function () {
+            this.hydrateAccountOptions();
+
+            const focused = (typeof getLiveSessionState === 'function') ? getLiveSessionState() : null;
+            const hasLive = focused && focused.active && focused.sessionId;
+
+            if (hasLive) {
+                this.state.liveSession = focused;
+                this.showView('live');
+                this.renderLiveState();
+
+                if (this.liveInterval) clearInterval(this.liveInterval);
+                this.liveInterval = setInterval(() => {
+                    const next = (typeof getLiveSessionState === 'function') ? getLiveSessionState() : null;
+                    if (!next || !next.active) {
+                        this.init();
+                        return;
+                    }
+                    this.state.liveSession = next;
+                    this.renderLiveHeaderOnly();
+                    this.updateLiveTimer();
+                }, 1000);
+                return;
+            }
+
+            // No live session: Setup flow
+            this.state.liveSession = null;
+            if (this.liveInterval) clearInterval(this.liveInterval);
+            this.showView('setup');
+
+            // Keep selection if user already chose, otherwise default to main
+            if (!this.state.accountId) {
+                this.selectAccount('main');
+            } else {
+                this.renderAccountSnapshot();
+            }
+
+            if (this.state.blueprintId) {
+                this.renderBlueprintBrief();
+            }
+
+            this.checkStartEnabled();
+        },
+
+        showView: function (viewName) {
+            document.querySelectorAll('.hero-state').forEach(el => el.classList.remove('active'));
+            const el = document.getElementById(`hero-view-${viewName}`);
+            if (el) el.classList.add('active');
+        },
+
+        // ---------- Formatting / Data helpers ----------
+        fmtMoney: function (v) {
+            const n = Number(v);
+            if (!Number.isFinite(n)) return '—';
+            return `$${n.toFixed(2)}`;
+        },
+
+        fmtMoneyCompact: function (v) {
+            const n = Number(v);
+            if (!Number.isFinite(n)) return '—';
+            return `$${Math.round(n).toLocaleString()}`;
+        },
+
+        getAccountData: function (accountId) {
+            const m = (wizardState && wizardState.accountData) ? wizardState.accountData : {};
+            return m[String(accountId)] || null;
+        },
+
+        getBlueprintRegistry: function () {
+            return mvpGetBlueprintRegistry();
+        },
+
+        getBlueprintById: function (id) {
+            const r = this.getBlueprintRegistry();
+            return r && r[String(id)] ? r[String(id)] : null;
+        },
+
+        hydrateAccountOptions: function () {
+            // Update option balances from wizardState (single source of truth)
+            const main = this.getAccountData('main');
+            const b = this.getAccountData('trading-b');
+            const opts = document.querySelectorAll('#account-selector .account-option');
+            opts.forEach(el => {
+                const id = el.getAttribute('data-account');
+                const data = this.getAccountData(id);
+                const moneyEl = el.querySelector('.text-muted');
+                if (moneyEl && data) moneyEl.textContent = this.fmtMoneyCompact(data.balance);
+            });
+        },
+
+        getPinned: function () {
+            try {
+                const arr = JSON.parse(localStorage.getItem(this.STORAGE.pinned) || '[]');
+                return Array.isArray(arr) ? arr.map(String) : [];
+            } catch (_) {
+                return [];
+            }
+        },
+
+        setPinned: function (arr) {
+            try {
+                localStorage.setItem(this.STORAGE.pinned, JSON.stringify(arr));
+            } catch (_) { /* noop */ }
+        },
+
+        getRecent: function () {
+            try {
+                const arr = JSON.parse(localStorage.getItem(this.STORAGE.recent) || '[]');
+                return Array.isArray(arr) ? arr.map(String) : [];
+            } catch (_) {
+                return [];
+            }
+        },
+
+        pushRecent: function (bpId) {
+            const id = String(bpId);
+            const prev = this.getRecent().filter(x => x !== id);
+            const next = [id, ...prev].slice(0, 6);
+            try {
+                localStorage.setItem(this.STORAGE.recent, JSON.stringify(next));
+            } catch (_) { /* noop */ }
+        },
+
+        getRiskGuardConfig: function () {
+            try {
+                const cfg = JSON.parse(localStorage.getItem(this.STORAGE.riskGuard) || 'null');
+                if (cfg && typeof cfg === 'object') return cfg;
+            } catch (_) {}
+            return null;
+        },
+
+        getPendingSessions: function () {
+            try {
+                const arr = JSON.parse(localStorage.getItem('toMoon_pending_sessions') || '[]');
+                return Array.isArray(arr) ? arr : [];
+            } catch (_) {
+                return [];
+            }
+        },
+
+        getTodayLossUsedForAccount: function (accountName) {
+            const name = String(accountName || '');
+            if (!name) return 0;
+            const now = new Date();
+            const y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+            const startOfDay = new Date(y, m, d, 0, 0, 0, 0);
+            const endOfDay = new Date(y, m, d, 23, 59, 59, 999);
+
+            const sessions = this.getPendingSessions();
+            let used = 0;
+            sessions.forEach(s => {
+                if (String(s.account || '') !== name) return;
+                const end = s.endTime ? new Date(s.endTime) : null;
+                if (!end || !Number.isFinite(+end)) return;
+                if (end < startOfDay || end > endOfDay) return;
+                const pnl = Number(s.pnl || 0);
+                if (pnl < 0) used += Math.abs(pnl);
+            });
+            return used;
+        },
+
+        getWeekLossUsedForAccount: function (accountName) {
+            const name = String(accountName || '');
+            if (!name) return 0;
+
+            const now = new Date();
+            const day = now.getDay(); // 0=Sun
+            // Trading-friendly: Monday start
+            const diffToMonday = (day === 0 ? -6 : 1) - day;
+            const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday, 0, 0, 0, 0);
+            const sundayEnd = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6, 23, 59, 59, 999);
+
+            const sessions = this.getPendingSessions();
+            let used = 0;
+            sessions.forEach(s => {
+                if (String(s.account || '') !== name) return;
+                const end = s.endTime ? new Date(s.endTime) : null;
+                if (!end || !Number.isFinite(+end)) return;
+                if (end < monday || end > sundayEnd) return;
+                const pnl = Number(s.pnl || 0);
+                if (pnl < 0) used += Math.abs(pnl);
+            });
+            return used;
+        },
+
+        // ---------- State A: Setup ----------
+        selectAccount: function (accountId) {
+            this.state.accountId = String(accountId);
+
+            document.querySelectorAll('#account-selector .account-option').forEach(el => {
+                el.classList.toggle('active', el.getAttribute('data-account') === String(accountId));
+            });
+
+            const card = document.getElementById('card-account');
+            if (card) card.classList.add('completed');
+            const step = card ? card.querySelector('.step-num') : null;
+            if (step) step.textContent = '✓';
+
+            document.getElementById('account-selector').style.display = 'none';
+            document.getElementById('account-snapshot').style.display = 'block';
+
+            this.renderAccountSnapshot();
+            this.checkStartEnabled();
+        },
+
+        resetAccount: function () {
+            this.state.accountId = null;
+            const card = document.getElementById('card-account');
+            if (card) {
+                card.classList.remove('completed');
+                const step = card.querySelector('.step-num');
+                if (step) step.textContent = '1';
+            }
+            document.getElementById('account-selector').style.display = 'block';
+            document.getElementById('account-snapshot').style.display = 'none';
+            document.querySelectorAll('#account-selector .account-option').forEach(el => el.classList.remove('active'));
+            this.checkStartEnabled();
+        },
+
+        renderAccountSnapshot: function () {
+            const accountData = this.getAccountData(this.state.accountId);
+            if (!accountData) return;
+            document.getElementById('selected-account-name').textContent = accountData.name;
+
+            const cfg = this.getRiskGuardConfig();
+            const hasRiskGuard = !!(cfg && cfg.accounts && cfg.accounts[String(this.state.accountId)]);
+
+            // Limits: prefer RiskGuard config; fallback to demo riskLimit
+            let daily = null;
+            let weekly = null;
+            if (hasRiskGuard) {
+                const rc = cfg.accounts[String(this.state.accountId)];
+                daily = Number(rc.dailyLimit);
+                weekly = Number(rc.weeklyLimit);
+            } else {
+                daily = Number(accountData.riskLimit);
+                weekly = Number(accountData.riskLimit) * 5;
+            }
+
+            const used = this.getTodayLossUsedForAccount(accountData.name);
+            const weeklyUsed = this.getWeekLossUsedForAccount(accountData.name);
+            const remaining = Number.isFinite(daily) && daily > 0 ? Math.max(0, daily - used) : null;
+            const weeklyRemaining = Number.isFinite(weekly) && weekly > 0 ? Math.max(0, weekly - weeklyUsed) : null;
+            const pct = Number.isFinite(daily) && daily > 0 ? Math.max(0, Math.min(1, remaining / daily)) : null;
+
+            document.getElementById('acc-daily-limit').textContent = Number.isFinite(daily) ? this.fmtMoney(daily) : '—';
+            document.getElementById('acc-weekly-limit').textContent = Number.isFinite(weekly) ? this.fmtMoney(weekly) : '—';
+            document.getElementById('acc-used').textContent = this.fmtMoney(used);
+            const weeklyUsedEl = document.getElementById('acc-weekly-used');
+            const weeklyRemainingEl = document.getElementById('acc-weekly-remaining');
+            if (weeklyUsedEl) weeklyUsedEl.textContent = this.fmtMoney(weeklyUsed);
+            if (weeklyRemainingEl) weeklyRemainingEl.textContent = (weeklyRemaining === null) ? '—' : this.fmtMoney(weeklyRemaining);
+
+            const remainingEl = document.getElementById('acc-remaining');
+            remainingEl.textContent = (remaining === null) ? '—' : this.fmtMoney(remaining);
+            remainingEl.classList.toggle('text-danger', remaining !== null && remaining <= daily * 0.3);
+            remainingEl.classList.toggle('text-success', remaining !== null && remaining > daily * 0.6);
+
+            const fill = document.getElementById('acc-risk-fill');
+            const pctText = document.getElementById('acc-risk-pct');
+            if (fill && pctText) {
+                const percent = pct === null ? 0 : Math.round(pct * 100);
+                fill.style.width = `${percent}%`;
+                fill.style.background = percent < 30 ? 'var(--danger)' : (percent < 60 ? 'var(--warning)' : 'var(--success)');
+                pctText.textContent = pct === null ? '—' : `${percent}%`;
+            }
+
+            const warn = document.getElementById('acc-riskguard-warning');
+            if (warn) warn.style.display = hasRiskGuard ? 'none' : 'flex';
+        },
+
+        goToBlueprintSelection: function () {
+            // Selecting blueprint happens in Creating Session view
+            this.goToCreatingSession();
+        },
+
+        goToCreatingSession: function () {
+            this.state.bpFilter = 'all';
+            const allBtn = document.getElementById('bp-filter-all');
+            if (allBtn) this.setBpFilter('all', allBtn);
+            const search = document.getElementById('bp-search');
+            if (search) search.value = '';
+            this.state.bpSearch = '';
+
+            // Reset checklist gating
+            const list = document.querySelectorAll('#bp-checklist input[type="checkbox"]');
+            list.forEach(c => { c.checked = false; });
+            this.onChecklistChanged();
+            this.hideStartError();
+
+            this.showView('blueprint');
+            this.updateBlueprintGrid();
+            this.renderBpPanel();
+        },
+
+        goBackToSetup: function () {
+            this.showView('setup');
+            if (this.state.blueprintId) {
+                this.renderBlueprintBrief();
+            }
+            this.checkStartEnabled();
+        },
+
+        resetBlueprint: function () {
+            this.state.blueprintId = null;
+            const card = document.getElementById('card-blueprint');
+            if (card) {
+                card.classList.remove('completed');
+                const step = card.querySelector('.step-num');
+                if (step) step.textContent = '2';
+            }
+            document.getElementById('bp-select-btn').style.display = 'flex';
+            document.getElementById('bp-brief').style.display = 'none';
+            this.checkStartEnabled();
+        },
+
+        selectBlueprint: function (bpId) {
+            this.state.blueprintId = String(bpId);
+            this.pushRecent(this.state.blueprintId);
+            this.renderBpPanel();
+            this.updateBlueprintGrid();
+        },
+
+        renderBlueprintBrief: function () {
+            const bp = this.getBlueprintById(this.state.blueprintId);
+            if (!bp) return;
+
+            const card = document.getElementById('card-blueprint');
+            if (card) {
+                card.classList.add('completed');
+                const step = card.querySelector('.step-num');
+                if (step) step.textContent = '✓';
+            }
+
+            document.getElementById('bp-select-btn').style.display = 'none';
+            document.getElementById('bp-brief').style.display = 'block';
+            document.getElementById('selected-bp-name').textContent = bp.name || 'Blueprint';
+
+            const entry = Array.isArray(bp.entryCriteria) ? bp.entryCriteria : [];
+            const exit = Array.isArray(bp.exitCriteria) ? bp.exitCriteria : [];
+
+            const entryTop = entry.slice(0, 3);
+            const exitTop = exit.slice(0, 3);
+
+            document.getElementById('selected-bp-entry').innerHTML = entryTop.map(x => `<li>${x}</li>`).join('') || '<li>—</li>';
+            document.getElementById('selected-bp-exit').innerHTML = exitTop.map(x => `<li>${x}</li>`).join('') || '<li>—</li>';
+
+            const more = document.getElementById('selected-bp-entry-more');
+            if (more) {
+                more.textContent = entry.length > 3 ? `+${entry.length - 3} more` : '';
+            }
+        },
+
+        checkStartEnabled: function () {
+            const btn = document.getElementById('btn-start-session');
+            const summary = document.getElementById('setup-summary-text');
+            const hint = document.getElementById('setup-hint-text');
+
+            if (!btn || !summary || !hint) return;
+
+            if (!this.state.accountId) {
+                btn.disabled = true;
+                summary.textContent = '';
+                hint.textContent = 'Choose an account';
+                return;
+            }
+            if (!this.state.blueprintId) {
+                btn.disabled = true;
+                summary.textContent = '';
+                hint.textContent = 'Select a blueprint';
+                return;
+            }
+
+            const acc = this.getAccountData(this.state.accountId);
+            const bp = this.getBlueprintById(this.state.blueprintId);
+            btn.disabled = false;
+            hint.textContent = '';
+
+            const accLabel = acc ? acc.name : 'Account';
+            const bal = acc ? this.fmtMoneyCompact(acc.balance) : '—';
+            const bpName = bp ? bp.name : 'Blueprint';
+            summary.textContent = `Account: ${accLabel} · Balance: ${bal} · Blueprint: ${bpName}`;
+        },
+
+        startManualSession: function () {
+            window.location.href = '../execute/index.html?view=sessions&mode=manual';
+        },
+
+        // ---------- State B: Creating Session ----------
+        setBpFilter: function (name, btnEl) {
+            this.state.bpFilter = String(name || 'all');
+            document.querySelectorAll('.bp-filter-btn').forEach(b => b.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+            this.updateBlueprintGrid();
+        },
+
+        updateBlueprintGrid: function () {
+            const container = document.getElementById('blueprint-grid-container');
+            if (!container) return;
+            const reg = this.getBlueprintRegistry();
+            if (!reg || typeof window.tmGetMvpBlueprintsList !== 'function') {
+                container.innerHTML = '<div class="text-muted">Blueprints not available.</div>';
+                return;
+            }
+
+            const searchEl = document.getElementById('bp-search');
+            this.state.bpSearch = searchEl ? String(searchEl.value || '') : (this.state.bpSearch || '');
+            const q = this.state.bpSearch.trim().toLowerCase();
+
+            const pinned = new Set(this.getPinned());
+            const recent = new Set(this.getRecent());
+
+            let list = window.tmGetMvpBlueprintsList();
+            if (!Array.isArray(list)) list = [];
+
+            if (this.state.bpFilter === 'pinned') {
+                list = list.filter(bp => pinned.has(String(bp.id)));
+            } else if (this.state.bpFilter === 'recent') {
+                list = list.filter(bp => recent.has(String(bp.id)));
+            }
+
+            if (q) {
+                list = list.filter(bp => {
+                    const name = String(bp.name || '').toLowerCase();
+                    const sym = String(bp.market && bp.market.symbol || '').toLowerCase();
+                    const tags = Array.isArray(bp.tags) ? bp.tags.join(' ').toLowerCase() : '';
+                    return name.includes(q) || sym.includes(q) || tags.includes(q);
+                });
+            }
+
+            if (this.state.bpFilter === 'pinned') {
+                list = list.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+            }
+
+            const activeId = String(this.state.blueprintId || '');
+            container.innerHTML = list.map(bp => {
+                const id = String(bp.id || '');
+                const isActive = id && id === activeId;
+                const sym = (bp.market && bp.market.symbol) ? String(bp.market.symbol) : 'Any';
+                const minRR = bp.minRR || '—';
+                const maxRisk = bp.maxRiskPerTrade || '—';
+                const tags = Array.isArray(bp.tags) ? bp.tags.slice(0, 3) : [];
+                const isPinned = pinned.has(id);
+                const pinLabel = isPinned ? 'Pinned' : 'Pin';
+                const pinStyle = isPinned ? 'background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.35); color: var(--text-main);' : '';
+
+                return `
+                    <div class="bp-card" style="${isActive ? 'border-color: var(--primary); box-shadow: 0 0 0 1px rgba(59,130,246,0.35);' : ''}" onclick="HeroModule.selectBlueprint('${id}')">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;">
+                            <div>
+                                <div style="font-weight:800; font-size:14px; margin-bottom:2px;">${bp.name || 'Blueprint'}</div>
+                                <div class="text-muted" style="font-size:12px;">${sym}${tags.length ? ' · ' + tags.join(' · ') : ''}</div>
+                            </div>
+                            <button class="btn-secondary" style="padding:4px 8px; font-size:11px; ${pinStyle}" onclick="HeroModule.togglePin('${id}', event)">${pinLabel}</button>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div class="risk-chip">
+                                <div class="risk-chip-label">Min RR</div>
+                                <div class="risk-chip-value">${minRR}</div>
+                            </div>
+                            <div class="risk-chip">
+                                <div class="risk-chip-label">Max Risk / Trade</div>
+                                <div class="risk-chip-value">${maxRisk}</div>
+                            </div>
+                        </div>
+
+                        <div class="text-muted" style="font-size:12px; margin-top:10px;">
+                            Checklist: 3 quick confirmations
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<div class="text-muted" style="padding:10px;">No blueprints found.</div>';
+        },
+
+        togglePin: function (bpId, ev) {
+            if (ev) ev.stopPropagation();
+            const id = String(bpId);
+            const set = new Set(this.getPinned());
+            if (set.has(id)) set.delete(id);
+            else set.add(id);
+            this.setPinned(Array.from(set));
+            this.updateBlueprintGrid();
+            this.renderBpPanel();
+        },
+
+        togglePinSelected: function () {
+            if (!this.state.blueprintId) return;
+            this.togglePin(this.state.blueprintId, null);
+        },
+
+        renderBpPanel: function () {
+            const empty = document.getElementById('bp-panel-empty');
+            const content = document.getElementById('bp-panel-content');
+            const startBtn = document.getElementById('bp-start-now');
+
+            if (!this.state.blueprintId) {
+                if (empty) empty.style.display = 'block';
+                if (content) content.style.display = 'none';
+                if (startBtn) startBtn.disabled = true;
+                return;
+            }
+
+            const bp = this.getBlueprintById(this.state.blueprintId);
+            if (!bp) return;
+
+            if (empty) empty.style.display = 'none';
+            if (content) content.style.display = 'block';
+
+            document.getElementById('bp-panel-name').textContent = bp.name || 'Blueprint';
+            const sym = (bp.market && bp.market.symbol) ? String(bp.market.symbol) : 'Any';
+            document.getElementById('bp-panel-meta').textContent = `${sym} · Win Rate ${mvpFmtWinRate(bp)} · Avg RR ${mvpFmtAvgRR(bp)}`;
+            document.getElementById('bp-panel-minrr').textContent = bp.minRR || '—';
+            document.getElementById('bp-panel-maxrisk').textContent = bp.maxRiskPerTrade || '—';
+
+            const pinned = new Set(this.getPinned());
+            const pinBtn = document.getElementById('bp-panel-pin-btn');
+            if (pinBtn) pinBtn.textContent = pinned.has(String(this.state.blueprintId)) ? 'Unpin' : 'Pin';
+
+            this.onChecklistChanged();
+        },
+
+        onChecklistChanged: function () {
+            const checks = Array.from(document.querySelectorAll('#bp-checklist input[type="checkbox"]'));
+            const startBtn = document.getElementById('bp-start-now');
+            const hasBlueprint = !!this.state.blueprintId;
+            const hasAccount = !!this.state.accountId;
+
+            // Minimal gating for “confirmation feel”: require the first checkbox checked.
+            const ok = checks.length > 0 ? !!checks[0].checked : true;
+            if (startBtn) startBtn.disabled = !(hasAccount && hasBlueprint && ok);
+        },
+
+        hideStartError: function () {
+            const el = document.getElementById('bp-start-error');
+            if (!el) return;
+            el.style.display = 'none';
+            el.textContent = '';
+        },
+
+        showStartError: function (msg) {
+            const el = document.getElementById('bp-start-error');
+            if (!el) return;
+            el.style.display = 'block';
+            el.textContent = String(msg || 'Failed to start session.');
+        },
+
+        startNow: function () {
+            this.hideStartError();
+            if (!this.state.accountId) {
+                this.showStartError('Choose an account first.');
+                return;
+            }
+            if (!this.state.blueprintId) {
+                this.showStartError('Select a blueprint first.');
+                return;
+            }
+
+            const checks = Array.from(document.querySelectorAll('#bp-checklist input[type="checkbox"]'));
+            const ok = checks.length > 0 ? !!checks[0].checked : true;
+            if (!ok) {
+                this.showStartError('Confirm you know your remaining loss today.');
+                return;
+            }
+
+            const acc = this.getAccountData(this.state.accountId);
+            const bp = this.getBlueprintById(this.state.blueprintId);
+            if (!acc || !bp) {
+                this.showStartError('Invalid selection.');
+                return;
+            }
+
+            // Persist selection back to Setup view
+            this.renderBlueprintBrief();
+            this.renderAccountSnapshot();
+            this.checkStartEnabled();
+
+            try {
+                if (typeof startLiveSession !== 'function') {
+                    this.showStartError('startLiveSession() not available.');
+                    return;
+                }
+
+                const state = startLiveSession({
+                    name: `${bp.name} Session`,
+                    account: acc.name,
+                    accountId: this.state.accountId,
+                    blueprint: bp.name,
+                    blueprintId: this.state.blueprintId,
+                    riskLimit: acc.riskLimit
+                });
+
+                if (!state || !state.sessionId) {
+                    this.showStartError('Failed to create session.');
+                    return;
+                }
+
+                if (typeof showTopbarToast === 'function') {
+                    showTopbarToast('Session started. Stay disciplined.');
+                }
+
+                // Move to live
+                this.init();
+            } catch (e) {
+                this.showStartError(e && e.message ? e.message : 'Failed to start session.');
+            }
+        },
+
+        // ---------- State C: Live ----------
+        getBlueprintForLiveSession: function (sess) {
+            const reg = this.getBlueprintRegistry();
+            if (!reg) return null;
+            const id = sess && sess.blueprintId ? String(sess.blueprintId) : '';
+            if (id && reg[id]) return reg[id];
+
+            // Fallback: match by name
+            const name = String(sess && (sess.blueprint || '') || '').toLowerCase();
+            if (!name) return null;
+            const keys = Object.keys(reg);
+            for (const k of keys) {
+                const bp = reg[k];
+                if (bp && String(bp.name || '').toLowerCase() === name) return bp;
+            }
+            return null;
+        },
+
+        renderLiveHeaderOnly: function () {
+            const session = this.state.liveSession;
+            if (!session) return;
+            const title = document.getElementById('live-session-title');
+            const pnlEl = document.getElementById('live-pnl-display');
+            if (title) title.textContent = session.sessionName || 'Live Session';
+
+            if (pnlEl) {
+                const pnl = Number(session.pnl || 0);
+                const sign = pnl >= 0 ? '+' : '-';
+                pnlEl.textContent = `${sign}$${Math.abs(pnl).toFixed(2)}`;
+                pnlEl.style.color = pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+            }
+        },
+
+        renderLiveState: function () {
+            const session = this.state.liveSession;
+            if (!session) return;
+
+            this.renderLiveHeaderOnly();
+            this.updateLiveTimer();
+
+            const bp = this.getBlueprintForLiveSession(session);
+            const entry = bp && Array.isArray(bp.entryCriteria) ? bp.entryCriteria : ['—'];
+            const exit = bp && Array.isArray(bp.exitCriteria) ? bp.exitCriteria : ['—'];
+            const noise = bp && Array.isArray(bp.noiseFilters) ? bp.noiseFilters : ['—'];
+
+            const entryEl = document.getElementById('live-entry-list');
+            const exitEl = document.getElementById('live-exit-list');
+            const noiseEl = document.getElementById('live-noise-list');
+            if (entryEl) entryEl.innerHTML = entry.map(x => `<li>${x}</li>`).join('');
+            if (exitEl) exitEl.innerHTML = exit.map(x => `<li>${x}</li>`).join('');
+            if (noiseEl) noiseEl.innerHTML = noise.map(x => `<li>${x}</li>`).join('');
+        },
+
+        updateLiveTimer: function () {
+            if (!this.state.liveSession) return;
+            const timer = document.getElementById('live-timer');
+            if (!timer) return;
+            if (typeof getSessionDuration === 'function') {
+                timer.textContent = getSessionDuration(this.state.liveSession.startTime);
+                return;
+            }
+
+            const start = new Date(this.state.liveSession.startTime);
+            const now = new Date();
+            const diff = Math.floor((now - start) / 1000);
+            const h = Math.floor(diff / 3600).toString().padStart(2, '0');
+            const m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0');
+            const s = (diff % 60).toString().padStart(2, '0');
+            timer.textContent = `${h}:${m}:${s}`;
+        },
+
+        endSession: function () {
+            const s = this.state.liveSession;
+            if (!s || !s.sessionId) return;
+            if (typeof endLiveSession !== 'function') return;
+            endLiveSession(s.sessionId);
+            this.init();
+        },
+
+        switchLiveTab: function (tabName, el) {
+            document.querySelectorAll('.live-tab').forEach(t => t.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            document.querySelectorAll('.live-content-area').forEach(c => c.style.display = 'none');
+            const target = document.getElementById(`live-content-${tabName}`);
+            if (target) target.style.display = 'block';
+        }
+    };
+    
+    // Auto-init on load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => HeroModule.init());
+    } else {
+        HeroModule.init();
+    }
+
+</script>
+
+
+</body>
+</html>
