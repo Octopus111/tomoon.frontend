@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1400, initial-scale=0.3, maximum-scale=3, user-scalable=yes">
+  <title>Strategy Builder — ToMoon Quant</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <style>
+    /* ── Three-column layout ── */
+    .canvas-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr 280px;
+      gap: 0;
+      height: calc(100vh - var(--topbar-height) - 48px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    @media (max-width: 1000px) { .canvas-layout { grid-template-columns: 200px 1fr; } }
+
+    /* ── LEFT: Node Palette ── */
+    .node-palette {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .palette-header {
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 800; letter-spacing: .10em;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+    .palette-search {
+      padding: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .palette-search input {
+      width: 100%; padding: 7px 10px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--bg-surface);
+      color: var(--text-main); font-size: 12px; outline: none;
+    }
+    .palette-search input:focus { border-color: var(--border-focus); }
+    .palette-list {
+      flex: 1; overflow-y: auto; padding: 8px;
+      scrollbar-width: thin;
+    }
+    .palette-group-label {
+      font-size: 10px; font-weight: 800; letter-spacing: .10em;
+      text-transform: uppercase; color: var(--text-dim);
+      padding: 12px 8px 4px;
+    }
+    .palette-node {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; margin: 2px 0; border-radius: var(--radius-sm);
+      cursor: grab; transition: all .12s;
+      border: 1px solid transparent; font-size: 12px; font-weight: 600;
+      color: var(--text-main);
+    }
+    .palette-node:hover { background: var(--bg-hover); border-color: var(--border-subtle); }
+    .palette-node .pn-dot {
+      width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0;
+    }
+    .palette-node .pn-sub { font-size: 10px; color: var(--text-dim); margin-left: auto; }
+
+    /* ── CENTER: Canvas ── */
+    .canvas-viewport {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(59,130,246,0.02), transparent 70%),
+        var(--bg-primary);
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .canvas-viewport.panning { cursor: grab; }
+    .canvas-viewport.panning.dragging { cursor: grabbing; }
+    /* Dot grid background */
+    .canvas-viewport::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+    .canvas-toolbar {
+      position: absolute; top: 12px; left: 12px; right: 12px;
+      display: flex; align-items: center; justify-content: flex-end;
+      z-index: 10; pointer-events: none;
+    }
+    .canvas-toolbar > * { pointer-events: auto; }
+    .toolbar-group {
+      display: flex; gap: 4px; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 4px; box-shadow: var(--shadow-card);
+    }
+    .tb-btn {
+      padding: 6px 10px; border-radius: var(--radius-sm);
+      border: none; background: transparent; color: var(--text-muted);
+      font-size: 11px; font-weight: 700; cursor: pointer; transition: all .12s;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .tb-btn:hover { background: var(--bg-hover); color: var(--text-main); }
+    .tb-btn.active { background: var(--primary-soft); color: var(--primary); }
+    .tb-btn svg { width: 14px; height: 14px; }
+
+    .zoom-display {
+      font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+      padding: 4px 8px;
+    }
+
+    /* Canvas Nodes */
+    .canvas-nodes {
+      position: absolute; inset: 0;
+      transform-origin: 0 0;
+    }
+
+    .cnode {
+      position: absolute;
+      min-width: 180px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      cursor: move;
+      user-select: none;
+      transition: box-shadow .15s, border-color .15s;
+      z-index: 1;
+    }
+    .cnode:hover { border-color: rgba(255,255,255,0.16); }
+    .cnode.selected { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft), var(--shadow-card); z-index: 10; }
+    .cnode.running { border-color: var(--success); }
+
+    .cnode-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+    .cnode-header .cn-dot { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; }
+    .cnode-header .cn-title { font-size: 12px; font-weight: 800; flex: 1; }
+    .cnode-header .cn-type { font-size: 10px; color: var(--text-dim); font-family: var(--font-mono); }
+    .cnode-header .cn-menu {
+      width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-dim); font-size: 14px; border-radius: 4px;
+    }
+    .cnode-header .cn-menu:hover { background: var(--bg-hover); color: var(--text-main); }
+
+    .cnode-body { padding: 10px 14px; font-size: 12px; }
+
+    .cnode-params { display: flex; flex-direction: column; gap: 6px; }
+    .cp-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .cp-row .cp-label { color: var(--text-muted); font-size: 11px; }
+    .cp-row .cp-val {
+      font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+      padding: 3px 8px; border-radius: 4px;
+      background: var(--bg-surface); border: 1px solid var(--border-subtle);
+      color: var(--text-main); text-align: right; width: 70px; outline: none;
+    }
+    .cp-row .cp-val:focus { border-color: var(--border-focus); }
+
+    .cnode-ports {
+      display: flex; justify-content: space-between;
+      padding: 6px 14px 10px;
+    }
+    .port {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 10px; color: var(--text-dim); cursor: crosshair;
+      padding: 4px; margin: -4px; /* Expand hit area */
+      position: relative;
+    }
+    .port-dot {
+      width: 12px; height: 12px; border-radius: 999px;
+      border: 2px solid var(--border);
+      background: var(--bg-card);
+      transition: all .12s;
+    }
+    /* Hover effects */
+    .port:hover .port-dot { border-color: var(--primary); background: var(--primary); transform: scale(1.2); }
+    .port-out:hover .port-dot { border-color: var(--accent); background: var(--accent); }
+
+    /* Dragging states */
+    .canvas-viewport.dragging-connection .port-in { opacity: 0.3; pointer-events: none; }
+    .canvas-viewport.dragging-connection .port-in.target-valid { opacity: 1; pointer-events: auto; }
+    .canvas-viewport.dragging-connection .port-in.target-valid .port-dot {
+      background: var(--success); border-color: var(--success);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    }
+    
+    .port.connected .port-dot { background: var(--success); border-color: var(--success); }
+
+    /* SVG Connections */
+    .canvas-connections {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 5; /* Ensure lines are ABOVE nodes so they are visible */
+    }
+    .canvas-connections path {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 2.5;
+      opacity: 0.8;
+      transition: stroke-width 0.15s;
+    }
+    .canvas-connections path:hover { stroke-width: 4; stroke: var(--primary-light); cursor: pointer; pointer-events: auto; }
+    
+    .canvas-connections path.preview {
+      stroke: var(--accent);
+      opacity: 1;
+      stroke-width: 3;
+      stroke-dasharray: 5 3;
+      animation: dash 0.5s linear infinite;
+    }
+    @keyframes dash {
+      to { stroke-dashoffset: -10; }
+    }
+
+    /* ── RIGHT: Inspector ── */
+    .inspector {
+      background: var(--bg-card);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .inspector-header {
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 800; letter-spacing: .10em;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+    .inspector-body {
+      flex: 1; overflow-y: auto; padding: 16px;
+      scrollbar-width: thin;
+    }
+    .insp-section { margin-bottom: 20px; }
+    .insp-label {
+      font-size: 10px; font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px;
+    }
+    .insp-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 0; border-bottom: 1px solid var(--border-subtle);
+      font-size: 12px;
+    }
+    .insp-row:last-child { border-bottom: none; }
+    .insp-row .ik { color: var(--text-muted); }
+    .insp-row .iv { font-family: var(--font-mono); font-weight: 700; }
+    .insp-input {
+      padding: 5px 8px; border-radius: 4px;
+      border: 1px solid var(--border); background: var(--bg-surface);
+      color: var(--text-main); font-size: 11px; width: 90px; text-align: right;
+      outline: none; font-family: var(--font-mono);
+    }
+    .insp-input:focus { border-color: var(--border-focus); }
+    .insp-select {
+      padding: 5px 8px; border-radius: 4px;
+      border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text-main); font-size: 11px; outline: none;
+    }
+
+    /* AI Training config */
+    .ai-card {
+      background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(59,130,246,0.05));
+      border: 1px solid rgba(167,139,250,0.25);
+      border-radius: var(--radius-sm);
+      padding: 12px; margin-top: 12px;
+    }
+    .ai-card h5 { margin: 0 0 8px; font-size: 12px; font-weight: 800; color: var(--accent); }
+
+    /* Strategy Config in Inspector */
+    .strat-cfg { margin-bottom: 16px; }
+    .strat-cfg .insp-row .cfg-input {
+      padding: 5px 8px; border-radius: 4px;
+      border: 1px solid var(--border); background: var(--bg-surface);
+      color: var(--text-main); font-size: 11px; width: 110px; text-align: right;
+      outline: none; font-family: var(--font-mono);
+    }
+    .strat-cfg .insp-row .cfg-input:focus { border-color: var(--border-focus); }
+    .spec-preview {
+      margin-top: 8px;
+      background: rgba(0,0,0,0.20);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      max-height: 200px;
+      overflow: auto;
+      scrollbar-width: thin;
+    }
+    .spec-preview pre {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-muted); white-space: pre-wrap; margin: 0;
+    }
+
+    /* Run bar */
+    .run-bar {
+      padding: 12px 16px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-card);
+    }
+
+    /* Mini badge in toolbar */
+    .node-count {
+      font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);
+      background: var(--bg-surface); padding: 2px 8px; border-radius: var(--radius-pill);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Drop zone highlight */
+    .canvas-viewport.drag-hover::after {
+      content: 'Drop to place node';
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(59,130,246,0.06);
+      color: var(--primary); font-size: 16px; font-weight: 800;
+      pointer-events: none; z-index: 50;
+      border: 2px dashed var(--primary);
+      border-radius: var(--radius-md);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div class="app-main" id="app-main">
+      <div class="page anim-in" style="padding-bottom: 8px;">
+
+        <div class="section-header" style="margin-bottom: 12px;">
+          <div>
+            <h3 class="section-title">Strategy Builder</h3>
+            <p class="section-subtitle">拖拽模块 · 因子组合 · 装配 Blueprint · 回测 · AI 优化</p>
+          </div>
+          <div class="flex gap-sm">
+            <button class="btn btn-sm" onclick="resetCanvas()">Clear</button>
+            <button class="btn btn-sm" onclick="loadDemoFlow()">Demo Flow</button>
+            <button class="btn btn-sm btn-primary" onclick="runBacktest()">▶ Run Backtest</button>
+            <button class="btn btn-sm btn-success" onclick="generateSpec()">Generate Spec</button>
+            <button class="btn btn-sm" onclick="exportFlow()">Export JSON</button>
+          </div>
+        </div>
+
+        <div class="canvas-layout">
+
+          <!-- LEFT: Node Palette -->
+          <div class="node-palette">
+            <div class="palette-header">Node Library</div>
+            <div class="palette-search">
+              <input type="text" placeholder="Search nodes…" id="paletteSearch" oninput="filterNodes(this.value)">
+            </div>
+            <div class="palette-list" id="paletteList"></div>
+          </div>
+
+          <!-- CENTER: Canvas -->
+          <div class="canvas-viewport" id="canvasViewport"
+               ondragover="event.preventDefault(); this.classList.add('drag-hover')"
+               ondragleave="this.classList.remove('drag-hover')"
+               ondrop="handleCanvasDrop(event)">
+
+            <div class="canvas-toolbar">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <span class="node-count" id="nodeCount">0 nodes</span>
+                <span class="node-count" id="connCount">0 connections</span>
+              </div>
+            </div>
+
+            <svg class="canvas-connections" id="canvasConnections"></svg>
+            <div class="canvas-nodes" id="canvasNodes"></div>
+          </div>
+
+          <!-- RIGHT: Inspector -->
+          <div class="inspector">
+            <div class="inspector-header">Inspector</div>
+            <div class="inspector-body" id="inspectorBody">
+              <div style="text-align:center;padding:40px 16px;color:var(--text-dim);">
+                <div style="font-size:32px;opacity:0.3;margin-bottom:12px;">⬅</div>
+                <div style="font-size:13px;font-weight:700;">Select a node</div>
+                <div style="font-size:12px;margin-top:4px;">Click any node on the canvas to inspect and configure its parameters</div>
+              </div>
+            </div>
+            <div class="run-bar" style="flex-wrap:wrap;">
+              <button class="btn btn-sm btn-primary" style="flex:1;" onclick="runBacktest()">▶ Run Pipeline</button>
+              <button class="btn btn-sm btn-success" style="flex:1;" onclick="submitToBacktest()">Submit to Research →</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/nav.js"></script>
+  <script src="../shared/mock-data.js"></script>
+  <script>
+    renderQuantSidebar('canvas');
+    renderQuantTopbar('Strategy Builder', [
+      { label: 'ToMoon Quant', href: '../dashboard/' },
+      { label: 'Strategy Builder' }
+    ]);
+
+    /* ═══════════════════════════════════════════
+       STRATEGY CONFIG STATE (merged from Blueprint)
+       ═══════════════════════════════════════════ */
+    const stratConfig = {
+      strategy_id: 'STR-NEW',
+      market_id: 'CME_ES',
+      regime: 'All',
+      version: 'v0.1',
+      execution: { commission: 2.50, slippage_ticks: 1, latency_ms: 15, fill_model: 'conservative' },
+      risk: { max_risk_per_trade: 50, min_rr: 1.8, max_trades_session: 5, dd_levels: [-200, -400, -600] },
+    };
+
+    /* ═══════════════════════════════════════════
+       NODE TYPE DEFINITIONS
+       ═══════════════════════════════════════════ */
+    const NODE_TYPES = {
+      // Data Import
+      data_feed: {
+        label: 'Data Feed',
+        group: 'Data Import',
+        color: 'var(--primary)',
+        inputs: [],
+        outputs: ['bars', 'ticks'],
+        params: { source: 'Rithmic', instrument: 'ES', timeframe: '1m', mode: 'historical' },
+        paramSpec: {
+          source: { kind: 'select', options: ['Rithmic', 'Binance', 'Bybit'] },
+          instrument: { kind: 'search', options: (node) => getInstrumentOptions(node.params.source) },
+          timeframe: { kind: 'select', options: ['1m', '5m', '15m', '1h', '4h', '1d'] },
+          mode: { kind: 'select', options: ['historical', 'live'] },
+        }
+      },
+
+      // Factors
+      factor_mom: {
+        label: 'Momentum Factor',
+        group: 'Factors',
+        color: 'var(--accent)',
+        inputs: ['bars'],
+        outputs: ['signal'],
+        params: { period: 14, smoothing: 3 },
+        paramSpec: {
+          period: { kind: 'number', min: 2, max: 300, step: 1 },
+          smoothing: { kind: 'number', min: 1, max: 50, step: 1 },
+        }
+      },
+      factor_vol: {
+        label: 'Volatility Factor',
+        group: 'Factors',
+        color: 'var(--accent)',
+        inputs: ['bars'],
+        outputs: ['signal'],
+        params: { atr_period: 14, multiplier: 2.0 },
+        paramSpec: {
+          atr_period: { kind: 'number', min: 2, max: 200, step: 1 },
+          multiplier: { kind: 'number', min: 0.1, max: 10, step: 0.1 },
+        }
+      },
+
+      // Combination
+      combine_score: {
+        label: 'Factor Scorer',
+        group: 'Combination',
+        color: 'var(--warning)',
+        inputs: ['signal_a', 'signal_b', 'signal_c'],
+        outputs: ['score'],
+        params: { method: 'weighted_sum', weights: '0.4, 0.3, 0.3' },
+        paramSpec: {
+          method: { kind: 'select', options: ['weighted_sum', 'zscore_sum', 'rank_sum'] },
+          weights: { kind: 'text', placeholder: '0.4,0.3,0.3' },
+        }
+      },
+
+
+      // Quality
+      filter_regime: {
+        label: 'Regime Filter',
+        group: 'Quality',
+        color: 'var(--success)',
+        inputs: ['score', 'bars'],
+        outputs: ['filtered'],
+        params: { regime: 'Trending', confidence_min: 0.6 },
+        paramSpec: {
+          regime: { kind: 'select', options: ['Trending', 'MeanRevert', 'HighVol', 'LowVol'] },
+          confidence_min: { kind: 'number', min: 0, max: 1, step: 0.05 },
+        }
+      },
+
+      // Execution
+      entry_plan: {
+        label: 'Entry Plan',
+        group: 'Execution',
+        color: 'var(--danger)',
+        inputs: ['filtered'],
+        outputs: ['orders'],
+        params: { type: 'Limit', offset_ticks: 1, max_entries: 3 },
+        paramSpec: {
+          type: { kind: 'select', options: ['Market', 'Limit', 'Stop'] },
+          offset_ticks: { kind: 'number', min: 0, max: 100, step: 1 },
+          max_entries: { kind: 'number', min: 1, max: 50, step: 1 },
+        }
+      },
+      exit_plan: {
+        label: 'Exit Plan',
+        group: 'Execution',
+        color: 'var(--danger)',
+        inputs: ['orders'],
+        outputs: ['trades'],
+        params: { take_profit: '2R', stop_loss: '1R', trailing: true },
+        paramSpec: {
+          take_profit: { kind: 'select', options: ['1R', '2R', '3R', 'ATR(2)'] },
+          stop_loss: { kind: 'select', options: ['0.5R', '1R', '1.5R', 'ATR(1)'] },
+          trailing: { kind: 'bool' },
+        }
+      },
+      risk_mgr: {
+        label: 'Risk Manager',
+        group: 'Execution',
+        color: 'var(--danger)',
+        inputs: ['trades'],
+        outputs: ['sized'],
+        params: { method: 'fixed_dollar', risk_per_trade: 50, max_position: 4 },
+        paramSpec: {
+          method: { kind: 'select', options: ['fixed_dollar', 'fixed_fraction', 'kelly'] },
+          risk_per_trade: { kind: 'number', min: 1, max: 100000, step: 1 },
+          max_position: { kind: 'number', min: 1, max: 1000, step: 1 },
+        }
+      },
+
+      // Backtest & Output
+      backtest_eng: {
+        label: 'Backtest Engine',
+        group: 'Backtest',
+        color: 'var(--primary)',
+        inputs: ['sized'],
+        outputs: ['results'],
+        params: { commission: 2.50, slippage: 1, start_capital: 10000, fill: 'next_bar' },
+        paramSpec: {
+          commission: { kind: 'number', min: 0, max: 1000, step: 0.25 },
+          slippage: { kind: 'number', min: 0, max: 50, step: 1 },
+          start_capital: { kind: 'number', min: 100, max: 100000000, step: 100 },
+          fill: { kind: 'select', options: ['next_bar', 'mid', 'bid_ask', 'market'] },
+        }
+      },
+      report_gen: {
+        label: 'Report Generator',
+        group: 'Backtest',
+        color: 'var(--primary)',
+        inputs: ['results'],
+        outputs: [],
+        params: { metrics: 'sharpe,maxdd,pf,winrate', charts: true, export: 'html' },
+        paramSpec: {
+          charts: { kind: 'bool' },
+          export: { kind: 'select', options: ['html', 'json', 'csv'] },
+          metrics: { kind: 'text', placeholder: 'sharpe,maxdd,pf,winrate' },
+        }
+      },
+    };
+
+    /* ═══════════════════════════════════════════
+       STATE
+       ═══════════════════════════════════════════ */
+    let nodes = [];
+    let connections = [];
+    let selectedNodeId = null;
+    let connectFrom = null;
+    let connectPreview = null;
+    let connecting = false;
+    let nextId = 1;
+    let dragNodeId = null;
+    let dragOffset = { x: 0, y: 0 };
+
+    // Viewport transform (pan/zoom)
+    const view = { x: 0, y: 0, zoom: 1 };
+    let isSpaceDown = false;
+    let isPanning = false;
+    let panStart = { x: 0, y: 0, vx: 0, vy: 0 };
+
+    function clampZoom(z) {
+      return Math.max(0.4, Math.min(2.25, z));
+    }
+
+    function applyViewTransform() {
+      const nodesEl = document.getElementById('canvasNodes');
+      if (!nodesEl) return;
+      const t = `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`;
+      nodesEl.style.transformOrigin = '0 0';
+      nodesEl.style.transform = t;
+
+      // Connections are drawn in viewport coordinates (screen-space),
+      // so we must redraw whenever the view transform changes.
+      if (typeof drawConnections === 'function') drawConnections();
+    }
+
+    function clientToWorld(clientX, clientY) {
+      const viewport = document.getElementById('canvasViewport');
+      const rect = viewport.getBoundingClientRect();
+      const sx = clientX - rect.left;
+      const sy = clientY - rect.top;
+      return {
+        x: (sx - view.x) / view.zoom,
+        y: (sy - view.y) / view.zoom,
+      };
+    }
+
+    function fitViewToNodes() {
+      if (!nodes.length) {
+        view.x = 0; view.y = 0; view.zoom = 1;
+        applyViewTransform();
+        return;
+      }
+      requestAnimationFrame(() => {
+        const viewport = document.getElementById('canvasViewport');
+        const vw = Math.max(1, viewport.clientWidth);
+        const vh = Math.max(1, viewport.clientHeight);
+        const pad = 36;
+
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        nodes.forEach(n => {
+          const el = document.getElementById('node-' + n.id);
+          const w = el ? el.offsetWidth : 200;
+          const h = el ? el.offsetHeight : 140;
+          minX = Math.min(minX, n.x);
+          minY = Math.min(minY, n.y);
+          maxX = Math.max(maxX, n.x + w);
+          maxY = Math.max(maxY, n.y + h);
+        });
+
+        const contentW = Math.max(1, maxX - minX);
+        const contentH = Math.max(1, maxY - minY);
+        const z = clampZoom(Math.min((vw - pad * 2) / contentW, (vh - pad * 2) / contentH));
+
+        view.zoom = z;
+        view.x = pad - minX * z;
+        view.y = pad - minY * z;
+        applyViewTransform();
+      });
+    }
+
+    const INSTRUMENTS_BY_SOURCE = {
+      Rithmic: ['ES', 'NQ', 'YM', 'RTY', 'CL', 'GC', '6E', 'ZN'],
+      Binance: ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT'],
+      Bybit: ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'DOGEUSDT'],
+    };
+
+    function getInstrumentOptions(source) {
+      return INSTRUMENTS_BY_SOURCE[source] || [];
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function getParamSpec(node, key) {
+      const def = NODE_TYPES[node.type];
+      return (def && def.paramSpec && def.paramSpec[key]) || { kind: 'text' };
+    }
+
+    function parseParamValue(spec, raw) {
+      if (!spec) return raw;
+      if (spec.kind === 'bool') {
+        if (raw === true || raw === false) return raw;
+        const v = String(raw).toLowerCase();
+        return v === 'true' || v === '1' || v === 'yes';
+      }
+      if (spec.kind === 'number') {
+        const num = Number(raw);
+        return Number.isFinite(num) ? num : raw;
+      }
+      return raw;
+    }
+
+    function normalizeNodeParams(node) {
+      if (node.type === 'data_feed') {
+        const src = node.params.source;
+        const opts = getInstrumentOptions(src);
+        if (opts.length > 0 && !opts.includes(node.params.instrument)) {
+          node.params.instrument = opts[0];
+        }
+      }
+    }
+
+    function resolveOptions(spec, node) {
+      if (!spec || !spec.options) return [];
+      if (typeof spec.options === 'function') return spec.options(node) || [];
+      return spec.options;
+    }
+
+    function renderParamControl(node, key, context) {
+      const spec = getParamSpec(node, key);
+      const rawVal = node.params[key];
+      const val = escapeHtml(rawVal);
+
+      const cls = context === 'inspector' ? (spec.kind === 'select' || spec.kind === 'bool' ? 'insp-select' : 'insp-input') : 'cp-val';
+
+      if (spec.kind === 'select') {
+        const opts = resolveOptions(spec, node);
+        return `<select class="${cls}" onchange="updateParam(${node.id},'${key}',this.value)">
+          ${opts.map(o => {
+            const ov = escapeHtml(o);
+            const selected = String(rawVal) === String(o) ? 'selected' : '';
+            return `<option value="${ov}" ${selected}>${ov}</option>`;
+          }).join('')}
+        </select>`;
+      }
+
+      if (spec.kind === 'bool') {
+        const v = !!rawVal;
+        return `<select class="${cls}" onchange="updateParam(${node.id},'${key}',this.value)">
+          <option value="true" ${v ? 'selected' : ''}>true</option>
+          <option value="false" ${!v ? 'selected' : ''}>false</option>
+        </select>`;
+      }
+
+      if (spec.kind === 'search') {
+        const dlId = `dl-${node.id}-${key}`;
+        const opts = resolveOptions(spec, node);
+        const placeholder = escapeHtml(spec.placeholder || '');
+        return `
+          <input class="${cls}" value="${val}" list="${dlId}" placeholder="${placeholder}" onchange="updateParam(${node.id},'${key}',this.value)" />
+          <datalist id="${dlId}">
+            ${opts.map(o => `<option value="${escapeHtml(o)}"></option>`).join('')}
+          </datalist>
+        `;
+      }
+
+      if (spec.kind === 'number') {
+        const min = spec.min ?? '';
+        const max = spec.max ?? '';
+        const step = spec.step ?? 'any';
+        return `<input class="${cls}" type="number" value="${val}" min="${min}" max="${max}" step="${step}" onchange="updateParam(${node.id},'${key}',this.value)" />`;
+      }
+
+      const placeholder = escapeHtml(spec.placeholder || '');
+      return `<input class="${cls}" value="${val}" placeholder="${placeholder}" onchange="updateParam(${node.id},'${key}',this.value)" />`;
+    }
+
+    /* ═══════════════════════════════════════════
+       PALETTE
+       ═══════════════════════════════════════════ */
+    function renderPalette() {
+      const list = document.getElementById('paletteList');
+      const groups = {};
+      for (const [key, def] of Object.entries(NODE_TYPES)) {
+        (groups[def.group] = groups[def.group] || []).push({ key, ...def });
+      }
+      let html = '';
+      for (const [group, items] of Object.entries(groups)) {
+        html += `<div class="palette-group-label">${group}</div>`;
+        items.forEach(item => {
+          html += `<div class="palette-node" draggable="true"
+                        data-type="${item.key}"
+                        ondragstart="onPaletteDragStart(event, '${item.key}')">
+            <span class="pn-dot" style="background:${item.color}"></span>
+            <span>${item.label}</span>
+            <span class="pn-sub">${item.inputs.length}→${item.outputs.length}</span>
+          </div>`;
+        });
+      }
+      list.innerHTML = html;
+    }
+
+    function filterNodes(term) {
+      term = term.toLowerCase();
+      document.querySelectorAll('.palette-node').forEach(el => {
+        const t = el.dataset.type;
+        const def = NODE_TYPES[t];
+        const match = def.label.toLowerCase().includes(term) || def.group.toLowerCase().includes(term) || t.includes(term);
+        el.style.display = match ? '' : 'none';
+      });
+      // Also show/hide group labels
+      document.querySelectorAll('.palette-group-label').forEach(gl => {
+        const next = [];
+        let sib = gl.nextElementSibling;
+        while (sib && !sib.classList.contains('palette-group-label')) {
+          if (sib.classList.contains('palette-node')) next.push(sib);
+          sib = sib.nextElementSibling;
+        }
+        gl.style.display = next.some(n => n.style.display !== 'none') ? '' : 'none';
+      });
+    }
+
+    function onPaletteDragStart(e, type) {
+      e.dataTransfer.setData('text/plain', type);
+      e.dataTransfer.effectAllowed = 'copy';
+    }
+
+    /* ═══════════════════════════════════════════
+       CANVAS DROP + NODE CREATION
+       ═══════════════════════════════════════════ */
+    function handleCanvasDrop(e) {
+      e.preventDefault();
+      document.getElementById('canvasViewport').classList.remove('drag-hover');
+      const type = e.dataTransfer.getData('text/plain');
+      if (!NODE_TYPES[type]) return;
+
+      const p = clientToWorld(e.clientX, e.clientY);
+      addNode(type, p.x, p.y);
+    }
+
+    function addNode(type, x, y) {
+      const def = NODE_TYPES[type];
+      const node = {
+        id: nextId++,
+        type,
+        label: def.label,
+        x: Math.max(10, x - 90),
+        y: Math.max(60, y - 30),
+        params: { ...def.params },
+        color: def.color,
+        inputs: [...def.inputs],
+        outputs: [...def.outputs],
+      };
+      nodes.push(node);
+      renderNodes();
+      selectNode(node.id);
+      updateCounts();
+    }
+
+    /* ═══════════════════════════════════════════
+       NODE RENDERING
+       ═══════════════════════════════════════════ */
+    function renderNodes() {
+      const container = document.getElementById('canvasNodes');
+      container.innerHTML = nodes.map(n => {
+        const def = NODE_TYPES[n.type];
+        const paramRows = Object.keys(n.params).map(k =>
+          `<div class="cp-row"><span class="cp-label">${escapeHtml(k)}</span>${renderParamControl(n, k, 'node')}</div>`
+        ).join('');
+
+        const inputPorts = n.inputs.map((p, i) => {
+          const connected = isConnected(n.id, 'in', i);
+          return `<div class="port port-in ${connected ? 'connected' : ''}" data-node="${n.id}" data-dir="in" data-idx="${i}" onclick="event.stopPropagation();"><span class="port-dot"></span><span>${escapeHtml(p)}</span></div>`;
+        }).join('');
+
+        const outputPorts = n.outputs.map((p, i) => {
+          const connected = isConnected(n.id, 'out', i);
+          const pending = !!(connectFrom && connectFrom.nodeId === n.id && connectFrom.dir === 'out' && connectFrom.idx === i);
+          return `<div class="port port-out ${connected ? 'connected' : ''} ${pending ? 'pending' : ''}" data-node="${n.id}" data-dir="out" data-idx="${i}"
+                    onmousedown="startConnectDrag(event, ${n.id}, ${i})" onclick="event.stopPropagation();"><span class="port-dot"></span><span>${escapeHtml(p)}</span></div>`;
+        }).join('');
+
+        return `
+          <div class="cnode ${n.id === selectedNodeId ? 'selected' : ''}" id="node-${n.id}"
+               style="left:${n.x}px; top:${n.y}px;"
+               onmousedown="startDragNode(event, ${n.id})"
+               onclick="selectNode(${n.id}); event.stopPropagation();">
+            <div class="cnode-header">
+              <span class="cn-dot" style="background:${n.color}"></span>
+              <span class="cn-title">${escapeHtml(n.label)}</span>
+              <span class="cn-type">${escapeHtml(n.type)}</span>
+              <span class="cn-menu" onclick="removeNode(${n.id}); event.stopPropagation();" title="Delete">×</span>
+            </div>
+            <div class="cnode-body">
+              <div class="cnode-params">${paramRows}</div>
+            </div>
+            <div class="cnode-ports">
+              <div>${inputPorts}</div>
+              <div style="text-align:right;">${outputPorts}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      drawConnections();
+    }
+
+    function isConnected(nodeId, dir, idx) {
+      return connections.some(c =>
+        (dir === 'out' && c.from === nodeId && c.fromIdx === idx) ||
+        (dir === 'in' && c.to === nodeId && c.toIdx === idx)
+      );
+    }
+
+    /* ═══════════════════════════════════════════
+       NODE DRAGGING
+       ═══════════════════════════════════════════ */
+    function startDragNode(e, id) {
+      if (isSpaceDown || e.button === 1) return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.target.classList.contains('cn-menu')) return;
+      if (e.target.closest && e.target.closest('.port')) return;
+
+      if (e.stopPropagation) e.stopPropagation();
+      dragNodeId = id;
+      const node = nodes.find(n => n.id === id);
+      const p = clientToWorld(e.clientX, e.clientY);
+      dragOffset.x = p.x - node.x;
+      dragOffset.y = p.y - node.y;
+      e.preventDefault();
+    }
+
+    /* ═══════════════════════════════════════════
+       CONNECTIONS
+       ═══════════════════════════════════════════ */
+    function startConnectDrag(e, nodeId, outIdx) {
+      if (!e) return;
+      if (e.stopPropagation) e.stopPropagation();
+      e.preventDefault();
+
+      const sourceNode = nodes.find(n => n.id === nodeId);
+      if (!sourceNode) return;
+      const outputType = sourceNode.outputs[outIdx];
+
+      connectFrom = { nodeId, dir: 'out', idx: outIdx, type: outputType };
+      connecting = true;
+      document.body.style.cursor = 'crosshair';
+      document.getElementById('canvasViewport').classList.add('dragging-connection');
+
+      const vpRect = document.getElementById('canvasViewport').getBoundingClientRect();
+      connectPreview = { x: e.clientX - vpRect.left, y: e.clientY - vpRect.top };
+      
+      // Highlight valid targets
+      document.querySelectorAll('.port-in').forEach(el => {
+        const nid = parseInt(el.dataset.node, 10);
+        // Self-connection check
+        if (nid === nodeId) {
+           el.classList.remove('target-valid');
+           return;
+        }
+        // ... match logic ...
+        const inIdx = parseInt(el.dataset.idx, 10);
+        const targetNode = nodes.find(n => n.id === nid);
+        if (!targetNode) return;
+        const inputType = targetNode.inputs[inIdx];
+
+        // Valid connection rules:
+        const isValid = (inputType === outputType) ||
+                        (inputType === 'any') ||
+                        (outputType === 'data' && (inputType === 'bars' || inputType === 'ticks'));
+
+        el.classList.toggle('target-valid', isValid);
+      });
+
+      drawConnections();
+     }
+
+    // Single mouse handlers (node drag + connect preview + pan)
+    document.addEventListener('mousemove', e => {
+      if (isPanning) {
+        const dx = e.clientX - panStart.x;
+        const dy = e.clientY - panStart.y;
+        view.x = panStart.vx + dx;
+        view.y = panStart.vy + dy;
+        applyViewTransform();
+        return;
+      }
+
+      const p = clientToWorld(e.clientX, e.clientY);
+
+      if (dragNodeId !== null) {
+        const node = nodes.find(n => n.id === dragNodeId);
+        if (!node) return;
+        node.x = Math.max(0, p.x - dragOffset.x);
+        node.y = Math.max(0, p.y - dragOffset.y);
+        const el = document.getElementById('node-' + dragNodeId);
+        if (el) { el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; }
+        drawConnections();
+        return;
+      }
+
+      if (connectFrom) {
+        const vpRect = document.getElementById('canvasViewport').getBoundingClientRect();
+        const mouseX = e.clientX - vpRect.left;
+        const mouseY = e.clientY - vpRect.top;
+        let snapped = false;
+
+        const validPorts = document.querySelectorAll('.port-in.target-valid');
+        for (const port of validPorts) {
+          const pr = port.getBoundingClientRect();
+          const px = (pr.left + pr.width / 2) - vpRect.left;
+          const py = (pr.top + pr.height / 2) - vpRect.top;
+          const dist = Math.hypot(px - mouseX, py - mouseY);
+          if (dist < 30) {
+            connectPreview = { x: px, y: py };
+            snapped = true;
+            break;
+          }
+        }
+
+        if (!snapped) connectPreview = { x: mouseX, y: mouseY };
+        drawConnections();
+      }
+    });
+
+    document.addEventListener('mouseup', (e) => {
+      if (isPanning) {
+        isPanning = false;
+        const vp = document.getElementById('canvasViewport');
+        vp.classList.remove('dragging');
+        return;
+      }
+
+      dragNodeId = null;
+      if (connectFrom) {
+        tryCompleteConnectionAt(e.clientX, e.clientY);
+      }
+      connecting = false;
+      document.body.style.cursor = '';
+      document.getElementById('canvasViewport').classList.remove('dragging-connection');
+      document.querySelectorAll('.target-valid').forEach(el => el.classList.remove('target-valid'));
+    });
+
+    function tryCompleteConnectionAt(clientX, clientY) {
+      if (!connectFrom) return;
+
+      const hit = document.elementFromPoint(clientX, clientY);
+      const portEl = hit && hit.closest ? hit.closest('.port.port-in') : null;
+      // Allow dropping on node body to auto-connect to first valid input
+      const nodeEl = !portEl && hit && hit.closest ? hit.closest('.cnode') : null;
+
+      let toNodeId = null;
+      let toIdx = null;
+
+      if (portEl) {
+        if (!portEl.classList.contains('target-valid')) {
+            // Invalid port type
+            console.log('Invalid port type match');
+            cancelConnection();
+            return;
+        }
+        toNodeId = parseInt(portEl.dataset.node, 10);
+        toIdx = parseInt(portEl.dataset.idx, 10);
+      } else if (nodeEl) {
+        // Find if this node has a valid input port
+        const nid = parseInt(nodeEl.id.replace('node-', ''), 10);
+        const validPort = nodeEl.querySelector('.port-in.target-valid');
+        if (validPort) {
+            toNodeId = nid;
+            toIdx = parseInt(validPort.dataset.idx, 10);
+        } else {
+             cancelConnection();
+             return;
+        }
+      } else {
+          cancelConnection();
+          return;
+      }
+
+      // Final validation
+      if (toNodeId === null || toIdx === null || toNodeId === connectFrom.nodeId) {
+        cancelConnection();
+        return;
+      }
+
+      // Enforce 1 inbound connection per input port
+      connections = connections.filter(c => !(c.to === toNodeId && c.toIdx === toIdx));
+      
+      // Avoid duplicates
+      const exists = connections.find(c =>
+        c.from === connectFrom.nodeId && c.fromIdx === connectFrom.idx &&
+        c.to === toNodeId && c.toIdx === toIdx
+      );
+      if (!exists) {
+        connections.push({
+          from: connectFrom.nodeId,
+          fromIdx: connectFrom.idx,
+          to: toNodeId,
+          toIdx: toIdx,
+        });
+      }
+
+      cancelConnection();
+    }
+
+    function cancelConnection() {
+        connectFrom = null;
+        connectPreview = null;
+        renderNodes();
+        updateCounts();
+    }
+
+    function drawConnections() {
+      const svg = document.getElementById('canvasConnections');
+      const viewport = document.getElementById('canvasViewport');
+      const vpRect = viewport.getBoundingClientRect();
+
+      let paths = '';
+      connections.forEach(c => {
+        const fromEl = document.querySelector(`[data-node="${c.from}"][data-dir="out"][data-idx="${c.fromIdx}"] .port-dot`);
+        const toEl = document.querySelector(`[data-node="${c.to}"][data-dir="in"][data-idx="${c.toIdx}"] .port-dot`);
+        if (!fromEl || !toEl) return;
+
+        const fr = fromEl.getBoundingClientRect();
+        const tr = toEl.getBoundingClientRect();
+        const x1 = (fr.left + fr.width/2) - vpRect.left;
+        const y1 = (fr.top + fr.height/2) - vpRect.top;
+        const x2 = (tr.left + tr.width/2) - vpRect.left;
+        const y2 = (tr.top + tr.height/2) - vpRect.top;
+        const dx = Math.abs(x2 - x1) * 0.5;
+        paths += `<path d="M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}" />`;
+      });
+
+      // Preview connection (output → mouse)
+      if (connectFrom) {
+        const fromEl = document.querySelector(`[data-node="${connectFrom.nodeId}"][data-dir="out"][data-idx="${connectFrom.idx}"] .port-dot`);
+        if (fromEl) {
+          const fr = fromEl.getBoundingClientRect();
+          const x1 = (fr.left + fr.width / 2) - vpRect.left;
+          const y1 = (fr.top + fr.height / 2) - vpRect.top;
+          const x2 = (connectPreview ? connectPreview.x : x1 + 80);
+          const y2 = (connectPreview ? connectPreview.y : y1);
+          const dx = Math.abs(x2 - x1) * 0.5;
+          paths += `<path class="preview" d="M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}" />`;
+        }
+      }
+      svg.innerHTML = paths;
+    }
+
+    /* ═══════════════════════════════════════════
+       SELECTION + INSPECTOR
+       ═══════════════════════════════════════════ */
+    function selectNode(id) {
+      if (connecting) return;
+      selectedNodeId = id;
+      document.querySelectorAll('.cnode').forEach(el => el.classList.toggle('selected', el.id === 'node-' + id));
+      renderInspector();
+    }
+
+    /* ═══════════════════════════════════════════
+       STRATEGY CONFIG UI (in Inspector when no node selected)
+       ═══════════════════════════════════════════ */
+    function renderStrategyConfig() {
+      const MARKETS = ['CME_ES','CME_MES','BTC_PERP','XAUUSD_CFD'];
+      const REGIMES = ['All','Trending','Ranging','Volatile','MeanRevert','HighVol','LowVol'];
+      const sc = stratConfig;
+
+      return `
+        <div class="strat-cfg">
+          <div class="insp-label">Strategy Blueprint</div>
+          <div class="insp-row"><span class="ik">Strategy ID</span><input class="cfg-input" value="${sc.strategy_id}" onchange="stratConfig.strategy_id=this.value"></div>
+          <div class="insp-row"><span class="ik">Market</span>
+            <select class="insp-select" onchange="stratConfig.market_id=this.value">
+              ${MARKETS.map(m => `<option ${m===sc.market_id?'selected':''}>${m}</option>`).join('')}
+            </select>
+          </div>
+          <div class="insp-row"><span class="ik">Regime</span>
+            <select class="insp-select" onchange="stratConfig.regime=this.value">
+              ${REGIMES.map(r => `<option ${r===sc.regime?'selected':''}>${r}</option>`).join('')}
+            </select>
+          </div>
+          <div class="insp-row"><span class="ik">Version</span><input class="cfg-input" value="${sc.version}" onchange="stratConfig.version=this.value" style="width:60px;"></div>
+        </div>
+        <div class="strat-cfg">
+          <div class="insp-label">Execution Assumptions</div>
+          <div class="insp-row"><span class="ik">Commission</span><span class="iv">$${sc.execution.commission.toFixed(2)}</span></div>
+          <div class="insp-row"><span class="ik">Slippage</span><span class="iv">${sc.execution.slippage_ticks} tick</span></div>
+          <div class="insp-row"><span class="ik">Latency</span><span class="iv">${sc.execution.latency_ms} ms</span></div>
+          <div class="insp-row"><span class="ik">Fill Model</span><span class="iv">${sc.execution.fill_model}</span></div>
+        </div>
+        <div class="strat-cfg">
+          <div class="insp-label">Risk Config</div>
+          <div class="insp-row"><span class="ik">Max Risk/Trade</span><input class="cfg-input" value="$${sc.risk.max_risk_per_trade}" onchange="stratConfig.risk.max_risk_per_trade=parseInt(this.value.replace('$',''))||50" style="width:60px;"></div>
+          <div class="insp-row"><span class="ik">Min R:R</span><input class="cfg-input" value="${sc.risk.min_rr}" onchange="stratConfig.risk.min_rr=parseFloat(this.value)||1.8" style="width:60px;"></div>
+          <div class="insp-row"><span class="ik">Max Trades/Sess</span><input class="cfg-input" value="${sc.risk.max_trades_session}" onchange="stratConfig.risk.max_trades_session=parseInt(this.value)||5" style="width:60px;"></div>
+          <div class="insp-row"><span class="ik">DD Levels</span><span class="iv" style="font-size:10px;">-$200 / -$400 / -$600</span></div>
+        </div>
+        <div class="strat-cfg">
+          <div class="insp-label">Spec Preview</div>
+          <div class="spec-preview"><pre id="spec-json">${escapeHtml(JSON.stringify(buildSpec(), null, 2))}</pre></div>
+        </div>`;
+    }
+
+    function buildSpec() {
+      const sc = stratConfig;
+      const nodeTypes = {};
+      nodes.forEach(n => {
+        const def = NODE_TYPES[n.type];
+        const group = def ? def.group : 'Other';
+        (nodeTypes[group] = nodeTypes[group] || []).push({ id: n.id, type: n.type, label: n.label, params: n.params });
+      });
+      return {
+        strategy_id: sc.strategy_id,
+        market_id: sc.market_id,
+        regime: sc.regime,
+        version: sc.version,
+        pipeline_nodes: nodeTypes,
+        connections: connections.map(c => ({ from: c.from, fromIdx: c.fromIdx, to: c.to, toIdx: c.toIdx })),
+        execution: sc.execution,
+        risk_config: sc.risk,
+      };
+    }
+
+    function generateSpec() {
+      const spec = buildSpec();
+      const json = JSON.stringify(spec, null, 2);
+      navigator.clipboard.writeText(json).then(() => {
+        alert('✅ Spec JSON generated & copied to clipboard.\n\nStrategy: ' + spec.strategy_id + '\nNodes: ' + nodes.length + '\nConnections: ' + connections.length);
+      }).catch(() => {
+        prompt('Copy the Spec JSON:', json);
+      });
+    }
+
+    function submitToBacktest() {
+      if (nodes.length === 0) {
+        alert('Canvas is empty. Assemble a pipeline first.');
+        return;
+      }
+      const spec = buildSpec();
+      const runId = 'RUN-' + Math.random().toString(36).slice(2,8).toUpperCase();
+      alert('Blueprint ' + spec.strategy_id + ' submitted to Research Pipeline.\nRunID: ' + runId + '\n\nRedirecting to Research Pipeline…');
+      window.location.href = '../research/';
+    }
+
+    function renderInspector() {
+      const body = document.getElementById('inspectorBody');
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (!node) {
+        // Show Strategy Config when no node is selected
+        body.innerHTML = renderStrategyConfig();
+        return;
+      }
+
+      const def = NODE_TYPES[node.type];
+      let html = '';
+
+      // Node identity
+      html += `<div class="insp-section">
+        <div class="insp-label">Node Info</div>
+        <div class="insp-row"><span class="ik">ID</span><span class="iv">#${node.id}</span></div>
+        <div class="insp-row"><span class="ik">Type</span><span class="iv">${node.type}</span></div>
+        <div class="insp-row"><span class="ik">Group</span><span class="pill" style="font-size:10px;padding:2px 6px;">${def.group}</span></div>
+        <div class="insp-row"><span class="ik">Inputs</span><span class="iv">${node.inputs.join(', ') || '—'}</span></div>
+        <div class="insp-row"><span class="ik">Outputs</span><span class="iv">${node.outputs.join(', ') || '—'}</span></div>
+      </div>`;
+
+      // Parameters
+      html += `<div class="insp-section">
+        <div class="insp-label">Parameters</div>
+        ${Object.keys(node.params).map(k => `
+          <div class="insp-row">
+            <span class="ik">${escapeHtml(k)}</span>
+            ${renderParamControl(node, k, 'inspector')}
+          </div>
+        `).join('')}
+      </div>`;
+
+      // Connections
+      const inConns = connections.filter(c => c.to === node.id);
+      const outConns = connections.filter(c => c.from === node.id);
+      html += `<div class="insp-section">
+        <div class="insp-label">Connections</div>
+        ${inConns.map(c => {
+          const src = nodes.find(n => n.id === c.from);
+          return `<div class="insp-row"><span class="ik">← from</span><span class="iv">${src ? src.label : '?'} #${c.from}</span></div>`;
+        }).join('')}
+        ${outConns.map(c => {
+          const tgt = nodes.find(n => n.id === c.to);
+          return `<div class="insp-row"><span class="ik">→ to</span><span class="iv">${tgt ? tgt.label : '?'} #${c.to}</span></div>`;
+        }).join('')}
+        ${(inConns.length + outConns.length) === 0 ? '<div style="font-size:11px;color:var(--text-dim);padding:6px 0;">No connections. Drag from an output port → drop on an input port (or drop on the target node) to connect.</div>' : ''}
+      </div>`;
+
+      // Actions
+      html += `<div class="insp-section" style="margin-top:16px;">
+        <button class="btn btn-sm btn-danger" style="width:100%;" onclick="removeNode(${node.id})">Delete Node</button>
+      </div>`;
+
+      body.innerHTML = html;
+    }
+
+    function updateParam(nodeId, key, value) {
+      const node = nodes.find(n => n.id === nodeId);
+      if (!node) return;
+      const spec = getParamSpec(node, key);
+      node.params[key] = parseParamValue(spec, value);
+      normalizeNodeParams(node);
+
+      // If changing fields that affects dynamic options, rerender
+      if (node.type === 'data_feed' && key === 'source') {
+        renderNodes();
+      }
+      if (selectedNodeId === nodeId) renderInspector();
+    }
+
+    function removeNode(id) {
+      nodes = nodes.filter(n => n.id !== id);
+      connections = connections.filter(c => c.from !== id && c.to !== id);
+      if (selectedNodeId === id) { selectedNodeId = null; renderInspector(); }
+      renderNodes();
+      updateCounts();
+    }
+
+    /* ═══════════════════════════════════════════
+       TOOLS + UTILITIES
+       ═══════════════════════════════════════════ */
+    function updateCounts() {
+      document.getElementById('nodeCount').textContent = nodes.length + ' nodes';
+      document.getElementById('connCount').textContent = connections.length + ' connections';
+    }
+
+    function resetCanvas() {
+      if (!confirm('Clear all nodes and connections?')) return;
+      nodes = []; connections = []; selectedNodeId = null; nextId = 1;
+      renderNodes(); renderInspector(); updateCounts();
+      fitViewToNodes();
+    }
+
+    function exportFlow() {
+      const flow = {
+        version: '1.0',
+        created: new Date().toISOString(),
+        nodes: nodes.map(n => ({ id: n.id, type: n.type, label: n.label, x: n.x, y: n.y, params: n.params })),
+        connections: connections,
+      };
+      const json = JSON.stringify(flow, null, 2);
+      // Copy to clipboard
+      navigator.clipboard.writeText(json).then(() => {
+        alert('Flow JSON copied to clipboard!\n\nNodes: ' + nodes.length + '\nConnections: ' + connections.length);
+      }).catch(() => {
+        prompt('Copy the JSON:', json);
+      });
+    }
+
+    function runBacktest() {
+      // Validate: need at least a data source and backtest engine
+      const hasData = nodes.some(n => ['data_feed', 'csv_import', 'parquet_import'].includes(n.type));
+      const hasEngine = nodes.some(n => n.type === 'backtest_eng');
+
+      if (nodes.length === 0) {
+        alert('Canvas is empty. Add nodes first by dragging from the palette.');
+        return;
+      }
+      if (!hasData) {
+        alert('Pipeline needs a Data Source node. Drag "Data Feed" or "CSV Import" from the palette.');
+        return;
+      }
+      if (!hasEngine) {
+        alert('Pipeline needs a Backtest Engine node. Drag "Backtest Engine" from the palette.');
+        return;
+      }
+
+      // Animate nodes
+      nodes.forEach((n, i) => {
+        setTimeout(() => {
+          const el = document.getElementById('node-' + n.id);
+          if (el) { el.classList.add('running'); }
+        }, i * 300);
+        setTimeout(() => {
+          const el = document.getElementById('node-' + n.id);
+          if (el) { el.classList.remove('running'); }
+        }, i * 300 + 800);
+      });
+
+      setTimeout(() => {
+        alert('✅ Pipeline executed successfully (MVP mock).\n\n'
+          + `Nodes processed: ${nodes.length}\n`
+          + `Connections: ${connections.length}\n\n`
+          + 'In production → dispatches to Research Pipeline with RunID.');
+      }, nodes.length * 300 + 500);
+    }
+
+    /* ═══════════════════════════════════════════
+       DEMO FLOW
+       ═══════════════════════════════════════════ */
+    function loadDemoFlow() {
+      nodes = []; connections = []; nextId = 1;
+
+      // Create nodes in a pipeline layout
+      const layout = [
+        { type: 'data_feed',     x: 40,  y: 120 },
+        { type: 'factor_mom',    x: 300, y: 60  },
+        { type: 'factor_vol',    x: 300, y: 240 },
+        { type: 'combine_score', x: 570, y: 140 },
+        { type: 'filter_regime', x: 830, y: 140 },
+        { type: 'entry_plan',    x: 1080, y: 80  },
+        { type: 'exit_plan',     x: 1080, y: 260 },
+        { type: 'risk_mgr',     x: 1320, y: 160 },
+        { type: 'backtest_eng', x: 1560, y: 100 },
+        { type: 'report_gen',   x: 1560, y: 300 },
+      ];
+
+      layout.forEach(item => addNode(item.type, item.x, item.y));
+
+      // Connect the pipeline
+      connections = [
+        { from: 1, fromIdx: 0, to: 2, toIdx: 0 },   // data bars → momentum
+        { from: 1, fromIdx: 0, to: 3, toIdx: 0 },   // data bars → volatility
+        { from: 2, fromIdx: 0, to: 4, toIdx: 0 },   // momentum → scorer A
+        { from: 3, fromIdx: 0, to: 4, toIdx: 1 },   // volatility → scorer B
+        { from: 4, fromIdx: 0, to: 5, toIdx: 0 },   // scorer → regime filter
+        { from: 5, fromIdx: 0, to: 6, toIdx: 0 },   // filtered → entry
+        { from: 6, fromIdx: 0, to: 7, toIdx: 0 },   // entry → exit
+        { from: 7, fromIdx: 0, to: 8, toIdx: 0 },   // exit → risk
+        { from: 8, fromIdx: 0, to: 9, toIdx: 0 },   // risk → backtest
+        { from: 9, fromIdx: 0, to: 10, toIdx: 0 },  // backtest → report
+      ];
+
+      renderNodes();
+      updateCounts();
+      selectNode(1);
+      fitViewToNodes();
+    }
+
+    /* ═══════════════════════════════════════════
+       PAN + ZOOM
+       ═══════════════════════════════════════════ */
+    (function initPanZoom() {
+      const vp = document.getElementById('canvasViewport');
+
+      vp.addEventListener('mousedown', (e) => {
+        // Pan by default when dragging empty canvas.
+        // Also supports middle mouse, and Space+drag as an override.
+        const isLeft = e.button === 0;
+        const isMiddle = e.button === 1;
+
+        const allow = isMiddle || (isLeft && isSpaceDown) || isLeft;
+        if (!allow) return;
+
+        // Don’t pan when interacting with nodes/ports/toolbar
+        if (e.target.closest && e.target.closest('.cnode')) return;
+        if (e.target.closest && e.target.closest('.port')) return;
+        if (e.target.closest && e.target.closest('.canvas-toolbar')) return;
+
+        e.preventDefault();
+
+        isPanning = true;
+        panStart = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y };
+        vp.classList.add('panning');
+        vp.classList.add('dragging');
+      });
+
+      vp.addEventListener('wheel', (e) => {
+        // Zoom on wheel (trackpad/mouse). Keep cursor point stable.
+        e.preventDefault();
+        const rect = vp.getBoundingClientRect();
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+        const wx = (sx - view.x) / view.zoom;
+        const wy = (sy - view.y) / view.zoom;
+
+        const delta = Math.sign(e.deltaY);
+        const factor = delta > 0 ? 0.92 : 1.08;
+        const newZoom = clampZoom(view.zoom * factor);
+        view.zoom = newZoom;
+        view.x = sx - wx * newZoom;
+        view.y = sy - wy * newZoom;
+        applyViewTransform();
+        // drawConnections() is called inside applyViewTransform()
+      }, { passive: false });
+    })();
+
+    /* ═══════════════════════════════════════════
+       CANVAS CLICK DESELECT
+       ═══════════════════════════════════════════ */
+    document.getElementById('canvasViewport').addEventListener('click', e => {
+      if (e.target === document.getElementById('canvasViewport') || e.target === document.getElementById('canvasNodes')) {
+        selectedNodeId = null;
+        document.querySelectorAll('.cnode').forEach(el => el.classList.remove('selected'));
+        renderInspector();
+        connectFrom = null;
+        connectPreview = null;
+        drawConnections();
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space') {
+        if (!isSpaceDown) {
+          isSpaceDown = true;
+          document.getElementById('canvasViewport').classList.add('panning');
+        }
+        e.preventDefault();
+      }
+      if (e.key === 'Escape') {
+        connectFrom = null;
+        connectPreview = null;
+        drawConnections();
+      }
+    });
+
+    document.addEventListener('keyup', e => {
+      if (e.code === 'Space') {
+        isSpaceDown = false;
+        const vp = document.getElementById('canvasViewport');
+        vp.classList.remove('panning');
+      }
+    });
+
+    /* ═══════════════════════════════════════════
+       INIT
+       ═══════════════════════════════════════════ */
+    renderPalette();
+    updateCounts();
+    applyViewTransform();
+  </script>
+</body>
+</html>

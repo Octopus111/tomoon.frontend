@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Session Redesign Demo — Impact & Criteria + Order Flow & PnL</title>
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --panel: rgba(255,255,255,0.04);
+      --panel2: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.10);
+      --border2: rgba(255,255,255,0.06);
+      --text: #e8eefc;
+      --muted: rgba(232,238,252,0.70);
+      --muted2: rgba(232,238,252,0.55);
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --primary: #60a5fa;
+      --accent: #a78bfa;
+
+      --radius: 16px;
+      --radiusSm: 12px;
+
+      --shadow: 0 14px 40px rgba(0,0,0,0.35);
+
+      --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+      --tnum: tabular-nums slashed-zero;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(96,165,250,0.20), transparent 55%),
+                  radial-gradient(900px 600px at 95% 10%, rgba(167,139,250,0.16), transparent 50%),
+                  var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.35;
+    }
+
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 20px 16px 28px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 12px 0;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(11,14,20,0.90) 0%, rgba(11,14,20,0.65) 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .title {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 240px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 850;
+      letter-spacing: 0.02em;
+    }
+    .title .sub {
+      margin: 0;
+      color: var(--muted2);
+      font-size: 12px;
+    }
+
+    .seg {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .seg button {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    }
+
+    .seg button[aria-selected="true"] {
+      color: var(--text);
+      background: rgba(96,165,250,0.16);
+      border: 1px solid rgba(96,165,250,0.30);
+    }
+
+    .seg button:hover { color: var(--text); }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .btn.primary {
+      border-color: rgba(96,165,250,0.35);
+      background: rgba(96,165,250,0.14);
+    }
+
+    /* ============ Shared section primitives ============ */
+    .surface {
+      margin-top: 18px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .surface-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 16px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.18);
+    }
+
+    .surface-header .h-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--muted2);
+    }
+
+    .headline {
+      font-size: 16px;
+      font-weight: 900;
+      margin: 0;
+      letter-spacing: 0.01em;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pills { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      font-family: var(--font-mono);
+      font-variant-numeric: var(--tnum);
+      font-feature-settings: "tnum" 1, "zero" 1;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .pill.positive { border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.12); color: var(--success); }
+    .pill.negative { border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.12); color: var(--danger); }
+    .pill.live { border-color: rgba(34,197,94,0.30); background: rgba(34,197,94,0.10); color: var(--success); }
+    .pill.demo { border-color: rgba(167,139,250,0.35); background: rgba(167,139,250,0.14); color: #ddd6fe; cursor: pointer; }
+
+    .content { padding: 16px; }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    /* ============ Unified grid that reflows per scheme ============ */
+    .ls-grid {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    /* Default scheme: compact split */
+    body[data-scheme="compact"] .ls-grid {
+      grid-template-columns: 1.05fr 0.95fr;
+      grid-template-areas:
+        "impact order"
+        "criteria order"
+        "risk order";
+      align-items: start;
+    }
+
+    body[data-scheme="unified"] .ls-grid {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "impact"
+        "order"
+        "criteria"
+        "risk";
+    }
+
+    body[data-scheme="desk"] .ls-grid {
+      grid-template-columns: 0.95fr 1.05fr 0.95fr;
+      grid-template-areas:
+        "impact order tape"
+        "criteria order tape"
+        "risk order tape";
+    }
+
+    @media (max-width: 1100px) {
+      body[data-scheme="compact"] .ls-grid,
+      body[data-scheme="desk"] .ls-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "impact"
+          "order"
+          "criteria"
+          "risk"
+          "tape";
+      }
+    }
+
+    .sec {
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      overflow: hidden;
+    }
+
+    .sec-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.12);
+    }
+
+    .sec-title {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .sec-title h2 {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .sec-body { padding: 14px; }
+
+    /* ============ Impact (Compliance) ============ */
+    .impact { grid-area: impact; }
+
+    .impact-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .ring {
+      position: relative;
+      width: 56px;
+      height: 56px;
+      flex: 0 0 auto;
+    }
+
+    .ring svg { width: 56px; height: 56px; transform: rotate(-90deg); }
+
+    .ring .bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 6; }
+    .ring .fg {
+      fill: none;
+      stroke: var(--success);
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.45s ease, stroke 0.2s ease;
+    }
+
+    .ring .txt {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-mono);
+      font-variant-numeric: var(--tnum);
+      font-feature-settings: "tnum" 1, "zero" 1;
+      font-weight: 900;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .impact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .impact-info .name {
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .impact-info .bp {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .impact-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .impact-pills .small {
+      font-size: 11px;
+      padding: 5px 10px;
+    }
+
+    /* ============ Criteria ============ */
+    .criteria { grid-area: criteria; }
+
+    .criteria-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    body[data-scheme="unified"] .criteria-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .crit-col {
+      border-radius: var(--radiusSm);
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(0,0,0,0.14);
+      overflow: hidden;
+    }
+
+    .crit-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .crit-head .label {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .crit-head .count {
+      font-family: var(--font-mono);
+      font-variant-numeric: var(--tnum);
+      font-feature-settings: "tnum" 1, "zero" 1;
+      font-weight: 900;
+      font-size: 11px;
+      color: var(--muted2);
+    }
+
+    .crit-list {
+      list-style: none;
+      margin: 0;
+      padding: 10px 10px 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .crit-list::-webkit-scrollbar { width: 0; height: 0; }
+
+    .crit-item {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 8px;
+      align-items: start;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-top: 3px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .dot.ok { background: rgba(34,197,94,0.22); border-color: rgba(34,197,94,0.35); }
+    .dot.warn { background: rgba(245,158,11,0.18); border-color: rgba(245,158,11,0.35); }
+    .dot.bad { background: rgba(239,68,68,0.18); border-color: rgba(239,68,68,0.35); }
+
+    /* ============ Risk ============ */
+    .risk { grid-area: risk; }
+
+    .risk-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .risk-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .risk-item {
+      border-radius: var(--radiusSm);
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(0,0,0,0.12);
+      padding: 12px;
+    }
+
+    .risk-item .k {
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      margin-bottom: 6px;
+    }
+
+    .risk-item .v {
+      font-family: var(--font-mono);
+      font-variant-numeric: var(--tnum);
+      font-feature-settings: "tnum" 1, "zero" 1;
+      font-weight: 900;
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ============ Order Flow ============ */
+    .order { grid-area: order; }
+
+    .order-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .order-head .left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .order-head .sess {
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .order-head .sess-meta {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .order-head .right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .kpis {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    body[data-scheme="compact"] .kpis,
+    body[data-scheme="desk"] .kpis {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 1100px) {
+      body[data-scheme="compact"] .kpis,
+      body[data-scheme="desk"] .kpis { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .kpi {
+      border-right: 1px solid rgba(255,255,255,0.06);
+      padding: 10px 0;
+      min-width: 0;
+    }
+    .kpi:last-child { border-right: none; }
+
+    body[data-scheme="unified"] .kpi {
+      border-right: none;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 10px 0 0;
+    }
+    body[data-scheme="unified"] .kpi:first-child { border-top: none; padding-top: 0; }
+
+    .kpi .lab {
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--muted2);
+    }
+
+    .kpi .val {
+      margin-top: 4px;
+      font-family: var(--font-mono);
+      font-variant-numeric: var(--tnum);
+      font-feature-settings: "tnum" 1, "zero" 1;
+      font-weight: 950;
+      font-size: 16px;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+
+    .spark {
+      width: 100%;
+      height: 28px;
+    }
+
+    .spark path {
+      fill: none;
+      stroke: rgba(34,197,94,0.80);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.20);
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .bar > div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(34,197,94,0.65) 0%, rgba(245,158,11,0.75) 60%, rgba(239,68,68,0.75) 100%);
+      transition: width 0.25s ease;
+    }
+
+    .subrow {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 12px;
+    }
+
+    body[data-scheme="unified"] .subrow { grid-template-columns: 1fr; }
+
+    .card {
+      border-radius: var(--radiusSm);
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(0,0,0,0.12);
+      padding: 12px;
+      min-width: 0;
+    }
+
+    .card .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .card .card-title {
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .mini-meta { font-size: 12px; color: var(--muted2); font-family: var(--font-mono); font-variant-numeric: var(--tnum); font-feature-settings: "tnum" 1, "zero" 1; }
+
+    .bars {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .act {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .act .a {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: var(--muted);
+      background: rgba(0,0,0,0.10);
+      user-select: none;
+      white-space: nowrap;
+      font-family: var(--font-mono);
+      font-variant-numeric: var(--tnum);
+      font-feature-settings: "tnum" 1, "zero" 1;
+    }
+
+    .badge.buy { border-color: rgba(34,197,94,0.30); color: var(--success); background: rgba(34,197,94,0.08); }
+    .badge.sell { border-color: rgba(239,68,68,0.30); color: var(--danger); background: rgba(239,68,68,0.08); }
+
+    .act .text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .act .pnl {
+      font-family: var(--font-mono);
+      font-variant-numeric: var(--tnum);
+      font-feature-settings: "tnum" 1, "zero" 1;
+      font-weight: 950;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .pnl.pos { color: var(--success); }
+    .pnl.neg { color: var(--danger); }
+
+    .tape { grid-area: tape; }
+
+    body[data-scheme="desk"] .tape { display: block; }
+    body:not([data-scheme="desk"]) .tape { display: none; }
+
+    /* In non-desk schemes, tape is embedded inside Order as card */
+    body:not([data-scheme="desk"]) .order .tape-embedded { display: block; }
+    body[data-scheme="desk"] .order .tape-embedded { display: none; }
+
+    .tape-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 420px;
+      overflow: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .tape-list::-webkit-scrollbar { width: 0; height: 0; }
+
+    /* Motion */
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+
+    /* Scheme accents */
+    body[data-scheme="unified"] {
+      --radius: 18px;
+      background: radial-gradient(1100px 600px at 15% -10%, rgba(167,139,250,0.20), transparent 55%),
+                  radial-gradient(1000px 650px at 90% 5%, rgba(96,165,250,0.17), transparent 55%),
+                  linear-gradient(180deg, #070a10 0%, #0b0e14 100%);
+    }
+
+    body[data-scheme="desk"] {
+      --radius: 14px;
+      --panel: rgba(255,255,255,0.035);
+      background: radial-gradient(1200px 700px at 50% -15%, rgba(96,165,250,0.18), transparent 55%),
+                  radial-gradient(1000px 650px at 85% 15%, rgba(34,197,94,0.10), transparent 55%),
+                  #090c12;
+    }
+
+    .hint {
+      margin-top: 12px;
+      color: var(--muted2);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body data-scheme="compact">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="title">
+        <h1>Live Session Redesign Demo</h1>
+        <p class="sub">Three layout schemes for Impact &amp; Criteria + Order Flow &amp; PnL (one file, same data)</p>
+      </div>
+
+      <div class="seg" role="tablist" aria-label="Design schemes">
+        <button id="scheme-compact" role="tab" aria-selected="true" data-scheme="compact">Scheme A · Compact Split</button>
+        <button id="scheme-unified" role="tab" aria-selected="false" data-scheme="unified">Scheme B · Unified Story</button>
+        <button id="scheme-desk" role="tab" aria-selected="false" data-scheme="desk">Scheme C · Trading Desk</button>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="toggle-demo">DEMO FEED</button>
+        <button class="btn primary" id="refresh">Refresh Data</button>
+        <a class="btn" href="index.html" style="display:inline-flex;align-items:center;gap:8px;">Back</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="surface">
+      <div class="surface-header">
+        <div class="h-left">
+          <div class="eyebrow">Combined View</div>
+          <h2 class="headline" id="demo-session-title">London Open · ES · Blueprint “Pullback Continuation”</h2>
+          <div class="meta" id="demo-session-meta">Today · 08:30–10:15 · 2 trades · demo feed on</div>
+        </div>
+        <div class="pills">
+          <div class="pill live"><span style="width:6px;height:6px;border-radius:999px;background:var(--success);"></span>LIVE</div>
+          <div class="pill" id="pill-compliance">Compliance 0%</div>
+          <div class="pill positive" id="pill-pnl">+$0.00</div>
+          <a class="pill" href="../execute/index.html?view=sessions">Open →</a>
+        </div>
+      </div>
+
+      <div class="ls-grid">
+        <!-- Impact -->
+        <section class="sec impact" aria-label="Impact & Criteria summary">
+          <div class="sec-head">
+            <div class="sec-title">
+              <h2>Impact &amp; Criteria</h2>
+              <div class="meta" id="impact-meta">Blueprint Compliance</div>
+            </div>
+            <div class="pills">
+              <div class="pill" id="bp-name">BP: -</div>
+            </div>
+          </div>
+          <div class="sec-body">
+            <div class="impact-top">
+              <div style="display:flex;gap:12px;align-items:center;min-width:0;">
+                <div class="ring" aria-label="Compliance ring">
+                  <svg viewBox="0 0 52 52">
+                    <circle class="bg" cx="26" cy="26" r="20" />
+                    <circle class="fg" id="ring-arc" cx="26" cy="26" r="20" stroke-dasharray="125.66" stroke-dashoffset="125.66" />
+                  </svg>
+                  <div class="txt" id="ring-pct">0%</div>
+                </div>
+                <div class="impact-info">
+                  <div class="name" id="impact-name">Blueprint Compliance</div>
+                  <div class="bp" id="impact-bp">-</div>
+                </div>
+              </div>
+              <div class="impact-pills" aria-label="Rule status pills">
+                <div class="pill small" id="pill-ok">0 OK</div>
+                <div class="pill small" id="pill-warn">0 WARN</div>
+                <div class="pill small" id="pill-bad">0 BAD</div>
+              </div>
+            </div>
+
+            <div class="hint">Goal: keep summary + rule signals together, no left-right scanning.</div>
+          </div>
+        </section>
+
+        <!-- Order -->
+        <section class="sec order" aria-label="Order Flow & PnL">
+          <div class="sec-head">
+            <div class="sec-title">
+              <h2>Order Flow &amp; PnL</h2>
+              <div class="meta" id="order-meta">Tape + activity + risk usage</div>
+            </div>
+            <div class="pills">
+              <div class="pill demo" id="pill-demo">DEMO FEED</div>
+            </div>
+          </div>
+
+          <div class="sec-body">
+            <div class="order-head">
+              <div class="left">
+                <div class="eyebrow">Session</div>
+                <div class="sess" id="of-session-name">-</div>
+                <div class="sess-meta" id="of-session-meta">-</div>
+              </div>
+              <div class="right">
+                <div class="pill live"><span style="width:6px;height:6px;border-radius:999px;background:var(--success);"></span>LIVE</div>
+                <div class="pill" id="of-pill-pnl">+$0.00</div>
+              </div>
+            </div>
+
+            <div class="kpis" aria-label="KPIs">
+              <div class="kpi">
+                <div class="lab">Trades</div>
+                <div class="val" id="kpi-trades">0</div>
+              </div>
+              <div class="kpi">
+                <div class="lab">Risk Used</div>
+                <div class="val" id="kpi-risk">$0</div>
+              </div>
+              <div class="kpi">
+                <div class="lab">P&amp;L</div>
+                <svg class="spark" viewBox="0 0 160 34" preserveAspectRatio="none" aria-label="P&L sparkline">
+                  <path id="spark-path" d="M2 17 L158 17"></path>
+                </svg>
+              </div>
+              <div class="kpi">
+                <div class="lab">Risk Bar</div>
+                <div class="mini-meta" id="risk-meta">-</div>
+                <div class="bar"><div id="risk-fill"></div></div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:12px;">
+              <div class="card-head">
+                <p class="card-title">Blueprint Adherence</p>
+                <span class="mini-meta" id="bp-meta">-</span>
+              </div>
+              <div class="bar" style="height:12px;"><div id="bp-fill"></div></div>
+            </div>
+
+            <div class="subrow" aria-label="Activity and Tape">
+              <div class="card">
+                <div class="card-head">
+                  <p class="card-title">Recent Activity</p>
+                  <span class="mini-meta" id="activity-meta">-</span>
+                </div>
+                <div class="bars" id="activity-list"></div>
+              </div>
+
+              <div class="card tape-embedded">
+                <div class="card-head">
+                  <p class="card-title">Order Tape</p>
+                  <span class="mini-meta" id="tape-meta">-</span>
+                </div>
+                <div class="tape-list" id="tape-list"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Criteria -->
+        <section class="sec criteria" aria-label="Entry and exit criteria">
+          <div class="sec-head">
+            <div class="sec-title">
+              <h2>Criteria</h2>
+              <div class="meta">Entry / Exit / Boundaries</div>
+            </div>
+            <div class="pills">
+              <div class="pill" id="crit-summary">-</div>
+            </div>
+          </div>
+          <div class="sec-body">
+            <div class="criteria-grid">
+              <div class="crit-col">
+                <div class="crit-head">
+                  <div class="label">Entry</div>
+                  <div class="count" id="entry-count">0</div>
+                </div>
+                <ul class="crit-list" id="entry-list"></ul>
+              </div>
+              <div class="crit-col">
+                <div class="crit-head">
+                  <div class="label">Exit</div>
+                  <div class="count" id="exit-count">0</div>
+                </div>
+                <ul class="crit-list" id="exit-list"></ul>
+              </div>
+              <div class="crit-col">
+                <div class="crit-head">
+                  <div class="label">Boundaries</div>
+                  <div class="count" id="bound-count">0</div>
+                </div>
+                <ul class="crit-list" id="bound-list"></ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Risk -->
+        <section class="sec risk" aria-label="Risk Snapshot">
+          <div class="sec-head">
+            <div class="sec-title">
+              <h2>Risk Snapshot</h2>
+              <div class="meta">Always visible, always scannable</div>
+            </div>
+            <div class="pills">
+              <div class="pill" id="risk-mode">Mode: Strict</div>
+            </div>
+          </div>
+          <div class="sec-body">
+            <div class="risk-row">
+              <div class="risk-item">
+                <div class="k">Max Risk / Trade</div>
+                <div class="v" id="risk-max">-$50</div>
+              </div>
+              <div class="risk-item">
+                <div class="k">Min R:R</div>
+                <div class="v" id="risk-rr">1.8R</div>
+              </div>
+              <div class="risk-item">
+                <div class="k">TP Method</div>
+                <div class="v" id="risk-tp">Structure + Scale</div>
+              </div>
+              <div class="risk-item">
+                <div class="k">SL Method</div>
+                <div class="v" id="risk-sl">Swing invalidation</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Desk-only standalone Tape column -->
+        <section class="sec tape" aria-label="Tape column (desk scheme)">
+          <div class="sec-head">
+            <div class="sec-title">
+              <h2>Order Tape</h2>
+              <div class="meta">Pinned on right (desk)</div>
+            </div>
+            <div class="pills">
+              <div class="pill" id="desk-tape-meta">-</div>
+            </div>
+          </div>
+          <div class="sec-body">
+            <div class="tape-list" id="tape-list-desk"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="content" style="border-top:1px solid rgba(255,255,255,0.06);">
+        <div class="hint">
+          Tips: Switch schemes at the top. Scheme C pins tape on the right to minimize left↔right scanning. Scheme B stacks sections to read top→down as a single story.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    const state = {
+      demoOn: true,
+      scheme: "compact",
+      data: null,
+    };
+
+    function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+    function formatMoney(n) {
+      const sign = n >= 0 ? "+" : "-";
+      const abs = Math.abs(n);
+      return `${sign}$${abs.toFixed(2)}`;
+    }
+
+    function rnd(min, max) { return Math.random() * (max - min) + min; }
+    function rndi(min, max) { return Math.floor(rnd(min, max + 1)); }
+
+    function makeSparkPath(points) {
+      const w = 160;
+      const h = 34;
+      const pad = 2;
+      const xs = points.map((_, i) => pad + (i * (w - pad * 2)) / (points.length - 1));
+      const min = Math.min(...points);
+      const max = Math.max(...points);
+      const span = Math.max(1e-6, max - min);
+      const ys = points.map(v => {
+        const t = (v - min) / span;
+        return pad + (1 - t) * (h - pad * 2);
+      });
+
+      let d = `M${xs[0].toFixed(1)} ${ys[0].toFixed(1)}`;
+      for (let i = 1; i < xs.length; i++) d += ` L${xs[i].toFixed(1)} ${ys[i].toFixed(1)}`;
+      return d;
+    }
+
+    function genDemoData() {
+      const pnl = rnd(-120, 240);
+      const riskUsedPct = clamp(rnd(0.08, 0.92), 0, 1);
+      const adherencePct = clamp(rnd(0.45, 0.95), 0, 1);
+      const compliancePct = clamp(adherencePct - rnd(0.02, 0.22), 0, 1);
+      const trades = rndi(1, 7);
+
+      const criteria = {
+        entry: [
+          { s: "ok", t: "Liquidity sweep confirmed" },
+          { s: "ok", t: "Higher-timeframe bias aligned" },
+          { s: "warn", t: "Pullback depth within range" },
+          { s: "ok", t: "Entry at defined level" },
+          { s: "warn", t: "No chase after impulse" },
+        ],
+        exit: [
+          { s: "ok", t: "Partial at 1R" },
+          { s: "ok", t: "Stop moved to BE after structure" },
+          { s: "warn", t: "No early exit before invalidation" },
+          { s: "ok", t: "Final TP at HTF target" },
+        ],
+        boundaries: [
+          { s: "ok", t: "Max loss not breached" },
+          { s: "ok", t: "No revenge trade" },
+          { s: "warn", t: "Max trades per session" },
+          { s: "ok", t: "No over-leverage" },
+        ]
+      };
+
+      const all = [...criteria.entry, ...criteria.exit, ...criteria.boundaries];
+      const ok = all.filter(x => x.s === "ok").length;
+      const warn = all.filter(x => x.s === "warn").length;
+      const bad = all.filter(x => x.s === "bad").length;
+
+      const tape = [];
+      const sides = ["buy", "sell"];
+      let position = 0; // positive long size, negative short size
+      for (let i = 0; i < 10; i++) {
+        const side = sides[rndi(0, 1)];
+        let qty = rndi(1, 4) * 0.25;
+        const actionRoll = Math.random();
+
+        let type = "Add";
+        if (position === 0) type = "Open";
+        else if (actionRoll < 0.25) type = "Partial Close";
+        else if (actionRoll < 0.32) type = "Close";
+
+        // Make close actions coherent
+        if (type === "Close") {
+          qty = Math.abs(position) || qty;
+        }
+
+        let signedQty = side === "buy" ? qty : -qty;
+        if (type === "Partial Close" || type === "Close") {
+          // Closing reduces current position rather than adding
+          if (position === 0) type = "Open";
+          else signedQty = -Math.sign(position) * Math.min(Math.abs(position), qty);
+        }
+
+        position += signedQty;
+        if (Math.abs(position) < 1e-9) position = 0;
+
+        const t = new Date(Date.now() - (10 - i) * 37_000);
+        tape.push({
+          time: t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          side: signedQty >= 0 ? "buy" : "sell",
+          type,
+          qty: Math.abs(signedQty),
+          price: 6000 + rnd(-4, 4),
+          pnl: rnd(-18, 28)
+        });
+      }
+
+      const activity = [];
+      for (let i = 0; i < 6; i++) {
+        const side = sides[rndi(0, 1)];
+        const t = new Date(Date.now() - (6 - i) * 62_000);
+        activity.push({
+          time: t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          side,
+          text: ["Sweep", "Reclaim", "Break", "Retest", "Absorption", "Impulse"][i] + " confirmed",
+          pnl: rnd(-12, 20)
+        });
+      }
+
+      const spark = Array.from({ length: 12 }, () => rnd(-1, 1)).reduce((acc, v) => {
+        const last = acc.length ? acc[acc.length - 1] : 0;
+        acc.push(last + v);
+        return acc;
+      }, []);
+
+      return {
+        sessionName: "London Open · ES",
+        sessionMeta: "08:30–10:15 · 2 trade ideas · risk-managed",
+        blueprintName: "Pullback Continuation",
+        compliancePct,
+        ok, warn, bad,
+        pnl,
+        trades,
+        riskUsedPct,
+        adherencePct,
+        tape,
+        activity,
+        spark,
+        criteria
+      };
+    }
+
+    function setRing(pct) {
+      const r = 20;
+      const c = 2 * Math.PI * r;
+      const offset = c * (1 - pct);
+      const arc = $("#ring-arc");
+      arc.style.strokeDasharray = c.toFixed(2);
+      arc.style.strokeDashoffset = offset.toFixed(2);
+      arc.style.stroke = pct >= 0.78 ? "var(--success)" : (pct >= 0.62 ? "var(--warning)" : "var(--danger)");
+      $("#ring-pct").textContent = `${Math.round(pct * 100)}%`;
+      $("#pill-compliance").textContent = `Compliance ${Math.round(pct * 100)}%`;
+    }
+
+    function setBars() {
+      const d = state.data;
+      $("#risk-fill").style.width = `${Math.round(d.riskUsedPct * 100)}%`;
+      $("#bp-fill").style.width = `${Math.round(d.adherencePct * 100)}%`;
+      $("#risk-meta").textContent = `${Math.round(d.riskUsedPct * 100)}%`;
+      $("#bp-meta").textContent = `${Math.round(d.adherencePct * 100)}%`;
+    }
+
+    function renderCriteria(listEl, items) {
+      listEl.innerHTML = "";
+      for (const it of items) {
+        const li = document.createElement("li");
+        li.className = "crit-item";
+        li.innerHTML = `<span class="dot ${it.s}"></span><span>${it.t}</span>`;
+        listEl.appendChild(li);
+      }
+    }
+
+    function renderActivity(listEl, items) {
+      listEl.innerHTML = "";
+      for (const it of items) {
+        const row = document.createElement("div");
+        row.className = "act";
+        const pnlCls = it.pnl >= 0 ? "pos" : "neg";
+        row.innerHTML = `
+          <div class="a">
+            <span class="badge ${it.side}">${it.side.toUpperCase()}</span>
+            <span class="text">${it.time} · ${it.text}</span>
+          </div>
+          <div class="pnl ${pnlCls}">${formatMoney(it.pnl)}</div>
+        `;
+        listEl.appendChild(row);
+      }
+    }
+
+    function renderTape(listEl, items) {
+      listEl.innerHTML = "";
+      for (const it of items) {
+        const row = document.createElement("div");
+        row.className = "act";
+        const pnlCls = it.pnl >= 0 ? "pos" : "neg";
+        row.innerHTML = `
+          <div class="a">
+            <span class="badge ${it.side}">${it.side.toUpperCase()} · ${it.type}</span>
+            <span class="text">${it.time} · ${it.qty.toFixed(2)} @ ${it.price.toFixed(2)}</span>
+          </div>
+          <div class="pnl ${pnlCls}">${formatMoney(it.pnl)}</div>
+        `;
+        listEl.appendChild(row);
+      }
+    }
+
+    function render() {
+      const d = state.data;
+
+      $("#demo-session-title").textContent = `${d.sessionName} · Blueprint “${d.blueprintName}”`;
+      $("#demo-session-meta").textContent = `Today · ${d.sessionMeta} · ${d.trades} trades · demo feed ${state.demoOn ? "on" : "off"}`;
+
+      $("#bp-name").textContent = `BP: ${d.blueprintName}`;
+      $("#impact-bp").textContent = `Blueprint: ${d.blueprintName}`;
+
+      $("#pill-ok").textContent = `${d.ok} OK`;
+      $("#pill-warn").textContent = `${d.warn} WARN`;
+      $("#pill-bad").textContent = `${d.bad} BAD`;
+
+      // style pills
+      $("#pill-ok").className = `pill small ${d.ok ? "positive" : ""}`;
+      $("#pill-warn").className = `pill small`;
+      $("#pill-bad").className = `pill small ${d.bad ? "negative" : ""}`;
+
+      setRing(d.compliancePct);
+
+      $("#pill-pnl").textContent = formatMoney(d.pnl);
+      $("#pill-pnl").className = `pill ${d.pnl >= 0 ? "positive" : "negative"}`;
+
+      $("#of-session-name").textContent = d.sessionName;
+      $("#of-session-meta").textContent = d.sessionMeta;
+      $("#of-pill-pnl").textContent = formatMoney(d.pnl);
+      $("#of-pill-pnl").className = `pill ${d.pnl >= 0 ? "positive" : "negative"}`;
+
+      $("#kpi-trades").textContent = String(d.trades);
+      $("#kpi-risk").textContent = `$${Math.round(d.riskUsedPct * 300)}`;
+
+      $("#spark-path").setAttribute("d", makeSparkPath(d.spark));
+      $("#spark-path").style.stroke = d.pnl >= 0 ? "rgba(34,197,94,0.80)" : "rgba(239,68,68,0.80)";
+
+      setBars();
+
+      $("#activity-meta").textContent = `${d.activity.length} events`;
+      $("#tape-meta").textContent = `${d.tape.length} fills`;
+      $("#desk-tape-meta").textContent = `${d.tape.length} fills`;
+
+      renderActivity($("#activity-list"), d.activity);
+      renderTape($("#tape-list"), d.tape);
+      renderTape($("#tape-list-desk"), d.tape);
+
+      renderCriteria($("#entry-list"), d.criteria.entry);
+      renderCriteria($("#exit-list"), d.criteria.exit);
+      renderCriteria($("#bound-list"), d.criteria.boundaries);
+
+      $("#entry-count").textContent = String(d.criteria.entry.length);
+      $("#exit-count").textContent = String(d.criteria.exit.length);
+      $("#bound-count").textContent = String(d.criteria.boundaries.length);
+      $("#crit-summary").textContent = `${d.ok} OK · ${d.warn} WARN · ${d.bad} BAD`;
+
+      $("#pill-demo").textContent = state.demoOn ? "DEMO FEED" : "LIVE FEED";
+      $("#toggle-demo").textContent = state.demoOn ? "DEMO FEED" : "LIVE FEED";
+    }
+
+    function setScheme(scheme) {
+      state.scheme = scheme;
+      document.body.setAttribute("data-scheme", scheme);
+
+      $$(".seg button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.scheme === scheme)));
+    }
+
+    function init() {
+      state.data = genDemoData();
+      render();
+
+      $$(".seg button").forEach(b => {
+        b.addEventListener("click", () => setScheme(b.dataset.scheme));
+      });
+
+      $("#refresh").addEventListener("click", () => {
+        state.data = genDemoData();
+        render();
+      });
+
+      function toggleDemo() {
+        state.demoOn = !state.demoOn;
+        render();
+      }
+
+      $("#pill-demo").addEventListener("click", toggleDemo);
+      $("#toggle-demo").addEventListener("click", toggleDemo);
+    }
+
+    init();
+  </script>
+</body>
+</html>

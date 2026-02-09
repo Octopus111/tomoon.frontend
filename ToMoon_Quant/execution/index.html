@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1400, initial-scale=0.3, maximum-scale=3, user-scalable=yes">
+  <title>Test Monitor — ToMoon Quant</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <style>
+    /* Kill Switch */
+    .kill-banner {
+      background: linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.03));
+      border: 1px solid rgba(239,68,68,0.25); border-radius: var(--radius-md);
+      padding: 16px 24px; margin-bottom: var(--sp-md);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .kill-banner .info { display: flex; align-items: center; gap: 12px; }
+    .kill-banner .info svg { width: 24px; height: 24px; color: var(--danger); }
+    .kill-banner .info h3 { margin: 0; font-size: 15px; font-weight: 900; }
+    .kill-banner .info p { margin: 2px 0 0; font-size: 12px; color: var(--text-muted); }
+    .btn-kill {
+      padding: 10px 28px; border-radius: var(--radius-md);
+      background: var(--danger); color: #fff; font-size: 14px; font-weight: 900;
+      border: none; cursor: pointer; transition: all .15s;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .btn-kill:hover { filter: brightness(1.15); box-shadow: 0 0 20px rgba(239,68,68,0.3); }
+    .btn-kill.armed { animation: pulse-kill 1s infinite; }
+    @keyframes pulse-kill { 0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
+
+    /* Live KPI strip → Test Monitor KPI strip */
+    .live-kpis {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: var(--sp-sm); margin-bottom: var(--sp-md);
+    }
+    .live-kpi {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+    .live-kpi .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+    .live-kpi .value {
+      font-size: 24px; font-weight: 900; margin-top: 4px;
+      font-family: var(--font-mono); font-variant-numeric: tabular-nums slashed-zero;
+    }
+    .live-kpi .delta { font-size: 11px; margin-top: 2px; }
+
+    /* Two-col layout */
+    .exec-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--sp-md);
+    }
+    @media (max-width: 1000px) { .exec-grid { grid-template-columns: 1fr; } }
+
+    .exec-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 20px;
+    }
+    .exec-card h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+
+    /* Tabs */
+    .exec-tabs {
+      display: flex; gap: 0; margin-bottom: var(--sp-md);
+      border-bottom: 2px solid var(--border);
+    }
+    .exec-tab {
+      padding: 10px 20px; font-size: 13px; font-weight: 700;
+      color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all .15s;
+    }
+    .exec-tab:hover { color: var(--text-main); }
+    .exec-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* Metrics Bars */
+    .metric-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    .metric-row .label { font-size: 12px; color: var(--text-muted); min-width: 120px; }
+    .metric-bar-container { flex: 1; height: 8px; background: var(--bg-hover); border-radius: 999px; overflow: hidden; }
+    .metric-bar { height: 100%; border-radius: 999px; transition: width 0.3s; }
+    .metric-bar.green { background: var(--success); }
+    .metric-bar.yellow { background: var(--warning); }
+    .metric-bar.red { background: var(--danger); }
+    .metric-bar.blue { background: var(--primary); }
+    .metric-row .val {
+      min-width: 50px; text-align: right;
+      font-size: 12px; font-family: var(--font-mono); font-weight: 700;
+    }
+
+    /* Order log table */
+    .order-log { max-height: 340px; overflow-y: auto; scrollbar-width: thin; }
+
+    /* RiskGuard panel */
+    .risk-panel {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 20px; margin-top: var(--sp-md);
+    }
+    .risk-panel h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+
+    .risk-subhead {
+      font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase;
+      color: var(--text-muted); margin: 16px 0 8px;
+    }
+
+    .risk-kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: var(--sp-sm);
+      margin-top: 16px;
+    }
+    .risk-kpi {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+    .risk-kpi .label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-dim);
+    }
+    .risk-kpi .value {
+      margin-top: 4px;
+      font-size: 16px;
+      font-weight: 900;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums slashed-zero;
+    }
+
+    .dd-gauge {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
+    }
+    .dd-gauge .bar-container {
+      flex: 1; height: 24px; background: var(--bg-hover);
+      border-radius: var(--radius-sm); overflow: hidden; position: relative;
+    }
+    .dd-gauge .bar {
+      height: 100%; border-radius: var(--radius-sm); transition: width 0.5s;
+    }
+    .dd-gauge .marker {
+      position: absolute; top: 0; bottom: 0; width: 2px;
+      background: var(--text-main);
+    }
+    .dd-gauge .marker-label {
+      position: absolute; top: -14px; font-size: 9px; font-family: var(--font-mono); color: var(--text-muted);
+      white-space: nowrap; transform: translateX(-50%);
+    }
+
+    /* Audit section */
+    .audit-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 20px; margin-top: var(--sp-md);
+    }
+    .audit-card h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+
+    /* Status dot */
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px;
+    }
+    .status-dot.live { background: var(--success); box-shadow: 0 0 6px var(--success); } /* active forward test */
+    .status-dot.paper { background: var(--warning); } /* validated / completed */
+    .status-dot.stopped { background: var(--danger); }
+
+    /* Open Positions → Simulated Positions */
+    .pos-side { font-weight: 700; font-size: 11px; }
+    .pos-side.long { color: var(--success); }
+    .pos-side.short { color: var(--danger); }
+
+    /* Session PnL chart */
+    .session-pnl-area { fill: url(#pnlGrad); opacity: 0.35; }
+    .session-pnl-line { fill: none; stroke: var(--success); stroke-width: 2; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div class="app-main" id="app-main">
+      <div class="page anim-in">
+
+        <!-- Stop All Tests Banner -->
+        <div class="kill-banner">
+          <div class="info">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+            <div>
+              <h3>Emergency Stop All Tests</h3>
+              <p>Instantly halt all running forward tests and cancel pending simulated orders</p>
+            </div>
+          </div>
+          <button class="btn-kill" id="killBtn" onclick="activateKillSwitch()">STOP ALL</button>
+        </div>
+
+        <!-- Live KPIs -->
+        <div class="live-kpis" id="liveKpis"></div>
+
+        <!-- Tabs -->
+        <div class="exec-tabs">
+          <div class="exec-tab active" onclick="switchExecTab('overview')">Overview</div>
+          <div class="exec-tab" onclick="switchExecTab('strategies')">Strategies</div>
+          <div class="exec-tab" onclick="switchExecTab('orders')">Simulated Orders</div>
+          <div class="exec-tab" onclick="switchExecTab('risk')">Risk &amp; Data Audit</div>
+        </div>
+
+        <!-- Tab: Overview -->
+        <div id="tab-overview">
+          <div class="exec-grid">
+            <div class="exec-card">
+              <h4>Simulated Session PnL</h4>
+              <div id="sessionPnl" style="height:200px;background:rgba(0,0,0,0.15);border-radius:var(--radius-sm);"></div>
+            </div>
+            <div class="exec-card">
+              <h4>Data Feed Latency</h4>
+              <div id="latencyChart" style="height:200px;background:rgba(0,0,0,0.15);border-radius:var(--radius-sm);"></div>
+            </div>
+          </div>
+          <div class="exec-card" style="margin-top: var(--sp-md);">
+            <h4>Test Quality Metrics</h4>
+            <div id="execMetrics"></div>
+          </div>
+        </div>
+
+        <!-- Tab: Strategies -->
+        <div id="tab-strategies" style="display:none;">
+          <div class="exec-grid">
+            <div class="exec-card">
+              <h4>Strategies Under Test</h4>
+              <table class="data-table">
+                <thead><tr><th>Status</th><th>Strategy</th><th>Market</th><th>Mode</th><th>Data Source</th><th>QA Gate</th><th>Sim. Day PnL</th><th>Sim. Trades</th></tr></thead>
+                <tbody id="deployBody"></tbody>
+              </table>
+            </div>
+            <div class="exec-card">
+              <h4>Simulated Positions</h4>
+              <table class="data-table">
+                <thead><tr><th>Strategy</th><th>Side</th><th>Qty</th><th>Entry</th><th>Current</th><th>Unrealized</th></tr></thead>
+                <tbody id="posBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Orders -->
+        <div id="tab-orders" style="display:none;">
+          <div class="exec-card">
+            <h4>Simulated Order Log</h4>
+            <div class="order-log">
+              <table class="data-table">
+                <thead><tr><th>Time</th><th>Strategy</th><th>Action</th><th>Qty</th><th>Price</th><th>Status</th></tr></thead>
+                <tbody id="orderBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Risk & Audit -->
+        <div id="tab-risk" style="display:none;">
+          <div class="risk-panel">
+            <h4>RiskGuard v0 — Simulated Drawdown Monitor</h4>
+            <div id="riskGuardContent"></div>
+          </div>
+          <div class="audit-card">
+            <h4>Data Quality &amp; Integrity Report</h4>
+            <div id="auditContent"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/nav.js"></script>
+  <script src="../shared/mock-data.js"></script>
+  <script>
+    renderQuantSidebar('execution');
+    renderQuantTopbar('Strategy Test Monitor', [
+      { label: 'ToMoon Quant', href: '../dashboard/' },
+      { label: 'Test Monitor' }
+    ]);
+
+    /* ── Tab switching ─────────────────────── */
+    function switchExecTab(tab) {
+      ['overview','strategies','orders','risk'].forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        if (el) el.style.display = t === tab ? '' : 'none';
+      });
+      document.querySelectorAll('.exec-tab').forEach((el, i) => {
+        const tabs = ['overview','strategies','orders','risk'];
+        el.classList.toggle('active', tabs[i] === tab);
+      });
+    }
+
+    /* ── Live KPIs (computed from MOCK data) ── */
+    (function() {
+      const strats = MOCK.testStrategies || [];
+      const orders = MOCK.orders || [];
+      const activeTests = strats.filter(s => s.mode === 'Forward Test');
+      const completedTests = strats.filter(s => s.mode === 'Validated');
+      const totalPnl = strats.reduce((a, s) => a + (s.pnl || 0), 0);
+      const totalTrades = strats.reduce((a, s) => a + (s.trades || 0), 0);
+      const filledOrders = orders.filter(o => o.status === 'Filled').length;
+      const fillRate = orders.length ? ((filledOrders / orders.length) * 100).toFixed(1) : '—';
+      const openPos = activeTests.length;
+      const latencySamples = orders.map(o => Number(o.latency_ms)).filter(v => Number.isFinite(v));
+      const avgLatency = latencySamples.length ? (latencySamples.reduce((a, b) => a + b, 0) / latencySamples.length) : null;
+      const slaMs = 50;
+
+      const kpis = [
+        { label: 'Simulated Day PnL', value: `${totalPnl >= 0 ? '+' : ''}$${totalPnl.toLocaleString()}`, cls: totalPnl >= 0 ? 'text-success' : 'text-danger', delta: `${activeTests.length} active · ${completedTests.length} completed` },
+        { label: 'Sim. Fill Rate', value: fillRate + '%', cls: parseFloat(fillRate) >= 95 ? 'text-success' : 'text-warning', delta: `${filledOrders}/${orders.length} simulated fills` },
+        { label: 'Data Feed Latency', value: avgLatency == null ? '—' : `${Math.round(avgLatency)}ms`, cls: avgLatency == null ? 'text-muted' : (avgLatency <= slaMs ? 'text-success' : avgLatency <= slaMs * 1.5 ? 'text-warning' : 'text-danger'), delta: `SLA target: ${slaMs}ms · samples: ${latencySamples.length}` },
+        { label: 'Strategies Under Test', value: String(strats.length), cls: 'text-primary', delta: `${activeTests.length} active · ${completedTests.length} validated` },
+      ];
+      document.getElementById('liveKpis').innerHTML = kpis.map(k => `
+        <div class="live-kpi">
+          <div class="label">${k.label}</div>
+          <div class="value ${k.cls}">${k.value}</div>
+          <div class="delta text-muted">${k.delta}</div>
+        </div>
+      `).join('');
+    })();
+
+    /* ── Telemetry helpers (derived from mock event fields) ── */
+    function percentile(values, p) {
+      if (!values || values.length === 0) return null;
+      const s = values.slice().sort((a, b) => a - b);
+      const idx = (s.length - 1) * p;
+      const lo = Math.floor(idx);
+      const hi = Math.ceil(idx);
+      if (lo === hi) return s[lo];
+      return s[lo] + (s[hi] - s[lo]) * (idx - lo);
+    }
+
+    function deriveSessionSeriesFromOrders(orders) {
+      const fills = (orders || [])
+        .filter(o => o.status === 'Filled' || o.status === 'Partial')
+        .map(o => ({ ts: Number(o.ts), pnl: Number(o.pnl) }))
+        .filter(x => Number.isFinite(x.pnl));
+      // Use ts when available; otherwise fall back to original order
+      const hasTs = fills.some(x => Number.isFinite(x.ts));
+      if (hasTs) fills.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+
+      let equity = 0;
+      let peak = 0;
+      const series = fills.map(f => {
+        equity += f.pnl;
+        peak = Math.max(peak, equity);
+        const dd = Math.max(0, peak - equity);
+        return { equity, dd };
+      });
+
+      const current = series.length ? series[series.length - 1] : { equity: 0, dd: 0 };
+      return { series, equity: current.equity, dd: current.dd };
+    }
+
+    /* ── Strategies Under Test (with provenance) ── */
+    (function() {
+      const strategies = MOCK.testStrategies || [];
+      const gateStatuses = ['G1 ✓', 'G2 ✓'];
+      document.getElementById('deployBody').innerHTML = strategies.map((s, i) => {
+        const isActive = s.mode === 'Forward Test';
+        const dotCls = isActive ? 'live' : 'paper';
+        const modePill = isActive ? 'pill-primary' : 'pill-success';
+        const gateCls = gateStatuses[i]?.startsWith('G2') ? 'text-success' : 'text-primary';
+        return `<tr>
+          <td><span class="status-dot ${dotCls}"></span></td>
+          <td style="font-weight:700;">${s.name || s.id}</td>
+          <td class="text-mono">${s.market || s.market_id}</td>
+          <td><span class="pill ${modePill}">${s.mode}</span></td>
+          <td class="text-mono text-muted" style="font-size:11px;">${s.dataSource || 'Historical'}</td>
+          <td class="${gateCls}" style="font-size:11px;font-weight:700;">${gateStatuses[i] || '—'}</td>
+          <td class="text-mono ${s.pnl >= 0 ? 'text-success' : 'text-danger'}">~${s.pnl >= 0 ? '+' : ''}$${s.pnl}</td>
+          <td class="text-mono">${s.trades}</td>
+        </tr>`;
+      }).join('');
+    })();
+
+    /* ── Simulated Positions ──────────────────── */
+    (function() {
+      const activeStrats = (MOCK.testStrategies || []).filter(s => s.mode === 'Forward Test');
+      // Generate simulated positions from forward-test strategies
+      const positions = activeStrats.map((s, i) => {
+        const side = i % 3 === 2 ? 'Short' : 'Long';
+        const entry = 5400 + Math.floor(Math.random() * 100);
+        const current = entry + (side === 'Long' ? 1 : -1) * (Math.floor(Math.random() * 30) - 10);
+        const qty = [2, 1, 3, 1][i] || 1;
+        const unrealized = (current - entry) * (side === 'Long' ? 1 : -1) * qty * 50; // ES $50/pt
+        return { strategy: s.name || s.id, side, qty, entry, current, unrealized };
+      });
+      document.getElementById('posBody').innerHTML = positions.map(p => `
+        <tr>
+          <td style="font-size:12px;">${p.strategy}</td>
+          <td><span class="pos-side ${p.side.toLowerCase()}">${p.side}</span></td>
+          <td class="text-mono">${p.qty}</td>
+          <td class="text-mono">$${p.entry.toLocaleString()}</td>
+          <td class="text-mono">$${p.current.toLocaleString()}</td>
+          <td class="text-mono ${p.unrealized >= 0 ? 'text-success' : 'text-danger'}">${p.unrealized >= 0 ? '+' : ''}$${p.unrealized.toLocaleString()}</td>
+        </tr>
+      `).join('');
+    })();
+
+    /* ── Order Log ──────────────────────────── */
+    (function() {
+      const orders = MOCK.orders || [];
+      const actionPill = a => {
+        const m = { Open: 'pill-success', Add: 'pill-primary', Close: 'pill-danger' };
+        return `<span class="pill ${m[a] || ''}">${a}</span>`;
+      };
+      const statusPill = s => {
+        const m = { Filled: 'pill-success', Partial: 'pill-warning', Pending: 'pill-primary', Rejected: 'pill-danger' };
+        return `<span class="pill ${m[s] || ''}">${s}</span>`;
+      };
+      document.getElementById('orderBody').innerHTML = orders.map(o => `
+        <tr>
+          <td class="text-mono text-muted" style="font-size:11px;">${o.time}</td>
+          <td>${o.strategy_id}</td>
+          <td>${actionPill(o.action)}</td>
+          <td class="text-mono">${o.qty}</td>
+          <td class="text-mono">$${o.price.toLocaleString()}</td>
+          <td>${statusPill(o.status)}</td>
+        </tr>
+      `).join('');
+    })();
+
+    /* ── Simulated Session PnL Curve ──────── */
+    (function() {
+      const w = 540, h = 180, pad = 30;
+      const n = 80; // 80 data points across the session
+      const strats = MOCK.testStrategies || [];
+      const totalPnl = strats.reduce((a, s) => a + (s.pnl || 0), 0);
+      // Build a cumulative PnL curve that ends at totalPnl
+      let pnl = [0];
+      for (let i = 1; i < n; i++) {
+        const drift = totalPnl / n;
+        pnl.push(pnl[i-1] + drift + (Math.random() - 0.48) * 80);
+      }
+      // Normalize end to actual totalPnl
+      const adjust = totalPnl - pnl[n-1];
+      pnl = pnl.map((v, i) => v + (adjust * i / (n-1)));
+
+      const minP = Math.min(...pnl, 0) - 100;
+      const maxP = Math.max(...pnl, 0) + 100;
+      const x = i => pad + (i / (n-1)) * (w - 2 * pad);
+      const y = v => pad + (1 - (v - minP) / (maxP - minP)) * (h - 2 * pad);
+      const pts = pnl.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+      const area = `${x(0)},${y(0)} ${pts} ${x(n-1)},${y(0)}`;
+      const zeroY = y(0);
+      const endColor = totalPnl >= 0 ? 'var(--success)' : 'var(--danger)';
+
+      document.getElementById('sessionPnl').innerHTML = `
+        <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">
+          <defs>
+            <linearGradient id="pnlGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${endColor}" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="${endColor}" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <line x1="${pad}" y1="${zeroY}" x2="${w - pad}" y2="${zeroY}" stroke="var(--border)" stroke-width="1" stroke-dasharray="4 3" />
+          <text x="${w - pad + 4}" y="${zeroY + 4}" fill="var(--text-dim)" font-size="9" font-family="var(--font-mono)">$0</text>
+          <polygon points="${area}" class="session-pnl-area" style="fill: url(#pnlGrad);" />
+          <polyline points="${pts}" fill="none" stroke="${endColor}" stroke-width="2" />
+          <circle cx="${x(n-1)}" cy="${y(pnl[n-1])}" r="4" fill="${endColor}" />
+          <text x="${x(n-1) - 50}" y="${y(pnl[n-1]) - 10}" fill="${endColor}" font-size="11" font-weight="900" font-family="var(--font-mono)">${totalPnl >= 0 ? '+' : ''}$${totalPnl}</text>
+          <text x="${pad}" y="${h - 6}" fill="var(--text-dim)" font-size="9" font-family="var(--font-mono)">Session Start</text>
+          <text x="${w - pad - 20}" y="${h - 6}" fill="var(--text-dim)" font-size="9" font-family="var(--font-mono)">Now</text>
+        </svg>`;
+    })();
+
+    /* ── Execution Metrics (computed) ────────── */
+    (function() {
+      const orders = MOCK.orders || [];
+      const filled = orders.filter(o => o.status === 'Filled').length;
+      const fillRate = orders.length ? ((filled / orders.length) * 100) : 0;
+      const rejected = orders.filter(o => o.status === 'Rejected').length;
+      const rejRate = orders.length ? ((rejected / orders.length) * 100) : 0;
+
+      const slaMs = 50;
+      const latencySamples = orders.map(o => Number(o.latency_ms)).filter(v => Number.isFinite(v));
+      const avgLatency = latencySamples.length ? (latencySamples.reduce((a, b) => a + b, 0) / latencySamples.length) : null;
+      const latencyPct = avgLatency == null ? 0 : Math.min((avgLatency / slaMs) * 100, 100);
+
+      const riskRejected = orders.filter(o => o.status === 'Rejected' && String(o.reject_reason || '').toLowerCase().startsWith('risk')).length;
+      const riskRejRate = orders.length ? ((riskRejected / orders.length) * 100) : 0;
+
+      const metrics = [
+        { label: 'Sim. Fill Rate', val: fillRate.toFixed(1) + '%', pct: fillRate, color: fillRate >= 95 ? 'green' : 'yellow' },
+        { label: 'Data Latency vs SLA', val: avgLatency == null ? `— / ${slaMs}ms` : `${Math.round(avgLatency)}ms / ${slaMs}ms`, pct: latencyPct, color: avgLatency == null ? 'blue' : (avgLatency <= slaMs ? 'green' : avgLatency <= slaMs * 1.5 ? 'yellow' : 'red') },
+        { label: 'Signal Rejection (Risk Rules)', val: riskRejRate.toFixed(1) + '%', pct: Math.min(riskRejRate * 10, 100), color: riskRejRate > 2 ? 'red' : 'green' },
+      ];
+      document.getElementById('execMetrics').innerHTML = metrics.map(m => `
+        <div class="metric-row">
+          <span class="label">${m.label}</span>
+          <div class="metric-bar-container">
+            <div class="metric-bar ${m.color}" style="width:${m.pct}%"></div>
+          </div>
+          <span class="val">${typeof m.val === 'number' ? m.val + '%' : m.val}</span>
+        </div>
+      `).join('');
+    })();
+
+    /* ── Latency chart (SVG sparkline) ──────── */
+    (function() {
+      const w = 540, h = 180, pad = 30;
+      const n = 60;
+      const orders = MOCK.orders || [];
+      let data = orders.map(o => Number(o.latency_ms)).filter(v => Number.isFinite(v));
+      // Ensure we always have enough points to draw a sparkline
+      while (data.length < n) {
+        const base = data.length ? data[data.length - 1] : 12;
+        data.push(Math.max(1, base + (Math.random() - 0.5) * 8));
+      }
+      data = data.slice(-n);
+      const maxV = 60;
+      const x = i => pad + (i / (n - 1)) * (w - 2 * pad);
+      const y = v => pad + (1 - Math.min(v, maxV) / maxV) * (h - 2 * pad);
+      const pts = data.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+
+      document.getElementById('latencyChart').innerHTML = `
+        <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">
+          <line x1="${pad}" y1="${y(50)}" x2="${w - pad}" y2="${y(50)}" stroke="var(--danger)" stroke-width="1" stroke-dasharray="4 3" opacity="0.5" />
+          <text x="${w - pad + 4}" y="${y(50) + 4}" fill="var(--danger)" font-size="9" font-family="var(--font-mono)">SLA 50ms</text>
+          <polyline points="${pts}" fill="none" stroke="var(--primary)" stroke-width="2" />
+          ${data.map((v, i) => v > 40 ? `<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="var(--warning)" />` : '').join('')}
+          <text x="${pad}" y="${h - 6}" fill="var(--text-dim)" font-size="9" font-family="var(--font-mono)">60s ago</text>
+          <text x="${w - pad - 20}" y="${h - 6}" fill="var(--text-dim)" font-size="9" font-family="var(--font-mono)">Now</text>
+          <text x="4" y="${y(0) + 4}" fill="var(--text-dim)" font-size="9" font-family="var(--font-mono)">60ms</text>
+          <text x="4" y="${y(maxV) + 12}" fill="var(--text-dim)" font-size="9" font-family="var(--font-mono)">0ms</text>
+        </svg>`;
+    })();
+
+    /* ── RiskGuard v0 ───────────────────────── */
+    (function() {
+      const strategies = MOCK.testStrategies || [];
+      const blueprint = strategies.length ? MOCK.genBlueprint(strategies[0]) : null;
+      const levels = (blueprint?.risk_config?.drawdown_levels || [-200, -400, -600]).map(v => Math.abs(Number(v))).filter(v => Number.isFinite(v));
+      const l1 = levels[0] || 200;
+      const l2 = levels[1] || 400;
+      const l3 = levels[2] || 600;
+      const daily = l3;
+
+      const orders = MOCK.orders || [];
+      const session = deriveSessionSeriesFromOrders(orders);
+      const current = Math.round(session.dd);
+
+      const pctCurr = daily ? (current / daily) * 100 : 0;
+      const pctL1 = daily ? (l1 / daily) * 100 : 0;
+      const pctL2 = daily ? (l2 / daily) * 100 : 0;
+
+      const barColor = current >= l2 ? 'var(--danger)' : current >= l1 ? 'var(--warning)' : 'var(--success)';
+
+      let degradeLabel = 'L0 Normal';
+      let degradeCls = 'text-success';
+      if (current >= l3) { degradeLabel = 'L3 Stop Trading'; degradeCls = 'text-danger'; }
+      else if (current >= l2) { degradeLabel = 'L2 Stop Strategy'; degradeCls = 'text-danger'; }
+      else if (current >= l1) { degradeLabel = 'L1 Reduce Size'; degradeCls = 'text-warning'; }
+
+      const ruleStatus = (threshold) => current >= threshold
+        ? '<span class="pill pill-danger">Triggered</span>'
+        : '<span class="pill pill-success">Armed</span>';
+
+      document.getElementById('riskGuardContent').innerHTML = `
+        <div class="dd-gauge">
+          <span style="font-size:12px;color:var(--text-muted);min-width:100px;">Simulated DD</span>
+          <div class="bar-container">
+            <div class="bar" style="width:${pctCurr}%;background:${barColor}"></div>
+            <div class="marker" style="left:${pctL1}%"><span class="marker-label">L1 $${l1}</span></div>
+            <div class="marker" style="left:${pctL2}%"><span class="marker-label">L2 $${l2}</span></div>
+          </div>
+          <span style="font-size:14px;font-family:var(--font-mono);font-weight:900;color:var(--warning);min-width:60px;text-align:right;">-$${current}</span>
+        </div>
+
+        <div class="risk-kpis">
+          <div class="risk-kpi"><div class="label">DD Distance L1</div><div class="value ${current >= l1 ? 'text-danger' : 'text-warning'}">$${Math.max(0, l1 - current)}</div></div>
+          <div class="risk-kpi"><div class="label">DD Distance L2</div><div class="value ${current >= l2 ? 'text-danger' : 'text-success'}">$${Math.max(0, l2 - current)}</div></div>
+          <div class="risk-kpi"><div class="label">Degradation Level</div><div class="value ${degradeCls}">${degradeLabel}</div></div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div class="risk-subhead">Alert Rules</div>
+          <table class="data-table" style="margin:0;">
+            <thead><tr><th>Alert Rule</th><th>Trigger</th><th>Action</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>DD hits L1</td><td>-$${l1}</td><td>reduce_size</td><td>${ruleStatus(l1)}</td></tr>
+              <tr><td>DD hits L2</td><td>-$${l2}</td><td>stop_strategy</td><td>${ruleStatus(l2)}</td></tr>
+              <tr><td>DD hits L3</td><td>-$${l3}</td><td>stop_trading</td><td>${ruleStatus(l3)}</td></tr>
+            </tbody>
+          </table>
+        </div>`;
+    })();
+
+    /* ── Daily Audit ────────────────────────── */
+    (function() {
+      const strategies = MOCK.testStrategies || [];
+      const blueprint = strategies.length ? MOCK.genBlueprint(strategies[0]) : null;
+      const levels = (blueprint?.risk_config?.drawdown_levels || [-200, -400, -600]).map(v => Math.abs(Number(v))).filter(v => Number.isFinite(v));
+      const l2 = levels[1] || 400;
+      const l3 = levels[2] || 600;
+
+      const orders = MOCK.orders || [];
+      const session = deriveSessionSeriesFromOrders(orders);
+      const dd = Math.round(session.dd);
+      const totalPnl = Math.round(session.equity);
+
+      const latencySamples = orders.map(o => Number(o.latency_ms)).filter(v => Number.isFinite(v));
+      const p95 = percentile(latencySamples, 0.95);
+      const markets = Array.from(new Set(orders.map(o => o.market_id).filter(Boolean)));
+
+      const ddStatus = dd >= l3 ? 'fail' : dd >= l2 ? 'warn' : 'pass';
+      const pnlStatus = Math.abs(totalPnl) > l3 ? 'warn' : 'pass';
+
+      const totalSignal = orders.length;
+      const withSignalTime = orders.filter(o => !!o.signal_time).length;
+
+      const auditItems = [
+        { check: 'All data feeds operational', status: latencySamples.length ? 'pass' : 'warn', detail: latencySamples.length ? `${markets.join(', ') || '—'} — latency samples: ${latencySamples.length}` : 'Requires ingestion heartbeat + gap detector (not implemented in MVP mock)' },
+        { check: 'Simulated PnL within expected range', status: pnlStatus, detail: `Total PnL: ${totalPnl >= 0 ? '+' : ''}$${totalPnl} (band: ±$${l3})` },
+        { check: 'Risk limits respected (simulated)', status: ddStatus, detail: `Current DD: -$${dd} (L2: -$${l2}, L3: -$${l3})` },
+        { check: 'Signal audit trail complete', status: withSignalTime === totalSignal ? 'pass' : 'warn', detail: `${withSignalTime}/${totalSignal} orders have signal_time` },
+      ];
+      const icon = s => s === 'pass' ? '✓' : s === 'warn' ? '⚠' : '✗';
+      const cls = s => s === 'pass' ? 'text-success' : s === 'warn' ? 'text-warning' : 'text-danger';
+
+      document.getElementById('auditContent').innerHTML = `
+        <table class="data-table">
+          <thead><tr><th style="width:30px"></th><th>Check</th><th>Detail</th><th>Status</th></tr></thead>
+          <tbody>
+            ${auditItems.map(a => `
+              <tr>
+                <td class="${cls(a.status)}">${icon(a.status)}</td>
+                <td>${a.check}</td>
+                <td class="text-muted" style="font-size:12px;">${a.detail}</td>
+                <td><span class="pill ${a.status === 'pass' ? 'pill-success' : 'pill-warning'}">${a.status === 'pass' ? 'Pass' : 'Warning'}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div style="margin-top:12px;font-size:11px;color:var(--text-dim);">
+          Last audit: ${new Date().toLocaleString()} · Next scheduled: Tomorrow 06:00 UTC
+        </div>`;
+    })();
+
+    /* ── Kill Switch ────────────────────────── */
+    function activateKillSwitch() {
+      const btn = document.getElementById('killBtn');
+      if (btn.classList.contains('armed')) {
+        btn.classList.remove('armed');
+        btn.textContent = 'STOPPED';
+        btn.style.background = '#555';
+        btn.disabled = true;
+        alert('🚨 ALL forward tests stopped, simulated orders cancelled. (MVP mock — no real action taken)');
+      } else {
+        btn.classList.add('armed');
+        btn.textContent = 'CONFIRM STOP';
+        setTimeout(() => {
+          if (btn.classList.contains('armed')) {
+            btn.classList.remove('armed');
+            btn.textContent = 'STOP ALL';
+          }
+        }, 5000);
+      }
+    }
+
+    // Ensure default tab is consistent
+    switchExecTab('overview');
+  </script>
+</body>
+</html>

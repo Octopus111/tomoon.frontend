@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1400, initial-scale=0.3, maximum-scale=3, user-scalable=yes">
+  <title>Dashboard — ToMoon Quant</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <style>
+    /* ── Dashboard-specific ── */
+    .hero-banner {
+      background:
+        radial-gradient(900px 380px at 18% 22%, rgba(59,130,246,0.28), transparent 70%),
+        radial-gradient(780px 360px at 86% 16%, rgba(139,92,246,0.20), transparent 72%),
+        linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      margin-bottom: var(--sp-lg);
+      border: 1px solid var(--border-subtle);
+    }
+    .hero-banner h2 { font-size: 22px; font-weight: 900; margin: 0 0 4px; }
+    .hero-banner p { color: var(--text-muted); font-size: 13px; margin: 0; }
+
+    .market-select {
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border-radius: var(--radius-pill);
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      outline: none;
+    }
+    .market-select:hover { background: var(--bg-hover); border-color: rgba(255,255,255,0.14); }
+    .market-select:focus { box-shadow: 0 0 0 3px rgba(96,165,250,0.18); border-color: var(--border-focus); }
+
+    /* ── Strategy Pipeline Funnel ── */
+    .funnel-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: var(--sp-sm);
+    }
+    @media (max-width: 1200px) { .funnel-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 800px)  { .funnel-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .funnel-stage {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      position: relative;
+    }
+    .funnel-stage .f-count { font-size: 28px; font-weight: 900; font-family: var(--font-mono); margin-bottom: 4px; }
+    .funnel-stage .f-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); }
+    .funnel-stage .f-arrow { position: absolute; right: -10px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 14px; z-index: 1; }
+    .funnel-stage:last-child .f-arrow { display: none; }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--sp-md);
+      margin-top: var(--sp-lg);
+    }
+    @media (max-width: 1100px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+    .alert-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+    }
+    .alert-row:last-child { border-bottom: none; }
+    .alert-row .a-time { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); min-width: 46px; }
+    .alert-row .a-msg { flex: 1; }
+    .alert-row .a-action { font-size: 11px; }
+
+    .regime-banner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-top: var(--sp-md);
+    }
+    .regime-banner .r-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+    .regime-banner .r-value { font-size: 16px; font-weight: 900; }
+
+    .run-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+    }
+    .run-row:last-child { border-bottom: none; }
+    .run-row:hover { background: var(--bg-hover); }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div class="app-main" id="app-main">
+      <div class="page anim-in">
+
+        <!-- Hero -->
+        <div class="hero-banner">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2>Strategy Factory Dashboard</h2>
+              <p></p>
+            </div>
+            <div class="flex gap-sm">
+              <p></p>
+              <select id="market-select" class="market-select" aria-label="Market"></select>
+              <span class="pill pill-accent" id="regime-pill">Regime: -</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Stats -->
+        <div class="stat-grid" id="stat-grid"></div>
+
+        <!-- Strategy Pipeline Funnel -->
+        <div class="section-header mt-lg">
+          <div>
+            <h3 class="section-title">Strategy Pipeline</h3>
+            <p class="section-subtitle">Draft → Backtest → QA → Forward Test → Validated → Archived</p>
+          </div>
+          <a href="../alpha-library/" class="btn btn-sm">Open Registry →</a>
+        </div>
+        <div class="funnel-grid" id="funnel-grid"></div>
+
+        <!-- Main Grid: Registry + Alerts -->
+        <div class="dashboard-grid">
+          <!-- Left: Recent Runs -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Recent Backtest Runs</h3>
+              <a href="../research/" class="btn btn-sm btn-primary">View All →</a>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <div class="table-wrap">
+                <div id="runs-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Alerts + Regime -->
+          <div class="flex flex-col gap-md">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Alerts & Events</h3>
+                <span class="pill pill-warning" id="alert-count">0</span>
+              </div>
+              <div class="card-body" style="padding:0;">
+                <div id="alerts-list"></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Risk Budget</h3>
+              </div>
+              <div class="card-body">
+                <div class="flex flex-col gap-sm">
+                  <div>
+                    <div class="flex justify-between fs-xs text-muted mb-md" style="margin-bottom:6px">
+                      <span>Daily Risk Used</span>
+                      <span class="text-mono" id="risk-daily-pct">-</span>
+                    </div>
+                    <div class="progress"><div class="progress-fill green" id="risk-daily-bar" style="width:0"></div></div>
+                  </div>
+                  <div style="margin-top:12px">
+                    <div class="flex justify-between fs-xs text-muted" style="margin-bottom:6px">
+                      <span>Drawdown vs L1 (-$400)</span>
+                      <span class="text-mono" id="risk-dd-val">-</span>
+                    </div>
+                    <div class="progress"><div class="progress-fill yellow" id="risk-dd-bar" style="width:0"></div></div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="regime-banner">
+              <div>
+                <div class="r-label">Market Regime</div>
+                <div class="r-value" id="regime-value">-</div>
+              </div>
+              <div style="margin-left:auto;">
+                <div class="r-label">Confidence</div>
+                <div class="r-value text-mono" id="regime-conf">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Strategy Registry Summary -->
+        <div class="section-header mt-lg">
+          <div>
+            <h3 class="section-title">Strategy Registry</h3>
+            <p class="section-subtitle">All strategies across lifecycle stages</p>
+          </div>
+          <a href="../alpha-library/" class="btn btn-sm">Open Library →</a>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <div class="table-wrap">
+              <table class="data-table" id="registry-table">
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Name</th><th>Status</th><th>Market</th>
+                    <th>Sharpe</th><th>Max DD</th><th>Gate</th><th>Updated</th>
+                  </tr>
+                </thead>
+                <tbody id="registry-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/nav.js"></script>
+  <script src="../shared/mock-data.js"></script>
+  <script>
+    renderQuantSidebar('dashboard');
+    renderQuantTopbar('Dashboard', [
+      { label: 'ToMoon Quant', href: '../dashboard/' },
+      { label: 'Dashboard' }
+    ]);
+
+    // ── Stats ──
+    const fwdTest = MOCK.strategies.filter(s => s.status === 'Forward Test').length;
+    const validated = MOCK.strategies.filter(s => s.status === 'Validated').length;
+    const avgSharpe = MOCK.strategies.filter(s => s.sharpe > 0).reduce((a, s) => a + s.sharpe, 0) / Math.max(1, MOCK.strategies.filter(s => s.sharpe > 0).length);
+    const totalRuns = MOCK.runs.length;
+
+    document.getElementById('stat-grid').innerHTML = [
+      { label: 'Total Strategies', value: MOCK.strategies.length, meta: `${fwdTest} testing · ${validated} validated` },
+      { label: 'Avg Sharpe (positive)', value: avgSharpe.toFixed(2), meta: 'Across all profitable' },
+      { label: 'Backtest Runs', value: totalRuns, meta: `${MOCK.runs.filter(r => r.status === 'completed').length} completed` },
+      { label: 'Components', value: MOCK.components.length, meta: `${MOCK.components.filter(c => c.status === 'Active').length} active` },
+    ].map(s => `
+      <div class="stat-card anim-in">
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-value">${s.value}</div>
+        <div class="stat-meta">${s.meta}</div>
+      </div>
+    `).join('');
+
+    // ── Pipeline Funnel ──
+    const STAGES = ['Draft','Backtest','QA Passed','Forward Test','Validated','Archived'];
+    const stageColors = { Draft:'var(--text-dim)', Backtest:'var(--warning)', 'QA Passed':'var(--accent)', 'Forward Test':'#60a5fa', Validated:'var(--success)', Archived:'var(--danger)' };
+    document.getElementById('funnel-grid').innerHTML = STAGES.map(st => {
+      const count = MOCK.strategies.filter(s => s.status === st).length;
+      return `
+        <div class="funnel-stage anim-in">
+          <div class="f-count" style="color:${stageColors[st]}">${count}</div>
+          <div class="f-label">${st}</div>
+          <span class="f-arrow">→</span>
+        </div>`;
+    }).join('');
+
+    // ── Recent Runs ──
+    const recentRuns = MOCK.runs.slice(0, 8);
+    document.getElementById('runs-list').innerHTML = recentRuns.map(r => {
+      const statusPill = r.status === 'completed' ? 'pill-success' : r.status === 'running' ? 'pill-primary' : 'pill-danger';
+      return `
+      <div class="run-row" style="cursor:pointer;" onclick="window.location.href='../research/index.html'" title="View in Research Pipeline">
+        <span class="text-mono fs-sm">${r.run_id}</span>
+        <span class="fs-sm">${r.strategy_id}</span>
+        <span class="pill ${statusPill}">${r.status}</span>
+        <span class="text-mono fs-sm">${r.metrics.sharpe.toFixed(2)} SR</span>
+        <span class="text-mono fs-sm ${r.metrics.max_dd < -10 ? 'text-danger' : ''}">${r.metrics.max_dd.toFixed(1)}%</span>
+      </div>`;
+    }).join('');
+
+    // ── Alerts ──
+    document.getElementById('alert-count').textContent = MOCK.alerts.length;
+    document.getElementById('alerts-list').innerHTML = MOCK.alerts.map(a => {
+      const pillCls = a.level === 'danger' ? 'pill-danger' : a.level === 'warning' ? 'pill-warning' : 'pill-primary';
+      return `
+      <div class="alert-row">
+        <span class="a-time">${a.time}</span>
+        <span class="a-msg">${a.msg}</span>
+        ${a.action ? `<span class="pill ${pillCls} a-action">${a.action}</span>` : ''}
+      </div>`;
+    }).join('');
+
+    // ── Risk ──
+    const dailyRisk = MOCK.rnd(0.2, 0.75);
+    const ddVal = -MOCK.rnd(80, 380);
+    document.getElementById('risk-daily-pct').textContent = (dailyRisk * 100).toFixed(0) + '%';
+    document.getElementById('risk-daily-bar').style.width = (dailyRisk * 100) + '%';
+    document.getElementById('risk-dd-val').textContent = '$' + Math.abs(ddVal).toFixed(0);
+    document.getElementById('risk-dd-bar').style.width = Math.min(100, (Math.abs(ddVal) / 400 * 100)) + '%';
+    if (Math.abs(ddVal) > 300) document.getElementById('risk-dd-bar').className = 'progress-fill red';
+
+    // ── Market Regime ──
+    const markets = (MOCK.markets && MOCK.markets.length)
+      ? [...MOCK.markets]
+      : Array.from(new Set(MOCK.strategies.map(s => s.market_id))).sort();
+
+    const params = new URLSearchParams(window.location.search);
+    const storedMarket = sessionStorage.getItem('qSelectedMarket');
+    const initialMarket = params.get('market') || storedMarket || markets[0] || 'CME_ES';
+
+    const marketSelect = document.getElementById('market-select');
+    marketSelect.innerHTML = markets.map(m => `<option value="${m}">${m}</option>`).join('');
+    marketSelect.value = markets.includes(initialMarket) ? initialMarket : (markets[0] || initialMarket);
+
+    function setUrlMarket(marketId) {
+      const u = new URL(window.location.href);
+      u.searchParams.set('market', marketId);
+      history.replaceState({}, '', u.toString());
+    }
+
+    function renderMarketRegime(marketId) {
+      const reg = typeof MOCK.getRegimeForMarket === 'function'
+        ? MOCK.getRegimeForMarket(marketId)
+        : (MOCK.regimesByMarket && MOCK.regimesByMarket[marketId])
+          ? MOCK.regimesByMarket[marketId]
+          : MOCK.currentRegime;
+
+      document.getElementById('regime-pill').textContent = `Regime (${marketId}): ${reg.label}`;
+      document.getElementById('regime-value').textContent = reg.label;
+      document.getElementById('regime-conf').textContent = (reg.confidence * 100).toFixed(0) + '%';
+    }
+
+    const selectedMarket = marketSelect.value;
+    sessionStorage.setItem('qSelectedMarket', selectedMarket);
+    setUrlMarket(selectedMarket);
+    renderMarketRegime(selectedMarket);
+
+    marketSelect.addEventListener('change', () => {
+      const m = marketSelect.value;
+      sessionStorage.setItem('qSelectedMarket', m);
+      setUrlMarket(m);
+      renderMarketRegime(m);
+    });
+
+    // ── Registry Table ──
+    document.getElementById('registry-body').innerHTML = MOCK.strategies.map(s => {
+      const statusCls = { Validated: 'pill-success', 'Forward Test': 'pill-primary', 'QA Passed': 'pill-accent', Backtest: 'pill-warning', Archived: 'pill-danger', Draft: '' }[s.status] || '';
+      const gateTxt = s.gate_2 ? 'G2 ✓' : s.gate_1 ? 'G1 ✓' : s.gate_0 ? 'G0 ✓' : '—';
+      const gateCls = s.gate_2 ? 'text-success' : s.gate_1 ? 'text-primary' : '';
+      return `
+      <tr style="cursor:pointer;" onclick="window.location.href='../alpha-library/index.html'" title="View in Alpha Library">
+        <td class="mono">${s.strategy_id}</td>
+        <td>${s.name}</td>
+        <td><span class="pill ${statusCls}">${s.status}</span></td>
+        <td class="mono">${s.market_id}</td>
+        <td class="mono ${s.sharpe >= 1.5 ? 'text-success' : s.sharpe < 0 ? 'text-danger' : ''}">${s.sharpe.toFixed(2)}</td>
+        <td class="mono text-danger">${s.max_dd.toFixed(1)}%</td>
+        <td class="${gateCls} fw-900">${gateTxt}</td>
+        <td class="text-muted">${s.last_updated}</td>
+      </tr>`;
+    }).join('');
+  </script>
+</body>
+</html>

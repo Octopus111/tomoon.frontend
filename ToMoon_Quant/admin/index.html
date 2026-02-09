@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1400, initial-scale=0.3, maximum-scale=3, user-scalable=yes">
+  <title>Admin &amp; Settings — ToMoon Quant</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <style>
+    .admin-tabs {
+      display: flex; gap: 0; margin-bottom: var(--sp-md);
+      border-bottom: 2px solid var(--border);
+    }
+    .admin-tab {
+      padding: 10px 20px; font-size: 13px; font-weight: 700;
+      color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all .15s;
+    }
+    .admin-tab:hover { color: var(--text-main); }
+    .admin-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .admin-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 24px; margin-bottom: var(--sp-md);
+    }
+    .admin-card h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 16px; }
+
+    .admin-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--sp-md);
+    }
+    @media (max-width: 900px) { .admin-grid { grid-template-columns: 1fr; } }
+
+    /* YAML code block */
+    .yaml-block {
+      background: rgba(0,0,0,0.25); border-radius: var(--radius-sm);
+      padding: 16px; max-height: 320px; overflow: auto; scrollbar-width: thin;
+    }
+    .yaml-block pre {
+      font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);
+      white-space: pre; margin: 0; line-height: 1.6;
+    }
+    .yaml-key { color: #7dd3fc; }
+    .yaml-val { color: #a5f3c4; }
+    .yaml-comment { color: #666; font-style: italic; }
+
+    /* Form rows */
+    .form-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border-subtle);
+    }
+    .form-row:last-child { border-bottom: none; }
+    .form-row .f-label { font-size: 13px; color: var(--text-muted); min-width: 160px; }
+    .form-row .f-input {
+      flex: 1; padding: 7px 12px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--bg-surface);
+      color: var(--text-main); font-size: 12px; outline: none;
+    }
+    .form-row .f-input:focus { border-color: var(--border-focus); }
+    .form-row .f-select {
+      padding: 7px 12px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text-main); font-size: 12px;
+    }
+
+    /* Gate rule editor */
+    .gate-rule {
+      background: var(--bg-panel); border-radius: var(--radius-sm);
+      padding: 14px 16px; margin-bottom: 10px;
+    }
+    .gate-rule .rule-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+    }
+    .gate-rule .rule-name { font-size: 13px; font-weight: 700; }
+    .gate-rule .rule-items { font-size: 12px; color: var(--text-muted); }
+
+    .toggle-switch {
+      position: relative; width: 40px; height: 22px;
+      background: var(--bg-hover); border-radius: 999px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-switch.on { background: var(--success); }
+    .toggle-switch::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 16px; height: 16px; border-radius: 999px;
+      background: white; transition: transform 0.2s;
+    }
+    .toggle-switch.on::after { transform: translateX(18px); }
+
+
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div class="app-main" id="app-main">
+      <div class="page anim-in">
+
+        <div class="section-header">
+          <div>
+            <h3 class="section-title">Admin & Settings</h3>
+            <p class="section-subtitle">Standards, adapter configuration & QA gate management</p>
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="alert('Settings saved (MVP mock)')">Save All Changes</button>
+        </div>
+
+        <div class="admin-tabs">
+          <div class="admin-tab active" onclick="switchAdminTab('standards')">Standards & Layers</div>
+          <div class="admin-tab" onclick="switchAdminTab('adapters')">Market Adapters</div>
+          <div class="admin-tab" onclick="switchAdminTab('gates')">QA Gates</div>
+        </div>
+
+        <!-- Tab: Standards & Layers -->
+        <div id="tab-standards">
+          <div class="admin-card">
+            <h4>11 Thin Standard Layers (§2.2)</h4>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
+              Cross-cutting standards that ensure every system module interoperates. Each layer is a thin spec — not a service — enforced via schema validation.
+            </p>
+            <table class="data-table">
+              <thead><tr><th>#</th><th>Layer</th><th>Description</th><th>Owner</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td style="font-weight:700;">Market Adapter</td><td class="text-muted" style="font-size:12px;">Tick-size, session hours, point-value per instrument; single YAML per market</td><td>Infra</td><td><span class="pill pill-success">Active</span></td></tr>
+                <tr><td>2</td><td style="font-weight:700;">Strategy Spec Schema</td><td class="text-muted" style="font-size:12px;">Blueprint JSON schema — components, params_snapshot, execution assumptions, risk config</td><td>Research</td><td><span class="pill pill-success">Active</span></td></tr>
+                <tr><td>3</td><td style="font-weight:700;">Data Versioning / DatasetID</td><td class="text-muted" style="font-size:12px;">Every backtest binds a DatasetID; datasets are immutable and referenceable</td><td>Data</td><td><span class="pill pill-success">Active</span></td></tr>
+                <tr><td>4</td><td style="font-weight:700;">Unified Event Model</td><td class="text-muted" style="font-size:12px;">Shared event schema for signals, fills, risk events; enables cross-system replay</td><td>Infra</td><td><span class="pill pill-warning">In Progress</span></td></tr>
+                <tr><td>5</td><td style="font-weight:700;">Execution Mode Adapter</td><td class="text-muted" style="font-size:12px;">Backtest / Forward Test / Validated toggle; same strategy code runs in all modes (no real trading)</td><td>Execution</td><td><span class="pill pill-success">Active</span></td></tr>
+                <tr><td>6</td><td style="font-weight:700;">Cost & Slippage Adapter</td><td class="text-muted" style="font-size:12px;">Conservative / realistic slippage model; identical cost calc in backtest & forward test</td><td>Research</td><td><span class="pill pill-success">Active</span></td></tr>
+                <tr><td>7</td><td style="font-weight:700;">Risk Policy Layer</td><td class="text-muted" style="font-size:12px;">RiskGuard v0 rules, degradation ladder (L0→L3), single-strategy & portfolio caps</td><td>Risk</td><td><span class="pill pill-success">Active</span></td></tr>
+                <tr><td>8</td><td style="font-weight:700;">Alpha Library & Registry</td><td class="text-muted" style="font-size:12px;">Component catalog with schema validation; version-controlled with failure_modes</td><td>Research</td><td><span class="pill pill-success">Active</span></td></tr>
+                <tr><td>9</td><td style="font-weight:700;">QA Gate Framework</td><td class="text-muted" style="font-size:12px;">3-gate pipeline (G0 Reproducible → G1 Reality → G2 Validated) with auto-check</td><td>QA</td><td><span class="pill pill-success">Active</span></td></tr>
+                <tr><td>10</td><td style="font-weight:700;">Observability Standard</td><td class="text-muted" style="font-size:12px;">Latency, slippage, fill-rate dashboards; structured logs; alerting thresholds</td><td>Infra</td><td><span class="pill pill-warning">In Progress</span></td></tr>
+                <tr><td>11</td><td style="font-weight:700;">Regime Tagging Adapter</td><td class="text-muted" style="font-size:12px;">VIX/ADR-based regime classification (Low-Vol / Normal / High-Vol / Crisis / Trending)</td><td>Research</td><td><span class="pill pill-success">Active</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Kill Switch SOP §8.2 -->
+          <div class="admin-card">
+            <h4>Emergency Stop Standard Operating Procedure (§8.2)</h4>
+            <div class="admin-grid">
+              <div>
+                <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--danger);margin-bottom:10px;">Trigger Conditions</div>
+                <table class="data-table">
+                  <thead><tr><th>Condition</th><th>Threshold</th><th>Scope</th></tr></thead>
+                  <tbody>
+                    <tr><td>Intraday DD &gt; L3</td><td>-$600</td><td>Portfolio</td></tr>
+                    <tr><td>Consecutive losses ≥ 5</td><td>5 trades</td><td>Per-strategy</td></tr>
+                    <tr><td>System anomaly</td><td>Feed gap &gt; 30s, unresponsive</td><td>Global</td></tr>
+                    <tr><td>Manual trigger</td><td>Operator decision</td><td>Global</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--warning);margin-bottom:10px;">Immediate Actions</div>
+                <ol style="font-size:12px;color:var(--text-muted);padding-left:18px;line-height:2;">
+                  <li>Cancel all pending orders</li>
+                  <li>Flatten all open positions at market</li>
+                  <li>Block all new entry signals</li>
+                  <li>Log kill event with timestamp, trigger, portfolio state</li>
+                  <li>Notify operator via Slack + email</li>
+                </ol>
+                <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--success);margin:16px 0 10px;">Recovery Process</div>
+                <ol style="font-size:12px;color:var(--text-muted);padding-left:18px;line-height:2;">
+                  <li>Root cause identified and documented</li>
+                  <li>Postmortem filed with deviation analysis</li>
+                  <li>Eddie sign-off to resume (manual approval)</li>
+                  <li>Resume at L1 degradation (50% size) for first session</li>
+                  <li>Return to L0 only after 2 clean sessions</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Adapters -->
+        <div id="tab-adapters" style="display:none;">
+          <div class="admin-grid">
+            <div class="admin-card">
+              <h4>CME Futures Adapter</h4>
+              <div class="form-row"><span class="f-label">Adapter ID</span><input class="f-input" value="adapter_cme_es_v1" readonly style="opacity:0.6;"></div>
+              <div class="form-row"><span class="f-label">Data Source</span><select class="f-select"><option>ATAS / dxFeed</option><option>CQG</option><option>Rithmic</option></select></div>
+              <div class="form-row"><span class="f-label">Instruments</span><input class="f-input" value="ES, MES, NQ, MNQ"></div>
+              <div class="form-row"><span class="f-label">Session Hours</span><input class="f-input" value="09:30–16:00 ET"></div>
+              <div class="form-row"><span class="f-label">Tick Size</span><input class="f-input" value="0.25" style="width:80px;"></div>
+              <div class="form-row"><span class="f-label">Status</span><span class="pill pill-success">Connected</span></div>
+            </div>
+
+            <div class="admin-card">
+              <h4>Adapter Config (YAML)</h4>
+              <div class="yaml-block"><pre id="yamlPreview"></pre></div>
+              <button class="btn btn-sm" style="margin-top:12px;" onclick="alert('Edit YAML in modal (MVP mock)')">Edit Raw YAML</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Gates -->
+        <div id="tab-gates" style="display:none;">
+          <div class="admin-card">
+            <h4>QA Gate Rule Configuration</h4>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
+              Define pass/fail criteria for each gate. Strategies must clear all checks to progress.
+            </p>
+            <div id="gateRules"></div>
+          </div>
+        </div>
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/nav.js"></script>
+  <script src="../shared/mock-data.js"></script>
+  <script>
+    renderQuantSidebar('admin');
+    renderQuantTopbar('Admin & Settings', [
+      { label: 'ToMoon Quant', href: '../dashboard/' },
+      { label: 'Admin & Settings' }
+    ]);
+
+    /* ── YAML Preview ───────────────────────── */
+    document.getElementById('yamlPreview').innerHTML = [
+      '<span class="yaml-comment"># CME Futures Adapter Config</span>',
+      '<span class="yaml-key">adapter_id</span>: <span class="yaml-val">adapter_cme_es_v1</span>',
+      '<span class="yaml-key">version</span>: <span class="yaml-val">1.2.0</span>',
+      '<span class="yaml-key">data_source</span>:',
+      '  <span class="yaml-key">provider</span>: <span class="yaml-val">atas_dxfeed</span>',
+      '  <span class="yaml-key">feed_type</span>: <span class="yaml-val">level2</span>',
+      '  <span class="yaml-key">reconnect_delay_ms</span>: <span class="yaml-val">3000</span>',
+      '',
+      '<span class="yaml-key">instruments</span>:',
+      '  - <span class="yaml-val">ES</span>  <span class="yaml-comment"># E-mini S&P 500</span>',
+      '  - <span class="yaml-val">MES</span> <span class="yaml-comment"># Micro E-mini S&P 500</span>',
+      '  - <span class="yaml-val">NQ</span>  <span class="yaml-comment"># E-mini NASDAQ 100</span>',
+      '',
+      '<span class="yaml-key">session</span>:',
+      '  <span class="yaml-key">timezone</span>: <span class="yaml-val">America/New_York</span>',
+      '  <span class="yaml-key">open</span>: <span class="yaml-val">"09:30"</span>',
+      '  <span class="yaml-key">close</span>: <span class="yaml-val">"16:00"</span>',
+      '  <span class="yaml-key">premarket</span>: <span class="yaml-val">"08:00"</span>',
+      '',
+      '<span class="yaml-key">execution</span>:',
+      '  <span class="yaml-key">tick_size</span>: <span class="yaml-val">0.25</span>',
+      '  <span class="yaml-key">tick_value</span>: <span class="yaml-val">12.50</span>',
+      '  <span class="yaml-key">commission</span>: <span class="yaml-val">2.50</span>',
+      '  <span class="yaml-key">slippage_model</span>: <span class="yaml-val">conservative</span>',
+      '',
+      '<span class="yaml-key">risk</span>:',
+      '  <span class="yaml-key">max_position_size</span>: <span class="yaml-val">4</span>',
+      '  <span class="yaml-key">daily_loss_limit</span>: <span class="yaml-val">400</span>',
+      '  <span class="yaml-key">kill_switch</span>: <span class="yaml-val">true</span>',
+    ].join('\n');
+
+    /* ── QA Gate Rules ──────────────────────── */
+    (function() {
+      const gates = [
+        { id: 'G0', name: 'Gate 0 — Reproducible (Backtest Integrity)', enabled: true, rules: [
+          { metric: 'OOS Sharpe', op: '≥', val: '1.2', editable: true },
+          { metric: 'Max Drawdown', op: '<', val: '-10%', editable: true },
+          { metric: 'Same RunID re-run yields identical results', op: '=', val: 'True', editable: false },
+        ]},
+        { id: 'G1', name: 'Gate 1 — Reality Check (Forward Test Validation)', enabled: true, rules: [
+          { metric: 'Forward Test Sharpe vs Backtest', op: '≥', val: '80%', editable: true },
+          { metric: 'Cost & slippage model enabled', op: '=', val: 'True', editable: false },
+          { metric: 'No look-ahead bias', op: '=', val: 'Confirmed', editable: false },
+          { metric: 'Parameter sensitivity (±20% stable)', op: '=', val: 'Passed', editable: false },
+        ]},
+        { id: 'G2', name: 'Gate 2 — Validated (Promotion)', enabled: true, rules: [
+          { metric: 'G1 Status', op: '=', val: 'Passed', editable: false },
+          { metric: 'Emergency stop tested', op: '=', val: 'Passed', editable: false },
+          { metric: 'Eddie Sign-off', op: '=', val: 'Approved', editable: false },
+        ]},
+      ];
+
+      document.getElementById('gateRules').innerHTML = gates.map(g => `
+        <div class="gate-rule">
+          <div class="rule-header">
+            <div>
+              <span class="rule-name">${g.name}</span>
+              <span class="pill ${g.enabled ? 'pill-success' : 'pill-danger'}" style="margin-left:8px;">${g.enabled ? 'Active' : 'Disabled'}</span>
+            </div>
+            <div class="toggle-switch ${g.enabled ? 'on' : ''}" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <table class="data-table" style="margin:0;">
+            <thead><tr><th>Metric</th><th>Operator</th><th>Value</th><th></th></tr></thead>
+            <tbody>
+              ${g.rules.map(r => `
+                <tr>
+                  <td>${r.metric}</td>
+                  <td class="text-mono">${r.op}</td>
+                  <td>${r.editable ? `<input class="f-input" value="${r.val}" style="width:100px;padding:4px 8px;">` : `<span class="text-mono">${r.val}</span>`}</td>
+                  <td style="width:30px;">${r.editable ? '<span style="cursor:pointer;color:var(--text-dim);" title="Reset to default">↺</span>' : ''}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `).join('');
+    })();
+
+    /* ── Tab switching ──────────────────────── */
+    function switchAdminTab(tab) {
+      ['standards','adapters','gates'].forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        if (el) el.style.display = t === tab ? '' : 'none';
+      });
+      document.querySelectorAll('.admin-tab').forEach((el, i) => {
+        const tabs = ['standards','adapters','gates'];
+        el.classList.toggle('active', tabs[i] === tab);
+      });
+    }
+  </script>
+</body>
+</html>

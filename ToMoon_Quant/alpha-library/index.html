@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1400, initial-scale=0.3, maximum-scale=3, user-scalable=yes">
+  <title>Alpha Library — ToMoon Quant</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <style>
+    .lib-tabs { margin-bottom: var(--sp-md); }
+
+    .comp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--sp-md);
+    }
+
+    .comp-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .comp-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-card); }
+
+    .comp-card .c-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .comp-card .c-name { font-size: 14px; font-weight: 800; }
+    .comp-card .c-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .comp-card .c-meta { font-size: 12px; color: var(--text-muted); margin-top: 8px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .comp-card .c-meta span { display: flex; align-items: center; gap: 4px; }
+    .comp-card .c-params { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); }
+    .comp-card .c-failures { font-size: 11px; color: var(--warning); margin-top: 8px; }
+
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: var(--sp-md);
+    }
+
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover { color: var(--text-main); border-color: rgba(255,255,255,0.14); }
+    .filter-btn.active { color: var(--primary); background: var(--primary-soft); border-color: rgba(59,130,246,0.30); }
+
+    .search-input {
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      min-width: 200px;
+    }
+    .search-input:focus { border-color: var(--border-focus); }
+    .search-input::placeholder { color: var(--text-dim); }
+
+    /* Detail Panel */
+    .detail-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.60); z-index: 200; display: none;
+      align-items: center; justify-content: center;
+    }
+    .detail-overlay.open { display: flex; }
+    .detail-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 560px; max-width: 90vw; max-height: 85vh;
+      overflow-y: auto; padding: 28px;
+      animation: fadeInScale 0.25s ease;
+    }
+    .detail-panel h2 { margin: 0 0 6px; font-size: 18px; font-weight: 900; }
+    .detail-panel .d-id { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+    .detail-panel .d-section { margin-top: 16px; }
+    .detail-panel .d-label { font-size: 11px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .detail-panel .d-val { font-size: 13px; }
+    .detail-panel pre { font-family: var(--font-mono); font-size: 12px; background: rgba(0,0,0,0.20); padding: 12px; border-radius: var(--radius-sm); overflow-x: auto; white-space: pre-wrap; color: var(--text-muted); }
+    .detail-close { position: absolute; top: 16px; right: 16px; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div class="app-main" id="app-main">
+      <div class="page anim-in">
+
+        <div class="section-header">
+          <div>
+            <h3 class="section-title">Alpha Component Library</h3>
+            <p class="section-subtitle">Browse, filter, and inspect strategy building blocks · <span class="text-mono" id="comp-total">0</span> components</p>
+          </div>
+          <div class="flex gap-sm">
+            <a href="../canvas/index.html" class="btn btn-success">Build Strategy →</a>
+            <button class="btn btn-primary" onclick="alert('入库表单 (MVP mock)')">+ New Component</button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar" id="filter-bar">
+          <input class="search-input" id="search" type="text" placeholder="Search by name, ID, or type…">
+          <button class="filter-btn active" data-type="All">All</button>
+        </div>
+
+        <!-- Component Grid -->
+        <div class="comp-grid" id="comp-grid"></div>
+
+        <!-- Registry Table -->
+        <div class="section-header mt-lg">
+          <div>
+            <h3 class="section-title">Strategy Registry</h3>
+            <p class="section-subtitle">Asset lifecycle · Draft → Backtest → QA → Forward Test → Validated → Archived</p>
+          </div>
+          <div class="flex gap-sm">
+            <button class="btn btn-sm" onclick="alert('导出 CSV (MVP mock)')">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Name</th><th>Status</th>
+                    <th>Market</th><th>Sharpe</th><th>Max DD</th><th>Gate</th>
+                  </tr>
+                </thead>
+                <tbody id="registry-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Overlay -->
+  <div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this)closeDetail()">
+    <div class="detail-panel" id="detail-panel"></div>
+  </div>
+
+  <script src="../shared/nav.js"></script>
+  <script src="../shared/mock-data.js"></script>
+  <script>
+    renderQuantSidebar('alpha-library');
+    renderQuantTopbar('Alpha Library', [
+      { label: 'ToMoon Quant', href: '../dashboard/' },
+      { label: 'Alpha Library' }
+    ]);
+
+    const types = ['All', ...new Set(MOCK.components.map(c => c.type))];
+    const filterBar = document.getElementById('filter-bar');
+    types.slice(1).forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-btn';
+      btn.dataset.type = t;
+      btn.textContent = t;
+      filterBar.appendChild(btn);
+    });
+
+    let activeType = 'All';
+    let searchTerm = '';
+
+    filterBar.addEventListener('click', e => {
+      if (!e.target.classList.contains('filter-btn')) return;
+      activeType = e.target.dataset.type;
+      filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.type === activeType));
+      renderComponents();
+    });
+
+    document.getElementById('search').addEventListener('input', e => {
+      searchTerm = e.target.value.toLowerCase();
+      renderComponents();
+    });
+
+    function renderComponents() {
+      let filtered = MOCK.components;
+      if (activeType !== 'All') filtered = filtered.filter(c => c.type === activeType);
+      if (searchTerm) filtered = filtered.filter(c =>
+        c.name.toLowerCase().includes(searchTerm) ||
+        c.component_id.toLowerCase().includes(searchTerm) ||
+        c.type.toLowerCase().includes(searchTerm)
+      );
+
+      document.getElementById('comp-total').textContent = filtered.length;
+      const typePill = { Setup: 'pill-primary', Factor: 'pill-accent', Trigger: 'pill-warning', Filter: '', Entry: 'pill-success', Exit: 'pill-danger', Risk: 'pill-danger' };
+      const statusPill = { Active: 'pill-success', Deprecated: 'pill-danger', Draft: 'pill-warning' };
+
+      document.getElementById('comp-grid').innerHTML = filtered.map(c => `
+        <div class="comp-card anim-in" onclick='showDetail(${JSON.stringify(c).replace(/'/g, "\\'")})'>
+          <div class="c-top">
+            <span class="pill ${typePill[c.type] || ''}">${c.type}</span>
+            <span class="pill ${statusPill[c.status] || ''}">${c.status}</span>
+          </div>
+          <div class="c-name">${c.name}</div>
+          <div class="c-id">${c.component_id} · ${c.version} · ${c.owner}</div>
+          <div class="c-meta">
+            <span>In: ${c.inputs.join(', ')}</span>
+            <span>Out: ${c.outputs.join(', ')}</span>
+          </div>
+          <div class="c-params">${JSON.stringify(c.params)}</div>
+          <div class="c-failures">⚠ ${c.failure_modes[0]}</div>
+        </div>
+      `).join('');
+    }
+
+    function showDetail(c) {
+      document.getElementById('detail-panel').innerHTML = `
+        <div class="flex justify-between items-center">
+          <div>
+            <h2>${c.name}</h2>
+            <div class="d-id">${c.component_id} · ${c.version}</div>
+          </div>
+          <button class="btn btn-sm" onclick="closeDetail()">✕ Close</button>
+        </div>
+        <div class="flex gap-sm">
+          <span class="pill">${c.type}</span>
+          <span class="pill">${c.status}</span>
+          <span class="pill">Owner: ${c.owner}</span>
+        </div>
+        <div class="d-section"><div class="d-label">Inputs</div><div class="d-val">${c.inputs.join(', ')}</div></div>
+        <div class="d-section"><div class="d-label">Outputs</div><div class="d-val">${c.outputs.join(', ')}</div></div>
+        <div class="d-section"><div class="d-label">Parameters</div><pre>${JSON.stringify(c.params, null, 2)}</pre></div>
+        <div class="d-section"><div class="d-label">Logic</div><pre>${(c.logic || 'Logic: TBD (MVP mock).')}</pre></div>
+        <div class="d-section"><div class="d-label">Failure Modes</div><div class="d-val">${c.failure_modes.map(f => `<div style="color:var(--warning);margin-top:4px;">⚠ ${f}</div>`).join('')}</div></div>
+      `;
+      document.getElementById('detail-overlay').classList.add('open');
+    }
+    function closeDetail() { document.getElementById('detail-overlay').classList.remove('open'); }
+
+    // Registry
+    document.getElementById('registry-body').innerHTML = MOCK.strategies.map(s => {
+      const sc = { Validated: 'pill-success', 'Forward Test': 'pill-primary', 'QA Passed': 'pill-accent', Backtest: 'pill-warning', Archived: 'pill-danger', Draft: '' }[s.status] || '';
+      const gate = s.gate_2 ? 'G2 ✓' : s.gate_1 ? 'G1 ✓' : s.gate_0 ? 'G0 ✓' : '—';
+      const gc = s.gate_2 ? 'text-success' : s.gate_1 ? 'text-primary' : '';
+      return `<tr>
+        <td class="mono">${s.strategy_id}</td><td>${s.name}</td>
+        <td><span class="pill ${sc}">${s.status}</span></td><td class="mono">${s.market_id}</td>
+        <td class="mono ${s.sharpe >= 1.5 ? 'text-success' : s.sharpe < 0 ? 'text-danger' : ''}">${s.sharpe.toFixed(2)}</td>
+        <td class="mono text-danger">${s.max_dd.toFixed(1)}%</td>
+        <td class="${gc} fw-900">${gate}</td>
+      </tr>`;
+    }).join('');
+
+    renderComponents();
+  </script>
+</body>
+</html>

@@ -246,7 +246,7 @@
         /* --- Day Tabs Re-design --- */
         .calendar-theme .day-tabs {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(7, 1fr);
             gap: 8px;
         }
 
@@ -540,7 +540,7 @@
         /* Mobile specific adjustments */
         @media (max-width: 768px) {
             .day-tabs {
-                grid-template-columns: repeat(5, minmax(80px, 1fr));
+                grid-template-columns: repeat(7, minmax(80px, 1fr));
                 overflow-x: auto;
                 padding-bottom: 5px;
             }
@@ -602,7 +602,7 @@
                     <div class="toolbar-top">
                         <button class="btn" id="today-btn">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                            Select Day
+                            <span class="today-btn-label">Select Day</span>
                         </button>
                         <div class="nav-container">
                             <button class="btn btn-icon" style="border:none; background:transparent;" id="week-prev-btn">
@@ -617,25 +617,33 @@
                     </div>
 
                     <div class="day-tabs">
-                        <div class="day-tab active" id="tab-26">
+                        <div class="day-tab active" id="tab-1">
                             <span class="day-name">Mon</span>
-                            <span class="day-date">26</span>
+                            <span class="day-date">1</span>
                         </div>
-                        <div class="day-tab" id="tab-27">
+                        <div class="day-tab" id="tab-2">
                             <span class="day-name">Tue</span>
-                            <span class="day-date">27</span>
+                            <span class="day-date">2</span>
                         </div>
-                        <div class="day-tab" id="tab-28">
+                        <div class="day-tab" id="tab-3">
                             <span class="day-name">Wed</span>
-                            <span class="day-date">28</span>
+                            <span class="day-date">3</span>
                         </div>
-                        <div class="day-tab" id="tab-29">
+                        <div class="day-tab" id="tab-4">
                             <span class="day-name">Thu</span>
-                            <span class="day-date">29</span>
+                            <span class="day-date">4</span>
                         </div>
-                        <div class="day-tab" id="tab-30">
+                        <div class="day-tab" id="tab-5">
                             <span class="day-name">Fri</span>
-                            <span class="day-date">30</span>
+                            <span class="day-date">5</span>
+                        </div>
+                        <div class="day-tab" id="tab-6">
+                            <span class="day-name">Sat</span>
+                            <span class="day-date">6</span>
+                        </div>
+                        <div class="day-tab" id="tab-7">
+                            <span class="day-name">Sun</span>
+                            <span class="day-date">7</span>
                         </div>
                     </div>
                 </div>
@@ -730,7 +738,7 @@
         }
 
         // --- Global Variables (Scoped to IIFE) ---
-        let currentWeekStart = new Date(2026, 0, 26); // Jan 26, 2026 (Monday)
+        let currentWeekStart = new Date(); // Initialized in initializeCalendar()
         const todayDate = new Date(); // Renamed to avoid any potential global conflict
         let eventScroll = null;
         let groupHeaders = [];
@@ -745,6 +753,13 @@
             return new Date(d.setDate(diff));
         }
         
+        function toISODate(date) {
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
         // Format date for display
         function formatDate(date) {
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -754,14 +769,15 @@
                 day: date.getDate(),
                 month: months[date.getMonth()],
                 year: date.getFullYear(),
-                full: `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
+                full: `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`,
+                iso: toISODate(date)
             };
         }
         
-        // Get week dates (Monday to Friday)
+        // Get week dates (Monday to Sunday)
         function getWeekDates(startDate) {
             const dates = [];
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 7; i++) {
                 const date = new Date(startDate);
                 date.setDate(startDate.getDate() + i);
                 dates.push(date);
@@ -824,9 +840,9 @@
             }
 
             if (currentHeader) {
-                const dateKey = currentHeader.id; // e.g., "date-19"
-                const day = dateKey.replace('date-', '');
-                const tabId = `tab-${day}`;
+                const dateKey = currentHeader.id; // e.g., "date-2026-02-05"
+                const iso = dateKey.replace('date-', '');
+                const tabId = `tab-${iso}`;
                 
                 document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
                 const activeTab = document.getElementById(tabId);
@@ -840,7 +856,7 @@
         function updateWeekDisplay() {
             const weekDates = getWeekDates(currentWeekStart);
             const start = formatDate(weekDates[0]);
-            const end = formatDate(weekDates[4]);
+            const end = formatDate(weekDates[6]);
             
             const rangeDisplay = document.getElementById('week-range-display');
             if (rangeDisplay) {
@@ -864,11 +880,11 @@
                     // Update ID and Click Listener safely
                     const oldTab = dayTabs[index];
                     const newTab = oldTab.cloneNode(true);
-                    newTab.id = `tab-${formatted.day}`;
+                    newTab.id = `tab-${formatted.iso}`;
                     
                     // Use addEventListener instead of onclick
                     newTab.addEventListener('click', function() {
-                        window.scrollToDate(`date-${formatted.day}`);
+                        window.scrollToDate(`date-${formatted.iso}`);
                     });
                     
                     oldTab.parentNode.replaceChild(newTab, oldTab);
@@ -1010,21 +1026,21 @@
 
         // Select current week
         function setNewWeek(selectedDate) {
-            currentWeekStart = new Date(selectedDate);
-            currentWeekStart.setDate(selectedDate.getDate() - 2); // Make selectedDate the middle day (Wednesday)
+            currentWeekStart = getMonday(selectedDate);
             updateWeekDisplay();
             renderEvents();
             
             // Scroll to selected date
             const formatted = formatDate(selectedDate);
-            setTimeout(() => window.scrollToDate(`date-${formatted.day}`), 100);
+            setTimeout(() => window.scrollToDate(`date-${formatted.iso}`), 100);
 
             // Update Today button label and native input fallback
             try {
                 const todayBtn = document.getElementById('today-btn');
+                const todayBtnLabel = todayBtn ? todayBtn.querySelector('.today-btn-label') : null;
                 const datePicker = document.getElementById('date-picker');
                 const label = 'Select Day';
-                if (todayBtn) todayBtn.textContent = label;
+                if (todayBtnLabel) todayBtnLabel.textContent = label;
                 if (datePicker) datePicker.value = selectedDate.toISOString().slice(0,10);
             } catch (e) {
                 console.warn('Could not update Today label/input', e);
@@ -1036,37 +1052,38 @@
             const formatted = formatDate(date);
             const dayOfWeek = date.getDay();
             const events = [];
+            const dateKey = `date-${formatted.iso}`;
             
             // Generate mock events based on day of week
             if (dayOfWeek === 1) { // Monday
                 events.push(
-                    { id: date.getTime() + 101, dateKey: `date-${formatted.day}`, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Industrial Production m/m', currency: 'JPY', time: '12:30', impact: 'medium', actual: '-1.0%', forecast: '-1.0%', previous: '1.5%', status: 'Expired', actualClass: 'data-neutral' },
-                    { id: date.getTime() + 102, dateKey: `date-${formatted.day}`, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Retail Sales y/y', currency: 'CNY', time: '14:00', impact: 'high', actual: '7.4%', forecast: '8.0%', previous: '10.1%', status: 'Expired', actualClass: 'data-worse' }
+                    { id: date.getTime() + 101, dateKey, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Industrial Production m/m', currency: 'JPY', time: '12:30', impact: 'medium', actual: '-1.0%', forecast: '-1.0%', previous: '1.5%', status: 'Expired', actualClass: 'data-neutral' },
+                    { id: date.getTime() + 102, dateKey, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Retail Sales y/y', currency: 'CNY', time: '14:00', impact: 'high', actual: '7.4%', forecast: '8.0%', previous: '10.1%', status: 'Expired', actualClass: 'data-worse' }
                 );
             } else if (dayOfWeek === 2) { // Tuesday
                 events.push(
-                    { id: date.getTime() + 201, dateKey: `date-${formatted.day}`, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Claimant Count Change', currency: 'GBP', time: '15:00', impact: 'high', actual: '16.0K', forecast: '15.0K', previous: '8.9K', status: 'Expired', actualClass: 'data-worse' },
-                    { id: date.getTime() + 202, dateKey: `date-${formatted.day}`, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'ZEW Economic Sentiment', currency: 'EUR', time: '18:00', impact: 'medium', actual: '15.2', forecast: '12.0', previous: '9.8', status: 'Expired', actualClass: 'data-better' }
+                    { id: date.getTime() + 201, dateKey, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Claimant Count Change', currency: 'GBP', time: '15:00', impact: 'high', actual: '16.0K', forecast: '15.0K', previous: '8.9K', status: 'Expired', actualClass: 'data-worse' },
+                    { id: date.getTime() + 202, dateKey, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'ZEW Economic Sentiment', currency: 'EUR', time: '18:00', impact: 'medium', actual: '15.2', forecast: '12.0', previous: '9.8', status: 'Expired', actualClass: 'data-better' }
                 );
             } else if (dayOfWeek === 3) { // Wednesday
                 events.push(
-                    { id: date.getTime() + 301, dateKey: `date-${formatted.day}`, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'CPI y/y', currency: 'GBP', time: '15:00', impact: 'high', actual: '4.0%', forecast: '3.8%', previous: '3.9%', status: 'Expired', actualClass: 'data-worse' },
-                    { id: date.getTime() + 302, dateKey: `date-${formatted.day}`, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Core Retail Sales m/m', currency: 'CAD', time: '21:30', impact: 'medium', actual: '-0.5%', forecast: '-0.1%', previous: '0.6%', status: 'Expired', actualClass: 'data-worse' }
+                    { id: date.getTime() + 301, dateKey, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'CPI y/y', currency: 'GBP', time: '15:00', impact: 'high', actual: '4.0%', forecast: '3.8%', previous: '3.9%', status: 'Expired', actualClass: 'data-worse' },
+                    { id: date.getTime() + 302, dateKey, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Core Retail Sales m/m', currency: 'CAD', time: '21:30', impact: 'medium', actual: '-0.5%', forecast: '-0.1%', previous: '0.6%', status: 'Expired', actualClass: 'data-worse' }
                 );
             } else if (dayOfWeek === 4) { // Thursday
                 const isTodayDate = isToday || (date.getDate() === todayDate.getDate() && date.getMonth() === todayDate.getMonth() && date.getFullYear() === todayDate.getFullYear());
                 events.push(
-                    { id: date.getTime() + 1, dateKey: `date-${formatted.day}`, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'CBI Realized Sales', currency: 'GBP', time: '20:00', impact: 'low', actual: '-17', forecast: '-35', previous: '-44', status: 'Expired', actualClass: 'data-better' },
-                    { id: date.getTime() + 2, dateKey: `date-${formatted.day}`, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'ECB Monetary Policy Meeting Accounts', currency: 'EUR', time: '20:30', impact: 'low', actual: '-', forecast: '-', previous: '-', status: 'Expired', isHoliday: false },
-                    { id: date.getTime() + 3, dateKey: `date-${formatted.day}`, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'NHPI m/m', currency: 'CAD', time: '21:30', impact: 'low', actual: '-0.2 %', forecast: '-0.2 %', previous: '0.0 %', status: 'Expired', actualClass: 'data-worse' },
-                    { id: date.getTime() + 4, dateKey: `date-${formatted.day}`, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Final GDP q/q', currency: 'USD', time: '22:30', impact: 'high', actual: isTodayDate ? '4.4 %' : '-', forecast: '4.3 %', previous: '4.3 %', status: isTodayDate ? 'Countdown' : 'Upcoming', timeLeft: isTodayDate ? '00:53:47' : '', actualClass: isTodayDate ? 'data-better' : '' },
-                    { id: date.getTime() + 5, dateKey: `date-${formatted.day}`, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Unemployment Claims', currency: 'USD', time: '22:30', impact: 'high', actual: isTodayDate ? '200 K' : '-', forecast: '209 K', previous: '198 K', status: isTodayDate ? 'Countdown' : 'Upcoming', timeLeft: isTodayDate ? '00:53:47' : '', actualClass: isTodayDate ? 'data-better' : '' },
-                    { id: date.getTime() + 6, dateKey: `date-${formatted.day}`, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Final GDP Price Index q/q', currency: 'USD', time: '22:30', impact: 'medium', actual: isTodayDate ? '3.8 %' : '-', forecast: '3.8 %', previous: '3.8 %', status: isTodayDate ? 'Countdown' : 'Upcoming', timeLeft: isTodayDate ? '00:53:47' : '', actualClass: isTodayDate ? 'data-neutral' : '' }
+                    { id: date.getTime() + 1, dateKey, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'CBI Realized Sales', currency: 'GBP', time: '20:00', impact: 'low', actual: '-17', forecast: '-35', previous: '-44', status: 'Expired', actualClass: 'data-better' },
+                    { id: date.getTime() + 2, dateKey, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'ECB Monetary Policy Meeting Accounts', currency: 'EUR', time: '20:30', impact: 'low', actual: '-', forecast: '-', previous: '-', status: 'Expired', isHoliday: false },
+                    { id: date.getTime() + 3, dateKey, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'NHPI m/m', currency: 'CAD', time: '21:30', impact: 'low', actual: '-0.2 %', forecast: '-0.2 %', previous: '0.0 %', status: 'Expired', actualClass: 'data-worse' },
+                    { id: date.getTime() + 4, dateKey, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Final GDP q/q', currency: 'USD', time: '22:30', impact: 'high', actual: isTodayDate ? '4.4 %' : '-', forecast: '4.3 %', previous: '4.3 %', status: isTodayDate ? 'Countdown' : 'Upcoming', timeLeft: isTodayDate ? '00:53:47' : '', actualClass: isTodayDate ? 'data-better' : '' },
+                    { id: date.getTime() + 5, dateKey, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Unemployment Claims', currency: 'USD', time: '22:30', impact: 'high', actual: isTodayDate ? '200 K' : '-', forecast: '209 K', previous: '198 K', status: isTodayDate ? 'Countdown' : 'Upcoming', timeLeft: isTodayDate ? '00:53:47' : '', actualClass: isTodayDate ? 'data-better' : '' },
+                    { id: date.getTime() + 6, dateKey, dateDisplay: isTodayDate ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Final GDP Price Index q/q', currency: 'USD', time: '22:30', impact: 'medium', actual: isTodayDate ? '3.8 %' : '-', forecast: '3.8 %', previous: '3.8 %', status: isTodayDate ? 'Countdown' : 'Upcoming', timeLeft: isTodayDate ? '00:53:47' : '', actualClass: isTodayDate ? 'data-neutral' : '' }
                 );
             } else if (dayOfWeek === 5) { // Friday
                 events.push(
-                    { id: date.getTime() + 501, dateKey: `date-${formatted.day}`, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Flash Manufacturing PMI', currency: 'EUR', time: '16:15', impact: 'medium', actual: '-', forecast: '44.8', previous: '44.4', status: 'Upcoming', actualClass: '' },
-                    { id: date.getTime() + 502, dateKey: `date-${formatted.day}`, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Flash Services PMI', currency: 'GBP', time: '17:30', impact: 'high', actual: '-', forecast: '53.2', previous: '53.4', status: 'Upcoming', actualClass: '' }
+                    { id: date.getTime() + 501, dateKey, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Flash Manufacturing PMI', currency: 'EUR', time: '16:15', impact: 'medium', actual: '-', forecast: '44.8', previous: '44.4', status: 'Upcoming', actualClass: '' },
+                    { id: date.getTime() + 502, dateKey, dateDisplay: isToday ? `Today ${formatted.day} ${formatted.month}` : `${formatted.dayName} ${formatted.day} ${formatted.month}`, description: 'Flash Services PMI', currency: 'GBP', time: '17:30', impact: 'high', actual: '-', forecast: '53.2', previous: '53.4', status: 'Upcoming', actualClass: '' }
                 );
             }
             return events;
@@ -1107,14 +1124,17 @@
                 groups[e.dateKey].items.push(e);
             });
 
-            // Sort logic
-            const sortedKeys = Object.keys(groups).sort((a, b) => {
-                const dayA = parseInt(a.replace('date-', '')) || 0;
-                const dayB = parseInt(b.replace('date-', '')) || 0;
-                // Handle month transition rough fix for demo
-                if (Math.abs(dayA - dayB) > 20) return dayA > dayB ? -1 : 1; 
-                return dayA - dayB;
+            // Ensure all dates in the currently selected week are present (even if no events)
+            getWeekDates(currentWeekStart).forEach(date => {
+                const d = formatDate(date);
+                const key = `date-${d.iso}`;
+                if (!groups[key]) {
+                    groups[key] = { title: `${d.dayName} ${d.day} ${d.month}`, items: [] };
+                }
             });
+
+            // Sort logic
+            const sortedKeys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
 
             sortedKeys.forEach(key => {
                 const group = groups[key];
@@ -1223,8 +1243,38 @@
         function handleWeekChangeOnScroll() {
             if (scrollUpdateTimeout) clearTimeout(scrollUpdateTimeout);
             scrollUpdateTimeout = setTimeout(() => {
-                // ... logic to detect week change (abbreviated for stability) ...
-                // For demo, keep it simple
+                if (!eventScroll) return;
+
+                const currentHeaders = Array.from(document.querySelectorAll('.event-group-header'));
+                if (currentHeaders.length === 0) return;
+
+                const containerTop = eventScroll.getBoundingClientRect().top;
+                let currentHeader = currentHeaders[0];
+                const threshold = 50;
+
+                for (const header of currentHeaders) {
+                    const headerTop = header.getBoundingClientRect().top - containerTop;
+                    if (headerTop <= threshold) {
+                        currentHeader = header;
+                    } else {
+                        break;
+                    }
+                }
+
+                const dateKey = currentHeader?.id;
+                if (!dateKey || !dateKey.startsWith('date-')) return;
+                const iso = dateKey.replace('date-', '');
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
+
+                const parts = iso.split('-').map(n => parseInt(n, 10));
+                if (parts.length !== 3 || parts.some(Number.isNaN)) return;
+                const headerDate = new Date(parts[0], parts[1] - 1, parts[2]);
+
+                const nextWeekStart = getMonday(headerDate);
+                if (toISODate(nextWeekStart) === toISODate(currentWeekStart)) return;
+
+                currentWeekStart = nextWeekStart;
+                updateWeekDisplay();
             }, 150);
         }
 
@@ -1242,8 +1292,9 @@
                     else openTodayDropdown(todayBtn);
                     e.stopPropagation();
                 });
-                // Set initial label
-                todayBtn.textContent = 'Select Day';
+                // Set initial label (preserve icon)
+                const lbl = todayBtn.querySelector('.today-btn-label');
+                if (lbl) lbl.textContent = 'Select Day';
             }
             // keep native input as fallback for non-js or direct selection
             if (datePicker) datePicker.addEventListener('change', (e) => {

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1400, initial-scale=0.3, maximum-scale=3, user-scalable=yes">
+  <title>Research Pipeline — ToMoon Quant</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <style>
+    .pipe-hero {
+      background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(59,130,246,0.08));
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 24px 32px; margin-bottom: var(--sp-md);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    }
+    .pipe-hero h2 { margin: 0; font-size: 18px; font-weight: 900; }
+    .pipe-hero .sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Queue Table */
+    .queue-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 20px; margin-bottom: var(--sp-md);
+    }
+    .queue-card h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+
+    /* Report Viewer */
+    .report-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-md);
+    }
+    @media (max-width: 900px) { .report-grid { grid-template-columns: 1fr; } }
+
+    .chart-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 20px;
+    }
+    .chart-box h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+
+    .chart-canvas {
+      width: 100%; height: 220px; background: rgba(0,0,0,0.15); border-radius: var(--radius-sm);
+      position: relative; overflow: hidden;
+    }
+
+    /* SVG Charts */
+    .eq-line { fill: none; stroke: var(--primary); stroke-width: 2; }
+    .eq-area { fill: url(#grad-blue); opacity: 0.25; }
+    .dd-line { fill: none; stroke: var(--danger); stroke-width: 2; }
+    .dd-area { fill: url(#grad-red); opacity: 0.20; }
+    .baseline { stroke: var(--text-dim); stroke-width: 1; stroke-dasharray: 4 3; }
+    .axis-text { fill: var(--text-dim); font-size: 10px; font-family: var(--font-mono); }
+
+    /* KPI bar */
+    .kpi-bar {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: var(--sp-sm); margin-bottom: var(--sp-md);
+    }
+    .kpi-mini {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 14px 16px;
+    }
+    .kpi-mini .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+    .kpi-mini .value {
+      font-size: 22px; font-weight: 900; margin-top: 4px;
+      font-family: var(--font-mono); font-variant-numeric: tabular-nums slashed-zero;
+    }
+
+    /* Tabs */
+    .run-tabs {
+      display: flex; gap: 0; margin-bottom: var(--sp-md);
+      border-bottom: 2px solid var(--border);
+    }
+    .run-tab {
+      padding: 10px 20px; font-size: 13px; font-weight: 700;
+      color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all .15s;
+    }
+    .run-tab:hover { color: var(--text-main); }
+    .run-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+
+
+    /* Gate badges */
+    .gate-strip {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+    }
+    .gate-badge {
+      padding: 6px 14px; border-radius: var(--radius-pill);
+      font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px;
+    }
+    .gate-badge.pass { background: var(--success-soft); color: var(--success); }
+    .gate-badge.fail { background: var(--danger-soft); color: var(--danger); }
+    .gate-badge.pending { background: var(--warning-soft); color: var(--warning); }
+    .gate-badge svg { width: 14px; height: 14px; }
+
+    /* Run selector */
+    .run-selector {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .run-selector label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+    .run-selector select {
+      border: 1px solid var(--border); background: var(--bg-surface);
+      color: var(--text-main); border-radius: var(--radius-sm);
+      padding: 6px 12px; font-size: 12px; font-weight: 700;
+      font-family: var(--font-mono); outline: none; cursor: pointer;
+    }
+    .run-selector select:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(96,165,250,0.18); }
+
+    /* Run context card */
+    .run-context {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: var(--sp-sm); margin-bottom: var(--sp-md);
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 16px 20px;
+    }
+    .run-ctx-item .ctx-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); }
+    .run-ctx-item .ctx-val { font-size: 13px; font-weight: 800; margin-top: 2px; font-family: var(--font-mono); }
+
+    /* Baseline comparison */
+    .baseline-compare {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 16px 20px; margin-bottom: var(--sp-md);
+    }
+    .baseline-compare h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+    .bl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+    .bl-item { text-align: center; padding: 10px; background: var(--bg-surface); border-radius: var(--radius-sm); }
+    .bl-item .bl-metric { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); }
+    .bl-item .bl-current { font-size: 16px; font-weight: 900; font-family: var(--font-mono); margin: 4px 0 2px; }
+    .bl-item .bl-base { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+    .bl-item .bl-delta { font-size: 11px; font-weight: 700; }
+
+    /* Clickable queue row */
+    #queueBody tr { cursor: pointer; transition: background 0.12s; }
+    #queueBody tr:hover { background: var(--bg-hover); }
+    #queueBody tr.active-run { background: var(--primary-soft); }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div class="app-main" id="app-main">
+      <div class="page anim-in">
+
+        <!-- Hero -->
+        <div class="pipe-hero">
+          <div>
+            <h2>Research Pipeline</h2>
+            <div class="sub">Data Ingestion → Backtest → Baseline Compare → QA Gate → Promotion</div>
+          </div>
+          <div class="flex gap-sm" style="align-items:center;">
+            <div class="run-selector">
+              <label>Run</label>
+              <select id="runSelect" onchange="selectRun(this.value)"></select>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="launchRun()">New Run</button>
+            <button class="btn btn-sm" onclick="switchTab('queue')">Queue</button>
+          </div>
+        </div>
+
+        <!-- Run Context -->
+        <div class="run-context" id="runContext"></div>
+
+        <!-- KPI Bar -->
+        <div class="kpi-bar" id="kpiBar"></div>
+
+        <!-- Tabs -->
+        <div class="run-tabs">
+          <div class="run-tab active" onclick="switchTab('report')">Latest Report</div>
+          <div class="run-tab" onclick="switchTab('queue')">Run Queue</div>
+          <div class="run-tab" onclick="switchTab('gates')">QA Gates</div>
+        </div>
+
+        <!-- Tab: Report -->
+        <div id="tab-report">
+          <!-- Baseline Compare -->
+          <div class="baseline-compare" id="baselineCompare"></div>
+          <div class="report-grid">
+            <div class="chart-box">
+              <h4>Equity Curve</h4>
+              <div class="chart-canvas" id="equityChart"></div>
+            </div>
+            <div class="chart-box">
+              <h4>Drawdown Profile</h4>
+              <div class="chart-canvas" id="ddChart"></div>
+            </div>
+            <div class="chart-box">
+              <h4>Returns Distribution</h4>
+              <div class="chart-canvas" id="distChart"></div>
+            </div>
+            <div class="chart-box">
+              <h4>Monthly PnL Heat Map</h4>
+              <div class="chart-canvas" id="monthlyPnl"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Queue -->
+        <div id="tab-queue" style="display:none;">
+          <div class="queue-card">
+            <h4>Backtest Run Queue</h4>
+            <table class="data-table">
+              <thead>
+                <tr><th>RunID</th><th>Strategy</th><th>Market</th><th>Period</th><th>Status</th><th>Sharpe</th><th>MaxDD</th><th>Duration</th></tr>
+              </thead>
+              <tbody id="queueBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+
+
+        <!-- Tab: QA Gates -->
+        <div id="tab-gates" style="display:none;">
+          <div class="chart-box">
+            <h4>QA Gate Certification — Latest Run</h4>
+            <div id="gateContent"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/nav.js"></script>
+  <script src="../shared/mock-data.js"></script>
+  <script>
+    renderQuantSidebar('research');
+    renderQuantTopbar('Research Pipeline', [
+      { label: 'ToMoon Quant', href: '../dashboard/' },
+      { label: 'Research Pipeline' }
+    ]);
+
+    /* ── Equity Curve (SVG) ─────────────────── */
+    function drawEquityCurve() {
+      const w = 540, h = 200, pad = 30;
+      const n = 80;
+      let equity = [10000];
+      for (let i = 1; i < n; i++) equity.push(equity[i-1] + (Math.random() - 0.38) * 200);
+      const minE = Math.min(...equity) - 200, maxE = Math.max(...equity) + 200;
+      const x = i => pad + (i / (n - 1)) * (w - 2 * pad);
+      const y = v => pad + (1 - (v - minE) / (maxE - minE)) * (h - 2 * pad);
+
+      const pts = equity.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+      const area = `${x(0)},${y(minE)} ${pts} ${x(n-1)},${y(minE)}`;
+      const baseline = equity[0];
+
+      document.getElementById('equityChart').innerHTML = `
+        <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">
+          <defs>
+            <linearGradient id="grad-blue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3b82f6" />
+              <stop offset="100%" stop-color="#3b82f600" />
+            </linearGradient>
+          </defs>
+          <line x1="${pad}" y1="${y(baseline)}" x2="${w - pad}" y2="${y(baseline)}" class="baseline" />
+          <polygon points="${area}" class="eq-area" />
+          <polyline points="${pts}" class="eq-line" />
+          <text x="${pad}" y="${h - 6}" class="axis-text">Day 1</text>
+          <text x="${w - pad - 40}" y="${h - 6}" class="axis-text">Day ${n}</text>
+          <text x="6" y="${y(maxE) + 4}" class="axis-text">$${(maxE/1000).toFixed(1)}k</text>
+          <text x="6" y="${y(minE) - 4}" class="axis-text">$${(minE/1000).toFixed(1)}k</text>
+        </svg>`;
+    }
+
+    /* ── Drawdown (SVG) ─────────────────────── */
+    function drawDrawdown() {
+      const w = 540, h = 200, pad = 30;
+      const n = 80;
+      let dd = [0];
+      for (let i = 1; i < n; i++) {
+        dd.push(Math.min(0, dd[i-1] + (Math.random() - 0.5) * 4));
+        if (dd[i] < -20) dd[i] = -20 + Math.random() * 5;
+        if (Math.random() > 0.85) dd[i] = Math.min(dd[i] + 8, 0);
+      }
+      const minD = Math.min(...dd) - 2;
+      const x = i => pad + (i / (n - 1)) * (w - 2 * pad);
+      const y = v => pad + (v / minD) * (h - 2 * pad);
+
+      const pts = dd.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+      const area = `${x(0)},${y(0)} ${pts} ${x(n-1)},${y(0)}`;
+
+      document.getElementById('ddChart').innerHTML = `
+        <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">
+          <defs>
+            <linearGradient id="grad-red" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ef444400" />
+              <stop offset="100%" stop-color="#ef4444" />
+            </linearGradient>
+          </defs>
+          <line x1="${pad}" y1="${y(0)}" x2="${w - pad}" y2="${y(0)}" class="baseline" />
+          <polygon points="${area}" class="dd-area" />
+          <polyline points="${pts}" class="dd-line" />
+          <text x="${pad}" y="${h - 6}" class="axis-text">Day 1</text>
+          <text x="${w - pad - 40}" y="${h - 6}" class="axis-text">Day 80</text>
+          <text x="6" y="${y(0) + 14}" class="axis-text">0%</text>
+          <text x="6" y="${h - pad}" class="axis-text">${minD.toFixed(0)}%</text>
+        </svg>`;
+    }
+
+    /* ── Distribution (SVG bar chart) ──────── */
+    function drawDistribution() {
+      const w = 540, h = 200, pad = 30;
+      const bins = 20;
+      const data = [];
+      for (let i = 0; i < bins; i++) {
+        data.push(Math.floor(Math.random() * 40) + 5);
+      }
+      // Make a roughly normal shape
+      for (let i = 0; i < bins; i++) {
+        const center = bins / 2;
+        const dist = Math.abs(i - center);
+        data[i] = Math.floor(data[i] * (1 - dist / bins * 0.7));
+      }
+      const maxV = Math.max(...data);
+      const bw = (w - 2 * pad) / bins - 2;
+
+      let bars = '';
+      data.forEach((v, i) => {
+        const bx = pad + i * ((w - 2 * pad) / bins) + 1;
+        const bh = (v / maxV) * (h - 2 * pad);
+        const by = h - pad - bh;
+        const color = i < bins / 2 ? 'var(--danger)' : 'var(--success)';
+        bars += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="${color}" opacity="0.6" rx="1" />`;
+      });
+
+      document.getElementById('distChart').innerHTML = `
+        <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">
+          <line x1="${pad}" y1="${h - pad}" x2="${w - pad}" y2="${h - pad}" stroke="var(--border)" stroke-width="1" />
+          <line x1="${w/2}" y1="${pad}" x2="${w/2}" y2="${h - pad}" class="baseline" />
+          ${bars}
+          <text x="${pad}" y="${h - 6}" class="axis-text">Losses</text>
+          <text x="${w - pad - 30}" y="${h - 6}" class="axis-text">Wins</text>
+          <text x="${w/2 - 8}" y="${h - 6}" class="axis-text">0</text>
+        </svg>`;
+    }
+
+    /* ── Monthly PnL Heatmap ──────────────── */
+    function drawMonthlyPnl() {
+      const w = 540, h = 200, pad = 30;
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const years = ['2023','2024'];
+      const cellW = (w - 2 * pad) / 12;
+      const cellH = (h - 2 * pad) / years.length;
+
+      let cells = '';
+      years.forEach((yr, yi) => {
+        months.forEach((m, mi) => {
+          const pnl = (Math.random() - 0.4) * 5000;
+          const norm = Math.min(1, Math.abs(pnl) / 5000);
+          const color = pnl >= 0
+            ? `rgba(34,197,94,${0.15 + norm * 0.55})`
+            : `rgba(239,68,68,${0.15 + norm * 0.55})`;
+          const cx = pad + mi * cellW;
+          const cy = pad + yi * cellH;
+          cells += `<rect x="${cx + 1}" y="${cy + 1}" width="${cellW - 2}" height="${cellH - 2}" fill="${color}" rx="3" />`;
+          cells += `<text x="${cx + cellW/2}" y="${cy + cellH/2 + 4}" text-anchor="middle" fill="var(--text-main)" font-size="9" font-family="var(--font-mono)">${pnl >= 0 ? '+' : ''}${(pnl/1000).toFixed(1)}k</text>`;
+        });
+        cells += `<text x="${pad - 6}" y="${pad + yi * cellH + cellH/2 + 4}" text-anchor="end" class="axis-text">${yr}</text>`;
+      });
+      months.forEach((m, mi) => {
+        cells += `<text x="${pad + mi * cellW + cellW/2}" y="${pad - 6}" text-anchor="middle" class="axis-text">${m}</text>`;
+      });
+
+      document.getElementById('monthlyPnl').innerHTML = `
+        <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">${cells}</svg>`;
+    }
+
+    /* ── Run Selection State ───────────────── */
+    let selectedRun = null;
+
+    // Baseline reference values (the "benchmark" each run is compared against)
+    const baseline = { sharpe: 1.20, max_dd: 0.08, win_rate: 0.50, profit_factor: 1.30, total_trades: 200 };
+
+    function initRunSelector() {
+      const sel = document.getElementById('runSelect');
+      const completedRuns = MOCK.backtestRuns.filter(r => r.status === 'Completed');
+      sel.innerHTML = completedRuns.map(r =>
+        `<option value="${r.run_id}">${r.run_id} — ${r.strategy_id}</option>`
+      ).join('');
+      if (completedRuns.length > 0) selectRun(completedRuns[0].run_id);
+    }
+
+    function selectRun(runId) {
+      selectedRun = MOCK.backtestRuns.find(r => r.run_id === runId);
+      if (!selectedRun) return;
+      renderRunContext();
+      renderKpis();
+      renderBaselineCompare();
+      drawEquityCurve();
+      drawDrawdown();
+      drawDistribution();
+      drawMonthlyPnl();
+      highlightQueueRow(runId);
+    }
+
+    function renderRunContext() {
+      if (!selectedRun) return;
+      const r = selectedRun;
+      const items = [
+        { label: 'Run ID', val: r.run_id },
+        { label: 'Strategy', val: r.strategy_id },
+        { label: 'Market', val: r.market_id || 'CME_ES' },
+        { label: 'Period', val: r.period },
+        { label: 'Duration', val: r.duration || '—' },
+      ];
+      document.getElementById('runContext').innerHTML = items.map(i => `
+        <div class="run-ctx-item">
+          <div class="ctx-label">${i.label}</div>
+          <div class="ctx-val">${i.val}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderKpis() {
+      if (!selectedRun) return;
+      const r = selectedRun.results;
+      const kpis = [
+        { label: 'Sharpe (OOS)', value: r.sharpe.toFixed(2), cls: r.sharpe >= 1.5 ? 'text-success' : 'text-warning' },
+        { label: 'Max Drawdown', value: (r.max_dd * 100).toFixed(1) + '%', cls: 'text-danger' },
+        { label: 'Total Runs', value: MOCK.backtestRuns.length, cls: '' },
+        { label: 'Completed', value: MOCK.backtestRuns.filter(x => x.status === 'Completed').length, cls: 'text-success' },
+      ];
+      document.getElementById('kpiBar').innerHTML = kpis.map(k => `
+        <div class="kpi-mini"><div class="label">${k.label}</div><div class="value ${k.cls}">${k.value}</div></div>
+      `).join('');
+    }
+
+    function renderBaselineCompare() {
+      if (!selectedRun) return;
+      const r = selectedRun.results;
+      const metrics = [
+        { label: 'Sharpe', cur: r.sharpe, base: baseline.sharpe, fmt: v => v.toFixed(2) },
+        { label: 'Max DD', cur: r.max_dd * 100, base: baseline.max_dd * 100, fmt: v => v.toFixed(1) + '%', invert: true },
+        { label: 'Win Rate', cur: (r.win_rate || 0.56) * 100, base: baseline.win_rate * 100, fmt: v => v.toFixed(1) + '%' },
+        { label: 'PF', cur: r.profit_factor || 1.6, base: baseline.profit_factor, fmt: v => v.toFixed(2) },
+        { label: 'Trades', cur: r.total_trades || 320, base: baseline.total_trades, fmt: v => Math.round(v) },
+      ];
+      document.getElementById('baselineCompare').innerHTML = `
+        <h4>Baseline Comparison</h4>
+        <div class="bl-grid">${metrics.map(m => {
+          const delta = m.cur - m.base;
+          const better = m.invert ? (delta < 0) : (delta > 0);
+          return `<div class="bl-item">
+            <div class="bl-metric">${m.label}</div>
+            <div class="bl-current">${m.fmt(m.cur)}</div>
+            <div class="bl-base">Baseline: ${m.fmt(m.base)}</div>
+            <div class="bl-delta ${better ? 'text-success' : 'text-danger'}">${delta >= 0 ? '+' : ''}${m.fmt(delta)}</div>
+          </div>`;
+        }).join('')}</div>`;
+    }
+
+    initRunSelector();
+
+    /* ── Queue Table ────────────────────────── */
+    (function renderQueue() {
+      const statusPill = s => {
+        const cls = { Completed: 'pill-success', Running: 'pill-primary', Queued: 'pill-warning', Failed: 'pill-danger' };
+        return `<span class="pill ${cls[s] || ''}">${s}</span>`;
+      };
+      document.getElementById('queueBody').innerHTML = MOCK.backtestRuns.map(r => `
+        <tr data-run="${r.run_id}" onclick="selectRunFromQueue('${r.run_id}')">
+          <td class="text-mono">${r.run_id}</td>
+          <td>${r.strategy_id}</td>
+          <td>${r.market_id || 'CME_ES'}</td>
+          <td class="text-mono text-muted">${r.period}</td>
+          <td>${statusPill(r.status)}</td>
+          <td class="text-mono ${r.results.sharpe >= 1.5 ? 'text-success' : 'text-warning'}">${r.results.sharpe.toFixed(2)}</td>
+          <td class="text-mono text-danger">${(r.results.max_dd * 100).toFixed(1)}%</td>
+          <td class="text-muted text-mono">${r.duration || '—'}</td>
+        </tr>
+      `).join('');
+      if (selectedRun) highlightQueueRow(selectedRun.run_id);
+    })();
+
+    function selectRunFromQueue(runId) {
+      const run = MOCK.backtestRuns.find(r => r.run_id === runId);
+      if (!run || run.status !== 'Completed') {
+        alert(`Run ${runId} is ${run ? run.status : 'not found'} — only completed runs can be viewed.`);
+        return;
+      }
+      document.getElementById('runSelect').value = runId;
+      selectRun(runId);
+      switchTab('report');
+    }
+
+    function highlightQueueRow(runId) {
+      document.querySelectorAll('#queueBody tr').forEach(tr => {
+        tr.classList.toggle('active-run', tr.dataset.run === runId);
+      });
+    }
+
+
+
+
+
+    /* ── QA Gates ───────────────────────────── */
+    (function renderGates() {
+      const gates = [
+        { id: 'G0', name: 'Gate 0 — Reproducible', items: [
+          { check: 'Same RunID re-run yields identical results', pass: true },
+          { check: 'OOS Sharpe ≥ 1.2', pass: true },
+          { check: 'MaxDD < -10%', pass: true },
+        ], pass: true },
+        { id: 'G1', name: 'Gate 1 — Reality Check (净真实)', items: [
+          { check: 'Cost & slippage models enabled', pass: true },
+          { check: 'No look-ahead / future information leak', pass: true },
+          { check: 'Parameter sensitivity (±20% stable)', pass: true },
+          { check: 'Forward Test ≥ 80% of backtest Sharpe', pass: false },
+        ], pass: false },
+        { id: 'G2', name: 'Gate 2 — Validation (Promotion)', items: [
+          { check: 'G1 passed (or waiver approved)', pass: null },
+          { check: 'Emergency Stop tested & operational', pass: null },
+          { check: 'Eddie approval sign-off', pass: null },
+        ], pass: null },
+      ];
+
+      const ic = pass => pass ? '✓' : pass === false ? '✗' : '○';
+      const cc = pass => pass ? 'text-success' : pass === false ? 'text-danger' : 'text-muted';
+
+      document.getElementById('gateContent').innerHTML = gates.map(g => `
+        <div style="margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <span class="gate-badge ${g.pass === true ? 'pass' : g.pass === false ? 'fail' : 'pending'}">
+              ${g.id} ${g.pass === true ? 'PASSED' : g.pass === false ? 'FAILED' : 'PENDING'}
+            </span>
+            <span style="font-size:13px;font-weight:700;">${g.name}</span>
+            ${g.pass === true && g.id === 'G0' ? '<a href="../execution/" class="btn btn-sm btn-primary" style="margin-left:auto;">Start Forward Test →</a>' : ''}
+            ${g.id === 'G2' ? '<a href="../execution/" class="btn btn-sm btn-success" style="margin-left:auto;">Mark as Validated →</a>' : ''}
+          </div>
+          <table class="data-table">
+            <tbody>
+              ${g.items.map(item => `
+                <tr>
+                  <td style="width:30px;" class="${cc(item.pass)}">${ic(item.pass)}</td>
+                  <td>${item.check}</td>
+                  <td style="width:80px;" class="${cc(item.pass)}">${item.pass === true ? 'Pass' : item.pass === false ? 'Fail' : 'Pending'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `).join('');
+    })();
+
+    /* ── Tab switching ──────────────────────── */
+    function switchTab(tab) {
+      ['report','queue','gates'].forEach(t => {
+        document.getElementById('tab-' + t).style.display = t === tab ? '' : 'none';
+      });
+      document.querySelectorAll('.run-tab').forEach((el, i) => {
+        const tabs = ['report','queue','gates'];
+        el.classList.toggle('active', tabs[i] === tab);
+      });
+    }
+
+    function launchRun() {
+      alert('New Backtest Run launched (MVP mock). In production this queues a RunID with data ingestion + backtest engine.');
+    }
+  </script>
+</body>
+</html>

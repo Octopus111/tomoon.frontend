@@ -1006,19 +1006,23 @@
 <!-- Sidebar (由共享模块生成) -->
 <aside class="sidebar" id="sidebar"></aside>
 <!-- Cache-bust for local static servers (avoid stale JS after edits) -->
-<script src="../shared/sidebar_mvp.js?v=20260127-3"></script>
-<script src="../shared/topbar_mvp.js?v=20260127-3"></script>
-<script src="../shared/blueprints_mvp.js?v=20260127-3"></script>
+<script src="../shared/sidebar_mvp.js?v=20260127-4"></script>
+<script src="../shared/topbar_mvp.js?v=20260127-4"></script>
+<script src="../shared/blueprints_mvp.js?v=20260127-4"></script>
 <script>
-    // 自动初始化侧边栏 - Strategy页面启用页面内切换
-    const { currentSubItem } = autoInitSidebar({ 
-        internalSwitch: true, 
-        switchFunction: 'switchView',
-        title: 'Execute Centre'
-    });
+    // 根据URL参数决定初始化哪个页面
+    const urlParams = new URLSearchParams(window.location.search);
+    const view = urlParams.get('view');
     
-    // 初始化 Topbar（包含全局 Quick Journal）
-    initTopbar({ title: 'Execute', basePath: '..' });
+    // Blueprint单独高亮，Sessions在Moonlog组下
+    if (view === 'blueprint' || view === 'library') {
+        initSidebar('blueprint', null, { title: 'Blueprint', basePath: '..' });
+    } else {
+        initSidebar('moonlog', 'sessions', { title: 'Sessions', basePath: '..' });
+    }
+    
+    // 初始化 Topbar
+    initTopbar({ title: view === 'blueprint' ? 'Blueprint' : 'Sessions', basePath: '..' });
     
     // 如果URL有参数，在页面加载时切换到对应视图
     document.addEventListener('DOMContentLoaded', function() {
@@ -1029,12 +1033,10 @@
         // MVP mapping: sessions -> dashboard, blueprint -> library
         if (view === 'blueprint' || view === 'library') {
             switchView('blueprint');
-            updateSidebarActive('blueprint');
         } else if (view === 'detail') {
             switchView('detail');
         } else {
             switchView('sessions');
-            updateSidebarActive('sessions');
         }
         
         // 如果有session参数，设置焦点到对应session
