@@ -10,17 +10,38 @@ const quantSidebarConfig = {
   },
   sections: [
     {
-      label: null, // no group label for primary
+      label: 'Build',
       items: [
-        { id: 'dashboard', label: 'Dashboard',   icon: 'grid',       href: '../dashboard/' },
+        {
+          id: 'canvas', label: 'Alpha Builder', icon: 'hammer',  href: '../canvas/',
+          children: [
+            { id: 'canvas-component', label: 'Component',  href: '../canvas/#component' },
+            { id: 'canvas-strategy',  label: 'Strategy',   href: '../canvas/#strategy' },
+          ]
+        },
+      ]
+    },
+    {
+      label: 'Library',
+      items: [
+        {
+          id: 'library', label: 'Library', icon: 'book', href: '../library/',
+          children: [
+            { id: 'library-components', label: 'Component Library', href: '../library/#components' },
+            { id: 'library-strategies', label: 'Strategy Library',  href: '../library/#strategies' },
+          ]
+        },
       ]
     },
     {
       label: 'Research',
       items: [
-        { id: 'alpha-library', label: 'Alpha Library',     icon: 'layers',    href: '../alpha-library/' },
-        { id: 'canvas',        label: 'Strategy Builder',   icon: 'canvas',    href: '../canvas/' },
-        { id: 'research',      label: 'Research Pipeline', icon: 'activity',  href: '../research/' },
+        {
+          id: 'research', label: 'Research Lab', icon: 'flask', href: '../research/',
+          children: [
+            { id: 'research-backtest', label: 'Chart Backtest', href: '../research/#backtest' },
+          ]
+        },
       ]
     },
     {
@@ -46,6 +67,10 @@ const ICONS = {
   monitor:  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
   settings: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
   canvas:   '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/><circle cx="16" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="16" y1="10" x2="16" y2="14"/></svg>',
+  hammer:   '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12l-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"/><path d="M17.64 15L22 10.64"/><path d="M20.91 11.7l-1.25-1.25c-.6-.6-.93-1.4-.93-2.25V6.5l-3.5-3.5-2 2 3.5 3.5h1.7c.85 0 1.65.33 2.25.93l1.25 1.25"/></svg>',
+  book:     '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+  flask:    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5L4 18a2 2 0 0 0 1.7 3h12.6a2 2 0 0 0 1.7-3l-6-8.5V3"/><path d="M8.5 14h7"/></svg>',
+  chevron:  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
   moon:     '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
   menu:     '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>',
 };
@@ -151,14 +176,43 @@ function renderQuantSidebar(activeId) {
       nav.appendChild(gl);
     }
     for (const item of section.items) {
+      const isParentActive = item.id === activeId || (item.children && item.children.some(c => c.id === activeId));
+
       const a = document.createElement('a');
-      a.className = 'nav-item' + (item.id === activeId ? ' active' : '');
+      a.className = 'nav-item' + (isParentActive ? ' active' : '');
       a.href = normalizeLocalDirectoryHref(item.href);
       a.innerHTML = `
         <span class="nav-icon">${ICONS[item.icon] || ''}</span>
         <span class="nav-label">${item.label}</span>
+        ${item.children ? '<span class="nav-chevron' + (isParentActive ? ' open' : '') + '">' + ICONS.chevron + '</span>' : ''}
       `;
+
+      // If item has children, toggle sub-nav on click
+      if (item.children) {
+        a.addEventListener('click', (e) => {
+          // Allow navigation but also toggle children
+          const subNav = a.nextElementSibling;
+          if (subNav && subNav.classList.contains('nav-sub')) {
+            subNav.classList.toggle('open');
+            a.querySelector('.nav-chevron')?.classList.toggle('open');
+          }
+        });
+      }
       nav.appendChild(a);
+
+      // Render children sub-nav
+      if (item.children) {
+        const sub = document.createElement('div');
+        sub.className = 'nav-sub' + (isParentActive ? ' open' : '');
+        for (const child of item.children) {
+          const ca = document.createElement('a');
+          ca.className = 'nav-sub-item' + (child.id === activeId ? ' active' : '');
+          ca.href = normalizeLocalDirectoryHref(child.href);
+          ca.innerHTML = `<span class="nav-sub-label">${child.label}</span>`;
+          sub.appendChild(ca);
+        }
+        nav.appendChild(sub);
+      }
     }
   }
   sidebar.appendChild(nav);

@@ -82,6 +82,24 @@ a:hover { text-decoration: underline; }
 img { max-width: 100%; display: block; }
 button, input, select, textarea { font: inherit; }
 
+/* ── Form Controls: Select readability ── */
+select {
+  color: var(--text-main);
+  background-color: var(--bg-surface);
+}
+
+select option,
+select optgroup {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+}
+
+select:disabled,
+select:disabled option,
+select:disabled optgroup {
+  color: var(--text-dim);
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -232,6 +250,42 @@ button, input, select, textarea { font: inherit; }
   border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
+
+/* ── Nav Sub-items ── */
+.nav-chevron {
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+}
+.sidebar.expanded .nav-chevron { opacity: 0.5; }
+.nav-chevron.open { transform: rotate(90deg); }
+
+.nav-sub {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+.nav-sub.open { max-height: 200px; }
+
+.nav-sub-item {
+  display: flex;
+  align-items: center;
+  padding: 7px 14px 7px 46px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+}
+.nav-sub-item:hover { color: var(--text-main); background: var(--bg-hover); text-decoration: none; }
+.nav-sub-item.active { color: var(--primary); background: var(--primary-soft); }
+.nav-sub-label { opacity: 0; transition: opacity 0.2s; }
+.sidebar.expanded .nav-sub-label { opacity: 1; }
 
 /* ── Cards ── */
 .card {

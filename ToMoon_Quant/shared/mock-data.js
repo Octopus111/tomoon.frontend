@@ -24,16 +24,8 @@ const MOCK = (() => {
     { strategy_id:'STR-005', name:'Range Fade',            version:'v0.4', status:'Archived',      owner:'Quant-2', market_id:'BTC_PERP',  sharpe:0.35, max_dd:-14.2, annual_return:-3, trades:180, profit_factor:0.85, win_rate:0.42, last_updated:'2025-04-10', last_run_id:'RUN-A005', gate_0:true,  gate_1:false, gate_2:false },
   ];
 
-  /* ── Components (7 — one per type) ── */
-  const components = [
-    { component_id:'CMP-SET-001', type:'Setup',   name:'Liquidity Sweep Zone',     version:'v1.0', owner:'Eddie',   inputs:['context'],        outputs:['signal'], params:{ window:20, threshold:'0.80' }, logic:'Detect sweep zone at last swing ± threshold.', failure_modes:['Missing data → NaN fill'], status:'Active' },
-    { component_id:'CMP-FAC-001', type:'Factor',  name:'Delta',                    version:'v2.1', owner:'Quant-1', inputs:['trades','bars_1s'],outputs:['series'], params:{ window:30, threshold:'0.60' }, logic:'Aggregate aggressor delta per bar; rolling delta.', failure_modes:['Divergent in low-vol regime'], status:'Active' },
-    { component_id:'CMP-TRI-001', type:'Trigger', name:'Delta Divergence Trigger', version:'v1.3', owner:'Eddie',   inputs:['context'],        outputs:['signal'], params:{ window:15, threshold:'1.20' }, logic:'Fire when price vs delta divergence confirmed.', failure_modes:['Late trigger in fast markets'], status:'Active' },
-    { component_id:'CMP-FIL-001', type:'Filter',  name:'Session Time Filter',      version:'v1.0', owner:'Eddie',   inputs:['context'],        outputs:['signal'], params:{ window:10, threshold:'0.50' }, logic:'Allow signals only inside configured session.', failure_modes:['Timezone misconfiguration'], status:'Active' },
-    { component_id:'CMP-ENT-001', type:'Entry',   name:'Limit at Level',           version:'v1.2', owner:'Quant-1', inputs:['context'],        outputs:['signal'], params:{ window:5,  threshold:'1.00' }, logic:'Place limit at reclaimed level with offset.', failure_modes:['No fill in fast markets'], status:'Active' },
-    { component_id:'CMP-EXI-001', type:'Exit',    name:'Partial at 1R',            version:'v1.1', owner:'Eddie',   inputs:['context'],        outputs:['signal'], params:{ window:10, threshold:'1.50' }, logic:'Take partial at +1R; trail the runner.', failure_modes:['Early exit in trend'], status:'Active' },
-    { component_id:'CMP-RSK-001', type:'Risk',    name:'Fixed $ Risk',             version:'v1.0', owner:'Eddie',   inputs:['context'],        outputs:['signal'], params:{ window:1,  threshold:'50'   }, logic:'Size so stop distance = fixed $ risk.', failure_modes:['Over-sizing in low-vol'], status:'Active' },
-  ];
+  /* ── Components (from CENTRAL_COMPONENTS in components.js) ── */
+  const components = (typeof CENTRAL_COMPONENTS !== 'undefined') ? CENTRAL_COMPONENTS : [];
 
   /* ── Blueprints ── */
   function genBlueprint(strat) {

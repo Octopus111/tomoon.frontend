@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1400, initial-scale=0.3, maximum-scale=3, user-scalable=yes">
+  <title>Library — ToMoon Quant</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <style>
+    /* ── Top Tabs ── */
+    .lib-tabs {
+      display: flex; gap: 0; margin-bottom: var(--sp-md);
+      border-bottom: 2px solid var(--border);
+    }
+    .lib-tab {
+      padding: 10px 24px; font-size: 14px; font-weight: 800;
+      color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all .15s;
+    }
+    .lib-tab:hover { color: var(--text-main); }
+    .lib-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .lib-tab-content { display: none; }
+    .lib-tab-content.active { display: block; }
+
+    /* ── Component & Strategy Cards ── */
+    .comp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--sp-md);
+    }
+
+    .comp-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .comp-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-card); }
+
+    .comp-card .c-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .comp-card .c-name { font-size: 14px; font-weight: 800; }
+    .comp-card .c-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .comp-card .c-meta { font-size: 12px; color: var(--text-muted); margin-top: 8px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .comp-card .c-meta span { display: flex; align-items: center; gap: 4px; }
+    .comp-card .c-params { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); }
+    .comp-card .c-failures { font-size: 11px; color: var(--warning); margin-top: 8px; }
+
+    .filter-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      margin-bottom: var(--sp-md);
+    }
+
+    .filter-btn {
+      padding: 6px 14px; border-radius: var(--radius-pill);
+      border: 1px solid var(--border); background: var(--bg-surface);
+      color: var(--text-muted); font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .filter-btn:hover { color: var(--text-main); border-color: rgba(255,255,255,0.14); }
+    .filter-btn.active { color: var(--primary); background: var(--primary-soft); border-color: rgba(59,130,246,0.30); }
+
+    .search-input {
+      padding: 8px 14px; border-radius: var(--radius-pill);
+      border: 1px solid var(--border); background: var(--bg-surface);
+      color: var(--text-main); font-size: 13px; outline: none; min-width: 200px;
+    }
+    .search-input:focus { border-color: var(--border-focus); }
+    .search-input::placeholder { color: var(--text-dim); }
+
+    /* Detail Panel */
+    .detail-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.60); z-index: 200; display: none;
+      align-items: center; justify-content: center;
+    }
+    .detail-overlay.open { display: flex; }
+    .detail-panel {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); width: 560px; max-width: 90vw; max-height: 85vh;
+      overflow-y: auto; padding: 28px; animation: fadeInScale 0.25s ease;
+    }
+    .detail-panel h2 { margin: 0 0 6px; font-size: 18px; font-weight: 900; }
+    .detail-panel .d-id { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+    .detail-panel .d-section { margin-top: 16px; }
+    .detail-panel .d-label { font-size: 11px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .detail-panel .d-val { font-size: 13px; }
+    .detail-panel pre { font-family: var(--font-mono); font-size: 12px; background: rgba(0,0,0,0.20); padding: 12px; border-radius: var(--radius-sm); overflow-x: auto; white-space: pre-wrap; color: var(--text-muted); }
+
+    /* Strategy Cards */
+    .strat-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 20px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .strat-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-card); }
+    .strat-card .s-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .strat-card .s-name { font-size: 14px; font-weight: 800; }
+    .strat-card .s-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .strat-card .s-kpi { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; font-family: var(--font-mono); }
+    .strat-card .s-kpi-item { display: flex; flex-direction: column; gap: 2px; }
+    .strat-card .s-kpi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); }
+    .strat-card .s-kpi-val { font-size: 14px; font-weight: 900; }
+
+    /* Strategy sub-filter */
+    .strat-sub-filter {
+      display: flex; gap: 4px; margin-bottom: 12px;
+      padding: 4px; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-pill);
+      width: fit-content;
+    }
+    .strat-sub-filter-btn {
+      padding: 6px 16px; border-radius: var(--radius-pill);
+      font-size: 12px; font-weight: 700; color: var(--text-muted);
+      cursor: pointer; transition: all .15s; border: 1px solid transparent;
+      background: transparent;
+    }
+    .strat-sub-filter-btn:hover { color: var(--text-main); }
+    .strat-sub-filter-btn.active {
+      color: var(--text-main); background: var(--primary-soft);
+      border-color: rgba(59,130,246,0.30);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div class="app-main" id="app-main">
+      <div class="page anim-in">
+
+        <div class="section-header">
+          <div>
+            <h3 class="section-title">Library</h3>
+            <p class="section-subtitle">Browse components and strategies</p>
+          </div>
+          <div class="flex gap-sm">
+            <a href="../canvas/index.html#component" class="btn btn-sm btn-primary">+ New Component</a>
+            <a href="../canvas/index.html#strategy" class="btn btn-sm btn-success">Build Strategy</a>
+          </div>
+        </div>
+
+        <!-- Top Tabs -->
+        <div class="lib-tabs">
+          <div class="lib-tab active" onclick="switchLibTab('components')">Component Library</div>
+          <div class="lib-tab" onclick="switchLibTab('strategies')">Strategy Library</div>
+        </div>
+
+        <!-- ═══ Tab: Component Library ═══ -->
+        <div class="lib-tab-content active" id="tab-components">
+          <div class="filter-bar" id="filter-bar">
+            <input class="search-input" id="comp-search" type="text" placeholder="Search by name, ID, or type...">
+            <button class="filter-btn active" data-type="All">All</button>
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+            <span class="text-mono" id="comp-total">0</span> components
+          </div>
+          <div class="comp-grid" id="comp-grid"></div>
+        </div>
+
+        <!-- ═══ Tab: Strategy Library ═══ -->
+        <div class="lib-tab-content" id="tab-strategies">
+          <div class="strat-sub-filter">
+            <div class="strat-sub-filter-btn active" onclick="filterStratBuildType('all')">All Strategies</div>
+            <div class="strat-sub-filter-btn" onclick="filterStratBuildType('self')">Self Build</div>
+            <div class="strat-sub-filter-btn" onclick="filterStratBuildType('guided')">Guided Build</div>
+          </div>
+          <div class="filter-bar" id="strat-filter-bar">
+            <input class="search-input" id="strat-search" type="text" placeholder="Search strategies...">
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+            <span class="text-mono" id="strat-total">0</span> strategies
+          </div>
+          <div class="comp-grid" id="strat-grid"></div>
+
+          <!-- Strategy Registry Table -->
+          <div class="section-header mt-lg">
+            <div>
+              <h3 class="section-title" style="font-size:16px;">Strategy Registry</h3>
+              <p class="section-subtitle">Asset lifecycle: Draft -> Backtest -> QA -> Forward Test -> Validated -> Archived</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body" style="padding:0;">
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th><th>Name</th><th>Status</th><th>Build Type</th>
+                      <th>Market</th><th>Sharpe</th><th>Max DD</th><th>Gate</th>
+                    </tr>
+                  </thead>
+                  <tbody id="registry-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Overlay -->
+  <div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this)closeDetail()">
+    <div class="detail-panel" id="detail-panel"></div>
+  </div>
+
+  <script src="../shared/nav.js"></script>
+  <script src="../shared/component-lib.js"></script>
+  <script src="../shared/components.js"></script>
+  <script src="../shared/mock-data.js"></script>
+  <script src="../shared/api.js"></script>
+  <script>
+    renderQuantSidebar('library');
+    renderQuantTopbar('Library', [
+      { label: 'ToMoon Quant', href: '../canvas/' },
+      { label: 'Library' }
+    ]);
+
+    // Handle hash
+    (function() {
+      const h = window.location.hash.replace('#', '');
+      if (h === 'strategies') switchLibTab('strategies');
+    })();
+
+    /* ═══ Tab Switching ═══ */
+    function switchLibTab(tab) {
+      document.querySelectorAll('.lib-tab').forEach((el, i) => {
+        const tabs = ['components', 'strategies'];
+        el.classList.toggle('active', tabs[i] === tab);
+      });
+      document.getElementById('tab-components').classList.toggle('active', tab === 'components');
+      document.getElementById('tab-strategies').classList.toggle('active', tab === 'strategies');
+      window.location.hash = tab;
+    }
+
+    /* ═══ STATE ═══ */
+    let allComponents = [];
+    let allStrategies = [];
+    let activeType = 'All';
+    let compSearchTerm = '';
+    let stratSearchTerm = '';
+    let stratBuildType = 'all';
+    let liveBackend = false;
+
+    async function loadData() {
+      const baseline = (typeof CENTRAL_COMPONENTS !== 'undefined' && Array.isArray(CENTRAL_COMPONENTS)) ? CENTRAL_COMPONENTS : [];
+      allComponents = baseline.filter(c => !c.hidden);
+
+      try {
+        allStrategies = await API.getStrategies();
+        liveBackend = true;
+        console.log('[library] Loaded', allComponents.length, 'core components and', allStrategies.length, 'strategies');
+      } catch(e) {
+        console.warn('[library] Strategy API unavailable, using mock data:', e.message);
+        allStrategies = MOCK.strategies;
+        liveBackend = false;
+      }
+
+      // Merge locally-saved strategies from Canvas Builder
+      try {
+        const saved = JSON.parse(localStorage.getItem('tmq_saved_strategies') || '{}');
+        const existingIds = new Set(allStrategies.map(s => s.strategy_id));
+        Object.values(saved).forEach(bp => {
+          if (existingIds.has(bp.strategy_id)) return;
+          const nodeCount = (bp.nodes || []).length;
+          allStrategies.push({
+            strategy_id: bp.strategy_id,
+            name: bp.name || bp.strategy_id,
+            version: bp.version || 'v0.1',
+            status: 'Draft',
+            owner: 'You',
+            market_id: 'ANY',
+            sharpe: 0, max_dd: 0, annual_return: 0, trades: 0,
+            profit_factor: 0, win_rate: 0,
+            last_updated: bp.updated || bp.created || '—',
+            build_type: 'self',
+            _source: 'local',
+            _node_count: nodeCount,
+          });
+        });
+        if (Object.keys(saved).length) {
+          console.log('[library] Merged', Object.keys(saved).length, 'locally saved strategies');
+        }
+      } catch(e) {
+        console.warn('[library] Failed to load local strategies:', e.message);
+      }
+
+      buildFilterButtons();
+      renderComponents();
+      renderStrategies();
+      renderRegistry();
+    }
+
+    /* ═══ Component Library ═══ */
+    function buildFilterButtons() {
+      const types = ['All', ...new Set(allComponents.map(c => c.type))];
+      const filterBar = document.getElementById('filter-bar');
+      filterBar.querySelectorAll('.filter-btn').forEach(b => b.remove());
+      types.forEach(t => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn' + (t === activeType ? ' active' : '');
+        btn.dataset.type = t;
+        btn.textContent = t;
+        filterBar.appendChild(btn);
+      });
+    }
+
+    document.getElementById('filter-bar').addEventListener('click', e => {
+      if (!e.target.classList.contains('filter-btn')) return;
+      activeType = e.target.dataset.type;
+      document.getElementById('filter-bar').querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.type === activeType));
+      renderComponents();
+    });
+
+    document.getElementById('comp-search').addEventListener('input', e => {
+      compSearchTerm = e.target.value.toLowerCase();
+      renderComponents();
+    });
+
+    function renderComponents() {
+      let filtered = allComponents;
+      if (activeType !== 'All') filtered = filtered.filter(c => c.type === activeType);
+      if (compSearchTerm) filtered = filtered.filter(c =>
+        c.name.toLowerCase().includes(compSearchTerm) ||
+        c.component_id.toLowerCase().includes(compSearchTerm) ||
+        c.type.toLowerCase().includes(compSearchTerm) ||
+        (c.market_tags || []).join(',').toLowerCase().includes(compSearchTerm)
+      );
+
+      document.getElementById('comp-total').textContent = filtered.length;
+      const typePill = { Setup: 'pill-primary', Factor: 'pill-accent', Trigger: 'pill-warning', Filter: '', Entry: 'pill-success', Exit: 'pill-danger', Risk: 'pill-danger', Foundation: 'pill-primary', Regime: 'pill-warning', Scoring: 'pill-accent', Execution: 'pill-primary' };
+      const statusPill = { Active: 'pill-success', Deprecated: 'pill-danger', Draft: 'pill-warning' };
+      const sourceBadge = { core: 'C' };
+
+      function portNames(ports) {
+        return (ports || []).map(p => typeof p === 'string' ? p : (p.name + (p.type && p.type !== p.name ? ':' + p.type : ''))).join(', ');
+      }
+
+      document.getElementById('comp-grid').innerHTML = filtered.map(c => `
+        <div class="comp-card anim-in" onclick='showCompDetail(${JSON.stringify(c).replace(/'/g, "\\'")})'>
+          <div class="c-top">
+            <span class="pill ${typePill[c.type] || ''}">${c.type}</span>
+            <span class="pill ${statusPill[c.status] || ''}">${c.status}</span>
+            ${c.source ? `<span class="pill" title="Source: ${c.source}">${sourceBadge[c.source] || ''} ${c.source}</span>` : ''}
+            ${c.executable ? '<span class="pill pill-success" title="Has Python executor">exec</span>' : ''}
+          </div>
+          <div class="c-name">${c.name}</div>
+          <div class="c-id">${c.component_id} · ${c.version} · ${c.owner || 'System'}</div>
+          <div class="c-meta">
+            <span>In: ${portNames(c.inputs)}</span>
+            <span>Out: ${portNames(c.outputs)}</span>
+          </div>
+          ${c.strict_swappable ? `<div class="c-meta"><span>Replace: same ${c.type} stage</span></div>` : ''}
+          ${(c.market_tags && c.market_tags.length) ? `<div class="c-meta"><span style="color:var(--accent)">Markets: ${c.market_tags.join(', ')}</span></div>` : ''}
+          <div class="c-params">${JSON.stringify(c.params)}</div>
+          ${(c.failure_modes && c.failure_modes.length) ? `<div class="c-failures">⚠ ${c.failure_modes[0]}</div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function showCompDetail(c) {
+      function formatPorts(ports) {
+        if (!ports || !ports.length) return '—';
+        return (ports).map(p => {
+          if (typeof p === 'string') return `<code>${p}</code>`;
+          return `<code>${p.name}</code><span style="color:var(--text-muted)"> : ${p.type}</span>${p.description ? ` — ${p.description}` : ''}`;
+        }).join('<br>');
+      }
+
+      function formatParamsSpec(ps) {
+        if (!ps || !Object.keys(ps).length) return '';
+        return '<table style="width:100%;font-size:12px;margin-top:6px;border-collapse:collapse">' +
+          '<tr style="color:var(--text-muted)"><th style="text-align:left;padding:2px 6px">Param</th><th>Kind</th><th>Default</th><th>Range</th></tr>' +
+          Object.entries(ps).map(([k, v]) => {
+            const range = (v.min !== undefined && v.max !== undefined) ? `${v.min} ~ ${v.max}` : (v.options ? v.options.join(', ') : '—');
+            return `<tr><td style="padding:2px 6px"><code>${k}</code></td><td style="text-align:center">${v.kind || '?'}</td><td style="text-align:center">${v.default !== undefined ? v.default : '—'}</td><td style="text-align:center">${range}</td></tr>`;
+          }).join('') + '</table>';
+      }
+
+      function formatInterfaceSpec(spec) {
+        if (!spec || typeof spec !== 'object') return '';
+        const inputNames = (spec.inputs || []).map(p => typeof p === 'string' ? p : `${p.name}:${p.type}`).join(', ') || '—';
+        const outputNames = (spec.outputs || []).map(p => typeof p === 'string' ? p : `${p.name}:${p.type}`).join(', ') || '—';
+        const paramNames = Object.keys(spec.params || {}).join(', ') || '—';
+        const notes = spec.ai_hints?.composition_notes || '—';
+        return `
+          <div style="font-size:12px;line-height:1.6;display:grid;gap:4px;">
+            <div><strong>Schema:</strong> ${spec.schema || '—'}</div>
+            <div><strong>Stage:</strong> ${spec.stage || '—'}</div>
+            <div><strong>Inputs:</strong> ${inputNames}</div>
+            <div><strong>Outputs:</strong> ${outputNames}</div>
+            <div><strong>Params:</strong> ${paramNames}</div>
+            <div><strong>AI Notes:</strong> ${notes}</div>
+          </div>`;
+      }
+
+      document.getElementById('detail-panel').innerHTML = `
+        <div class="flex justify-between items-center">
+          <div>
+            <h2>${c.name}</h2>
+            <div class="d-id">${c.component_id} · ${c.version}</div>
+          </div>
+          <div class="flex gap-sm">
+            <a href="../canvas/index.html?component=${c.component_id}#strategy" class="btn btn-sm btn-primary">Use in Builder</a>
+            <button class="btn btn-sm" onclick="closeDetail()">Close</button>
+          </div>
+        </div>
+        <div class="flex gap-sm" style="flex-wrap:wrap">
+          <span class="pill">${c.type}</span>
+          <span class="pill">${c.status}</span>
+          <span class="pill">Owner: ${c.owner || 'System'}</span>
+          ${c.source ? `<span class="pill">Source: ${c.source}</span>` : ''}
+          ${c.executable ? '<span class="pill pill-success">Executable</span>' : ''}
+        </div>
+        ${(c.market_tags && c.market_tags.length) ? `<div class="d-section"><div class="d-label">Markets</div><div class="d-val">${c.market_tags.map(t => `<span class="pill" style="margin:2px">${t}</span>`).join(' ')}</div></div>` : ''}
+        <div class="d-section"><div class="d-label">Description</div><div class="d-val">${c.description || c.logic || '—'}</div></div>
+        <div class="d-section"><div class="d-label">Inputs</div><div class="d-val">${formatPorts(c.inputs)}</div></div>
+        <div class="d-section"><div class="d-label">Outputs</div><div class="d-val">${formatPorts(c.outputs)}</div></div>
+        ${c.strict_swappable ? `<div class="d-section"><div class="d-label">Replacement Rule</div><div class="d-val">Replace within the same <code>${c.type}</code> stage. Internal input/output compatibility is checked automatically by the engine.</div></div>` : ''}
+        ${c.interface_spec ? `<div class="d-section"><div class="d-label">Interface Contract</div><div class="d-val">${formatInterfaceSpec(c.interface_spec)}</div></div>` : ''}
+        <div class="d-section"><div class="d-label">Parameters</div><pre>${JSON.stringify(c.params, null, 2)}</pre>${formatParamsSpec(c.params_spec)}</div>
+        <div class="d-section"><div class="d-label">Logic</div><pre>${(c.logic || c.description || 'Logic: TBD.')}</pre></div>
+        ${(c.failure_modes && c.failure_modes.length)
+          ? `<div class="d-section"><div class="d-label">Failure Modes</div><div class="d-val">${c.failure_modes.map(f => `<div style="color:var(--warning);margin-top:4px;">⚠ ${f}</div>`).join('')}</div></div>`
+          : ''}
+        ${(c.tags && c.tags.length) ? `<div class="d-section"><div class="d-label">Tags</div><div class="d-val">${c.tags.map(t => `<span class="pill" style="margin:2px">${t}</span>`).join(' ')}</div></div>` : ''}
+      `;
+      document.getElementById('detail-overlay').classList.add('open');
+    }
+    function closeDetail() { document.getElementById('detail-overlay').classList.remove('open'); }
+
+    /* ═══ Strategy Library ═══ */
+    document.getElementById('strat-search').addEventListener('input', e => {
+      stratSearchTerm = e.target.value.toLowerCase();
+      renderStrategies();
+    });
+
+    function filterStratBuildType(type) {
+      stratBuildType = type;
+      document.querySelectorAll('.strat-sub-filter-btn').forEach((el, i) => {
+        const types = ['all', 'self', 'guided'];
+        el.classList.toggle('active', types[i] === type);
+      });
+      renderStrategies();
+    }
+
+    function renderStrategies() {
+      let filtered = allStrategies;
+
+      // Assign build_type based on strategy properties (mock logic)
+      filtered = filtered.map(s => ({
+        ...s,
+        build_type: s.build_type || (s.strategy_id.includes('GUI') ? 'guided' : 'self'),
+      }));
+
+      if (stratBuildType !== 'all') filtered = filtered.filter(s => s.build_type === stratBuildType);
+      if (stratSearchTerm) filtered = filtered.filter(s =>
+        s.name.toLowerCase().includes(stratSearchTerm) ||
+        s.strategy_id.toLowerCase().includes(stratSearchTerm)
+      );
+
+      document.getElementById('strat-total').textContent = filtered.length;
+      const statusPill = { Validated: 'pill-success', 'Forward Test': 'pill-primary', 'QA Passed': 'pill-accent', Backtest: 'pill-warning', Archived: 'pill-danger', Draft: '' };
+      const buildPill = { self: 'pill-primary', guided: 'pill-accent' };
+
+      document.getElementById('strat-grid').innerHTML = filtered.length ? filtered.map(s => `
+        <div class="strat-card anim-in" onclick='showStratDetail(${JSON.stringify(s).replace(/'/g, "\\'")})'>
+          <div class="s-top">
+            <span class="pill ${statusPill[s.status] || ''}">${s.status}</span>
+            <span class="pill ${buildPill[s.build_type] || ''}">${s.build_type === 'guided' ? 'Guided Build' : 'Self Build'}</span>
+            ${s._source === 'local' ? '<span class="pill" style="background:rgba(99,102,241,0.15);color:#818cf8;">📌 Local</span>' : ''}
+          </div>
+          <div class="s-name">${s.name}</div>
+          <div class="s-id">${s.strategy_id} · ${s.market_id}${s._node_count ? ' · ' + s._node_count + ' nodes' : ''}</div>
+          <div class="s-kpi">
+            <div class="s-kpi-item">
+              <span class="s-kpi-label">Sharpe</span>
+              <span class="s-kpi-val ${(s.sharpe||0) >= 1.5 ? 'text-success' : 'text-warning'}">${(s.sharpe || 0).toFixed(2)}</span>
+            </div>
+            <div class="s-kpi-item">
+              <span class="s-kpi-label">Max DD</span>
+              <span class="s-kpi-val text-danger">${(s.max_dd || 0).toFixed(1)}%</span>
+            </div>
+            <div class="s-kpi-item">
+              <span class="s-kpi-label">Win Rate</span>
+              <span class="s-kpi-val">${((s.win_rate || 0) * 100).toFixed(0)}%</span>
+            </div>
+          </div>
+        </div>
+      `).join('') : '<div class="empty-state"><div class="empty-title">No strategies found</div><div class="empty-desc">Build your first strategy in Alpha Builder</div></div>';
+    }
+
+    function hasLocalStrategyBlueprint(strategyId) {
+      if (!strategyId) return false;
+      try {
+        const saved = JSON.parse(localStorage.getItem('tmq_saved_strategies') || '{}');
+        if (saved && saved[strategyId]) return true;
+      } catch (e) {
+        console.warn('[library] Failed to parse tmq_saved_strategies:', e.message);
+      }
+
+      try {
+        const active = JSON.parse(localStorage.getItem('tmq_blueprint') || 'null');
+        if (active && active.strategy_id === strategyId) return true;
+      } catch (e) {
+        console.warn('[library] Failed to parse tmq_blueprint:', e.message);
+      }
+
+      return false;
+    }
+
+    function getStrategyBuilderHref(strategy) {
+      const strategyId = strategy && strategy.strategy_id ? strategy.strategy_id : '';
+      if (!hasLocalStrategyBlueprint(strategyId)) {
+        return '../canvas/index.html#strategy';
+      }
+      return '../canvas/index.html?strategy=' + encodeURIComponent(strategyId) + '#strategy';
+    }
+
+    function showStratDetail(s) {
+      document.getElementById('detail-panel').innerHTML = `
+        <div class="flex justify-between items-center">
+          <div>
+            <h2>${s.name}</h2>
+            <div class="d-id">${s.strategy_id} · ${s.market_id}</div>
+          </div>
+          <div class="flex gap-sm">
+            <a href="${getStrategyBuilderHref(s)}" class="btn btn-sm">Open in Builder</a>
+            <a href="../research/index.html#backtest" class="btn btn-sm btn-primary">Run Backtest</a>
+            <button class="btn btn-sm" onclick="closeDetail()">Close</button>
+          </div>
+        </div>
+        <div class="flex gap-sm" style="margin-top:8px;">
+          <span class="pill">${s.status}</span>
+          <span class="pill">${(s.build_type || 'self') === 'guided' ? 'Guided Build' : 'Self Build'}</span>
+          <span class="pill">${s.market_id}</span>
+        </div>
+        <div class="d-section">
+          <div class="d-label">KPI Summary</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;">
+            <div style="padding:12px;background:var(--bg-surface);border-radius:var(--radius-sm);text-align:center;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-dim);">Sharpe</div>
+              <div style="font-size:18px;font-weight:900;font-family:var(--font-mono);margin-top:4px;" class="${(s.sharpe||0) >= 1.5 ? 'text-success' : 'text-warning'}">${(s.sharpe || 0).toFixed(2)}</div>
+            </div>
+            <div style="padding:12px;background:var(--bg-surface);border-radius:var(--radius-sm);text-align:center;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-dim);">Max DD</div>
+              <div style="font-size:18px;font-weight:900;font-family:var(--font-mono);margin-top:4px;color:var(--danger);">${(s.max_dd || 0).toFixed(1)}%</div>
+            </div>
+            <div style="padding:12px;background:var(--bg-surface);border-radius:var(--radius-sm);text-align:center;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-dim);">Win Rate</div>
+              <div style="font-size:18px;font-weight:900;font-family:var(--font-mono);margin-top:4px;">${((s.win_rate || 0) * 100).toFixed(0)}%</div>
+            </div>
+          </div>
+        </div>
+        ${s.components ? `<div class="d-section"><div class="d-label">Components</div><pre>${JSON.stringify(s.components, null, 2)}</pre></div>` : ''}
+        ${s.description ? `<div class="d-section"><div class="d-label">Description</div><div class="d-val">${s.description}</div></div>` : ''}
+      `;
+      document.getElementById('detail-overlay').classList.add('open');
+    }
+
+    /* ═══ Strategy Registry Table ═══ */
+    function renderRegistry() {
+      document.getElementById('registry-body').innerHTML = allStrategies.map(s => {
+        const sc = { Validated: 'pill-success', 'Forward Test': 'pill-primary', 'QA Passed': 'pill-accent', Backtest: 'pill-warning', Archived: 'pill-danger', Draft: '' }[s.status] || '';
+        const gate = s.gate_2 ? 'G2' : s.gate_1 ? 'G1' : s.gate_0 ? 'G0' : '—';
+        const gc = s.gate_2 ? 'text-success' : s.gate_1 ? 'text-primary' : '';
+        const bt = s.build_type || (s.strategy_id.includes('GUI') ? 'guided' : 'self');
+        return `<tr>
+          <td class="mono">${s.strategy_id}</td><td>${s.name}</td>
+          <td><span class="pill ${sc}">${s.status}</span></td>
+          <td><span class="pill ${bt === 'guided' ? 'pill-accent' : 'pill-primary'}">${bt === 'guided' ? 'Guided' : 'Self'}</span></td>
+          <td class="mono">${s.market_id}</td>
+          <td class="mono ${(s.sharpe || 0) >= 1.5 ? 'text-success' : (s.sharpe || 0) < 0 ? 'text-danger' : ''}">${(s.sharpe || 0).toFixed(2)}</td>
+          <td class="mono text-danger">${(s.max_dd || 0).toFixed(1)}%</td>
+          <td class="${gc} fw-900">${gate}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── Init ──
+    loadData();
+  </script>
+</body>
+</html>

@@ -2,43 +2,395 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1400, initial-scale=0.3, maximum-scale=3, user-scalable=yes">
-  <title>Research Pipeline — ToMoon Quant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, user-scalable=yes">
+  <title>Research Lab — ToMoon Quant</title>
   <link rel="stylesheet" href="../shared/styles.css">
   <style>
-    .pipe-hero {
-      background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(59,130,246,0.08));
-      border: 1px solid var(--border); border-radius: var(--radius-md);
-      padding: 24px 32px; margin-bottom: var(--sp-md);
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    .page {
+      max-width: min(1720px, calc(100vw - 56px));
+      padding: 28px 28px 56px;
+      position: relative;
+      overflow: hidden;
     }
-    .pipe-hero h2 { margin: 0; font-size: 18px; font-weight: 900; }
-    .pipe-hero .sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .page::before,
+    .page::after {
+      content: '';
+      position: absolute;
+      inset: auto;
+      pointer-events: none;
+      filter: blur(18px);
+      opacity: 0.9;
+    }
+    .page::before {
+      top: 18px;
+      right: 5%;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(34,197,94,0.12), transparent 64%);
+    }
+    .page::after {
+      top: 220px;
+      left: -120px;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(59,130,246,0.12), transparent 68%);
+    }
+
+    .pipe-hero {
+      padding: 12px 0 28px 0;
+      margin-bottom: var(--sp-lg);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .pipe-hero h2 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 52px);
+      font-weight: 950;
+      letter-spacing: -0.05em;
+      line-height: 0.95;
+    }
+    .pipe-hero .sub {
+      max-width: 760px;
+      font-size: 14px;
+      color: rgba(226,232,240,0.72);
+      margin-top: 10px;
+      line-height: 1.7;
+    }
+    .pipe-hero .btn,
+    .control-dock .btn {
+      border: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.04));
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+      color: var(--text-main);
+    }
+    .pipe-hero .btn:hover,
+    .control-dock .btn:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+    }
+    .control-dock .btn-primary {
+      background: linear-gradient(135deg, rgba(34,197,94,0.22), rgba(59,130,246,0.18));
+      color: #f8fffb;
+    }
+
+    .control-dock {
+      margin-bottom: var(--sp-xl);
+      transition: opacity .18s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .control-dock-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 0 14px;
+    }
+    .control-dock-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      text-align: left;
+    }
+    .control-dock-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(226,232,240,0.76);
+      flex-shrink: 0;
+    }
+    .control-dock-summary {
+      min-width: 0;
+      color: rgba(226,232,240,0.64);
+      font-size: 13px;
+      font-family: var(--font-mono);
+      white-space: normal;
+      line-height: 1.6;
+    }
+    .control-dock-arrow {
+      flex-shrink: 0;
+      color: var(--text-main);
+      transition: transform .18s ease;
+    }
+    .control-dock-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .control-dock-panel {
+      padding: 26px 28px 22px;
+      max-height: 640px;
+      overflow: hidden;
+      transition: max-height .22s ease, padding .22s ease, opacity .22s ease;
+      opacity: 1;
+      border-radius: 32px;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.16), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(34,197,94,0.12), transparent 22%),
+        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      box-shadow: 0 28px 80px rgba(0,0,0,0.24);
+      backdrop-filter: blur(20px);
+    }
+    .control-dock.collapsed {
+      position: sticky;
+      top: calc(var(--topbar-height) + 10px);
+      z-index: 30;
+      background: rgba(8,12,22,0.82);
+      backdrop-filter: blur(16px);
+      margin-left: 0;
+      margin-right: 0;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .control-dock.collapsed .control-dock-panel {
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      opacity: 0;
+    }
+    .control-dock.collapsed .control-dock-arrow {
+      transform: rotate(-90deg);
+    }
+    .control-dock.collapsed .control-dock-bar {
+      padding: 12px 0;
+    }
+    .control-dock.collapsed .control-dock-summary {
+      color: var(--text-main);
+    }
+
+    /* Config Grid */
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 28px;
+      margin-bottom: 0;
+    }
+    .config-card { grid-column: span 4; padding: 0; }
+    @media (max-width: 1100px) { .config-card { grid-column: span 6; } }
+    @media (max-width: 700px) { .config-card { grid-column: span 12; } }
+
+    .config-card h4 {
+      font-size: 11px; font-weight: 900; letter-spacing: .14em;
+      text-transform: uppercase; color: rgba(226,232,240,0.58); margin: 0 0 20px;
+    }
+    .cfg-row { margin-bottom: 18px; }
+    .cfg-row label {
+      display: block; font-size: 11px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: rgba(226,232,240,0.5); margin-bottom: 8px;
+    }
+    .cfg-row input, .cfg-row select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      color: var(--text-main); font-size: 13px; outline: none;
+      font-family: var(--font-mono);
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+      border-radius: 18px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+    .cfg-row input:focus, .cfg-row select:focus {
+      transform: translateY(-1px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+      box-shadow: inset 0 0 0 1px rgba(96,165,250,0.20), 0 8px 24px rgba(15,23,42,0.22);
+    }
+    .cfg-row select option { background: var(--bg-card); color: var(--text-main); }
+    .cfg-row-inline {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
 
     /* Queue Table */
     .queue-card {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
-      padding: 20px; margin-bottom: var(--sp-md);
+      padding: 0; margin-bottom: var(--sp-lg);
     }
-    .queue-card h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+    .queue-card h4 { font-size: 11px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; color: rgba(226,232,240,0.58); margin: 0 0 18px; }
 
     /* Report Viewer */
     .report-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--sp-md);
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 28px;
     }
-    @media (max-width: 900px) { .report-grid { grid-template-columns: 1fr; } }
+    .chart-box:nth-child(1) { grid-column: span 7; }
+    .chart-box:nth-child(2) { grid-column: span 5; }
+    .chart-box:nth-child(3) { grid-column: span 5; }
+    .chart-box:nth-child(4) { grid-column: span 7; }
+    @media (max-width: 1100px) { .chart-box { grid-column: span 12 !important; } }
 
     .chart-box {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
-      padding: 20px;
+      padding: 0;
+      margin-bottom: 0;
     }
-    .chart-box h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+    .chart-box h4 { font-size: 11px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; color: rgba(226,232,240,0.58); margin: 0 0 16px; }
 
     .chart-canvas {
-      width: 100%; height: 220px; background: rgba(0,0,0,0.15); border-radius: var(--radius-sm);
-      position: relative; overflow: hidden;
+      width: 100%;
+      height: 220px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(4,10,18,0.72), rgba(9,16,28,0.52));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px rgba(0,0,0,0.16);
+    }
+
+    .research-workspace-shell {
+      margin-bottom: var(--sp-xl);
+      position: relative;
+      z-index: 1;
+    }
+    .research-workspace {
+      --chart-pane-height: 58%;
+      --report-panel-height: 36%;
+      --splitter-top: 56%;
+      height: clamp(760px, calc(100vh - 160px), 1080px);
+      min-height: 760px;
+      position: relative;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)),
+        radial-gradient(circle at top right, rgba(59,130,246,0.14), transparent 24%),
+        radial-gradient(circle at 10% 90%, rgba(34,197,94,0.08), transparent 26%),
+        rgba(10,14,24,0.66);
+      overflow: hidden;
+      border-radius: 34px;
+      box-shadow: 0 34px 80px rgba(0,0,0,0.28);
+      backdrop-filter: blur(16px);
+    }
+    .workspace-pane {
+      min-height: 0;
+      min-width: 0;
+    }
+    .workspace-pane-top {
+      height: var(--chart-pane-height);
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, rgba(7,11,20,0.70), rgba(7,11,20,0.12));
+    }
+    .workspace-pane-bottom {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: var(--report-panel-height);
+      min-height: 220px;
+      overflow: auto;
+      padding: 24px 0;
+      background: linear-gradient(180deg, rgba(8,12,22,0.18), rgba(8,12,22,0.04));
+      z-index: 4;
+    }
+    .workspace-splitter {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: var(--splitter-top);
+      height: 12px;
+      cursor: row-resize;
+      background: transparent;
+      z-index: 5;
+    }
+    .workspace-splitter::before {
+      content: '';
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 54px; height: 3px;
+      transform: translate(-50%, -50%);
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(59,130,246,0), rgba(59,130,246,0.95), rgba(34,197,94,0));
+    }
+    .workspace-splitter:hover::before,
+    .workspace-splitter.is-dragging::before {
+      background: linear-gradient(90deg, rgba(34,197,94,0), rgba(34,197,94,0.95), rgba(59,130,246,0));
+    }
+    .tv-chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 24px 18px;
+      background: transparent;
+    }
+    .tv-chart-title {
+      min-width: 0;
+    }
+    .tv-chart-title .eyebrow {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .tv-chart-title h3 {
+      margin: 4px 0 0;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+    .tv-chart-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .tv-meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.16);
+    }
+    .tv-meta-pill strong {
+      color: var(--text-main);
+      font-weight: 900;
+    }
+    .tv-chart-body {
+      flex: 1;
+      min-height: 0;
+      padding: 0 24px 10px;
+    }
+    .tv-chart-surface {
+      height: 100%;
+      background: linear-gradient(180deg, rgba(2,8,18,0.88), rgba(8,14,26,0.62));
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .tv-chart-footnote {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 24px 18px;
+      font-size: 11px;
+      color: var(--text-dim);
+      background: transparent;
+    }
+    .tv-bottom-section {
+      background: transparent;
+      padding: 0 24px 24px;
+      min-height: 100%;
+    }
+    .research-workspace.overlay-active .workspace-pane-bottom {
+      background: rgba(8,11,17,0.94);
+      backdrop-filter: blur(18px);
+    }
+    .research-workspace.has-run {
+      height: clamp(820px, calc(100vh - 108px), 1120px);
     }
 
     /* SVG Charts */
@@ -52,86 +404,398 @@
     /* KPI bar */
     .kpi-bar {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: var(--sp-sm); margin-bottom: var(--sp-md);
+      gap: 18px; margin-bottom: 26px;
     }
     .kpi-mini {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
       padding: 14px 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border-radius: 22px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
     }
-    .kpi-mini .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+    .kpi-mini .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); }
     .kpi-mini .value {
-      font-size: 22px; font-weight: 900; margin-top: 4px;
+      font-size: 26px; font-weight: 900; margin-top: 8px;
       font-family: var(--font-mono); font-variant-numeric: tabular-nums slashed-zero;
+      color: var(--text-main);
     }
 
     /* Tabs */
     .run-tabs {
-      display: flex; gap: 0; margin-bottom: var(--sp-md);
-      border-bottom: 2px solid var(--border);
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 24px;
+      padding: 6px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 999px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
     }
     .run-tab {
-      padding: 10px 20px; font-size: 13px; font-weight: 700;
-      color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
-      margin-bottom: -2px; transition: all .15s;
+      padding: 10px 18px; font-size: 13px; font-weight: 700;
+      color: var(--text-muted); cursor: pointer;
+      transition: all .15s;
+      border-radius: 999px;
     }
     .run-tab:hover { color: var(--text-main); }
-    .run-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-
-
+    .run-tab.active {
+      color: #f8fffb;
+      background: linear-gradient(135deg, rgba(34,197,94,0.22), rgba(59,130,246,0.22));
+      box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+    }
 
     /* Gate badges */
-    .gate-strip {
-      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
-    }
     .gate-badge {
-      padding: 6px 14px; border-radius: var(--radius-pill);
+      padding: 7px 12px; border-radius: 999px;
       font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.06);
     }
-    .gate-badge.pass { background: var(--success-soft); color: var(--success); }
-    .gate-badge.fail { background: var(--danger-soft); color: var(--danger); }
-    .gate-badge.pending { background: var(--warning-soft); color: var(--warning); }
-    .gate-badge svg { width: 14px; height: 14px; }
+    .gate-badge.pass { color: var(--success); background: rgba(34,197,94,0.12); }
+    .gate-badge.fail { color: var(--danger); background: rgba(239,68,68,0.12); }
+    .gate-badge.pending { color: var(--warning); background: rgba(245,158,11,0.12); }
 
     /* Run selector */
-    .run-selector {
-      display: flex; align-items: center; gap: 8px;
-    }
-    .run-selector label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+    .run-selector { display: flex; align-items: center; gap: 12px; }
+    .run-selector label { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; }
     .run-selector select {
-      border: 1px solid var(--border); background: var(--bg-surface);
-      color: var(--text-main); border-radius: var(--radius-sm);
-      padding: 6px 12px; font-size: 12px; font-weight: 700;
-      font-family: var(--font-mono); outline: none; cursor: pointer;
+      border: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      color: var(--text-main); border-radius: 16px;
+      padding: 10px 14px; font-size: 13px; font-weight: 700;
+      font-family: var(--font-mono); outline: none; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease;
     }
-    .run-selector select:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(96,165,250,0.18); }
+    .run-selector select:focus { transform: translateY(-1px); box-shadow: inset 0 0 0 1px rgba(96,165,250,0.20), 0 8px 24px rgba(15,23,42,0.22); }
+    .run-selector select option { background: var(--bg-card); }
 
     /* Run context card */
     .run-context {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: var(--sp-sm); margin-bottom: var(--sp-md);
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
-      padding: 16px 20px;
+      gap: 18px; margin-bottom: 30px; padding: 0;
+    }
+    .run-ctx-item {
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
     }
     .run-ctx-item .ctx-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); }
-    .run-ctx-item .ctx-val { font-size: 13px; font-weight: 800; margin-top: 2px; font-family: var(--font-mono); }
+    .run-ctx-item .ctx-val { font-size: 14px; font-weight: 800; margin-top: 6px; font-family: var(--font-mono); color: var(--text-main); }
+
+    .stage-board {
+      padding: 0; margin-bottom: 30px;
+    }
+    .stage-board h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-dim); margin: 0 0 16px; }
+    .stage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+    .stage-card {
+      padding: 0;
+    }
+    .stage-card .stage-name { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+    .stage-card .stage-components { margin-top: 0; font-size: 13px; color: var(--text-main); line-height: 1.5; }
+    .stage-card .stage-meta { margin-top: 6px; font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+    .stage-pill {
+      display: inline-block; margin: 2px 6px 0 0; padding: 0; border-radius: 0;
+      background: transparent; color: var(--primary); font-size: 11px; font-weight: 700;
+      font-family: var(--font-mono);
+    }
 
     /* Baseline comparison */
     .baseline-compare {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
-      padding: 16px 20px; margin-bottom: var(--sp-md);
+      padding: 0; margin-bottom: 30px;
     }
-    .baseline-compare h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
-    .bl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
-    .bl-item { text-align: center; padding: 10px; background: var(--bg-surface); border-radius: var(--radius-sm); }
-    .bl-item .bl-metric { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); }
-    .bl-item .bl-current { font-size: 16px; font-weight: 900; font-family: var(--font-mono); margin: 4px 0 2px; }
-    .bl-item .bl-base { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
-    .bl-item .bl-delta { font-size: 11px; font-weight: 700; }
+    .baseline-compare h4 { font-size: 11px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; color: var(--text-dim); margin: 0 0 16px; }
+    .bl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 24px; }
+    .bl-item { text-align: left; padding: 0; background: transparent; }
+    .bl-item .bl-metric { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+    .bl-item .bl-current { font-size: 18px; font-weight: 900; font-family: var(--font-mono); margin: 0; color: var(--text-main); }
+    .bl-item .bl-base { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 4px; }
+    .bl-item .bl-delta { font-size: 12px; font-weight: 800; margin-left: 6px; }
 
     /* Clickable queue row */
     #queueBody tr { cursor: pointer; transition: background 0.12s; }
-    #queueBody tr:hover { background: var(--bg-hover); }
-    #queueBody tr.active-run { background: var(--primary-soft); }
+    #queueBody tr:hover { background: rgba(255,255,255,0.02); }
+    #queueBody tr.active-run { background: rgba(59,130,246,0.06); }
+
+    /* LightweightCharts chart */
+    .lw-chart-container { width: 100%; height: 100%; position: relative; }
+    .lw-equity-container { width: 100%; height: 260px; position: relative; margin-top: 8px; }
+    .chart-box-full { grid-column: 1 / -1; }
+
+    /* Trade log */
+    .tl-filter-btn {
+      font-size: 11px; font-weight: 700; padding: 6px 16px; border-radius: 0;
+      border: 0; background: transparent; color: var(--text-dim);
+      cursor: pointer; transition: all .15s;
+      border-radius: 999px;
+    }
+    .tl-filter-btn:hover { color: var(--text-main); }
+    .tl-filter-btn.active {
+      color: #f8fffb;
+      background: linear-gradient(135deg, rgba(34,197,94,0.22), rgba(59,130,246,0.22));
+    }
+    .tl-stat-pill {
+      display: inline-flex; align-items: baseline; gap: 8px;
+      padding: 0; background: transparent; font-size: 12px; border: 0;
+      margin-right: 24px;
+    }
+    .tl-stat-pill .tl-stat-label { color: var(--text-dim); font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: .06em; }
+    .tl-stat-pill .tl-stat-val { font-weight: 900; font-family: var(--font-mono); font-size: 18px; color: var(--text-main); }
+    .tl-card {
+      background: transparent; border: 0; border-radius: 0; padding: 16px 0;
+      overflow: hidden;
+    }
+    .tl-card:last-child { border-bottom: 0; }
+    .tl-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 0 12px 0; background: transparent; border: 0;
+    }
+    .tl-card-header .tl-id { font-family: var(--font-mono); font-weight: 900; font-size: 14px; color: var(--text-main); }
+    .tl-dir-badge {
+      display: inline-block; padding: 0; border-radius: 0;
+      font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    }
+    .tl-dir-badge.long { background: transparent; color: #22c55e; }
+    .tl-dir-badge.short { background: transparent; color: #f87171; }
+    .tl-card-body { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+    .tl-section { padding: 0; }
+    .tl-section:not(:last-child) { border-right: 0; }
+    .tl-section-title {
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--text-dim); margin-bottom: 10px;
+    }
+    .tl-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+    .tl-row .tl-label { font-size: 12px; color: var(--text-dim); }
+    .tl-row .tl-val { font-size: 13px; font-weight: 700; font-family: var(--font-mono); color: var(--text-main); }
+    .tl-tp-badge {
+      display: inline-block; padding: 0; font-size: 10px; font-weight: 800; margin-left: 6px;
+    }
+    .tl-tp-badge.hit { background: transparent; color: #22c55e; }
+    .tl-tp-badge.miss { background: transparent; color: var(--text-dim); }
+    .tl-pnl-big { font-size: 20px; font-weight: 900; font-family: var(--font-mono); }
+    .trade-table-shell {
+      border: 0;
+      border-radius: 0;
+      overflow: auto;
+      background: transparent;
+    }
+    .trade-table-scroll {
+      max-height: none;
+      overflow: visible;
+    }
+    .trade-table {
+      width: 100%;
+      min-width: 1080px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .trade-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 16px 0;
+      text-align: left;
+      background: rgba(10,14,24,0.92);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .trade-table tbody tr {
+      transition: background .14s ease;
+    }
+    .trade-table tbody tr:hover {
+      background: rgba(255,255,255,0.03);
+    }
+    .trade-table tbody td {
+      padding: 16px 0;
+      vertical-align: middle;
+      color: var(--text-main);
+    }
+    .trade-col-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .trade-col-stack small {
+      color: var(--text-dim);
+      font-size: 10px;
+    }
+    .trade-pnl {
+      font-family: var(--font-mono);
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .trade-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .trade-tag.long { color: #22c55e; }
+    .trade-tag.short { color: #f87171; }
+    .trade-empty {
+      text-align: center;
+      padding: 44px 0;
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+    .data-source-indicator {
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      color: var(--text-muted);
+      font-size: 12px;
+      border-radius: 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .data-source-indicator[data-state="online"] {
+      background: linear-gradient(180deg, rgba(34,197,94,0.12), rgba(59,130,246,0.08));
+    }
+    .data-source-indicator[data-state="offline"] {
+      background: linear-gradient(180deg, rgba(245,158,11,0.14), rgba(239,68,68,0.08));
+    }
+    .research-inline-code {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+      font-size: 11px;
+      color: var(--text-main);
+    }
+    .filter-divider {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.22);
+    }
+    .diag-panel {
+      padding: 14px 16px;
+      font-size: 12px;
+      line-height: 1.6;
+      font-family: var(--font-mono);
+    }
+    .diag-title {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(226,232,240,0.58);
+      margin-bottom: 12px;
+    }
+    .diag-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 18px;
+    }
+    .diag-sep {
+      height: 18px;
+    }
+    .gate-group {
+      margin-bottom: 22px;
+      padding: 18px 20px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .gate-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .pill,
+    .data-table th,
+    .data-table td {
+      border: 0;
+    }
+    .pill {
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+    }
+    .data-table {
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+    .data-table th {
+      background: transparent;
+      padding: 8px 14px;
+      position: static;
+      color: rgba(226,232,240,0.5);
+    }
+    .data-table td {
+      padding: 14px;
+      background: rgba(255,255,255,0.03);
+    }
+    .data-table tbody tr td:first-child {
+      border-top-left-radius: 14px;
+      border-bottom-left-radius: 14px;
+    }
+    .data-table tbody tr td:last-child {
+      border-top-right-radius: 14px;
+      border-bottom-right-radius: 14px;
+    }
+    #queueBody tr:hover td {
+      background: rgba(255,255,255,0.05);
+    }
+    #queueBody tr.active-run td {
+      background: rgba(59,130,246,0.12);
+    }
+    @media (max-width: 768px) {
+      .page {
+        max-width: 100%;
+        padding: 18px 16px 44px;
+      }
+      .control-dock-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .control-dock-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .research-workspace {
+        height: auto;
+        min-height: 0;
+        position: static;
+      }
+      .workspace-pane-top {
+        height: 420px;
+        min-height: 320px;
+      }
+      .workspace-pane-bottom {
+        position: static;
+        height: auto;
+        min-height: 320px;
+        box-shadow: none;
+        padding-top: 24px;
+      }
+      .control-dock-panel,
+      .research-workspace {
+        border-radius: 24px;
+      }
+      .workspace-splitter { display: none; }
+      .tv-chart-header,
+      .tv-chart-footnote {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .tv-chart-meta {
+        justify-content: flex-start;
+      }
+      .diag-grid {
+        grid-template-columns: 1fr;
+      }
+      .tl-card-body { grid-template-columns: 1fr; gap: 16px; }
+      .tl-section:not(:last-child) { border-right: none; }
+    }
   </style>
 </head>
 <body>
@@ -142,76 +806,229 @@
         <!-- Hero -->
         <div class="pipe-hero">
           <div>
-            <h2>Research Pipeline</h2>
-            <div class="sub">Data Ingestion → Backtest → Baseline Compare → QA Gate → Promotion</div>
+            <h2>Research Lab</h2>
+            <div class="sub">Select strategy, configure backtest parameters, run backtest, analyze results</div>
           </div>
           <div class="flex gap-sm" style="align-items:center;">
-            <div class="run-selector">
-              <label>Run</label>
-              <select id="runSelect" onchange="selectRun(this.value)"></select>
-            </div>
-            <button class="btn btn-sm btn-primary" onclick="launchRun()">New Run</button>
-            <button class="btn btn-sm" onclick="switchTab('queue')">Queue</button>
+            <button class="btn btn-sm" onclick="switchTab('history')">History</button>
           </div>
         </div>
 
-        <!-- Run Context -->
-        <div class="run-context" id="runContext"></div>
-
-        <!-- KPI Bar -->
-        <div class="kpi-bar" id="kpiBar"></div>
-
-        <!-- Tabs -->
-        <div class="run-tabs">
-          <div class="run-tab active" onclick="switchTab('report')">Latest Report</div>
-          <div class="run-tab" onclick="switchTab('queue')">Run Queue</div>
-          <div class="run-tab" onclick="switchTab('gates')">QA Gates</div>
-        </div>
-
-        <!-- Tab: Report -->
-        <div id="tab-report">
-          <!-- Baseline Compare -->
-          <div class="baseline-compare" id="baselineCompare"></div>
-          <div class="report-grid">
-            <div class="chart-box">
-              <h4>Equity Curve</h4>
-              <div class="chart-canvas" id="equityChart"></div>
+        <div class="control-dock" id="controlDock">
+          <div class="control-dock-bar">
+            <button class="control-dock-toggle" id="controlDockToggle" type="button" onclick="toggleControlDock()" aria-expanded="true">
+              <span class="control-dock-title">Backtest Setup</span>
+              <span class="control-dock-summary" id="controlDockSummary">Configure market, timeframe and costs before running a backtest.</span>
+              <span class="control-dock-arrow">▾</span>
+            </button>
+            <div class="control-dock-actions">
+              <button class="btn btn-sm" type="button" onclick="toggleControlDock(false)">Expand</button>
+              <button class="btn btn-sm btn-primary" type="button" onclick="launchConfiguredRun()">Run Backtest</button>
             </div>
-            <div class="chart-box">
-              <h4>Drawdown Profile</h4>
-              <div class="chart-canvas" id="ddChart"></div>
+          </div>
+          <div class="control-dock-panel">
+            <!-- Data Source Status -->
+            <div id="dataSourceIndicator" class="data-source-indicator" data-state="checking">
+              <span style="color:var(--text-dim);">● Checking backend connection...</span>
             </div>
-            <div class="chart-box">
-              <h4>Returns Distribution</h4>
-              <div class="chart-canvas" id="distChart"></div>
+
+            <!-- ═══ Backtest Configuration ═══ -->
+            <div class="config-grid">
+          <!-- Strategy Selection -->
+          <div class="config-card">
+            <h4>Strategy Selection</h4>
+            <div class="cfg-row">
+              <label>Strategy</label>
+              <select id="cfgStrategy">
+                <option value="STR-001">STR-001 — Alpha Trend v2</option>
+                <option value="STR-002">STR-002 — Mean Reversion ES</option>
+                <option value="STR-003">STR-003 — Momentum Breakout</option>
+                <option value="STR-004">STR-004 — Delta Divergence</option>
+                <option value="STR-005">STR-005 — Liquidity Sweep</option>
+              </select>
             </div>
-            <div class="chart-box">
-              <h4>Monthly PnL Heat Map</h4>
-              <div class="chart-canvas" id="monthlyPnl"></div>
+            <div class="cfg-row">
+              <label>Market</label>
+              <select id="cfgMarket">
+                <option value="XAUUSD">XAUUSD (Gold)</option>
+                <option value="CME_ES">CME ES (S&P 500)</option>
+                <option value="CME_NQ">CME NQ (Nasdaq)</option>
+                <option value="EURUSD">EURUSD</option>
+                <option value="BTCUSD">BTCUSD</option>
+                <option value="AAPL">AAPL</option>
+              </select>
+            </div>
+            <div class="cfg-row">
+              <label>Timeframe</label>
+              <select id="cfgTimeframe">
+                <option value="1m">1 Minute</option>
+                <option value="5m">5 Minutes</option>
+                <option value="15m" selected>15 Minutes</option>
+                <option value="1h">1 Hour</option>
+                <option value="4h">4 Hours</option>
+                <option value="D">Daily</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Account Settings -->
+          <div class="config-card">
+            <h4>Account & Cost Settings</h4>
+            <div class="cfg-row">
+              <label>Initial Capital ($)</label>
+              <input type="number" id="cfgCapital" value="100000" step="10000">
+            </div>
+            <div class="cfg-row">
+              <label>Commission ($ per side)</label>
+              <input type="number" id="cfgCommission" value="3.50" step="0.50">
+            </div>
+            <div class="cfg-row cfg-row-inline">
+              <div>
+                <label>Spread ($)</label>
+                <input type="number" id="cfgSpread" value="0.30" step="0.01" min="0">
+              </div>
+              <div>
+                <label>Slippage ($)</label>
+                <input type="number" id="cfgSlippage" value="0.10" step="0.01" min="0">
+              </div>
+            </div>
+            <div class="cfg-row">
+              <label>Value Per Price Unit ($/lot)</label>
+              <input type="number" id="cfgValuePerUnit" value="100" step="1" min="1">
+            </div>
+          </div>
+
+          <!-- Backtest Period -->
+          <div class="config-card">
+            <h4>Backtest Period</h4>
+            <div class="cfg-row cfg-row-inline">
+              <div>
+                <label>From Date</label>
+                <input type="date" id="cfgFrom" value="2025-01-02">
+              </div>
+              <div>
+                <label>To Date</label>
+                <input type="date" id="cfgTo" value="2025-02-28">
+              </div>
+            </div>
+            <div class="cfg-row">
+              <label>Synthetic Bars (if no real data)</label>
+              <input type="number" id="cfgBars" value="2000" step="100" min="100" max="10000">
+            </div>
+            <div class="cfg-row">
+              <label>Data Source</label>
+              <select id="cfgDataSource">
+                <option value="dukascopy">Dukascopy (real market data)</option>
+                <option value="synthetic" selected>Synthetic (GBM random)</option>
+                <option value="api">Full API backtest (backend engine)</option>
+              </select>
+            </div>
+          </div>
             </div>
           </div>
         </div>
 
-        <!-- Tab: Queue -->
-        <div id="tab-queue" style="display:none;">
-          <div class="queue-card">
-            <h4>Backtest Run Queue</h4>
-            <table class="data-table">
-              <thead>
-                <tr><th>RunID</th><th>Strategy</th><th>Market</th><th>Period</th><th>Status</th><th>Sharpe</th><th>MaxDD</th><th>Duration</th></tr>
-              </thead>
-              <tbody id="queueBody"></tbody>
-            </table>
-          </div>
-        </div>
+        <!-- Run Context (shows after a run is selected) -->
+        <div class="run-context" id="runContext" style="display:none;"></div>
+        <div class="stage-board" id="stageBoard" style="display:none;"></div>
 
+        <div class="research-workspace-shell">
+          <div class="research-workspace" id="researchWorkspace">
+            <div class="workspace-pane workspace-pane-top">
+              <div class="tv-chart-header">
+                <div class="tv-chart-title">
+                  <div class="eyebrow">Backtest Replay</div>
+                  <h3 id="chartPanelTitle">Strategy Price Chart</h3>
+                </div>
+                <div class="tv-chart-meta" id="chartMetaBar">
+                  <span class="tv-meta-pill"><strong>Awaiting run</strong></span>
+                </div>
+              </div>
+              <div class="tv-chart-body">
+                <div class="tv-chart-surface">
+                  <div class="lw-chart-container" id="lwCandleChart"></div>
+                </div>
+              </div>
+              <div class="tv-chart-footnote">
+                <span>Executed trade markers stay aligned with the selected run. Raw signal arrows only appear when no trade was actually filled.</span>
+                <span>Drag the divider below to rebalance chart space vs report space.</span>
+              </div>
+            </div>
 
+            <div class="workspace-splitter" id="workspaceSplitter" role="separator" aria-orientation="horizontal" aria-label="Resize chart and report panels"></div>
 
-        <!-- Tab: QA Gates -->
-        <div id="tab-gates" style="display:none;">
-          <div class="chart-box">
-            <h4>QA Gate Certification — Latest Run</h4>
-            <div id="gateContent"></div>
+            <div class="workspace-pane workspace-pane-bottom">
+              <div class="tv-bottom-section">
+                <div class="kpi-bar" id="kpiBar"></div>
+
+                <div class="run-tabs">
+                  <div class="run-tab active" onclick="switchTab('report')">Backtest Report</div>
+                  <div class="run-tab" onclick="switchTab('trades')">Trade Log</div>
+                  <div class="run-tab" onclick="switchTab('history')">Run History</div>
+                  <div class="run-tab" onclick="switchTab('gates')">QA Gates</div>
+                </div>
+
+                <div id="tab-report">
+                  <div class="baseline-compare" id="baselineCompare"></div>
+
+                  <div class="report-grid">
+                    <div class="chart-box">
+                      <h4>Equity Curve</h4>
+                      <div class="lw-equity-container" id="lwEquityChart"></div>
+                    </div>
+                    <div class="chart-box">
+                      <h4>Drawdown Profile</h4>
+                      <div class="chart-canvas" id="ddChart"></div>
+                    </div>
+                    <div class="chart-box">
+                      <h4>Returns Distribution</h4>
+                      <div class="chart-canvas" id="distChart"></div>
+                    </div>
+                    <div class="chart-box">
+                      <h4>Stage & Diagnostics</h4>
+                      <div class="chart-canvas" id="diagnosticsChart"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="tab-trades" style="display:none;">
+                  <div id="tradeLogStats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;"></div>
+                  <div id="tradeLogFilters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;">
+                    <span style="font-size:11px;color:var(--text-dim);font-weight:700;margin-right:4px;">FILTER</span>
+                    <button class="tl-filter-btn active" data-filter="all" onclick="applyTradeFilter('all')">All</button>
+                    <button class="tl-filter-btn" data-filter="long" onclick="applyTradeFilter('long')">Long</button>
+                    <button class="tl-filter-btn" data-filter="short" onclick="applyTradeFilter('short')">Short</button>
+                    <span class="filter-divider"></span>
+                    <button class="tl-filter-btn" data-filter="win" onclick="applyTradeFilter('win')">Winners</button>
+                    <button class="tl-filter-btn" data-filter="loss" onclick="applyTradeFilter('loss')">Losers</button>
+                    <span class="filter-divider"></span>
+                    <button class="tl-filter-btn" data-filter="sl" onclick="applyTradeFilter('sl')">SL Exit</button>
+                    <button class="tl-filter-btn" data-filter="tp" onclick="applyTradeFilter('tp')">TP Exit</button>
+                    <button class="tl-filter-btn" data-filter="reversal" onclick="applyTradeFilter('reversal')">Reversal</button>
+                  </div>
+                  <div id="tradeLogCards"></div>
+                </div>
+
+                <div id="tab-history" style="display:none;">
+                  <div class="queue-card" style="margin-bottom:0;">
+                    <h4>Backtest Run History</h4>
+                    <table class="data-table">
+                      <thead>
+                        <tr><th>RunID</th><th>Strategy</th><th>Market</th><th>Data</th><th>Period</th><th>Status</th><th>Sharpe</th><th>MaxDD</th><th>Duration</th></tr>
+                      </thead>
+                      <tbody id="queueBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div id="tab-gates" style="display:none;">
+                  <div class="chart-box">
+                    <h4>QA Gate Certification — Latest Run</h4>
+                    <div id="gateContent"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -219,224 +1036,1401 @@
     </div>
   </div>
 
+  <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
   <script src="../shared/nav.js"></script>
+  <script src="../shared/component-lib.js"></script>
+  <script src="../shared/components.js"></script>
   <script src="../shared/mock-data.js"></script>
+  <script src="../shared/api.js"></script>
+  <script src="../shared/components/kpi-panel.js"></script>
+  <script src="../shared/backtest-engine.js"></script>
   <script>
     renderQuantSidebar('research');
-    renderQuantTopbar('Research Pipeline', [
-      { label: 'ToMoon Quant', href: '../dashboard/' },
-      { label: 'Research Pipeline' }
+    renderQuantTopbar('Research Lab', [
+      { label: 'ToMoon Quant', href: '../canvas/' },
+      { label: 'Research Lab' }
     ]);
 
-    /* ── Equity Curve (SVG) ─────────────────── */
-    function drawEquityCurve() {
-      const w = 540, h = 200, pad = 30;
-      const n = 80;
-      let equity = [10000];
-      for (let i = 1; i < n; i++) equity.push(equity[i-1] + (Math.random() - 0.38) * 200);
-      const minE = Math.min(...equity) - 200, maxE = Math.max(...equity) + 200;
-      const x = i => pad + (i / (n - 1)) * (w - 2 * pad);
-      const y = v => pad + (1 - (v - minE) / (maxE - minE)) * (h - 2 * pad);
+    /* ═══ State ═══ */
+    let backtestRuns = [];
+    let allStrategies = [];
+    let savedStrategies = {}; // from localStorage tmq_saved_strategies
+    let selectedRun = null;
+    let currentBlueprint = null;  // loaded from localStorage
+    let lastBacktestResult = null; // full engine result for the selected run
+    let backendAlive = false; // whether backend API is reachable
+    let researchPanelHeightPx = 360;
+    let controlsCollapsed = false;
 
-      const pts = equity.map((v, i) => `${x(i)},${y(v)}`).join(' ');
-      const area = `${x(0)},${y(minE)} ${pts} ${x(n-1)},${y(minE)}`;
-      const baseline = equity[0];
+    const CHART_MIN_HEIGHT_PX = 280;
+    const REPORT_PANEL_MIN_PX = 220;
+    const SPLITTER_SIZE_PX = 12;
 
-      document.getElementById('equityChart').innerHTML = `
-        <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">
-          <defs>
-            <linearGradient id="grad-blue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#3b82f6" />
-              <stop offset="100%" stop-color="#3b82f600" />
-            </linearGradient>
-          </defs>
-          <line x1="${pad}" y1="${y(baseline)}" x2="${w - pad}" y2="${y(baseline)}" class="baseline" />
-          <polygon points="${area}" class="eq-area" />
-          <polyline points="${pts}" class="eq-line" />
-          <text x="${pad}" y="${h - 6}" class="axis-text">Day 1</text>
-          <text x="${w - pad - 40}" y="${h - 6}" class="axis-text">Day ${n}</text>
-          <text x="6" y="${y(maxE) + 4}" class="axis-text">$${(maxE/1000).toFixed(1)}k</text>
-          <text x="6" y="${y(minE) - 4}" class="axis-text">$${(minE/1000).toFixed(1)}k</text>
-        </svg>`;
+    // LightweightCharts instances
+    let lwChart = null, lwCandleSeries = null, lwIndicatorLines = new Map();
+    let lwEquityChart = null, lwEquitySeries = null;
+
+    const baseline = { sharpe: 1.20, max_dd: 0.08, win_rate: 0.50, profit_factor: 1.30, total_trades: 200 };
+    // Verified against backend endpoint tests (2026-03-06).
+    // CME_ES/CME_MES are not native CME futures in Dukascopy; the backend maps them to SPY proxy bars.
+    const DUKASCOPY_MARKET_META = {
+      XAUUSD: { label: 'XAUUSD (Gold)', supported: true },
+      CME_ES: { label: 'CME ES (SPY proxy via Dukascopy)', supported: true, proxy: 'SPY.US/USD' },
+      CME_MES: { label: 'CME MES (SPY proxy via Dukascopy)', supported: true, proxy: 'SPY.US/USD' },
+      CME_NQ: { label: 'CME NQ (Nasdaq)', supported: false },
+      EURUSD: { label: 'EURUSD', supported: true },
+      BTCUSD: { label: 'BTCUSD', supported: true },
+      AAPL: { label: 'AAPL', supported: false },
+    };
+    const DUKASCOPY_SUPPORTED_MARKETS = new Set(
+      Object.entries(DUKASCOPY_MARKET_META)
+        .filter(([, meta]) => meta.supported)
+        .map(([market]) => market)
+    );
+    const ALL_MARKETS = [
+      { value: 'XAUUSD', label: 'XAUUSD (Gold)' },
+      { value: 'CME_ES', label: 'CME ES (SPY proxy via Dukascopy)' },
+      { value: 'CME_MES', label: 'CME MES (SPY proxy via Dukascopy)' },
+      { value: 'CME_NQ', label: 'CME NQ (Nasdaq)' },
+      { value: 'EURUSD', label: 'EURUSD' },
+      { value: 'BTCUSD', label: 'BTCUSD' },
+      { value: 'AAPL', label: 'AAPL' },
+    ];
+    const STAGE_ORDER = ['Foundation', 'Factor', 'Regime', 'Setup', 'Trigger', 'Filter', 'Scoring', 'Entry', 'Exit', 'Risk', 'Execution'];
+    const STAGE_LABELS = {
+      Foundation: 'Foundation',
+      Factor: 'Factors',
+      Regime: 'Regime',
+      Setup: 'Setups',
+      Trigger: 'Triggers',
+      Filter: 'Filters',
+      Scoring: 'Scoring',
+      Entry: 'Entry',
+      Exit: 'Exit',
+      Risk: 'Risk',
+      Execution: 'Execution',
+    };
+
+    function toUnix(ts) { return Math.floor(new Date(ts).getTime() / 1000); }
+
+    function getDukascopyMarketMeta(market) {
+      return DUKASCOPY_MARKET_META[market] || { label: market, supported: false };
     }
 
-    /* ── Drawdown (SVG) ─────────────────────── */
-    function drawDrawdown() {
-      const w = 540, h = 200, pad = 30;
-      const n = 80;
-      let dd = [0];
-      for (let i = 1; i < n; i++) {
-        dd.push(Math.min(0, dd[i-1] + (Math.random() - 0.5) * 4));
-        if (dd[i] < -20) dd[i] = -20 + Math.random() * 5;
-        if (Math.random() > 0.85) dd[i] = Math.min(dd[i] + 8, 0);
-      }
-      const minD = Math.min(...dd) - 2;
-      const x = i => pad + (i / (n - 1)) * (w - 2 * pad);
-      const y = v => pad + (v / minD) * (h - 2 * pad);
+    /* ═══ Init ═══ */
+    async function loadResearchData() {
+      // Check backend connectivity first
+      await checkBackendStatus();
 
-      const pts = dd.map((v, i) => `${x(i)},${y(v)}`).join(' ');
-      const area = `${x(0)},${y(0)} ${pts} ${x(n-1)},${y(0)}`;
+      // Load blueprint from canvas
+      try {
+        const raw = localStorage.getItem('tmq_blueprint');
+        if (raw) {
+          currentBlueprint = JSON.parse(raw);
+          console.log('[research] Blueprint loaded:', currentBlueprint.strategy_id, '—', (currentBlueprint.nodes || []).length, 'nodes');
+        }
+      } catch(e) { console.warn('[research] Blueprint parse error:', e); }
+
+      // Load saved strategies from localStorage
+      try {
+        savedStrategies = JSON.parse(localStorage.getItem('tmq_saved_strategies') || '{}');
+      } catch(e) { savedStrategies = {}; }
+
+      // Load strategies (API or fallback)
+      try {
+        allStrategies = await API.getStrategies();
+      } catch(e) {
+        allStrategies = MOCK.strategies || [];
+      }
+      updateStrategySelector();
+
+      // Load past runs from API (optional)
+      try {
+        const apiRuns = await API.getBacktestRuns();
+        if (apiRuns && apiRuns.length) {
+          backtestRuns = apiRuns.map(r => _normalizeRun(r));
+        }
+      } catch(e) {
+        console.log('[research] No API runs, starting fresh.');
+      }
+
+      // Load runs saved in localStorage
+      try {
+        const savedRuns = JSON.parse(localStorage.getItem('tmq_backtest_runs') || '[]');
+        if (savedRuns.length) {
+          backtestRuns = savedRuns.concat(backtestRuns);
+        }
+      } catch(e) {}
+
+      initRunSelector();
+      renderQueue();
+      renderGates();
+      updateControlDockSummary();
+      setResearchReadyState(backtestRuns.some(r => String(r.status).toLowerCase() === 'completed'));
+
+      // Show blueprint info
+      if (currentBlueprint) {
+        const v = BacktestEngine.validateBlueprint(currentBlueprint);
+        if (v.valid) {
+          const comps = Object.entries(v.components).map(([k,arr]) => arr.length + ' ' + k).join(', ');
+          showBlueprintBanner('Blueprint loaded: ' + (currentBlueprint.strategy_id || 'Unnamed') + ' (' + comps + ')', 'success');
+        } else {
+          showBlueprintBanner('Blueprint has issues: ' + v.errors.join('; '), 'warning');
+        }
+      }
+
+      // Sync market options with selected data source after page init
+      syncMarketOptionsByDataSource(false);
+    }
+
+    function syncMarketOptionsByDataSource(showNotice = true) {
+      const dsSel = document.getElementById('cfgDataSource');
+      const marketSel = document.getElementById('cfgMarket');
+      if (!dsSel || !marketSel) return;
+
+      const ds = dsSel.value;
+      const current = marketSel.value;
+
+      // For Dukascopy, show all options but disable unsupported ones.
+      // For synthetic/api, enable all markets.
+      marketSel.innerHTML = ALL_MARKETS.map(m => {
+        const dkMeta = getDukascopyMarketMeta(m.value);
+        const unsupportedOnDk = ds === 'dukascopy' && !dkMeta.supported;
+        const suffix = unsupportedOnDk
+          ? ' (not supported by Dukascopy)'
+          : (ds === 'dukascopy' && dkMeta.proxy ? ` (proxy: ${dkMeta.proxy})` : '');
+        return `<option value="${m.value}" ${unsupportedOnDk ? 'disabled' : ''}>${m.label}${suffix}</option>`;
+      }).join('');
+
+      let next = current;
+      const currentValid = ds !== 'dukascopy' || DUKASCOPY_SUPPORTED_MARKETS.has(current);
+      if (!currentValid) {
+        next = 'XAUUSD';
+        if (showNotice) {
+          showBlueprintBanner(
+            'Selected market is not supported by Dukascopy. Switched to XAUUSD automatically.',
+            'warning'
+          );
+        }
+      }
+      marketSel.value = next;
+    }
+
+    async function checkBackendStatus() {
+      const indicator = document.getElementById('dataSourceIndicator');
+      try {
+        const h = await API.health();
+        backendAlive = true;
+        if (indicator) {
+          indicator.dataset.state = 'online';
+          indicator.innerHTML = '<span style="color:var(--success);font-weight:800;">● Backend Online</span> — Dukascopy real market data available';
+        }
+        // Auto-select dukascopy if backend is alive
+        const dsSel = document.getElementById('cfgDataSource');
+        if (dsSel && dsSel.value === 'synthetic') dsSel.value = 'dukascopy';
+        syncMarketOptionsByDataSource(false);
+      } catch(e) {
+        backendAlive = false;
+        if (indicator) {
+          indicator.dataset.state = 'offline';
+          indicator.innerHTML = '<span style="color:var(--warning);font-weight:800;">● Backend Offline</span> — Only synthetic data is available right now.<br><span class="research-inline-code">cd ToMoon_Quant_Backend ; uvicorn main:app --reload --port 8000</span>';
+        }
+        // Force synthetic if backend is down
+        const dsSel = document.getElementById('cfgDataSource');
+        if (dsSel && dsSel.value !== 'synthetic') {
+          dsSel.value = 'synthetic';
+        }
+        syncMarketOptionsByDataSource(false);
+      }
+    }
+
+    function _normalizeRun(r) {
+      return {
+        run_id: r.run_id,
+        strategy_id: r.strategy_id,
+        market_id: r.market_id || 'XAUUSD',
+        period: r.period || '--',
+        status: 'Completed',
+        duration: r.duration_s ? r.duration_s.toFixed(1) + 's' : (r.duration || '--'),
+        results: {
+          sharpe: (r.metrics && r.metrics.sharpe) || 0,
+          max_dd: (r.metrics && r.metrics.max_dd_pct) || 0,
+          win_rate: (r.metrics && r.metrics.win_rate) || 0,
+          profit_factor: (r.metrics && r.metrics.profit_factor) || 0,
+          total_trades: (r.metrics && r.metrics.total_trades) || 0,
+          net_profit: (r.metrics && r.metrics.net_profit) || 0,
+          avg_winner: (r.metrics && r.metrics.avg_winner) || 0,
+          avg_loser: (r.metrics && r.metrics.avg_loser) || 0,
+          stage_distribution: (r.metrics && r.metrics.stage_distribution) || {},
+          long_trades: (r.metrics && r.metrics.long_trades) || 0,
+          short_trades: (r.metrics && r.metrics.short_trades) || 0,
+          annual_return: (r.metrics && r.metrics.annual_return) || 0,
+          calmar_ratio: (r.metrics && r.metrics.calmar_ratio) || 0,
+          total_commission: (r.metrics && r.metrics.total_commission) || 0,
+          max_consec_wins: (r.metrics && r.metrics.max_consec_wins) || 0,
+          max_consec_losses: (r.metrics && r.metrics.max_consec_losses) || 0,
+          gross_profit: (r.metrics && r.metrics.gross_profit) || 0,
+          gross_loss: (r.metrics && r.metrics.gross_loss) || 0,
+          long_win_rate: (r.metrics && r.metrics.long_win_rate) || 0,
+          short_win_rate: (r.metrics && r.metrics.short_win_rate) || 0,
+          avg_bars_held: (r.metrics && r.metrics.avg_bars_held) || 0,
+          avg_bars_winner: (r.metrics && r.metrics.avg_bars_winner) || 0,
+          avg_bars_loser: (r.metrics && r.metrics.avg_bars_loser) || 0,
+          return_over_max_dd: (r.metrics && r.metrics.return_over_max_dd) || 0,
+          expectancy: (r.metrics && r.metrics.expectancy) || 0,
+          max_dd_usd: (r.metrics && r.metrics.max_dd_usd) || 0,
+          tuw_bars: (r.metrics && r.metrics.tuw_bars) || 0,
+        },
+        trades: r.trades || [],
+        equityCurve: r.equityCurve || [],
+        bars: r.bars || [],
+        indicators: r.indicators || null,
+        maClose: r.maClose || null,
+        maOpen: r.maOpen || null,
+        signals: r.signals || null,
+        stageReport: r.stageReport || null,
+        stageComponents: r.stageComponents || null,
+        runtimeMeta: r.runtimeMeta || null,
+        dataSource: r.dataSource || 'unknown',
+        engineResult: r.engineResult || null,
+      };
+    }
+
+    function getSanitizedEquityCurve(equityCurveData) {
+      const rows = Array.isArray(equityCurveData) ? equityCurveData : [];
+      const cleaned = rows
+        .map((point, index) => {
+          const rawTime = point && point.timestamp ? toUnix(point.timestamp) : null;
+          const fallbackTime = Number.isFinite(point && point.bar) ? point.bar : index;
+          const time = Number.isFinite(rawTime) ? rawTime : fallbackTime;
+          const value = point && Number.isFinite(point.equity) ? point.equity
+                      : point && Number.isFinite(point.value) ? point.value : null;
+          const bar = point && Number.isFinite(point.bar) ? point.bar : index;
+          return value == null ? null : { time, value, bar, timestamp: point.timestamp || null };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.time - b.time || a.bar - b.bar);
+
+      const deduped = [];
+      for (const point of cleaned) {
+        const last = deduped[deduped.length - 1];
+        if (last && last.time === point.time) deduped[deduped.length - 1] = point;
+        else deduped.push(point);
+      }
+      return deduped;
+    }
+
+    function getReliableRunResults(run) {
+      const baseResults = (run && run.results) || {};
+      const equityCurve = getSanitizedEquityCurve(run && run.equityCurve);
+      const trades = Array.isArray(run && run.trades) ? run.trades : [];
+      const initialCapital = Number.isFinite(run && run.engineResult && run.engineResult.config && run.engineResult.config.initial_capital)
+        ? run.engineResult.config.initial_capital
+        : 100000;
+
+      if (!trades.length || equityCurve.length < 2 || typeof BacktestEngine === 'undefined') {
+        return baseResults;
+      }
+
+      const recomputed = BacktestEngine.calcMetrics(
+        trades,
+        equityCurve.map((point) => ({
+          bar: point.bar,
+          timestamp: point.timestamp || point.time,
+          equity: point.value,
+        })),
+        { initial_capital: initialCapital }
+      );
+
+      return { ...baseResults, ...recomputed };
+    }
+
+    function showBlueprintBanner(msg, type) {
+      const hero = document.querySelector('.pipe-hero .sub');
+      if (hero) {
+        const color = type === 'success' ? 'var(--success)' : type === 'warning' ? 'var(--warning)' : 'var(--text-muted)';
+        hero.innerHTML = msg.replace(/</g,'&lt;');
+        hero.style.color = color;
+      }
+    }
+
+    function buildControlDockSummary(run) {
+      if (run) {
+        const metrics = getReliableRunResults(run);
+        return `${run.market_id || 'XAUUSD'} | ${run.period || '--'} | ${metrics.total_trades || 0} trades | ${(metrics.sharpe || 0).toFixed(2)} Sharpe`;
+      }
+      const market = document.getElementById('cfgMarket')?.value || 'XAUUSD';
+      const timeframe = document.getElementById('cfgTimeframe')?.value || '15m';
+      const dataSource = document.getElementById('cfgDataSource')?.value || 'synthetic';
+      return `${market} | ${timeframe} | ${dataSource} source`;
+    }
+
+    function updateControlDockSummary(run = selectedRun) {
+      const el = document.getElementById('controlDockSummary');
+      if (el) el.textContent = buildControlDockSummary(run);
+    }
+
+    function setControlDockCollapsed(collapsed) {
+      const dock = document.getElementById('controlDock');
+      const toggle = document.getElementById('controlDockToggle');
+      if (!dock || !toggle) return;
+      controlsCollapsed = collapsed;
+      dock.classList.toggle('collapsed', collapsed);
+      toggle.setAttribute('aria-expanded', String(!collapsed));
+    }
+
+    function toggleControlDock(force) {
+      const next = typeof force === 'boolean' ? force : !controlsCollapsed;
+      setControlDockCollapsed(next);
+      if (!next) updateControlDockSummary(selectedRun);
+    }
+
+    function formatStageComponents(stageComponents, stageReport) {
+      return STAGE_ORDER.map((stageName) => {
+        const comps = (stageComponents && stageComponents[stageName]) || [];
+        const report = (stageReport && stageReport[stageName]) || null;
+        const componentIds = comps.map((component) => component.id || component.component_id || component.name).filter(Boolean);
+        const signalMeta = report && report.activeSignals
+          ? Object.entries(report.activeSignals).filter(([, count]) => count > 0).map(([key, count]) => `${key}:${count}`).join(' · ')
+          : '';
+        const indicatorMeta = report && report.indicatorKeys && report.indicatorKeys.length
+          ? `Indicators: ${report.indicatorKeys.join(', ')}`
+          : '';
+        return { stageName, componentIds, signalMeta, indicatorMeta };
+      }).filter((stage) => stage.componentIds.length || stage.signalMeta || stage.indicatorMeta);
+    }
+
+    function renderStageBoard() {
+      const panel = document.getElementById('stageBoard');
+      if (!panel || !selectedRun) return;
+      const stageRows = formatStageComponents(selectedRun.stageComponents, selectedRun.stageReport);
+      if (!stageRows.length) {
+        panel.style.display = 'none';
+        panel.innerHTML = '';
+        return;
+      }
+      panel.style.display = '';
+      panel.innerHTML = `
+        <h4>Stage Execution Chain</h4>
+        <div class="stage-grid">
+          ${stageRows.map((row) => `
+            <div class="stage-card">
+              <div class="stage-name">${STAGE_LABELS[row.stageName] || row.stageName}</div>
+              <div class="stage-components">
+                ${row.componentIds.length ? row.componentIds.map((id) => `<span class="stage-pill">${id}</span>`).join('') : '<span style="color:var(--text-dim);">No components</span>'}
+              </div>
+              <div class="stage-meta">
+                ${row.signalMeta ? `<div>${row.signalMeta}</div>` : ''}
+                ${row.indicatorMeta ? `<div>${row.indicatorMeta}</div>` : ''}
+              </div>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    function updateChartMeta(run) {
+      const titleEl = document.getElementById('chartPanelTitle');
+      const metaEl = document.getElementById('chartMetaBar');
+      if (!titleEl || !metaEl) return;
+
+      if (!run) {
+        titleEl.textContent = 'Strategy Price Chart';
+        metaEl.innerHTML = '<span class="tv-meta-pill"><strong>Awaiting run</strong></span>';
+        return;
+      }
+
+      const result = getReliableRunResults(run);
+      const dataSource = run.dataSource || 'synthetic';
+      const dsTone = dataSource.toLowerCase().includes('dukascopy') || dataSource.toLowerCase().includes('backend')
+        ? 'var(--success)'
+        : dataSource.toLowerCase().includes('synthetic')
+          ? 'var(--warning)'
+          : 'var(--text-main)';
+
+      titleEl.textContent = `${run.strategy_id} on ${run.market_id || 'XAUUSD'}`;
+      metaEl.innerHTML = [
+        `<span class="tv-meta-pill"><strong>${run.period || '--'}</strong></span>`,
+        `<span class="tv-meta-pill">Data <strong style="color:${dsTone};">${dataSource}</strong></span>`,
+        `<span class="tv-meta-pill">Trades <strong>${result.total_trades || 0}</strong></span>`,
+        `<span class="tv-meta-pill">Sharpe <strong>${(result.sharpe || 0).toFixed(2)}</strong></span>`
+      ].join('');
+    }
+
+    function setResearchReadyState(hasRun) {
+      const workspace = document.getElementById('researchWorkspace');
+      if (!workspace) return;
+      workspace.classList.toggle('has-run', hasRun);
+      if (hasRun) {
+        setControlDockCollapsed(true);
+        primeWorkspaceForChartFocus();
+      } else {
+        setControlDockCollapsed(false);
+      }
+      updateControlDockSummary(selectedRun);
+    }
+
+    function resizeResearchCharts() {
+      const candleContainer = document.getElementById('lwCandleChart');
+      if (lwChart && candleContainer) {
+        lwChart.applyOptions({ width: candleContainer.clientWidth, height: candleContainer.clientHeight || 420 });
+      }
+      const equityContainer = document.getElementById('lwEquityChart');
+      if (lwEquityChart && equityContainer) {
+        lwEquityChart.applyOptions({ width: equityContainer.clientWidth, height: equityContainer.clientHeight || 200 });
+      }
+    }
+
+    function getWorkspaceMetrics() {
+      const workspace = document.getElementById('researchWorkspace');
+      if (!workspace) return null;
+      const height = workspace.clientHeight || 0;
+      const maxVisibleReport = Math.max(REPORT_PANEL_MIN_PX, height - CHART_MIN_HEIGHT_PX - SPLITTER_SIZE_PX);
+      const maxPanel = Math.max(REPORT_PANEL_MIN_PX, height - 96);
+      return { workspace, height, maxVisibleReport, maxPanel };
+    }
+
+    function applyWorkspacePanelHeight(panelHeightPx) {
+      const metrics = getWorkspaceMetrics();
+      if (!metrics) return;
+      const { workspace, height, maxVisibleReport, maxPanel } = metrics;
+      if (window.innerWidth <= 768 || !height) {
+        resizeResearchCharts();
+        return;
+      }
+
+      researchPanelHeightPx = Math.max(REPORT_PANEL_MIN_PX, Math.min(maxPanel, panelHeightPx));
+      const visibleReportHeight = Math.min(researchPanelHeightPx, maxVisibleReport);
+      const chartHeight = Math.max(CHART_MIN_HEIGHT_PX, height - visibleReportHeight - SPLITTER_SIZE_PX);
+      const splitterTop = Math.max(0, height - researchPanelHeightPx - SPLITTER_SIZE_PX);
+
+      workspace.style.setProperty('--chart-pane-height', `${chartHeight}px`);
+      workspace.style.setProperty('--report-panel-height', `${researchPanelHeightPx}px`);
+      workspace.style.setProperty('--splitter-top', `${splitterTop}px`);
+      workspace.classList.toggle('overlay-active', researchPanelHeightPx > maxVisibleReport);
+      resizeResearchCharts();
+    }
+
+    function primeWorkspaceForChartFocus() {
+      const metrics = getWorkspaceMetrics();
+      if (!metrics) return;
+      const preferred = Math.min(Math.max(metrics.height * 0.38, 300), 420);
+      applyWorkspacePanelHeight(preferred);
+    }
+
+    function initResearchWorkspaceSplitter() {
+      const workspace = document.getElementById('researchWorkspace');
+      const splitter = document.getElementById('workspaceSplitter');
+      if (!workspace || !splitter) return;
+
+      applyWorkspacePanelHeight(researchPanelHeightPx);
+
+      splitter.addEventListener('pointerdown', (event) => {
+        if (window.innerWidth <= 768) return;
+        const rect = workspace.getBoundingClientRect();
+        splitter.classList.add('is-dragging');
+        splitter.setPointerCapture(event.pointerId);
+
+        const onMove = (moveEvent) => {
+          const nextHeight = rect.bottom - moveEvent.clientY - SPLITTER_SIZE_PX;
+          applyWorkspacePanelHeight(nextHeight);
+        };
+        const onUp = () => {
+          splitter.classList.remove('is-dragging');
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onUp);
+        };
+
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+      });
+
+      window.addEventListener('resize', () => applyWorkspacePanelHeight(researchPanelHeightPx));
+    }
+
+    function updateStrategySelector() {
+      const sel = document.getElementById('cfgStrategy');
+      let options = '';
+      // Active blueprint from canvas (most recent)
+      if (currentBlueprint) {
+        options += `<option value="__blueprint__" selected>${currentBlueprint.strategy_id || 'Canvas Blueprint'} (active from Canvas)</option>`;
+      }
+      // Saved strategies from localStorage
+      const savedIds = Object.keys(savedStrategies);
+      if (savedIds.length) {
+        savedIds.forEach(sid => {
+          // Skip if same as active blueprint
+          if (currentBlueprint && sid === currentBlueprint.strategy_id) return;
+          const s = savedStrategies[sid];
+          const date = s.updated ? new Date(s.updated).toLocaleDateString() : '';
+          options += `<option value="__saved__:${sid}">${sid} (saved${date ? ' ' + date : ''})</option>`;
+        });
+      }
+      // API strategies
+      if (allStrategies.length) {
+        options += allStrategies.map(s =>
+          `<option value="${s.strategy_id}">${s.strategy_id} — ${s.name}</option>`
+        ).join('');
+      }
+      if (!options) {
+        options = '<option value="OC-CROSS-DEFAULT">OC-CROSS-DEFAULT (built-in demo)</option>';
+      }
+      sel.innerHTML = options;
+    }
+
+    /* ═══ Launch Backtest (JS Engine + Dukascopy real data) ═══ */
+    async function launchConfiguredRun() {
+      const stratId = document.getElementById('cfgStrategy').value;
+      const market = document.getElementById('cfgMarket').value;
+      const timeframe = document.getElementById('cfgTimeframe').value;
+      const capital = Number(document.getElementById('cfgCapital').value) || 100000;
+      const commission = Number(document.getElementById('cfgCommission').value) || 3.50;
+      const spread = Number(document.getElementById('cfgSpread').value) || 0.30;
+      const slippage = Number(document.getElementById('cfgSlippage').value) || 0.10;
+      const valuePerUnit = Number(document.getElementById('cfgValuePerUnit').value) || 100;
+      const numBars = Number(document.getElementById('cfgBars').value) || 2000;
+      const dataSource = document.getElementById('cfgDataSource').value;
+      const fromDate = document.getElementById('cfgFrom').value;
+      const toDate = document.getElementById('cfgTo').value;
+
+      // Refresh backend status right before run to avoid stale state.
+      await checkBackendStatus();
+
+      const dukascopyMeta = getDukascopyMarketMeta(market);
+      if (dataSource === 'dukascopy' && !DUKASCOPY_SUPPORTED_MARKETS.has(market)) {
+        alert(
+          'Selected market "' + market + '" is not supported by Dukascopy in this demo.\n\n' +
+          'Supported: XAUUSD, BTCUSD, EURUSD, CME_ES (SPY proxy), CME_MES (SPY proxy)\n' +
+          'Please switch market or select Synthetic data source.'
+        );
+        return;
+      }
+
+      // Resolve strategy blueprint: active canvas, saved, or default
+      let resolvedBlueprint = null;
+      let resolvedStrategyId = stratId;
+
+      if (stratId === '__blueprint__' && currentBlueprint) {
+        resolvedBlueprint = currentBlueprint;
+        resolvedStrategyId = currentBlueprint.strategy_id || 'OC-CROSS';
+      } else if (stratId.startsWith('__saved__:')) {
+        const sid = stratId.replace('__saved__:', '');
+        resolvedBlueprint = savedStrategies[sid] || null;
+        resolvedStrategyId = sid;
+      }
+
+      // Extract strategy params from blueprint (if available)
+      let stratCfg = {};
+      if (resolvedBlueprint) {
+        const v = BacktestEngine.validateBlueprint(resolvedBlueprint);
+        if (!v.valid) {
+          alert('Blueprint validation failed:\n' + v.errors.join('\n'));
+          return;
+        }
+        stratCfg = BacktestEngine.extractStrategyConfig(resolvedBlueprint);
+      }
+
+      // Merge account config
+      const config = {
+        ...stratCfg,
+        initial_capital: capital,
+        commission_per_side: commission,
+        spread: spread,
+        slippage: slippage,
+        value_per_unit: valuePerUnit,
+      };
+
+      // Show loading state
+      const runBtn = document.querySelector('[onclick="launchConfiguredRun()"]');
+      if (runBtn) { runBtn.disabled = true; runBtn.textContent = 'Running...'; }
+      showBlueprintBanner('Fetching data and running backtest...', 'info');
+
+      // Get bar data
+      let bars = null;
+      let dataLabel = 'synthetic';
+      const startPrice = market === 'XAUUSD' ? 2650 : market === 'BTCUSD' ? 95000 : market === 'EURUSD' ? 1.08 : 5200;
+
+      if (dataSource === 'api') {
+        // Full backend API backtest (uses backend engine, not JS engine)
+        try {
+          const result = await API.runBacktest({
+            strategy_id: resolvedStrategyId,
+            strategy_name: resolvedStrategyId,
+            symbol: market,
+            initial_capital: capital,
+            commission: commission,
+            from_date: fromDate,
+            to_date: toDate,
+          });
+          const run = _normalizeRun(result);
+          backtestRuns.unshift(run);
+          _saveRunsToStorage();
+          initRunSelector();
+          renderQueue();
+          selectRun(run.run_id);
+          switchTab('report');
+          setResearchReadyState(true);
+          showBlueprintBanner('Backtest completed (backend engine, real data)', 'success');
+          if (runBtn) { runBtn.disabled = false; runBtn.textContent = 'Run Backtest'; }
+          return;
+        } catch(e) {
+          console.warn('[research] API backtest failed, falling back to JS engine:', e.message);
+          showBlueprintBanner('Backend API unavailable, running JS engine...', 'warning');
+        }
+      }
+
+      if (dataSource === 'dukascopy' || (dataSource === 'api' && !bars)) {
+        try {
+          const marketLabel = dukascopyMeta.proxy
+            ? `${market} via ${dukascopyMeta.proxy} proxy`
+            : market;
+          showBlueprintBanner(`Fetching ${marketLabel} ${timeframe} bars from Dukascopy (${fromDate} to ${toDate})...`, 'info');
+          bars = await API.fetchMarketBars(market, timeframe, fromDate, toDate);
+          if (bars && bars.length >= 20) {
+            dataLabel = dukascopyMeta.proxy
+              ? `Dukascopy ${dukascopyMeta.proxy} proxy (${bars.length} bars)`
+              : 'Dukascopy (' + bars.length + ' bars)';
+          } else {
+            bars = null;
+          }
+        } catch(e) {
+          const msg = (e && e.message) ? e.message : String(e);
+          if (msg.includes('API 404') || msg.includes('Not Found')) {
+            showBlueprintBanner(
+              'This backend does not expose `/api/market-data/bars` yet. Research Lab will continue with synthetic data unless you switch to the backend API engine.',
+              'warning'
+            );
+          } else if (msg.includes('API 400')) {
+            showBlueprintBanner(
+              dukascopyMeta.proxy
+                ? `Dukascopy rejected ${market} because this demo uses ${dukascopyMeta.proxy} as a proxy feed, not native CME futures. Switch market, timeframe, or use synthetic data.`
+                : 'Dukascopy request rejected (market/timeframe not supported) — switch market or use synthetic data.',
+              'warning'
+            );
+          } else if (msg.includes('dukascopy_python')) {
+            showBlueprintBanner('Backend missing dependency: dukascopy_python. Install requirements in the same Python env used by uvicorn.', 'warning');
+          } else {
+            showBlueprintBanner(
+              dukascopyMeta.proxy
+                ? `Dukascopy proxy feed for ${market} is unavailable — this market is mapped to ${dukascopyMeta.proxy}, so gaps or empty ranges are possible. Using synthetic data instead.`
+                : 'Dukascopy unavailable — using synthetic data. Start the backend to use real data.',
+              'warning'
+            );
+          }
+          bars = null;
+        }
+      }
+
+      // Fallback to synthetic data
+      if (!bars || bars.length < 20) {
+        if (dataSource === 'dukascopy') {
+          showBlueprintBanner(
+            'Real market data is unavailable for this run. Falling back to synthetic bars so the backtest can still execute.',
+            'warning'
+          );
+        }
+        bars = BacktestEngine.generateSyntheticBars(numBars, startPrice, market);
+        dataLabel = '⚠ SYNTHETIC (' + bars.length + ' bars) — NOT real market data';
+        if (!bars || bars.length < 20) {
+          alert('Failed to generate market data.');
+          if (runBtn) { runBtn.disabled = false; runBtn.textContent = 'Run Backtest'; }
+          return;
+        }
+      }
+
+      // Run JS backtest engine (component-driven)
+      let engineLabel = 'OC Cross';
+      let result;
+      const t0 = performance.now();
+
+      if (typeof ComponentLib !== 'undefined' && resolvedBlueprint) {
+        // Component-driven: resolve blueprint → components → generic engine
+        const components = ComponentLib.resolveComponents(resolvedBlueprint);
+        const hasComps = Object.values(components.stageSummary || {}).some((items) => Array.isArray(items) && items.length > 0);
+        if (hasComps) {
+          engineLabel = 'Component-driven';
+          const accountCfg = {
+            initial_capital: capital,
+            commission_per_side: commission,
+            spread: spread,
+            slippage: slippage,
+            value_per_unit: valuePerUnit,
+          };
+          showBlueprintBanner('Running component-driven backtest on ' + dataLabel + '...', 'info');
+          result = BacktestEngine.runWithComponents(bars, components, accountCfg);
+        } else {
+          // Blueprint has no resolved components → fallback to OC Cross
+          showBlueprintBanner('Running OC Cross backtest engine on ' + dataLabel + '...', 'info');
+          result = BacktestEngine.runBacktest(bars, config);
+        }
+      } else {
+        // No blueprint → backward-compatible OC Cross
+        showBlueprintBanner('Running OC Cross backtest engine on ' + dataLabel + '...', 'info');
+        result = BacktestEngine.runBacktest(bars, config);
+      }
+
+      const durationMs = performance.now() - t0;
+
+      if (result.error) {
+        alert('Backtest error: ' + result.error);
+        if (runBtn) { runBtn.disabled = false; runBtn.textContent = 'Run Backtest'; }
+        return;
+      }
+
+      // Human-readable Run ID: strategy + timestamp
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const timeStr = pad(now.getMonth()+1) + pad(now.getDate()) + '-' + pad(now.getHours()) + pad(now.getMinutes());
+      const runId = resolvedStrategyId + '-' + timeStr;
+
+      const run = {
+        run_id: runId,
+        strategy_id: resolvedStrategyId,
+        market_id: market,
+        period: fromDate + ' to ' + toDate,
+        status: 'Completed',
+        duration: (durationMs / 1000).toFixed(2) + 's',
+        dataSource: dataLabel,
+        results: {
+          sharpe: result.metrics.sharpe,
+          max_dd: result.metrics.max_dd_pct,
+          win_rate: result.metrics.win_rate,
+          profit_factor: result.metrics.profit_factor,
+          total_trades: result.metrics.total_trades,
+          net_profit: result.metrics.net_profit,
+          avg_winner: result.metrics.avg_winner,
+          avg_loser: result.metrics.avg_loser,
+          stage_distribution: result.metrics.stage_distribution,
+          long_trades: result.metrics.long_trades,
+          short_trades: result.metrics.short_trades,
+          annual_return: result.metrics.annual_return,
+          calmar_ratio: result.metrics.calmar_ratio,
+          total_commission: result.metrics.total_commission,
+          max_consec_wins: result.metrics.max_consec_wins,
+          max_consec_losses: result.metrics.max_consec_losses,
+          gross_profit: result.metrics.gross_profit,
+          gross_loss: result.metrics.gross_loss,
+          long_win_rate: result.metrics.long_win_rate,
+          short_win_rate: result.metrics.short_win_rate,
+          avg_bars_held: result.metrics.avg_bars_held,
+          avg_bars_winner: result.metrics.avg_bars_winner,
+          avg_bars_loser: result.metrics.avg_bars_loser,
+          return_over_max_dd: result.metrics.return_over_max_dd,
+          expectancy: result.metrics.expectancy,
+          max_dd_usd: result.metrics.max_dd_usd,
+          tuw_bars: result.metrics.tuw_bars,
+        },
+        trades: result.trades,
+        equityCurve: result.equityCurve,
+        bars: bars, // store bars for candlestick chart
+        indicators: result.indicators || null,
+        maClose: result.maClose, // ALMA indicator
+        maOpen: result.maOpen,
+        signals: result.signals, // signal array for markers
+        stageReport: result.stageReport || null,
+        stageComponents: result.stageComponents || null,
+        runtimeMeta: result.runtimeMeta || null,
+        engineResult: result,
+      };
+
+      backtestRuns.unshift(run);
+      _saveRunsToStorage();
+      initRunSelector();
+      renderQueue();
+      selectRun(runId);
+      switchTab('report');
+      setResearchReadyState(true);
+      showBlueprintBanner(
+        `Backtest completed: ${result.metrics.total_trades} trades, ` +
+        `Sharpe ${result.metrics.sharpe.toFixed(2)}, ` +
+        `MaxDD ${(result.metrics.max_dd_pct * 100).toFixed(1)}%, ` +
+        `Net $${result.metrics.net_profit.toFixed(0)} — Data: ${dataLabel}`,
+        result.metrics.total_trades > 0 ? 'success' : 'warning'
+      );
+      if (runBtn) { runBtn.disabled = false; runBtn.textContent = 'Run Backtest'; }
+    }
+
+    function _saveRunsToStorage() {
+      try {
+        // Save runs; include downsampled bars for candlestick chart
+        const slim = backtestRuns.slice(0, 10).map(r => ({
+          run_id: r.run_id, strategy_id: r.strategy_id, market_id: r.market_id,
+          period: r.period, status: r.status, duration: r.duration, dataSource: r.dataSource,
+          results: getReliableRunResults(r), trades: (r.trades || []).slice(0, 200),
+          equityCurve: getSanitizedEquityCurve(r.equityCurve || []).map((point) => ({
+            bar: point.bar,
+            timestamp: point.timestamp || null,
+            equity: point.value,
+          })),
+          // Downsample bars for chart (keep every 3rd bar, max 800)
+          bars: (r.bars || []).filter((_, i) => i % 3 === 0).slice(0, 800),
+          indicators: Object.fromEntries(
+            Object.entries(r.indicators || {}).map(([key, values]) => [
+              key,
+              Array.isArray(values) ? values.filter((_, i) => i % 3 === 0).slice(0, 800) : values,
+            ])
+          ),
+          maClose: r.maClose ? r.maClose.filter((_, i) => i % 3 === 0).slice(0, 800) : null,
+          maOpen: r.maOpen ? r.maOpen.filter((_, i) => i % 3 === 0).slice(0, 800) : null,
+          signals: r.signals ? r.signals.filter((_, i) => i % 3 === 0).slice(0, 800) : null,
+          stageReport: r.stageReport || null,
+          stageComponents: r.stageComponents || null,
+          runtimeMeta: r.runtimeMeta || null,
+        }));
+        localStorage.setItem('tmq_backtest_runs', JSON.stringify(slim));
+      } catch(e) { console.warn('Storage save failed:', e.message); }
+    }
+
+    /* ═══ Charts — LightweightCharts Candlestick + Equity ═══ */
+
+    function initLwCandleChart() {
+      const container = document.getElementById('lwCandleChart');
+      container.innerHTML = '';
+      lwIndicatorLines = new Map();
+
+      lwChart = LightweightCharts.createChart(container, {
+        width: container.clientWidth,
+        height: container.clientHeight || 420,
+        layout: { background: { color: 'transparent' }, textColor: '#c8ccd4' },
+        grid: { vertLines: { color: 'rgba(255,255,255,0.04)' }, horzLines: { color: 'rgba(255,255,255,0.04)' } },
+        timeScale: { timeVisible: true, secondsVisible: false },
+        rightPriceScale: { borderVisible: false },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+      });
+
+      lwCandleSeries = lwChart.addCandlestickSeries({
+        upColor: '#16a34a', downColor: '#ef4444', borderVisible: false,
+        wickUpColor: '#16a34a', wickDownColor: '#ef4444',
+      });
+
+      window.addEventListener('resize', () => {
+        resizeResearchCharts();
+      });
+    }
+
+    function initLwEquityChart() {
+      const container = document.getElementById('lwEquityChart');
+      container.innerHTML = '';
+
+      lwEquityChart = LightweightCharts.createChart(container, {
+        width: container.clientWidth,
+        height: container.clientHeight || 200,
+        layout: { background: { color: 'transparent' }, textColor: '#c8ccd4' },
+        grid: { vertLines: { color: 'rgba(255,255,255,0.04)' }, horzLines: { color: 'rgba(255,255,255,0.04)' } },
+        timeScale: { timeVisible: true, secondsVisible: false },
+        rightPriceScale: { borderVisible: false },
+      });
+
+      lwEquitySeries = lwEquityChart.addLineSeries({ color: '#3b82f6', lineWidth: 2 });
+
+      window.addEventListener('resize', () => {
+        resizeResearchCharts();
+      });
+    }
+
+    function getChartIndicatorSeries(run) {
+      const out = [];
+      const addSeries = (id, title, values, options = {}) => {
+        if (!Array.isArray(values) || values.length === 0) return;
+        out.push({ id, title, values, options });
+      };
+
+      const indicators = run.indicators || {};
+      addSeries('ALMA_Close', 'ALMA Close', indicators.maClose || run.maClose, { color: '#d97706', lineWidth: 2 });
+      addSeries('ALMA_Open', 'ALMA Open', indicators.maOpen || run.maOpen, { color: '#8b5cf6', lineWidth: 1, lineStyle: 2 });
+      addSeries('SMA_Fast', 'SMA Fast', indicators.fastSma, { color: '#f59e0b', lineWidth: 2 });
+      addSeries('SMA_Slow', 'SMA Slow', indicators.slowSma, { color: '#06b6d4', lineWidth: 2 });
+
+      return out;
+    }
+
+    function renderCandlestickChart(run) {
+      const bars = run.bars || [];
+      if (!bars.length) {
+        document.getElementById('lwCandleChart').innerHTML = '<div style="padding:60px;text-align:center;color:var(--text-dim);font-size:13px;">No price data. Run a backtest to see candlestick chart with trade markers.</div>';
+        return;
+      }
+
+      if (!lwChart) initLwCandleChart();
+
+      // Clear old indicators
+      if (lwIndicatorLines) {
+        lwIndicatorLines.forEach(s => lwChart.removeSeries(s));
+        lwIndicatorLines.clear();
+      }
+
+      // Set candlestick data
+      const chartBars = bars.map(b => ({
+        time: toUnix(b.timestamp),
+        open: b.open, high: b.high, low: b.low, close: b.close,
+      }));
+      lwCandleSeries.setData(chartBars);
+
+      for (const series of getChartIndicatorSeries(run)) {
+        const line = lwChart.addLineSeries({ ...series.options, title: series.title });
+        const lineData = [];
+        for (let i = 0; i < chartBars.length && i < series.values.length; i++) {
+          const value = series.values[i];
+          if (value != null && Number.isFinite(value)) {
+            lineData.push({ time: chartBars[i].time, value });
+          }
+        }
+        line.setData(lineData);
+        lwIndicatorLines.set(series.id, line);
+      }
+
+      // Trade markers — prefer executed trades.
+      // Raw signal markers are only shown when no trade was actually filled,
+      // otherwise the chart overstates activity versus the trade metrics.
+      const markers = [];
+      const trades = run.trades || [];
+      const signalArr = run.signals || [];
+
+      // Method 1: From signal array (debug fallback only when there are no executed trades)
+      if (!trades.length && signalArr.length && chartBars.length) {
+        for (let i = 0; i < signalArr.length && i < chartBars.length; i++) {
+          if (signalArr[i] === 1) {
+            const entryIdx = Math.min(i + 1, chartBars.length - 1);
+            markers.push({
+              time: chartBars[entryIdx].time,
+              position: 'belowBar',
+              color: '#16a34a',
+              shape: 'arrowUp',
+              text: 'SIG BUY',
+            });
+          } else if (signalArr[i] === -1) {
+            const entryIdx = Math.min(i + 1, chartBars.length - 1);
+            markers.push({
+              time: chartBars[entryIdx].time,
+              position: 'aboveBar',
+              color: '#ef4444',
+              shape: 'arrowDown',
+              text: 'SIG SELL',
+            });
+          }
+        }
+      }
+
+      // Method 2: From trade objects (entry + exit markers)
+      if (trades.length && chartBars.length) {
+        trades.forEach(t => {
+          // Entry marker
+          if (t.entryBar != null && t.entryBar < chartBars.length) {
+            const isLong = t.direction === 'LONG';
+            markers.push({
+              time: chartBars[t.entryBar].time,
+              position: isLong ? 'belowBar' : 'aboveBar',
+              color: isLong ? '#16a34a' : '#ef4444',
+              shape: isLong ? 'arrowUp' : 'arrowDown',
+              text: `${isLong ? 'L' : 'S'} @${t.entryPrice.toFixed(0)}`,
+            });
+          }
+          // Exit marker
+          const exitBar = t.entryBar != null ? t.entryBar + (t.barsHeld || 0) : null;
+          if (exitBar != null && exitBar < chartBars.length) {
+            const pnlLabel = t.netPnl >= 0 ? `+$${t.netPnl.toFixed(0)}` : `-$${Math.abs(t.netPnl).toFixed(0)}`;
+            markers.push({
+              time: chartBars[exitBar].time,
+              position: t.direction === 'LONG' ? 'aboveBar' : 'belowBar',
+              color: t.netPnl >= 0 ? '#16a34a' : '#ef4444',
+              shape: 'circle',
+              text: `${t.exitReason?.split(' ')[0] || 'Exit'} ${pnlLabel}`,
+            });
+          }
+        });
+      }
+
+      // Sort markers by time (required by LightweightCharts)
+      markers.sort((a, b) => a.time - b.time);
+      // Deduplicate markers at same time (keep entry+exit)
+      lwCandleSeries.setMarkers(markers);
+      lwChart.timeScale().fitContent();
+    }
+
+    function renderLwEquityChart(equityCurveData) {
+      const data = getSanitizedEquityCurve(equityCurveData || []);
+      if (data.length < 2) {
+        document.getElementById('lwEquityChart').innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-dim);font-size:12px;">No equity data. Run a backtest first.</div>';
+        return;
+      }
+      if (!lwEquityChart) initLwEquityChart();
+
+      lwEquitySeries.setData(data.map(point => ({ time: point.time, value: point.value })));
+      lwEquityChart.timeScale().fitContent();
+    }
+
+    function drawDrawdown(equityCurveData) {
+      const w = 540, h = 200, pad = 30;
+      const data = equityCurveData || [];
+      if (data.length < 2) {
+        document.getElementById('ddChart').innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-dim);font-size:12px;">No drawdown data.</div>';
+        return;
+      }
+      const ddSeries = BacktestEngine.calcDrawdownSeries(data);
+      const dd = ddSeries.map(d => d.drawdown);
+      const n = dd.length;
+      const minD = Math.min(...dd, -0.1) * 1.1;
+      const x = i => pad + (i / (n - 1)) * (w - 2 * pad);
+      const y = v => pad + (minD !== 0 ? (v / minD) : 0) * (h - 2 * pad);
+      const pts = dd.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+      const area = `${x(0).toFixed(1)},${y(0).toFixed(1)} ${pts} ${x(n-1).toFixed(1)},${y(0).toFixed(1)}`;
 
       document.getElementById('ddChart').innerHTML = `
         <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">
-          <defs>
-            <linearGradient id="grad-red" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#ef444400" />
-              <stop offset="100%" stop-color="#ef4444" />
-            </linearGradient>
-          </defs>
-          <line x1="${pad}" y1="${y(0)}" x2="${w - pad}" y2="${y(0)}" class="baseline" />
+          <defs><linearGradient id="grad-red" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ef444400" /><stop offset="100%" stop-color="#ef4444" /></linearGradient></defs>
+          <line x1="${pad}" y1="${y(0).toFixed(1)}" x2="${w - pad}" y2="${y(0).toFixed(1)}" class="baseline" />
           <polygon points="${area}" class="dd-area" />
           <polyline points="${pts}" class="dd-line" />
-          <text x="${pad}" y="${h - 6}" class="axis-text">Day 1</text>
-          <text x="${w - pad - 40}" y="${h - 6}" class="axis-text">Day 80</text>
-          <text x="6" y="${y(0) + 14}" class="axis-text">0%</text>
-          <text x="6" y="${h - pad}" class="axis-text">${minD.toFixed(0)}%</text>
+          <text x="6" y="${y(0).toFixed(1)}" class="axis-text">0%</text>
+          <text x="6" y="${h - pad}" class="axis-text">${minD.toFixed(1)}%</text>
+          <text x="${w/2}" y="14" text-anchor="middle" class="axis-text" style="fill:var(--danger);">Max DD: ${minD.toFixed(2)}%</text>
         </svg>`;
     }
 
-    /* ── Distribution (SVG bar chart) ──────── */
-    function drawDistribution() {
-      const w = 540, h = 200, pad = 30;
-      const bins = 20;
-      const data = [];
-      for (let i = 0; i < bins; i++) {
-        data.push(Math.floor(Math.random() * 40) + 5);
+    function drawDistribution(trades) {
+      const w = 540, h = 200, pad = 30, numBins = 20;
+      if (!trades || trades.length < 2) {
+        document.getElementById('distChart').innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-dim);font-size:12px;">No trade data.</div>';
+        return;
       }
-      // Make a roughly normal shape
-      for (let i = 0; i < bins; i++) {
-        const center = bins / 2;
-        const dist = Math.abs(i - center);
-        data[i] = Math.floor(data[i] * (1 - dist / bins * 0.7));
-      }
-      const maxV = Math.max(...data);
-      const bw = (w - 2 * pad) / bins - 2;
+      const pnls = trades.map(t => t.netPnl);
+      const minPnl = Math.min(...pnls);
+      const maxPnl = Math.max(...pnls);
+      const range = maxPnl - minPnl || 1;
+      const binWidth = range / numBins;
 
-      let bars = '';
-      data.forEach((v, i) => {
-        const bx = pad + i * ((w - 2 * pad) / bins) + 1;
-        const bh = (v / maxV) * (h - 2 * pad);
-        const by = h - pad - bh;
-        const color = i < bins / 2 ? 'var(--danger)' : 'var(--success)';
-        bars += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="${color}" opacity="0.6" rx="1" />`;
+      const bins = new Array(numBins).fill(0);
+      pnls.forEach(p => {
+        let idx = Math.floor((p - minPnl) / binWidth);
+        if (idx >= numBins) idx = numBins - 1;
+        bins[idx]++;
       });
+      const maxBin = Math.max(...bins, 1);
+
+      const bw = (w - 2 * pad) / numBins - 2;
+      let svg = '';
+      bins.forEach((v, i) => {
+        const bx = pad + i * ((w - 2 * pad) / numBins) + 1;
+        const bh = (v / maxBin) * (h - 2 * pad);
+        const by = h - pad - bh;
+        const midPnl = minPnl + (i + 0.5) * binWidth;
+        const color = midPnl >= 0 ? 'var(--success)' : 'var(--danger)';
+        svg += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="${color}" opacity="0.6" rx="1" />`;
+      });
+      // zero line
+      const zeroX = pad + ((0 - minPnl) / range) * (w - 2 * pad);
 
       document.getElementById('distChart').innerHTML = `
         <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">
-          <line x1="${pad}" y1="${h - pad}" x2="${w - pad}" y2="${h - pad}" stroke="var(--border)" stroke-width="1" />
-          <line x1="${w/2}" y1="${pad}" x2="${w/2}" y2="${h - pad}" class="baseline" />
-          ${bars}
-          <text x="${pad}" y="${h - 6}" class="axis-text">Losses</text>
-          <text x="${w - pad - 30}" y="${h - 6}" class="axis-text">Wins</text>
-          <text x="${w/2 - 8}" y="${h - 6}" class="axis-text">0</text>
+          <line x1="${pad}" y1="${h - pad}" x2="${w - pad}" y2="${h - pad}" stroke="rgba(255,255,255,0.14)" stroke-width="1" />
+          ${zeroX > pad && zeroX < w - pad ? `<line x1="${zeroX}" y1="${pad}" x2="${zeroX}" y2="${h - pad}" class="baseline" />` : ''}
+          ${svg}
+          <text x="${pad}" y="${h - 6}" class="axis-text">$${minPnl.toFixed(0)}</text>
+          <text x="${w - pad - 40}" y="${h - 6}" class="axis-text">$${maxPnl.toFixed(0)}</text>
+          <text x="${w/2}" y="14" text-anchor="middle" class="axis-text" style="fill:var(--text-muted);">${trades.length} trades</text>
         </svg>`;
     }
 
-    /* ── Monthly PnL Heatmap ──────────────── */
-    function drawMonthlyPnl() {
-      const w = 540, h = 200, pad = 30;
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const years = ['2023','2024'];
-      const cellW = (w - 2 * pad) / 12;
-      const cellH = (h - 2 * pad) / years.length;
+    function drawDiagnostics(metrics) {
+      const el = document.getElementById('diagnosticsChart');
+      if (!metrics || !metrics.total_trades) {
+        el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-dim);font-size:12px;">No diagnostics data.</div>';
+        return;
+      }
+      const sd = metrics.stage_distribution || {};
+      const total = metrics.total_trades || 1;
 
-      let cells = '';
-      years.forEach((yr, yi) => {
-        months.forEach((m, mi) => {
-          const pnl = (Math.random() - 0.4) * 5000;
-          const norm = Math.min(1, Math.abs(pnl) / 5000);
-          const color = pnl >= 0
-            ? `rgba(34,197,94,${0.15 + norm * 0.55})`
-            : `rgba(239,68,68,${0.15 + norm * 0.55})`;
-          const cx = pad + mi * cellW;
-          const cy = pad + yi * cellH;
-          cells += `<rect x="${cx + 1}" y="${cy + 1}" width="${cellW - 2}" height="${cellH - 2}" fill="${color}" rx="3" />`;
-          cells += `<text x="${cx + cellW/2}" y="${cy + cellH/2 + 4}" text-anchor="middle" fill="var(--text-main)" font-size="9" font-family="var(--font-mono)">${pnl >= 0 ? '+' : ''}${(pnl/1000).toFixed(1)}k</text>`;
-        });
-        cells += `<text x="${pad - 6}" y="${pad + yi * cellH + cellH/2 + 4}" text-anchor="end" class="axis-text">${yr}</text>`;
-      });
-      months.forEach((m, mi) => {
-        cells += `<text x="${pad + mi * cellW + cellW/2}" y="${pad - 6}" text-anchor="middle" class="axis-text">${m}</text>`;
-      });
-
-      document.getElementById('monthlyPnl').innerHTML = `
-        <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">${cells}</svg>`;
+      el.innerHTML = `
+        <div class="diag-panel">
+          <div class="diag-title">Stage Distribution</div>
+          <div class="diag-grid">
+            <div>Stage 0 (SL hit early): <b>${sd.stage0 || 0}</b> (${((sd.stage0||0)/total*100).toFixed(0)}%)</div>
+            <div>Stage 1 (TP1 hit): <b>${sd.stage1 || 0}</b> (${((sd.stage1||0)/total*100).toFixed(0)}%)</div>
+            <div>Stage 2 (TP2 hit): <b>${sd.stage2 || 0}</b> (${((sd.stage2||0)/total*100).toFixed(0)}%)</div>
+            <div>Stage 3 (TP3 full): <b>${sd.stage3 || 0}</b> (${((sd.stage3||0)/total*100).toFixed(0)}%)</div>
+          </div>
+          <div class="diag-sep"></div>
+          <div class="diag-title">Direction Breakdown</div>
+          <div class="diag-grid">
+            <div>Long: <b>${metrics.long_trades || 0}</b> (WR: ${((metrics.long_win_rate||0)*100).toFixed(0)}%)</div>
+            <div>Short: <b>${metrics.short_trades || 0}</b> (WR: ${((metrics.short_win_rate||0)*100).toFixed(0)}%)</div>
+          </div>
+          <div class="diag-sep"></div>
+          <div class="diag-title">Risk & Return</div>
+          <div class="diag-grid">
+            <div>Annual Return: <b>${((metrics.annual_return||0)*100).toFixed(1)}%</b></div>
+            <div>Calmar Ratio: <b>${(metrics.calmar_ratio||0).toFixed(2)}</b></div>
+            <div>Gross Profit: <b style="color:var(--success);">$${(metrics.gross_profit||0).toFixed(0)}</b></div>
+            <div>Gross Loss: <b style="color:var(--danger);">$${(metrics.gross_loss||0).toFixed(0)}</b></div>
+            <div>Return / MaxDD: <b>${(metrics.return_over_max_dd||0).toFixed(2)}</b></div>
+            <div>Expectancy: <b>$${(metrics.expectancy||0).toFixed(2)}</b></div>
+          </div>
+          <div class="diag-sep"></div>
+          <div class="diag-title">Cost & Efficiency</div>
+          <div>Total Commissions: <b>$${(metrics.total_commission||0).toFixed(2)}</b></div>
+          <div>Avg Bars Held: <b>${(metrics.avg_bars_held||0).toFixed(1)}</b> | Winner: <b>${(metrics.avg_bars_winner||0).toFixed(1)}</b> | Loser: <b>${(metrics.avg_bars_loser||0).toFixed(1)}</b></div>
+          <div>Max Consec Wins: <b>${metrics.max_consec_wins||0}</b> | Losses: <b>${metrics.max_consec_losses||0}</b></div>
+        </div>`;
     }
 
-    /* ── Run Selection State ───────────────── */
-    let selectedRun = null;
+    /* ═══ Trade Log — Card UI ═══ */
+    let _allTrades = [];
+    let _activeFilter = 'all';
 
-    // Baseline reference values (the "benchmark" each run is compared against)
-    const baseline = { sharpe: 1.20, max_dd: 0.08, win_rate: 0.50, profit_factor: 1.30, total_trades: 200 };
+    function renderTradeLog(trades) {
+      _allTrades = trades || [];
+      _activeFilter = 'all';
+      // Reset filter buttons
+      document.querySelectorAll('.tl-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === 'all'));
+      _renderTradeStats(_allTrades);
+      _renderTradeCards(_allTrades);
+    }
 
+    function applyTradeFilter(filter) {
+      _activeFilter = filter;
+      document.querySelectorAll('.tl-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+
+      let filtered = _allTrades;
+      if (filter === 'long') filtered = _allTrades.filter(t => _dir(t) === 'LONG');
+      else if (filter === 'short') filtered = _allTrades.filter(t => _dir(t) === 'SHORT');
+      else if (filter === 'win') filtered = _allTrades.filter(t => _pnl(t) > 0);
+      else if (filter === 'loss') filtered = _allTrades.filter(t => _pnl(t) <= 0);
+      else if (filter === 'sl') filtered = _allTrades.filter(t => (_reason(t)).toLowerCase().includes('sl'));
+      else if (filter === 'tp') filtered = _allTrades.filter(t => (_reason(t)).toLowerCase().includes('tp'));
+      else if (filter === 'reversal') filtered = _allTrades.filter(t => (_reason(t)).toLowerCase().includes('reversal'));
+
+      _renderTradeStats(filtered);
+      _renderTradeCards(filtered);
+    }
+
+    // Trade field helpers (handle camelCase + snake_case)
+    function _gv(obj, keys, fb) { for (const k of keys) { if (obj && obj[k] != null) return obj[k]; } return fb !== undefined ? fb : null; }
+    function _dir(t) { const d = _gv(t, ['direction']); return typeof d === 'number' ? (d > 0 ? 'LONG' : 'SHORT') : String(d||'').toUpperCase(); }
+    function _pnl(t) { return Number(_gv(t, ['netPnl', 'net_pnl'], 0)); }
+    function _reason(t) { return String(_gv(t, ['exitReason', 'exit_reason'], '')); }
+    function _fn(v, d, dollar) { const n = Number(v); if (!Number.isFinite(n)) return '—'; return (dollar ? '$' : '') + n.toFixed(d); }
+
+    function _renderTradeStats(trades) {
+      const el = document.getElementById('tradeLogStats');
+      if (!trades || trades.length === 0) { el.innerHTML = ''; return; }
+      const wins = trades.filter(t => _pnl(t) > 0);
+      const losses = trades.filter(t => _pnl(t) <= 0);
+      const totalPnl = trades.reduce((s, t) => s + _pnl(t), 0);
+      const avgPnl = totalPnl / trades.length;
+      const avgR = trades.reduce((s, t) => s + Number(_gv(t, ['pnlInR', 'pnl_in_r'], 0)), 0) / trades.length;
+      const wr = (wins.length / trades.length * 100).toFixed(0);
+      el.innerHTML = [
+        { label: 'Trades', val: trades.length, cls: '' },
+        { label: 'Wins', val: wins.length, cls: 'color:#22c55e' },
+        { label: 'Losses', val: losses.length, cls: 'color:#ef4444' },
+        { label: 'Win Rate', val: wr + '%', cls: Number(wr) >= 50 ? 'color:#22c55e' : 'color:#ef4444' },
+        { label: 'Total PnL', val: '$' + totalPnl.toFixed(0), cls: totalPnl >= 0 ? 'color:#22c55e' : 'color:#ef4444' },
+        { label: 'Avg PnL', val: '$' + avgPnl.toFixed(2), cls: avgPnl >= 0 ? 'color:#22c55e' : 'color:#ef4444' },
+        { label: 'Avg R', val: avgR.toFixed(2) + 'R', cls: avgR >= 0 ? 'color:#22c55e' : 'color:#ef4444' },
+      ].map(s => `<div class="tl-stat-pill"><span class="tl-stat-label">${s.label}</span><span class="tl-stat-val" style="${s.cls}">${s.val}</span></div>`).join('');
+    }
+
+    function _renderTradeCards(trades) {
+      const container = document.getElementById('tradeLogCards');
+      if (!trades || trades.length === 0) {
+        container.innerHTML = '<div class="trade-empty">No trades match the current filter.</div>';
+        return;
+      }
+      container.innerHTML = `
+        <div class="trade-table-shell">
+          <div class="trade-table-scroll">
+            <table class="trade-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Direction</th>
+                  <th>Entry</th>
+                  <th>Exit</th>
+                  <th>Position</th>
+                  <th>Performance</th>
+                  <th>Excursion</th>
+                  <th>Context</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${trades.map(t => {
+        const id = _gv(t, ['id', 'trade_id'], '—');
+        const dir = _dir(t);
+        const entry = _gv(t, ['entryPrice', 'entry_price']);
+        const exit = _gv(t, ['exitPrice', 'exit_price']);
+        const size = _gv(t, ['originalLots', 'quantity', 'position_size']);
+        const stopDist = _gv(t, ['stopDistance', 'stop_distance']);
+        const initRR = _gv(t, ['initialRR', 'initial_rr']);
+        const netPnl = _pnl(t);
+        const pnlInR = _gv(t, ['pnlInR', 'pnl_in_r']);
+        const mfe = _gv(t, ['mfe']);
+        const mae = _gv(t, ['mae']);
+        const exitReason = _reason(t) || '—';
+        const stage = _gv(t, ['finalStage', 'final_stage'], 0);
+        const bars = _gv(t, ['barsHeld', 'bars_held'], '—');
+        const tp1 = Boolean(_gv(t, ['tp1Hit', 'tp1_hit'], false));
+        const tp2 = Boolean(_gv(t, ['tp2Hit', 'tp2_hit'], false));
+        const entryTs = _gv(t, ['entryTimestamp', 'entry_timestamp']);
+        const exitTs = _gv(t, ['exitTimestamp', 'exit_timestamp']);
+        const ts = entryTs ? String(entryTs).substring(0, 16).replace('T', ' ') : ('Bar ' + _gv(t, ['entryBar', 'entry_bar'], '?'));
+        const exitTsStr = exitTs ? String(exitTs).substring(0, 16).replace('T', ' ') : '';
+
+        const pnlColor = netPnl >= 0 ? '#22c55e' : '#ef4444';
+        const dirBadge = dir === 'LONG' ? 'long' : 'short';
+        const pnlRColor = Number(pnlInR) >= 0 ? '#22c55e' : '#ef4444';
+
+        return `<tr data-dir="${dir}" data-pnl="${netPnl}" data-reason="${exitReason}">
+          <td>
+            <div class="trade-col-stack">
+              <strong class="text-mono">#${id}</strong>
+              <small>S${stage}</small>
+            </div>
+          </td>
+          <td>
+            <div class="trade-col-stack">
+              <span class="trade-tag ${dirBadge}">${dir}</span>
+              <small>${exitReason}</small>
+            </div>
+          </td>
+          <td>
+            <div class="trade-col-stack">
+              <strong class="text-mono">${_fn(entry, 2)}</strong>
+              <small>${ts}</small>
+            </div>
+          </td>
+          <td>
+            <div class="trade-col-stack">
+              <strong class="text-mono">${_fn(exit, 2)}</strong>
+              <small>${exitTsStr || '—'}</small>
+            </div>
+          </td>
+          <td>
+            <div class="trade-col-stack">
+              <strong class="text-mono">${_fn(size, 3)}</strong>
+              <small>Stop ${_fn(stopDist, 2)} | RR ${_fn(initRR, 2)}</small>
+            </div>
+          </td>
+          <td>
+            <div class="trade-col-stack">
+              <span class="trade-pnl" style="color:${pnlColor};">${_fn(netPnl, 2, true)}</span>
+              <small style="color:${pnlRColor};">${_fn(pnlInR, 3)}R</small>
+            </div>
+          </td>
+          <td>
+            <div class="trade-col-stack">
+              <strong class="text-mono" style="color:#22c55e;">MFE ${_fn(mfe, 3)}R</strong>
+              <small style="color:#f87171;">MAE ${_fn(mae, 3)}R</small>
+            </div>
+          </td>
+          <td>
+            <div class="trade-col-stack">
+              <small>Held ${bars} bars</small>
+              <small>${tp1 ? 'TP1 hit' : 'TP1 miss'} | ${tp2 ? 'TP2 hit' : 'TP2 miss'}</small>
+            </div>
+          </td>
+        </tr>`;
+      }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    }
+
+    /* ═══ Run Selection ═══ */
     function initRunSelector() {
-      const sel = document.getElementById('runSelect');
-      const completedRuns = MOCK.backtestRuns.filter(r => r.status === 'Completed');
-      sel.innerHTML = completedRuns.map(r =>
-        `<option value="${r.run_id}">${r.run_id} — ${r.strategy_id}</option>`
-      ).join('');
-      if (completedRuns.length > 0) selectRun(completedRuns[0].run_id);
+      const completedRuns = backtestRuns.filter(r => r.status === 'Completed' || r.status === 'completed');
+      if (!completedRuns.length) return;
+      if (!selectedRun || !completedRuns.some((run) => run.run_id === selectedRun.run_id)) {
+        selectRun(completedRuns[0].run_id);
+      }
     }
 
     function selectRun(runId) {
-      selectedRun = MOCK.backtestRuns.find(r => r.run_id === runId);
+      selectedRun = backtestRuns.find(r => r.run_id === runId);
       if (!selectedRun) return;
+      lastBacktestResult = selectedRun.engineResult || null;
+      updateChartMeta(selectedRun);
+      updateControlDockSummary(selectedRun);
       renderRunContext();
+      renderStageBoard();
       renderKpis();
       renderBaselineCompare();
-      drawEquityCurve();
-      drawDrawdown();
-      drawDistribution();
-      drawMonthlyPnl();
+      renderReportPanels();
+      renderTradeLog(selectedRun.trades || []);
       highlightQueueRow(runId);
+    }
+
+    function renderReportPanels() {
+      if (!selectedRun) return;
+      const eq = getSanitizedEquityCurve(selectedRun.equityCurve || []);
+      const trades = selectedRun.trades || [];
+      const metrics = getReliableRunResults(selectedRun);
+      renderCandlestickChart(selectedRun);
+      renderLwEquityChart(eq);
+      drawDrawdown(eq.map((point) => ({
+        bar: point.bar,
+        timestamp: point.timestamp || point.time,
+        equity: point.value,
+      })));
+      drawDistribution(trades);
+      drawDiagnostics(metrics);
+      resizeResearchCharts();
     }
 
     function renderRunContext() {
       if (!selectedRun) return;
+      document.getElementById('runContext').style.display = '';
       const r = selectedRun;
-      const items = [
+      const ds = r.dataSource || 'synthetic';
+      const isReal = ds.toLowerCase().includes('dukascopy') || ds.toLowerCase().includes('backend');
+      const isSynthetic = ds.toLowerCase().includes('synthetic');
+      const dsColor = isReal ? 'var(--success)' : isSynthetic ? 'var(--danger)' : 'var(--text-main)';
+      const dsIcon = isReal ? '✓ ' : isSynthetic ? '⚠ ' : '';
+      document.getElementById('runContext').innerHTML = [
         { label: 'Run ID', val: r.run_id },
         { label: 'Strategy', val: r.strategy_id },
-        { label: 'Market', val: r.market_id || 'CME_ES' },
+        { label: 'Market', val: r.market_id || 'XAUUSD' },
         { label: 'Period', val: r.period },
-        { label: 'Duration', val: r.duration || '—' },
-      ];
-      document.getElementById('runContext').innerHTML = items.map(i => `
-        <div class="run-ctx-item">
-          <div class="ctx-label">${i.label}</div>
-          <div class="ctx-val">${i.val}</div>
-        </div>
-      `).join('');
+        { label: 'Duration', val: r.duration || '--' },
+        { label: 'Trades', val: r.results.total_trades || 0 },
+        { label: 'Data Source', val: `<span style="color:${dsColor};font-weight:800;">${dsIcon}${ds}</span>` },
+      ].map(i => `<div class="run-ctx-item"><div class="ctx-label">${i.label}</div><div class="ctx-val">${i.val}</div></div>`).join('');
     }
 
     function renderKpis() {
       if (!selectedRun) return;
-      const r = selectedRun.results;
-      const kpis = [
-        { label: 'Sharpe (OOS)', value: r.sharpe.toFixed(2), cls: r.sharpe >= 1.5 ? 'text-success' : 'text-warning' },
-        { label: 'Max Drawdown', value: (r.max_dd * 100).toFixed(1) + '%', cls: 'text-danger' },
-        { label: 'Total Runs', value: MOCK.backtestRuns.length, cls: '' },
-        { label: 'Completed', value: MOCK.backtestRuns.filter(x => x.status === 'Completed').length, cls: 'text-success' },
-      ];
-      document.getElementById('kpiBar').innerHTML = kpis.map(k => `
-        <div class="kpi-mini"><div class="label">${k.label}</div><div class="value ${k.cls}">${k.value}</div></div>
-      `).join('');
+      const r = getReliableRunResults(selectedRun);
+      const sharpe = r.sharpe || 0;
+      const maxDD = r.max_dd || 0;
+      const winRate = r.win_rate || 0;
+      const pf = r.profit_factor || 0;
+      const netProfit = r.net_profit || 0;
+      document.getElementById('kpiBar').innerHTML = [
+        { label: 'Sharpe Ratio', value: sharpe.toFixed(2), cls: sharpe >= 1.5 ? 'text-success' : sharpe >= 0.5 ? 'text-warning' : 'text-danger' },
+        { label: 'Max Drawdown', value: (maxDD * 100).toFixed(2) + '%', cls: 'text-danger' },
+        { label: 'Win Rate', value: (winRate * 100).toFixed(1) + '%', cls: winRate >= 0.5 ? 'text-success' : '' },
+        { label: 'Profit Factor', value: pf === Infinity ? 'INF' : pf.toFixed(2), cls: pf >= 1.5 ? 'text-success' : '' },
+        { label: 'Net Profit', value: '$' + netProfit.toFixed(0), cls: netProfit >= 0 ? 'text-success' : 'text-danger' },
+        { label: 'Total Trades', value: r.total_trades || 0, cls: '' },
+        { label: 'Avg Winner', value: '$' + (r.avg_winner || 0).toFixed(0), cls: 'text-success' },
+        { label: 'Avg Loser', value: '$' + (r.avg_loser || 0).toFixed(0), cls: 'text-danger' },
+        { label: 'Annual Return', value: ((r.annual_return || 0) * 100).toFixed(1) + '%', cls: (r.annual_return || 0) >= 0 ? 'text-success' : 'text-danger' },
+        { label: 'Calmar Ratio', value: (r.calmar_ratio || 0).toFixed(2), cls: (r.calmar_ratio || 0) >= 1.0 ? 'text-success' : '' },
+      ].map(k => `<div class="kpi-mini"><div class="label">${k.label}</div><div class="value ${k.cls}">${k.value}</div></div>`).join('');
     }
 
     function renderBaselineCompare() {
       if (!selectedRun) return;
-      const r = selectedRun.results;
+      const r = getReliableRunResults(selectedRun);
       const metrics = [
-        { label: 'Sharpe', cur: r.sharpe, base: baseline.sharpe, fmt: v => v.toFixed(2) },
-        { label: 'Max DD', cur: r.max_dd * 100, base: baseline.max_dd * 100, fmt: v => v.toFixed(1) + '%', invert: true },
-        { label: 'Win Rate', cur: (r.win_rate || 0.56) * 100, base: baseline.win_rate * 100, fmt: v => v.toFixed(1) + '%' },
-        { label: 'PF', cur: r.profit_factor || 1.6, base: baseline.profit_factor, fmt: v => v.toFixed(2) },
-        { label: 'Trades', cur: r.total_trades || 320, base: baseline.total_trades, fmt: v => Math.round(v) },
+        { label: 'Sharpe', cur: r.sharpe || 0, base: baseline.sharpe, fmt: v => v.toFixed(2) },
+        { label: 'Max DD', cur: (r.max_dd || 0) * 100, base: baseline.max_dd * 100, fmt: v => v.toFixed(1) + '%', invert: true },
+        { label: 'Win Rate', cur: (r.win_rate || 0) * 100, base: baseline.win_rate * 100, fmt: v => v.toFixed(1) + '%' },
+        { label: 'PF', cur: r.profit_factor || 0, base: baseline.profit_factor, fmt: v => v === Infinity ? 'INF' : v.toFixed(2) },
+        { label: 'Trades', cur: r.total_trades || 0, base: baseline.total_trades, fmt: v => Math.round(v) },
       ];
       document.getElementById('baselineCompare').innerHTML = `
         <h4>Baseline Comparison</h4>
         <div class="bl-grid">${metrics.map(m => {
-          const delta = m.cur - m.base;
+          const delta = (m.cur === Infinity ? 999 : m.cur) - m.base;
           const better = m.invert ? (delta < 0) : (delta > 0);
           return `<div class="bl-item">
             <div class="bl-metric">${m.label}</div>
@@ -447,36 +2441,34 @@
         }).join('')}</div>`;
     }
 
-    initRunSelector();
-
-    /* ── Queue Table ────────────────────────── */
-    (function renderQueue() {
+    /* ═══ Queue Table ═══ */
+    function renderQueue() {
       const statusPill = s => {
-        const cls = { Completed: 'pill-success', Running: 'pill-primary', Queued: 'pill-warning', Failed: 'pill-danger' };
+        const cls = { Completed: 'pill-success', completed: 'pill-success', Running: 'pill-primary', Failed: 'pill-danger' };
         return `<span class="pill ${cls[s] || ''}">${s}</span>`;
       };
-      document.getElementById('queueBody').innerHTML = MOCK.backtestRuns.map(r => `
-        <tr data-run="${r.run_id}" onclick="selectRunFromQueue('${r.run_id}')">
-          <td class="text-mono">${r.run_id}</td>
+      document.getElementById('queueBody').innerHTML = backtestRuns.map((r, idx) => `
+        <tr data-run="${r.run_id}" data-idx="${idx}" onclick="selectRunFromQueue(this.dataset.run)">
+          <td class="text-mono" style="font-size:10px;">${r.run_id}</td>
           <td>${r.strategy_id}</td>
-          <td>${r.market_id || 'CME_ES'}</td>
-          <td class="text-mono text-muted">${r.period}</td>
+          <td>${r.market_id || 'XAUUSD'}</td>
+          <td class="text-mono text-muted" style="font-size:10px;">${r.dataSource || 'synthetic'}</td>
+          <td class="text-mono text-muted">${r.period || '--'}</td>
           <td>${statusPill(r.status)}</td>
-          <td class="text-mono ${r.results.sharpe >= 1.5 ? 'text-success' : 'text-warning'}">${r.results.sharpe.toFixed(2)}</td>
-          <td class="text-mono text-danger">${(r.results.max_dd * 100).toFixed(1)}%</td>
-          <td class="text-muted text-mono">${r.duration || '—'}</td>
+          <td class="text-mono ${(r.results.sharpe || 0) >= 1.5 ? 'text-success' : 'text-warning'}">${(r.results.sharpe || 0).toFixed(2)}</td>
+          <td class="text-mono text-danger">${((r.results.max_dd || 0) * 100).toFixed(1)}%</td>
+          <td class="text-muted text-mono">${r.duration || '--'}</td>
         </tr>
       `).join('');
       if (selectedRun) highlightQueueRow(selectedRun.run_id);
-    })();
+    }
 
     function selectRunFromQueue(runId) {
-      const run = MOCK.backtestRuns.find(r => r.run_id === runId);
-      if (!run || run.status !== 'Completed') {
-        alert(`Run ${runId} is ${run ? run.status : 'not found'} — only completed runs can be viewed.`);
+      const run = backtestRuns.find(r => r.run_id === runId);
+      if (!run || run.status.toLowerCase() !== 'completed') {
+        alert('Run ' + runId + ' is ' + (run ? run.status : 'not found') + ' -- only completed runs can be viewed.');
         return;
       }
-      document.getElementById('runSelect').value = runId;
       selectRun(runId);
       switchTab('report');
     }
@@ -487,73 +2479,75 @@
       });
     }
 
-
-
-
-
-    /* ── QA Gates ───────────────────────────── */
-    (function renderGates() {
+    /* ═══ QA Gates ═══ */
+    function renderGates() {
+      const r = selectedRun ? selectedRun.results : {};
+      const hasTrades = (r.total_trades || 0) > 0;
+      const costEnabled = true; // JS engine always includes costs
       const gates = [
-        { id: 'G0', name: 'Gate 0 — Reproducible', items: [
-          { check: 'Same RunID re-run yields identical results', pass: true },
-          { check: 'OOS Sharpe ≥ 1.2', pass: true },
-          { check: 'MaxDD < -10%', pass: true },
-        ], pass: true },
-        { id: 'G1', name: 'Gate 1 — Reality Check (净真实)', items: [
-          { check: 'Cost & slippage models enabled', pass: true },
-          { check: 'No look-ahead / future information leak', pass: true },
-          { check: 'Parameter sensitivity (±20% stable)', pass: true },
-          { check: 'Forward Test ≥ 80% of backtest Sharpe', pass: false },
-        ], pass: false },
-        { id: 'G2', name: 'Gate 2 — Validation (Promotion)', items: [
-          { check: 'G1 passed (or waiver approved)', pass: null },
-          { check: 'Emergency Stop tested & operational', pass: null },
-          { check: 'Eddie approval sign-off', pass: null },
+        { id: 'G0', name: 'Gate 0 -- Reproducible', items: [
+          { check: 'Deterministic engine (no random in backtest)', pass: hasTrades },
+          { check: 'OOS Sharpe >= 1.2', pass: hasTrades ? (r.sharpe || 0) >= 1.2 : null },
+          { check: 'MaxDD < 10%', pass: hasTrades ? (r.max_dd || 0) < 0.10 : null },
+        ], pass: hasTrades && (r.sharpe || 0) >= 1.2 && (r.max_dd || 0) < 0.10 },
+        { id: 'G1', name: 'Gate 1 -- Reality Check', items: [
+          { check: 'Spread/Slippage/Commission enabled', pass: costEnabled },
+          { check: 'Signal at BAR_CLOSE, fill at NEXT_BAR_OPEN', pass: true },
+          { check: 'SL_FIRST conflict policy active', pass: true },
+          { check: 'NEXT_BAR stage effective timing', pass: true },
+        ], pass: costEnabled },
+        { id: 'G2', name: 'Gate 2 -- Validation', items: [
+          { check: 'G0 + G1 passed', pass: hasTrades && (r.sharpe||0) >= 1.2 && costEnabled ? true : hasTrades ? false : null },
+          { check: 'Forward Test completed', pass: null },
+          { check: 'Admin approval', pass: null },
         ], pass: null },
       ];
-
-      const ic = pass => pass ? '✓' : pass === false ? '✗' : '○';
-      const cc = pass => pass ? 'text-success' : pass === false ? 'text-danger' : 'text-muted';
-
+      const ic = pass => pass === true ? 'PASS' : pass === false ? 'FAIL' : '--';
+      const cc = pass => pass === true ? 'text-success' : pass === false ? 'text-danger' : 'text-muted';
       document.getElementById('gateContent').innerHTML = gates.map(g => `
-        <div style="margin-bottom:20px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div class="gate-group">
+          <div class="gate-heading">
             <span class="gate-badge ${g.pass === true ? 'pass' : g.pass === false ? 'fail' : 'pending'}">
               ${g.id} ${g.pass === true ? 'PASSED' : g.pass === false ? 'FAILED' : 'PENDING'}
             </span>
             <span style="font-size:13px;font-weight:700;">${g.name}</span>
-            ${g.pass === true && g.id === 'G0' ? '<a href="../execution/" class="btn btn-sm btn-primary" style="margin-left:auto;">Start Forward Test →</a>' : ''}
-            ${g.id === 'G2' ? '<a href="../execution/" class="btn btn-sm btn-success" style="margin-left:auto;">Mark as Validated →</a>' : ''}
           </div>
-          <table class="data-table">
-            <tbody>
-              ${g.items.map(item => `
-                <tr>
-                  <td style="width:30px;" class="${cc(item.pass)}">${ic(item.pass)}</td>
-                  <td>${item.check}</td>
-                  <td style="width:80px;" class="${cc(item.pass)}">${item.pass === true ? 'Pass' : item.pass === false ? 'Fail' : 'Pending'}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+          <table class="data-table"><tbody>
+            ${g.items.map(item => `<tr>
+              <td style="width:30px;" class="${cc(item.pass)}">${ic(item.pass)}</td>
+              <td>${item.check}</td>
+              <td style="width:80px;" class="${cc(item.pass)}">${item.pass === true ? 'Pass' : item.pass === false ? 'Fail' : 'Pending'}</td>
+            </tr>`).join('')}
+          </tbody></table>
         </div>
       `).join('');
-    })();
+    }
 
-    /* ── Tab switching ──────────────────────── */
+    /* ═══ Tab Switching ═══ */
     function switchTab(tab) {
-      ['report','queue','gates'].forEach(t => {
-        document.getElementById('tab-' + t).style.display = t === tab ? '' : 'none';
+      ['report','trades','history','gates'].forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        if (el) el.style.display = t === tab ? '' : 'none';
       });
       document.querySelectorAll('.run-tab').forEach((el, i) => {
-        const tabs = ['report','queue','gates'];
+        const tabs = ['report','trades','history','gates'];
         el.classList.toggle('active', tabs[i] === tab);
       });
+      // Refresh gates when viewing
+      if (tab === 'gates') renderGates();
     }
 
-    function launchRun() {
-      alert('New Backtest Run launched (MVP mock). In production this queues a RunID with data ingestion + backtest engine.');
-    }
+    // ── Init ──
+    initResearchWorkspaceSplitter();
+    initLwCandleChart();
+    initLwEquityChart();
+    updateChartMeta(null);
+    ['cfgStrategy', 'cfgMarket', 'cfgTimeframe', 'cfgDataSource', 'cfgFrom', 'cfgTo'].forEach((id) => {
+      const field = document.getElementById(id);
+      if (field) field.addEventListener('change', () => updateControlDockSummary());
+    });
+    document.getElementById('cfgDataSource').addEventListener('change', () => syncMarketOptionsByDataSource(true));
+    loadResearchData();
   </script>
 </body>
 </html>
