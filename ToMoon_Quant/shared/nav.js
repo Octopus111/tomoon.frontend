@@ -13,11 +13,7 @@ const quantSidebarConfig = {
       label: 'Build',
       items: [
         {
-          id: 'canvas', label: 'Alpha Builder', icon: 'hammer',  href: '../canvas/',
-          children: [
-            { id: 'canvas-component', label: 'Component',  href: '../canvas/#component' },
-            { id: 'canvas-strategy',  label: 'Strategy',   href: '../canvas/#strategy' },
-          ]
+          id: 'canvas', label: 'Alpha Builder', icon: 'hammer',  href: '../canvas/'
         },
       ]
     },
@@ -25,11 +21,7 @@ const quantSidebarConfig = {
       label: 'Library',
       items: [
         {
-          id: 'library', label: 'Library', icon: 'book', href: '../library/',
-          children: [
-            { id: 'library-components', label: 'Component Library', href: '../library/#components' },
-            { id: 'library-strategies', label: 'Strategy Library',  href: '../library/#strategies' },
-          ]
+          id: 'library', label: 'Library', icon: 'book', href: '../library/'
         },
       ]
     },
@@ -87,10 +79,28 @@ function normalizeLocalDirectoryHref(rawHref) {
   if (/^(https?:|mailto:|tel:|sms:|data:|blob:)/i.test(href)) return rawHref;
   if (href.startsWith('#')) return rawHref;
 
-  // If it's a directory-style link, point to index.html explicitly for file:// usage
-  if (href.endsWith('/')) return href + 'index.html';
+  const hashIndex = href.indexOf('#');
+  const queryIndex = href.indexOf('?');
+  const cutIndex = [hashIndex, queryIndex].filter((i) => i >= 0).sort((a, b) => a - b)[0];
+  const pathPart = cutIndex == null ? href : href.slice(0, cutIndex);
+  const suffix = cutIndex == null ? '' : href.slice(cutIndex);
+
+  // Empty path with only query/hash should stay unchanged.
+  if (!pathPart) return rawHref;
+
+  // If it's a directory-style link, point to index.html explicitly for file:// usage.
+  if (pathPart.endsWith('/')) return pathPart + 'index.html' + suffix;
+
+  const lastSegment = pathPart.split('/').pop() || '';
+  const hasFileExtension = /\.[a-z0-9]+$/i.test(lastSegment);
+  if (!hasFileExtension) return pathPart + '/index.html' + suffix;
 
   return rawHref;
+}
+
+function resolveActiveNavId(activeId) {
+  if (activeId === 'research') return 'research-backtest';
+  return activeId;
 }
 
 function fixLocalDirectoryLinks(root = document) {
@@ -141,6 +151,7 @@ if (typeof window !== 'undefined') {
  */
 function renderQuantSidebar(activeId) {
   const cfg = quantSidebarConfig;
+  const resolvedActiveId = resolveActiveNavId(activeId);
 
   const sidebar = document.createElement('nav');
   sidebar.className = 'sidebar';
@@ -176,7 +187,9 @@ function renderQuantSidebar(activeId) {
       nav.appendChild(gl);
     }
     for (const item of section.items) {
-      const isParentActive = item.id === activeId || (item.children && item.children.some(c => c.id === activeId));
+      const hasActiveChild = item.children && item.children.some(c => c.id === resolvedActiveId);
+      const isParentDirectActive = item.id === resolvedActiveId;
+      const isParentActive = isParentDirectActive && !hasActiveChild;
 
       const a = document.createElement('a');
       a.className = 'nav-item' + (isParentActive ? ' active' : '');
@@ -184,7 +197,7 @@ function renderQuantSidebar(activeId) {
       a.innerHTML = `
         <span class="nav-icon">${ICONS[item.icon] || ''}</span>
         <span class="nav-label">${item.label}</span>
-        ${item.children ? '<span class="nav-chevron' + (isParentActive ? ' open' : '') + '">' + ICONS.chevron + '</span>' : ''}
+        ${item.children ? '<span class="nav-chevron' + (hasActiveChild ? ' open' : '') + '">' + ICONS.chevron + '</span>' : ''}
       `;
 
       // If item has children, toggle sub-nav on click
@@ -203,10 +216,10 @@ function renderQuantSidebar(activeId) {
       // Render children sub-nav
       if (item.children) {
         const sub = document.createElement('div');
-        sub.className = 'nav-sub' + (isParentActive ? ' open' : '');
+        sub.className = 'nav-sub' + (hasActiveChild ? ' open' : '');
         for (const child of item.children) {
           const ca = document.createElement('a');
-          ca.className = 'nav-sub-item' + (child.id === activeId ? ' active' : '');
+          ca.className = 'nav-sub-item' + (child.id === resolvedActiveId ? ' active' : '');
           ca.href = normalizeLocalDirectoryHref(child.href);
           ca.innerHTML = `<span class="nav-sub-label">${child.label}</span>`;
           sub.appendChild(ca);
