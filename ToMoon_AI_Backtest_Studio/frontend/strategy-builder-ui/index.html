@@ -21,12 +21,13 @@
             warning: '#f97316',
             danger: '#ef4444',
             
-            // Dark mode overrides
+            // Enhanced Dark mode - Premium deep space theme
             dark: {
-              bg: '#0f172a',
-              surface: '#1e293b',
-              card: '#334155',
-              border: '#475569'
+              bg: '#0a0e1a',
+              surface: '#0f1419',
+              card: 'rgba(20, 25, 35, 0.6)',
+              border: 'rgba(255, 255, 255, 0.08)',
+              accent: '#3b82f6'
             }
           }
         }
@@ -64,17 +65,18 @@
       background: #94a3b8;
     }
     
-    /* Dark mode scrollbar */
+    /* Dark mode scrollbar - Enhanced */
     .dark ::-webkit-scrollbar-track {
-      background: #1e293b;
+      background: rgba(15, 20, 25, 0.5);
     }
     
     .dark ::-webkit-scrollbar-thumb {
-      background: #475569;
+      background: linear-gradient(180deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3));
+      border-radius: 3px;
     }
     
     .dark ::-webkit-scrollbar-thumb:hover {
-      background: #64748b;
+      background: linear-gradient(180deg, rgba(59, 130, 246, 0.5), rgba(139, 92, 246, 0.5));
     }
     
     /* Smooth transitions */
@@ -89,10 +91,22 @@
       backdrop-filter: blur(8px);
     }
     
-    /* Glass morphism effect - Dark mode */
+    /* Enhanced Glass morphism effect - Dark mode (premium deep space) */
     .dark .glass {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(12px);
+      background: rgba(10, 14, 26, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    /* Premium dark mode cards with enhanced glass effect */
+    .dark .bg-white {
+      background: rgba(20, 25, 35, 0.6) !important;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .dark .bg-\[\#F8F7FB\] {
+      background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
     }
     
     /* Node connection lines */
@@ -119,32 +133,71 @@
     .theme-toggle:hover {
       transform: rotate(15deg);
     }
+    
+    /* Enhanced dark mode hover effects */
+    .dark .hover\:bg-slate-100:hover {
+      background: rgba(59, 130, 246, 0.1) !important;
+    }
+    
+    .dark .hover\:bg-slate-700:hover {
+      background: rgba(59, 130, 246, 0.15) !important;
+    }
+    
+    /* Premium gradient borders for dark mode */
+    .dark .gradient-border {
+      position: relative;
+      background: rgba(20, 25, 35, 0.6);
+      backdrop-filter: blur(20px);
+    }
+    
+    .dark .gradient-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    
+    /* Enhanced dark mode glow effects */
+    .dark .glow-purple {
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+    }
+    
+    .dark .glow-blue {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+    }
   </style>
 </head>
 <body class="h-screen w-full flex bg-[#F8F7FB] dark:bg-dark-bg text-slate-800 dark:text-slate-100 overflow-hidden transition-colors duration-300">
   
   <!-- 1. Main Sidebar (Leftmost Navigation) -->
-  <aside class="w-16 bg-white dark:bg-dark-surface border-r border-slate-200 dark:border-dark-border flex flex-col items-center py-4 space-y-6 shrink-0 z-20 transition-colors duration-300">
+  <aside class="w-16 bg-white dark:bg-opacity-0 dark:backdrop-blur-xl border-r border-slate-200 dark:border-dark-border flex flex-col items-center py-4 space-y-6 shrink-0 z-20 transition-colors duration-300">
     <!-- Logo -->
-    <div class="text-rose-500 dark:text-rose-400 mb-4 cursor-pointer hover:scale-110 transition-transform">
+    <div class="text-rose-500 dark:text-rose-400 mb-4 cursor-pointer hover:scale-110 transition-transform glow-purple">
       <i data-lucide="box" class="w-8 h-8 fill-current"></i>
     </div>
     
     <!-- Nav Icons -->
     <nav class="flex flex-col space-y-4 text-slate-400 dark:text-slate-500">
-      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 hover:glow-blue">
         <i data-lucide="layout-grid" class="w-5 h-5"></i>
       </button>
-      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 hover:glow-blue">
         <i data-lucide="link" class="w-5 h-5"></i>
       </button>
-      <button class="text-purple-600 dark:text-purple-400 p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30">
+      <button class="text-purple-600 dark:text-purple-400 p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30 glow-purple">
         <i data-lucide="layers" class="w-5 h-5"></i>
       </button>
-      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 hover:glow-blue">
         <i data-lucide="settings" class="w-5 h-5"></i>
       </button>
-      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 hover:glow-blue">
         <i data-lucide="message-square" class="w-5 h-5"></i>
       </button>
     </nav>
@@ -154,14 +207,14 @@
   <main class="flex-1 flex flex-col min-w-0">
     
     <!-- Header -->
-    <header class="h-16 glass border-b border-slate-200 dark:border-dark-border flex items-center justify-between px-6 shrink-0 z-10">
+    <header class="h-16 glass dark:gradient-border border-b border-slate-200 dark:border-dark-border flex items-center justify-between px-6 shrink-0 z-10">
       <div class="flex items-center space-x-4">
-        <span class="font-semibold text-slate-700 dark:text-slate-200 flex items-center">
+        <span class="font-semibold text-slate-700 dark:text-slate-200 flex items-center glow-purple">
           ToMoon 
           <span class="text-slate-400 dark:text-slate-500 font-normal ml-2">AI Strategy Builder</span>
         </span>
         
-        <div class="flex items-center text-sm font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-dark-card px-3 py-1.5 rounded-md shadow-sm border border-slate-100 dark:border-dark-border cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+        <div class="flex items-center text-sm font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-dark-card px-3 py-1.5 rounded-md shadow-sm border border-slate-100 dark:border-dark-border cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors glow-blue">
           <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 dark:text-slate-500 mr-1"></i>
           Gold Breakout Strategy
           <span class="ml-2 px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded text-xs">Drafting</span>
@@ -169,26 +222,26 @@
       </div>
       
       <div class="flex items-center space-x-3 text-sm">
-        <button class="flex items-center px-3 py-1.5 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+        <button class="flex items-center px-3 py-1.5 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors hover:glow-blue">
           <i data-lucide="save" class="w-4 h-4 mr-2"></i> Save Draft
         </button>
-        <button class="px-3 py-1.5 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center">
+        <button class="px-3 py-1.5 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center hover:glow-blue">
           v0.6 <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
         </button>
-        <button class="p-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+        <button class="p-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors hover:glow-blue">
           <i data-lucide="search" class="w-4 h-4"></i>
         </button>
-        <button class="p-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+        <button class="p-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors hover:glow-blue">
           <i data-lucide="bell" class="w-4 h-4"></i>
         </button>
         
         <!-- Theme Toggle Button -->
-        <button onclick="toggleTheme()" class="theme-toggle p-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors" title="Toggle theme">
+        <button onclick="toggleTheme()" class="theme-toggle p-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors hover:glow-purple" title="Toggle theme">
           <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
           <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
         </button>
         
-        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 cursor-pointer ring-2 ring-white dark:ring-dark-border"></div>
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 cursor-pointer ring-2 ring-white dark:ring-dark-border glow-purple"></div>
       </div>
     </header>
 
