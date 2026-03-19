@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToMoon AI Backtest Studio - 访问指南</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 { color: #667eea; margin-top: 0; }
+        .success { 
+            background: #4CAF50; 
+            color: white; 
+            padding: 15px 25px; 
+            border-radius: 10px; 
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .step {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin: 15px 0;
+            color: #333;
+        }
+        .warning {
+            background: #ff9800;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover { text-decoration: underline; }
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin: 10px 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+        code {
+            background: #333;
+            color: #0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🚀 ToMoon AI Backtest Studio</h1>
+        
+        <div class="success">
+            ✅ 后端服务已成功启动！<br>
+            📍 运行在：<code>http://localhost:8000</code>
+        </div>
+
+        <h2>📖 访问方式</h2>
+        
+        <div class="step">
+            <strong>方式 1: 点击下面的按钮（推荐）</strong>
+            <div style="margin-top: 15px;">
+                <a href="http://localhost:8000" class="button" target="_blank">🌐 打开应用</a>
+            </div>
+        </div>
+
+        <div class="step">
+            <strong>方式 2: 手动在浏览器输入地址</strong>
+            <p>在浏览器地址栏输入：<code>http://localhost:8000</code></p>
+        </div>
+
+        <div class="warning">
+            ⚠️ <strong>重要提示：</strong><br>
+            不要直接双击 <code>index.html</code> 文件打开！<br>
+            必须通过 <code>http://localhost:8000</code> 访问，否则 CSS/JS 无法加载，页面会混乱。
+        </div>
+
+        <h2>🔧 如果页面仍然混乱</h2>
+        <div class="step">
+            <ol>
+                <li>清除浏览器缓存（Ctrl + Shift + Delete）</li>
+                <li>使用无痕模式打开（Ctrl + Shift + N）</li>
+                <li>检查浏览器控制台是否有错误（F12）</li>
+                <li>确认地址栏是 <code>http://localhost:8000</code> 而不是 <code>file://...</code></li>
+            </ol>
+        </div>
+
+        <h2>🎯 快速开始</h2>
+        <div class="step">
+            <ol>
+                <li>点击右上角 <strong>⚙️ AI 偏好设置</strong></li>
+                <li>输入你的 API Key（阿里云 DashScope）</li>
+                <li>点击 <strong>💾 保存设置</strong></li>
+                <li>点击 <strong>🔌 测试连接</strong> 验证</li>
+                <li>在聊天框输入策略描述，例如：<br>
+                    <code>SMA20 上穿 EMA50 做多，RSI 低于 30 入场，止盈 3%，止损 1.5%</code>
+                </li>
+                <li>点击 <strong>▶️ 运行回测</strong> 查看结果</li>
+            </ol>
+        </div>
+
+        <hr style="border: 1px solid #ddd; margin: 30px 0;">
+        
+        <p style="color: #666; font-size: 14px;">
+            💡 提示：后端服务会持续运行，关闭此页面不影响服务。
+            如需停止服务，在终端按 Ctrl+C。
+        </p>
+    </div>
+</body>
+</html>

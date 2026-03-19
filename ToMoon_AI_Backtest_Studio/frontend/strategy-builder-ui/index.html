@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ToMoon - AI Strategy Builder</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Config for Dark Mode -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            // Light mode (default)
+            primary: '#7c3aed',
+            success: '#10b981',
+            warning: '#f97316',
+            danger: '#ef4444',
+            
+            // Dark mode overrides
+            dark: {
+              bg: '#0f172a',
+              surface: '#1e293b',
+              card: '#334155',
+              border: '#475569'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    /* Custom scrollbar - Light mode */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    
+    /* Dark mode scrollbar */
+    .dark ::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    
+    .dark ::-webkit-scrollbar-thumb {
+      background: #475569;
+    }
+    
+    .dark ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+    
+    /* Smooth transitions */
+    .transition-all {
+      transition-duration: 200ms;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Glass morphism effect - Light mode */
+    .glass {
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(8px);
+    }
+    
+    /* Glass morphism effect - Dark mode */
+    .dark .glass {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+    }
+    
+    /* Node connection lines */
+    .connection-line {
+      position: relative;
+    }
+    
+    .connection-line::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(to bottom, #c084fc, #a855f7);
+    }
+    
+    /* Theme toggle animation */
+    .theme-toggle {
+      transition: transform 0.3s ease;
+    }
+    
+    .theme-toggle:hover {
+      transform: rotate(15deg);
+    }
+  </style>
+</head>
+<body class="h-screen w-full flex bg-[#F8F7FB] dark:bg-dark-bg text-slate-800 dark:text-slate-100 overflow-hidden transition-colors duration-300">
+  
+  <!-- 1. Main Sidebar (Leftmost Navigation) -->
+  <aside class="w-16 bg-white dark:bg-dark-surface border-r border-slate-200 dark:border-dark-border flex flex-col items-center py-4 space-y-6 shrink-0 z-20 transition-colors duration-300">
+    <!-- Logo -->
+    <div class="text-rose-500 dark:text-rose-400 mb-4 cursor-pointer hover:scale-110 transition-transform">
+      <i data-lucide="box" class="w-8 h-8 fill-current"></i>
+    </div>
+    
+    <!-- Nav Icons -->
+    <nav class="flex flex-col space-y-4 text-slate-400 dark:text-slate-500">
+      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+        <i data-lucide="layout-grid" class="w-5 h-5"></i>
+      </button>
+      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+        <i data-lucide="link" class="w-5 h-5"></i>
+      </button>
+      <button class="text-purple-600 dark:text-purple-400 p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30">
+        <i data-lucide="layers" class="w-5 h-5"></i>
+      </button>
+      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+        <i data-lucide="settings" class="w-5 h-5"></i>
+      </button>
+      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+        <i data-lucide="message-square" class="w-5 h-5"></i>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col min-w-0">
+    
+    <!-- Header -->
+    <header class="h-16 glass border-b border-slate-200 dark:border-dark-border flex items-center justify-between px-6 shrink-0 z-10">
+      <div class="flex items-center space-x-4">
+        <span class="font-semibold text-slate-700 dark:text-slate-200 flex items-center">
+          ToMoon 
+          <span class="text-slate-400 dark:text-slate-500 font-normal ml-2">AI Strategy Builder</span>
+        </span>
+        
+        <div class="flex items-center text-sm font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-dark-card px-3 py-1.5 rounded-md shadow-sm border border-slate-100 dark:border-dark-border cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 dark:text-slate-500 mr-1"></i>
+          Gold Breakout Strategy
+          <span class="ml-2 px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded text-xs">Drafting</span>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-3 text-sm">
+        <button class="flex items-center px-3 py-1.5 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+          <i data-lucide="save" class="w-4 h-4 mr-2"></i> Save Draft
+        </button>
+        <button class="px-3 py-1.5 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center">
+          v0.6 <i data-lucide="chevron-down" class="w-4 h-4 ml-1"></i>
+        </button>
+        <button class="p-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+          <i data-lucide="search" class="w-4 h-4"></i>
+        </button>
+        <button class="p-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+        </button>
+        
+        <!-- Theme Toggle Button -->
+        <button onclick="toggleTheme()" class="theme-toggle p-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors" title="Toggle theme">
+          <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+          <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+        </button>
+        
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 cursor-pointer ring-2 ring-white dark:ring-dark-border"></div>
+      </div>
+    </header>
+
+    <!-- Three Column Layout -->
+    <div class="flex-1 flex overflow-hidden">
+      
+      <!-- 2. Left Panel: AI Strategy Dialogue -->
+      <aside class="w-80 bg-[#F8F7FB] dark:bg-dark-bg border-r border-slate-200 dark:border-dark-border p-4 overflow-y-auto shrink-0 flex flex-col gap-4 transition-colors duration-300">
+        
+        <!-- AI Conversation Card -->
+        <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-100 dark:border-dark-border p-4 hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-3 text-purple-700 dark:text-purple-400 font-medium">
+            <span class="flex items-center">
+              <i data-lucide="bot" class="w-4 h-4 mr-2"></i> AI Strategy Dialogue
+            </span>
+            <button class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+          
+          <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+            I've drafted a breakout strategy targeting the gold market with a 1 hour timeframe. The strategy will use an ATR-based stop loss of 1.5 ATR and require a volatility filter for consolidation.
+          </p>
+          
+          <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg text-sm space-y-2 mb-4">
+            <div class="flex items-center text-slate-700 dark:text-slate-200">
+              <i data-lucide="circle-check" class="w-4 h-4 text-emerald-500 mr-2"></i>
+              Market: Gold (XAU/USD)
+            </div>
+            <div class="flex items-center text-slate-700 dark:text-slate-200">
+              <i data-lucide="circle-check" class="w-4 h-4 text-emerald-500 mr-2"></i>
+              Timeframe: 1 Hour
+            </div>
+            <div class="flex items-center text-slate-700 dark:text-slate-200">
+              <i data-lucide="circle-check" class="w-4 h-4 text-emerald-500 mr-2"></i>
+              Strategy Type: Breakout
+            </div>
+          </div>
+          
+          <div class="text-xs text-slate-500 dark:text-slate-400 italic">
+            Based on the entered strategy logic, here are suggested data inputs:
+          </div>
+        </div>
+
+        <!-- Data Inputs Card -->
+        <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-100 dark:border-dark-border p-4 hover:shadow-md transition-shadow">
+          <h3 class="text-sm font-medium mb-3 text-slate-700 dark:text-slate-200">Suggested Data Inputs</h3>
+          
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded cursor-pointer border border-transparent hover:border-slate-100 dark:hover:border-dark-border transition-all group">
+              <div class="flex items-center">
+                <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                Core Price Data
+              </div>
+              <span class="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-600">Core</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded cursor-pointer border border-transparent hover:border-slate-100 dark:hover:border-dark-border transition-all group">
+              <div class="flex items-center">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
+                ATR(14)
+              </div>
+              <span class="text-xs bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50">Signal</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded cursor-pointer border border-transparent hover:border-slate-100 dark:hover:border-dark-border transition-all group">
+              <div class="flex items-center">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 mr-2"></span>
+                20-Period Volume MA
+              </div>
+              <span class="text-xs bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50">Confirmation</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded cursor-pointer border border-transparent hover:border-slate-100 dark:hover:border-dark-border transition-all group">
+              <div class="flex items-center">
+                <span class="w-2 h-2 rounded-full bg-orange-500 mr-2"></span>
+                London/NY Sessions
+              </div>
+              <span class="text-xs bg-orange-50 dark:bg-orange-900/30 px-2 py-0.5 rounded text-orange-600 dark:text-orange-400 group-hover:bg-orange-100 dark:group-hover:bg-orange-900/50">Filter</span>
+            </div>
+            
+            <button class="flex items-center text-purple-600 dark:text-purple-400 cursor-pointer text-sm font-medium mt-3 hover:text-purple-700 dark:hover:text-purple-300 transition-colors">
+              <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Add Data Input
+            </button>
+          </div>
+        </div>
+
+        <!-- Suggested Additions Card -->
+        <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-100 dark:border-dark-border p-4 hover:shadow-md transition-shadow">
+          <h3 class="text-sm font-medium mb-3 text-slate-700 dark:text-slate-200">Suggested Additions</h3>
+          <div class="space-y-2">
+            <button class="flex items-center text-sm text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+              <i data-lucide="plus-circle" class="w-3 h-3 mr-2"></i>
+              Add Dollar Index
+            </button>
+            <button class="flex items-center text-sm text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+              <i data-lucide="plus-circle" class="w-3 h-3 mr-2"></i>
+              Add Economic Calendar
+            </button>
+            <button class="flex items-center text-sm text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+              <i data-lucide="arrow-right" class="w-3 h-3 mr-2"></i>
+              Work with own Data
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 3. Center Canvas: Strategy Workflow -->
+      <section class="flex-1 bg-[#F8F7FB] dark:bg-dark-bg overflow-y-auto p-8 relative flex flex-col items-center transition-colors duration-300">
+        
+        <!-- Stepper -->
+        <div class="flex items-center space-x-4 mb-8 text-sm">
+          <span class="flex items-center text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 rounded-full">
+            <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Discover
+          </span>
+          <span class="text-slate-300 dark:text-slate-600">───</span>
+          <span class="flex items-center bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1.5 rounded-full font-medium">
+            <i data-lucide="circle-dashed" class="w-4 h-4 mr-1 animate-spin-slow"></i> Structure
+          </span>
+          <span class="text-slate-500 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer transition-colors">Refine</span>
+          <span class="text-slate-300 dark:text-slate-600">───</span>
+          <span class="text-slate-500 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer transition-colors">Validate</span>
+          <span class="text-slate-300 dark:text-slate-600">───</span>
+          <span class="text-slate-500 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer transition-colors">Backtest</span>
+        </div>
+
+        <!-- Title -->
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">Strategy Workflow</h2>
+          <p class="text-sm text-purple-500 dark:text-purple-400 mt-1 flex items-center justify-center">
+            <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i>
+            Auto-generated based on your input
+          </p>
+        </div>
+
+        <!-- Nodes Container -->
+        <div class="w-full max-w-4xl flex flex-col items-center space-y-4 relative">
+          
+          <!-- Node 1: Strategy Identity -->
+          <div class="w-[500px] bg-white dark:bg-dark-card rounded-xl shadow-sm border border-emerald-200 dark:border-emerald-800 p-4 hover:shadow-lg transition-all cursor-pointer group">
+            <div class="flex justify-between items-center mb-3">
+              <div class="flex items-center font-medium text-slate-800 dark:text-slate-100">
+                <i data-lucide="badge-check" class="w-4 h-4 text-emerald-500 mr-2"></i>
+                Strategy Identity
+              </div>
+              <span class="text-xs bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded font-medium border border-emerald-100 dark:border-emerald-800">CONFIRMED</span>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-dark-border px-2 py-1.5 rounded text-slate-600 dark:text-slate-300 flex items-center group-hover:border-emerald-200 dark:group-hover:border-emerald-700 transition-colors">
+                <i data-lucide="coins" class="w-3 h-3 mr-1"></i> Gold (XAU/USD)
+              </span>
+              <span class="bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-dark-border px-2 py-1.5 rounded text-slate-600 dark:text-slate-300 flex items-center group-hover:border-emerald-200 dark:group-hover:border-emerald-700 transition-colors">
+                <i data-lucide="clock" class="w-3 h-3 mr-1"></i> 1H Timeframe
+              </span>
+              <span class="bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-dark-border px-2 py-1.5 rounded text-slate-600 dark:text-slate-300 flex items-center group-hover:border-emerald-200 dark:group-hover:border-emerald-700 transition-colors">
+                <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i> Breakout Strategy
+              </span>
+            </div>
+          </div>
+
+          <!-- Connection Line -->
+          <div class="w-px h-8 bg-gradient-to-b from-emerald-300 dark:from-emerald-600 to-purple-300 dark:to-purple-600"></div>
+
+          <!-- Node 2: Premise / Edge -->
+          <div class="w-[500px] bg-white dark:bg-dark-card rounded-xl shadow-sm border-2 border-purple-200 dark:border-purple-700 p-4 hover:shadow-lg transition-all cursor-pointer relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-purple-50 dark:bg-purple-900/20 rounded-bl-full opacity-50"></div>
+            <div class="relative">
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center font-medium text-purple-700 dark:text-purple-400">
+                  <i data-lucide="lightbulb" class="w-4 h-4 mr-2"></i> Premise / Edge
+                </div>
+                <span class="text-xs text-orange-500 dark:text-orange-400 font-medium flex items-center">
+                  <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i> Drafted by AI
+                </span>
+              </div>
+              <p class="text-sm text-slate-600 dark:text-slate-300 pl-6">Breakout from low volatility consolidation</p>
+            </div>
+          </div>
+
+          <!-- Connection Lines to Bottom Nodes -->
+          <div class="relative w-full max-w-3xl h-8 flex justify-center">
+            <svg class="absolute w-full h-full" viewBox="0 0 800 32">
+              <!-- Center line splitting into three -->
+              <path d="M 400 0 L 400 16" stroke="#a855f7" stroke-width="2" fill="none"/>
+              <path d="M 400 16 C 400 24, 267 24, 267 32" stroke="#a855f7" stroke-width="2" fill="none"/>
+              <path d="M 400 16 L 400 32" stroke="#a855f7" stroke-width="2" fill="none"/>
+              <path d="M 400 16 C 400 24, 533 24, 533 32" stroke="#a855f7" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+
+          <!-- Bottom Three Nodes Row -->
+          <div class="flex w-full justify-between gap-4 pt-2">
+            
+            <!-- Logic Node 1: Market & Regime -->
+            <div class="flex-1 bg-purple-50/50 dark:bg-purple-900/20 rounded-xl shadow-sm border border-purple-100 dark:border-purple-800 p-4 hover:shadow-lg transition-all cursor-pointer group">
+              <h4 class="font-medium text-sm flex items-center mb-3 text-slate-700 dark:text-slate-200">
+                <span class="w-2 h-2 rounded bg-purple-500 mr-2"></span>
+                Market & Regime
+                <button class="ml-auto text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                </button>
+              </h4>
+              
+              <div class="text-sm space-y-3">
+                <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-purple-100 dark:border-purple-800">
+                  <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                    <i data-lucide="gauge" class="w-3 h-3 mr-1"></i> Volatility Filter
+                  </div>
+                  <div class="text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 inline-block px-2 py-1 rounded text-xs font-medium border border-rose-100 dark:border-rose-800">
+                    ATR(14) > Threshold
+                  </div>
+                </div>
+                
+                <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-purple-100 dark:border-purple-800">
+                  <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                    <i data-lucide="trend-up" class="w-3 h-3 mr-1"></i> Bullish Bias
+                  </div>
+                  <div class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 inline-block px-2 py-1 rounded text-xs font-medium border border-emerald-100 dark:border-emerald-800">
+                    Above 200 EMA
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Logic Node 2: Signal Logic -->
+            <div class="flex-1 bg-blue-50/50 dark:bg-blue-900/20 rounded-xl shadow-sm border border-blue-100 dark:border-blue-800 p-4 hover:shadow-lg transition-all cursor-pointer group">
+              <h4 class="font-medium text-sm flex items-center mb-3 text-slate-700 dark:text-slate-200">
+                <span class="w-2 h-2 rounded bg-blue-500 mr-2"></span>
+                Signal Logic
+                <button class="ml-auto text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                </button>
+              </h4>
+              
+              <div class="text-sm space-y-3">
+                <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-blue-100 dark:border-blue-800">
+                  <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                    <i data-lucide="square" class="w-3 h-3 mr-1"></i> Setup
+                  </div>
+                  <div class="text-slate-700 dark:text-slate-200 text-xs">Price in Consolidation</div>
+                </div>
+                
+                <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-blue-100 dark:border-blue-800">
+                  <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                    <i data-lucide="zap" class="w-3 h-3 mr-1"></i> Entry Trigger
+                  </div>
+                  <div class="text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 inline-block px-2 py-1 rounded text-xs font-medium border border-orange-100 dark:border-orange-800">
+                    Breakout Above High
+                  </div>
+                </div>
+                
+                <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-blue-100 dark:border-blue-800">
+                  <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                    <i data-lucide="circle-check" class="w-3 h-3 mr-1"></i> Confirmation
+                  </div>
+                  <div class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 inline-block px-2 py-1 rounded text-xs font-medium border border-emerald-100 dark:border-emerald-800">
+                    Volume > 20MA ✓
+                  </div>
+                </div>
+                
+                <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-blue-100 dark:border-blue-800">
+                  <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                    <i data-lucide="shield-alert" class="w-3 h-3 mr-1"></i> Invalidation
+                  </div>
+                  <div class="text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 inline-block px-2 py-1 rounded text-xs font-medium border border-red-100 dark:border-red-800">
+                    Breakdown Below Range
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Logic Node 3: Risk & Money -->
+            <div class="flex-1 bg-emerald-50/50 dark:bg-emerald-900/20 rounded-xl shadow-sm border border-emerald-100 dark:border-emerald-800 p-4 hover:shadow-lg transition-all cursor-pointer group">
+              <h4 class="font-medium text-sm flex items-center mb-3 text-slate-700 dark:text-slate-200">
+                <span class="w-2 h-2 rounded bg-emerald-500 mr-2"></span>
+                Risk & Money
+                <button class="ml-auto text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                </button>
+              </h4>
+              
+              <div class="text-sm space-y-3">
+                <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-emerald-100 dark:border-emerald-800">
+                  <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                    <i data-lucide="percent" class="w-3 h-3 mr-1"></i> Position Size
+                  </div>
+                  <div class="text-slate-700 dark:text-slate-200 text-xs">1% Risk / Trade</div>
+                </div>
+                
+                <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-emerald-100 dark:border-emerald-800">
+                  <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                    <i data-lucide="target" class="w-3 h-3 mr-1"></i> Stop Loss
+                  </div>
+                  <div class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 inline-block px-2 py-1 rounded text-xs font-medium border border-emerald-100 dark:border-emerald-800">
+                    1.5 x ATR ✓
+                  </div>
+                </div>
+                
+                <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-emerald-100 dark:border-emerald-800">
+                  <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                    <i data-lucide="award" class="w-3 h-3 mr-1"></i> Take Profit
+                  </div>
+                  <div class="text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 inline-block px-2 py-1 rounded text-xs font-medium border border-orange-100 dark:border-orange-800">
+                    Optional ⚠️
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Execution Node (Below) -->
+          <div class="relative pt-4">
+            <div class="w-px h-8 mx-auto bg-gradient-to-b from-purple-300 dark:from-purple-600 to-orange-300 dark:to-orange-600"></div>
+          </div>
+          
+          <div class="w-[500px] bg-orange-50/50 dark:bg-orange-900/20 rounded-xl shadow-sm border border-orange-100 dark:border-orange-800 p-4 hover:shadow-lg transition-all cursor-pointer group">
+            <h4 class="font-medium text-sm flex items-center mb-3 text-slate-700 dark:text-slate-200">
+              <span class="w-2 h-2 rounded bg-orange-500 mr-2"></span>
+              Execution
+              <button class="ml-auto text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+              </button>
+            </h4>
+            
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-orange-100 dark:border-orange-800">
+                <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                  <i data-lucide="clock" class="w-3 h-3 mr-1"></i> Trading Session
+                </div>
+                <div class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 inline-block px-2 py-1 rounded text-xs font-medium border border-emerald-100 dark:border-emerald-800">
+                  London + NY ✓
+                </div>
+              </div>
+              
+              <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-orange-100 dark:border-orange-800">
+                <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                  <i data-lucide="arrows-left-right" class="w-3 h-3 mr-1"></i> Max Spread
+                </div>
+                <div class="text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 inline-block px-2 py-1 rounded text-xs font-medium border border-orange-100 dark:border-orange-800">
+                  < 2.0 pips
+                </div>
+              </div>
+              
+              <div class="bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 border border-orange-100 dark:border-orange-800 col-span-2">
+                <div class="text-slate-500 dark:text-slate-400 text-xs mb-1 flex items-center">
+                  <i data-lucide="newspaper" class="w-3 h-3 mr-1"></i> News Filter
+                </div>
+                <div class="text-slate-700 dark:text-slate-200 text-xs">High Impact Events Only</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 4. Right Panel: Details & Completeness -->
+      <aside class="w-80 bg-[#F8F7FB] dark:bg-dark-bg border-l border-slate-200 dark:border-dark-border p-4 overflow-y-auto shrink-0 flex flex-col gap-6 transition-colors duration-300">
+        
+        <!-- Strategy Details -->
+        <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-100 dark:border-dark-border p-4">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-semibold text-slate-800 dark:text-slate-100">Strategy Details</h3>
+            <button class="text-xs flex items-center border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface px-2 py-1 rounded text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+              <i data-lucide="edit-2" class="w-3 h-3 mr-1"></i> Edit
+            </button>
+          </div>
+          
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between pb-2 border-b border-slate-100 dark:border-dark-border">
+              <span class="text-slate-400 dark:text-slate-500">Name</span>
+              <span class="text-slate-700 dark:text-slate-200 font-medium">Gold Breakout Strategy</span>
+            </div>
+            <div class="flex justify-between pb-2 border-b border-slate-100 dark:border-dark-border">
+              <span class="text-slate-400 dark:text-slate-500">Market</span>
+              <span class="text-slate-700 dark:text-slate-200 flex items-center">
+                <i data-lucide="coins" class="w-3 h-3 mr-1 text-yellow-500"></i> XAU/USD
+              </span>
+            </div>
+            <div class="flex justify-between pb-2 border-b border-slate-100 dark:border-dark-border">
+              <span class="text-slate-400 dark:text-slate-500">Timeframe</span>
+              <span class="text-slate-700 dark:text-slate-200 flex items-center">
+                <i data-lucide="clock" class="w-3 h-3 mr-1"></i> 1 Hour
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400 dark:text-slate-500">Type</span>
+              <span class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded text-xs font-medium border border-emerald-100 dark:border-emerald-800">
+                Breakout
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-slate-200 dark:border-dark-border" />
+
+        <!-- Completeness Score -->
+        <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-100 dark:border-dark-border p-4">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="font-semibold text-slate-800 dark:text-slate-100">Completeness</h3>
+            <span class="font-bold text-slate-800 dark:text-slate-100 text-lg">72%</span>
+          </div>
+          
+          <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-4">
+            <div class="bg-gradient-to-r from-emerald-400 to-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 72%"></div>
+          </div>
+          
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between items-center p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+              <span class="flex items-center text-slate-600 dark:text-slate-300">
+                <i data-lucide="chevron-right" class="w-3 h-3 mr-1"></i>
+                Strategy Structure Progress
+              </span>
+              <span class="text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded">80%</span>
+            </div>
+            <div class="flex justify-between items-center p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+              <span class="flex items-center text-slate-600 dark:text-slate-300">
+                <i data-lucide="chevron-right" class="w-3 h-3 mr-1"></i>
+                Data Readiness Progress
+              </span>
+              <span class="text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded">65%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-100 dark:border-dark-border p-4">
+          <h3 class="font-semibold text-slate-800 dark:text-slate-100 mb-3 flex items-center">
+            <i data-lucide="list-checks" class="w-4 h-4 mr-2"></i> Next Steps
+          </h3>
+          
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg cursor-pointer transition-colors group border border-transparent hover:border-slate-100 dark:hover:border-dark-border">
+              <div class="flex items-center text-slate-700 dark:text-slate-200">
+                <span class="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-500 dark:text-rose-400 flex items-center justify-center text-xs font-bold mr-2">1</span>
+                Add Profit Target
+              </div>
+              <span class="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-1 rounded font-medium group-hover:bg-orange-200 dark:group-hover:bg-orange-900/50 transition-colors">High</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg cursor-pointer transition-colors group border border-transparent hover:border-slate-100 dark:hover:border-dark-border">
+              <div class="flex items-center text-slate-700 dark:text-slate-200">
+                <span class="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-500 dark:text-orange-400 flex items-center justify-center text-xs font-bold mr-2">2</span>
+                Work with Own Data
+              </div>
+              <span class="text-xs bg-orange-50 dark:bg-orange-900/20 text-orange-500 dark:text-orange-400 px-2 py-1 rounded font-medium group-hover:bg-orange-100 dark:group-hover:bg-orange-900/30 transition-colors">Medium</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg cursor-pointer transition-colors group border border-transparent hover:border-slate-100 dark:hover:border-dark-border">
+              <div class="flex items-center text-slate-700 dark:text-slate-200">
+                <span class="w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-500 dark:text-green-400 flex items-center justify-center text-xs font-bold mr-2">3</span>
+                View Data Readiness
+              </div>
+              <span class="text-xs bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded font-medium group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors">Low</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Dependencies -->
+        <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-100 dark:border-dark-border p-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-semibold text-slate-800 dark:text-slate-100 flex items-center">
+              <i data-lucide="database" class="w-4 h-4 mr-2"></i> Data Dependencies
+            </h3>
+            <button class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
+              View All
+            </button>
+          </div>
+          
+          <div class="space-y-2 text-xs">
+            <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-dark-border">
+              <div class="flex items-center">
+                <i data-lucide="check-circle" class="w-3 h-3 text-emerald-500 mr-2"></i>
+                <span class="text-slate-700 dark:text-slate-200">Core Price Data</span>
+              </div>
+              <span class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded font-medium">Ready</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-dark-border">
+              <div class="flex items-center">
+                <i data-lucide="check-circle" class="w-3 h-3 text-emerald-500 mr-2"></i>
+                <span class="text-slate-700 dark:text-slate-200">ATR(14)</span>
+              </div>
+              <span class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded font-medium">Ready</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-dark-border">
+              <div class="flex items-center">
+                <i data-lucide="circle" class="w-3 h-3 text-blue-500 mr-2"></i>
+                <span class="text-slate-700 dark:text-slate-200">Dollar Index</span>
+              </div>
+              <span class="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded font-medium">Optional</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-dark-border">
+              <div class="flex items-center">
+                <i data-lucide="triangle-alert" class="w-3 h-3 text-orange-500 mr-2"></i>
+                <span class="text-slate-700 dark:text-slate-200">Economic Calendar</span>
+              </div>
+              <span class="text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-2 py-0.5 rounded font-medium">Missing</span>
+            </div>
+          </div>
+          
+          <button class="w-full mt-3 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium py-2 border border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center justify-center">
+            <i data-lucide="eye" class="w-3 h-3 mr-1"></i> View Data Readiness
+          </button>
+        </div>
+
+      </aside>
+    </div>
+  </main>
+
+  <!-- Initialize Lucide Icons -->
+  <script>
+    // Theme toggle function
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      
+      // Save preference to localStorage
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      
+      // Refresh icons after theme change
+      setTimeout(() => lucide.createIcons(), 50);
+    }
+    
+    // Check for saved theme preference or default to light mode
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+    
+    // Initialize icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
