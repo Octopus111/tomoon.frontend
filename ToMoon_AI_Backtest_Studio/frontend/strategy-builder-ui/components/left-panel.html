@@ -41,61 +41,16 @@
             </div>
 
             <!-- ================= WORKFLOW STATE ================= -->
-            <div id="left-panel-workflow" class="flex flex-col gap-6 opacity-0 hidden transition-opacity duration-300">
-            <!-- AI Message 1 -->
-            <div class="flex flex-col gap-1.5">
-              <div class="bg-white dark:bg-dark-card rounded-2xl rounded-tl-sm p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-slate-100 dark:border-dark-border text-[13.5px] text-slate-700 dark:text-slate-300 leading-relaxed max-w-[95%] relative">
-                <p class="mb-4 text-slate-600 dark:text-slate-300">Great! I'll help you structure this into a breakout strategy workflow. Based on your description, here's the initial draft:</p>
-                <div class="space-y-3 font-medium text-[13px] bg-[#F8F9FA] dark:bg-slate-800/50 p-3 rounded-xl border border-slate-50 dark:border-slate-800">
-                  <div class="flex items-center gap-2.5">
-                    <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i> 
-                    <span class="text-slate-700 dark:text-slate-200">Market: Gold (XAU/USD)</span>
-                  </div>
-                  <div class="flex items-center gap-2.5">
-                    <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i> 
-                    <span class="text-slate-700 dark:text-slate-200">Timeframe: 1H</span>
-                  </div>
-                  <div class="flex items-center gap-2.5">
-                    <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0"></i> 
-                    <span class="text-slate-700 dark:text-slate-200">Strategy Type: Breakout (Trend-Following)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- User Message -->
-            <div class="flex flex-col gap-1.5 items-end">
-              <div class="bg-[#F6F0FF] dark:bg-purple-900/30 rounded-2xl rounded-tr-sm p-3.5 shadow-sm border border-purple-100 dark:border-purple-800/40 text-[13.5px] text-slate-700 dark:text-slate-200 max-w-[90%] leading-relaxed inline-block text-left relative">
-                Yes, and I want to add a <span class="font-bold text-slate-800 dark:text-white">filter for volatility</span> and a <span class="font-bold text-slate-800 dark:text-white">stop loss at 1.5 ATR</span>.
-              </div>
-            </div>
-
-            <!-- AI Message 2 -->
-            <div class="flex flex-col gap-1.5">
-              <div class="bg-white dark:bg-dark-card rounded-2xl rounded-tl-sm p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-slate-100 dark:border-dark-border text-[13.5px] text-slate-700 dark:text-slate-300 leading-relaxed max-w-[95%]">
-                <p class="mb-4">Updated. I've added <strong class="text-slate-800 dark:text-slate-200 font-semibold">Volatility Filter</strong> and <strong class="text-slate-800 dark:text-slate-200 font-semibold">ATR Stop Loss</strong>.</p>
-                <p class="mb-3.5 font-medium text-slate-800 dark:text-slate-200">Next: Would you like to add profit target rules or trailing stop?</p>
-                <div class="flex flex-wrap gap-2 mt-2">
-                  <button class="px-3.5 py-1.5 bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 rounded-lg text-[12px] font-medium text-slate-700 dark:text-slate-200 hover:border-purple-300 hover:text-purple-600 hover:shadow-sm dark:hover:border-purple-500 transition-all">Add Profit Target</button>
-                  <button class="px-3.5 py-1.5 bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 rounded-lg text-[12px] font-medium text-slate-700 dark:text-slate-200 hover:border-purple-300 hover:text-purple-600 hover:shadow-sm dark:hover:border-purple-500 transition-all">Add Trailing Stop</button>
-                  <button class="px-3.5 py-1.5 bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 rounded-lg text-[12px] font-medium text-slate-500 dark:text-slate-400 hover:border-slate-300 hover:text-slate-700 hover:shadow-sm dark:hover:text-slate-200 transition-all">Skip</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Suggested Prompts (Max 2, placed at the end of chat) -->
-            <div class="flex flex-col gap-2.5 mt-auto pt-4">
-              <div class="flex flex-wrap gap-2">
-                <button class="px-3.5 py-1.5 bg-white dark:bg-dark-card border border-slate-200 dark:border-slate-700 rounded-full text-[12.5px] font-medium text-slate-600 dark:text-slate-300 hover:border-purple-300 hover:text-purple-600 hover:bg-purple-50/50 dark:hover:bg-slate-800 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex items-center">
-                  <i data-lucide="zap" class="w-3.5 h-3.5 mr-1.5 text-purple-500"></i> Add news filter
-                </button>
-                <button class="px-3.5 py-1.5 bg-white dark:bg-dark-card border border-slate-200 dark:border-slate-700 rounded-full text-[12.5px] font-medium text-slate-600 dark:text-slate-300 hover:border-purple-300 hover:text-purple-600 hover:bg-purple-50/50 dark:hover:bg-slate-800 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex items-center">
-                  <i data-lucide="zap" class="w-3.5 h-3.5 mr-1.5 text-purple-500"></i> Set risk per trade
-                </button>
-              </div>
-            </div>
+            <div id="left-panel-workflow" class="flex flex-col gap-4 opacity-0 hidden transition-opacity duration-300 h-full">
+              <div id="strategy-chat-messages" class="flex flex-col gap-3 min-h-0"></div>
             </div>
             
+          </div>
+
+          <!-- AI Next Actions (Fixed under conversation) -->
+          <div id="strategy-next-actions" class="px-3 py-2 border-t border-slate-100 dark:border-dark-border bg-white dark:bg-dark-card hidden">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">AI Next Actions</p>
+            <div id="strategy-next-actions-list" class="flex flex-wrap gap-2"></div>
           </div>
 
           <!-- Input Area (Footer) - Anchored at the bottom -->

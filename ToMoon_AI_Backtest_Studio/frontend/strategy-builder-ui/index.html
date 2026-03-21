@@ -204,6 +204,52 @@
     </div>
   </main>
 
+  <div id="ai-settings-modal" class="hidden fixed inset-0 z-[100]">
+    <div class="absolute inset-0 bg-black/40" onclick="closeAISettings()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="w-full max-w-lg bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-2xl shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-dark-border">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">AI Settings</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">配置 AI Strategy Dialog 的模型连接</p>
+          </div>
+          <button onclick="closeAISettings()" class="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div class="p-5 space-y-4">
+          <div>
+            <label for="ai-base-url-preset" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1.5">Region Base URL</label>
+            <select id="ai-base-url-preset" onchange="applyBaseUrlPreset()" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/25">
+              <option value="https://dashscope.aliyuncs.com/compatible-mode/v1">华北2（北京）</option>
+              <option value="https://dashscope-intl.aliyuncs.com/compatible-mode/v1">新加坡</option>
+              <option value="https://dashscope-us.aliyuncs.com/compatible-mode/v1">美国（弗吉尼亚）</option>
+              <option value="custom">自定义</option>
+            </select>
+          </div>
+          <div>
+            <label for="ai-base-url" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1.5">Base URL</label>
+            <input id="ai-base-url" type="text" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/25" placeholder="https://dashscope-intl.aliyuncs.com/compatible-mode/v1">
+          </div>
+          <div>
+            <label for="ai-api-key" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1.5">API Key</label>
+            <input id="ai-api-key" type="password" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/25" placeholder="sk-...">
+          </div>
+          <div>
+            <label for="ai-model" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1.5">Model</label>
+            <input id="ai-model" type="text" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/25" placeholder="qwen-plus">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">例如：qwen-plus</p>
+          </div>
+          <p id="ai-settings-status" class="text-[11px] text-slate-500 dark:text-slate-400">保存后将用于左侧 AI Strategy Dialogue 的实时调用。</p>
+        </div>
+        <div class="px-5 py-4 border-t border-slate-100 dark:border-dark-border flex items-center justify-end gap-2">
+          <button onclick="closeAISettings()" class="px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">Cancel</button>
+          <button onclick="saveAISettings()" class="px-3 py-1.5 text-sm rounded-lg bg-purple-600 text-white hover:bg-purple-700">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Initialize Lucide Icons -->
   <script>
     // Theme toggle function
@@ -261,6 +307,502 @@
 
     // Empty State Toggle
     let isEmptyState = true;
+    let isStrategyGenerating = false;
+    let strategyConversation = [];
+    const strategyState = {
+      strategyName: 'New Strategy',
+      market: '',
+      marketShort: '',
+      timeframe: '',
+      timeframeShort: '',
+      strategyType: '',
+      strategyTypeShort: '',
+      edge: '',
+      volatilityFilter: '',
+      entryTrigger: '',
+      stopLoss: '',
+      takeProfit: '',
+      useOwnData: false,
+      economicCalendarReady: false,
+      executionItems: [],
+      signalLogicItems: [],
+      riskMoneyItems: [],
+      dataConnectionNotes: []
+    };
+    const REQUIRED_ITEMS = [
+      { key: 'market', label: '交易市场', priority: 'Medium' },
+      { key: 'timeframe', label: '时间周期', priority: 'Medium' },
+      { key: 'entryTrigger', label: '入场触发条件', priority: 'High' },
+      { key: 'stopLoss', label: '止损规则', priority: 'High' },
+      { key: 'takeProfit', label: '止盈规则', priority: 'High' },
+      { key: 'economicCalendarReady', label: '经济日历数据', priority: 'Medium' }
+    ];
+    const FIELD_TO_MODULE = {
+      market: 'Strategy Identity > Market',
+      timeframe: 'Strategy Identity > Timeframe',
+      strategyType: 'Strategy Identity > Type',
+      edge: 'Premise / Edge',
+      volatilityFilter: 'Market & Regime > Volatility Filter',
+      entryTrigger: 'Signal Logic > Entry Trigger',
+      stopLoss: 'Risk & Money > Stop Loss',
+      takeProfit: 'Risk & Money > Take Profit',
+      useOwnData: 'Data Connection',
+      economicCalendarReady: 'Data Dependencies > Economic Calendar',
+      executionItems: 'Execution',
+      signalLogicItems: 'Signal Logic',
+      riskMoneyItems: 'Risk & Money',
+      dataConnectionNotes: 'Data Connection'
+    };
+
+    function escapeHtml(text) {
+      return (text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function toFormulaText(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/greater than or equal to|大于等于/gi, '>=')
+        .replace(/less than or equal to|小于等于/gi, '<=')
+        .replace(/greater than|above|高于|大于/gi, '>')
+        .replace(/less than|below|低于|小于/gi, '<')
+        .replace(/cross(es)? above|上穿/gi, 'cross↑')
+        .replace(/cross(es)? below|下穿/gi, 'cross↓')
+        .replace(/\band\b|且|并且/gi, ' ∧ ')
+        .replace(/\bor\b|或者|或/gi, ' ∨ ')
+        .replace(/inside/gi, 'in')
+        .replace(/outside/gi, 'out')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function getBaseUrl() {
+      const saved = localStorage.getItem('baseUrl') || 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1';
+      return saved.replace(/\/$/, '');
+    }
+
+    function openAISettings() {
+      const modal = document.getElementById('ai-settings-modal');
+      const presetInput = document.getElementById('ai-base-url-preset');
+      const baseUrlInput = document.getElementById('ai-base-url');
+      const apiKeyInput = document.getElementById('ai-api-key');
+      const modelInput = document.getElementById('ai-model');
+      const statusEl = document.getElementById('ai-settings-status');
+      if (baseUrlInput) baseUrlInput.value = getBaseUrl();
+      if (presetInput && baseUrlInput) {
+        const known = ['https://dashscope.aliyuncs.com/compatible-mode/v1', 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1', 'https://dashscope-us.aliyuncs.com/compatible-mode/v1'];
+        presetInput.value = known.includes(baseUrlInput.value) ? baseUrlInput.value : 'custom';
+      }
+      if (apiKeyInput) apiKeyInput.value = localStorage.getItem('apiKey') || '';
+      if (modelInput) modelInput.value = localStorage.getItem('model') || 'qwen-plus';
+      if (statusEl) statusEl.textContent = '保存后将用于左侧 AI Strategy Dialogue 的实时调用。';
+      if (modal) modal.classList.remove('hidden');
+      setTimeout(() => lucide.createIcons(), 0);
+    }
+
+    function closeAISettings() {
+      const modal = document.getElementById('ai-settings-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function applyBaseUrlPreset() {
+      const preset = document.getElementById('ai-base-url-preset');
+      const baseUrlInput = document.getElementById('ai-base-url');
+      if (!preset || !baseUrlInput) return;
+      if (preset.value !== 'custom') baseUrlInput.value = preset.value;
+    }
+
+    function saveAISettings() {
+      const statusEl = document.getElementById('ai-settings-status');
+      const baseUrl = (document.getElementById('ai-base-url')?.value || '').trim();
+      const apiKey = (document.getElementById('ai-api-key')?.value || '').trim();
+      const model = (document.getElementById('ai-model')?.value || '').trim();
+      if (!apiKey || !apiKey.startsWith('sk-')) {
+        if (statusEl) statusEl.textContent = '保存失败：请填写有效 API Key（sk- 开头）。';
+        return;
+      }
+      localStorage.setItem('baseUrl', baseUrl || 'https://dashscope.aliyuncs.com/compatible-mode/v1');
+      localStorage.setItem('apiKey', apiKey);
+      localStorage.setItem('model', model || 'qwen-plus');
+      if (statusEl) statusEl.textContent = '保存成功。';
+      closeAISettings();
+    }
+
+    function getMissingItems() {
+      return REQUIRED_ITEMS.filter((item) => {
+        const value = strategyState[item.key];
+        if (typeof value === 'boolean') return !value;
+        return !String(value || '').trim();
+      });
+    }
+
+    function getCompleteness() {
+      const missing = getMissingItems();
+      return Math.max(0, Math.round(((REQUIRED_ITEMS.length - missing.length) / REQUIRED_ITEMS.length) * 100));
+    }
+
+    function applyStrategyStateToCenter() {
+      const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el && value !== undefined) el.textContent = value;
+      };
+      setText('module-market', strategyState.market || 'Pending');
+      setText('module-timeframe', strategyState.timeframe || 'Pending');
+      setText('module-strategy-type', strategyState.strategyType || 'Pending');
+      setText('module-edge', strategyState.edge || '待补充策略核心假设');
+      setText('module-volatility-filter', strategyState.volatilityFilter || 'Pending');
+      setText('module-entry-trigger', strategyState.entryTrigger || 'Pending');
+      setText('module-stop-loss', strategyState.stopLoss || 'Pending');
+      setText('module-take-profit', strategyState.takeProfit || 'Optional');
+      setText('module-take-profit-status', strategyState.takeProfit ? 'Configured' : 'Incomplete');
+      setText('module-status-identity', strategyState.market && strategyState.timeframe && strategyState.strategyType ? 'CONFIRMED' : 'IN PROGRESS');
+
+      const cardStates = [
+        ['card-strategy-identity', !!(strategyState.market && strategyState.timeframe && strategyState.strategyType)],
+        ['card-premise-edge', !!strategyState.edge],
+        ['card-market-regime', !!strategyState.volatilityFilter],
+        ['card-signal-logic', !!strategyState.entryTrigger],
+        ['card-risk-money', !!(strategyState.stopLoss && strategyState.takeProfit)],
+        ['card-data-connection', !!strategyState.useOwnData]
+      ];
+      cardStates.forEach(([id, ready]) => {
+        const card = document.getElementById(id);
+        if (!card) return;
+        card.style.opacity = ready ? '1' : '0.65';
+      });
+      renderDynamicModuleLists();
+    }
+
+    function renderDynamicModuleLists() {
+      const renderList = (id, items) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (!items || !items.length) {
+          el.innerHTML = `<li class="text-xs text-slate-400 dark:text-slate-500">Waiting for AI to add rules...</li>`;
+          return;
+        }
+        el.innerHTML = items.map((item) => `
+          <li class="relative pl-5">
+            <div class="absolute left-0 top-2 w-2 h-2 rounded-full bg-purple-500"></div>
+            <div class="text-slate-700 dark:text-slate-200 text-[12px] font-semibold mb-1">${escapeHtml(item.title || 'Rule')}</div>
+            <div class="inline-block bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] px-2 py-1 rounded border border-slate-200 dark:border-slate-600 font-mono leading-relaxed">
+              ${escapeHtml(toFormulaText(item.value || item.formula || item.title || item))}
+            </div>
+          </li>
+        `).join('');
+      };
+      renderList('module-list-execution', strategyState.executionItems);
+      renderList('module-list-signal-logic', strategyState.signalLogicItems);
+      renderList('module-list-risk-money', strategyState.riskMoneyItems);
+
+      const dataEl = document.getElementById('module-list-data-connection');
+      if (dataEl) {
+        const notes = strategyState.dataConnectionNotes || [];
+        dataEl.innerHTML = notes.length ? notes.map((n) => `
+          <div class="flex items-start mb-2">
+            <i data-lucide="info" class="w-3.5 h-3.5 text-indigo-500 mt-0.5 mr-2 shrink-0"></i>
+            <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">${escapeHtml(n)}</p>
+          </div>
+        `).join('') : `<p class="text-slate-400 dark:text-slate-500">Waiting for AI to add data connection notes...</p>`;
+      }
+    }
+
+    function renderNextActions() {
+      const wrap = document.getElementById('strategy-next-actions');
+      const list = document.getElementById('strategy-next-actions-list');
+      if (!wrap || !list) return;
+      const missing = getMissingItems().slice(0, 2);
+      if (!strategyConversation.length || !missing.length) {
+        wrap.classList.add('hidden');
+        list.innerHTML = '';
+        return;
+      }
+      wrap.classList.remove('hidden');
+      list.innerHTML = missing.map((item) => `
+        <button onclick="setInput('请补充${item.label}')" class="px-3.5 py-1.5 bg-white dark:bg-dark-card border border-slate-200 dark:border-slate-700 rounded-full text-[12.5px] font-medium text-slate-600 dark:text-slate-300 hover:border-purple-300 hover:text-purple-600 hover:bg-purple-50/50 dark:hover:bg-slate-800 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex items-center">
+          <i data-lucide="zap" class="w-3.5 h-3.5 mr-1.5 text-purple-500"></i> ${item.label}
+        </button>
+      `).join('');
+      setTimeout(() => lucide.createIcons(), 0);
+    }
+
+    function applyStrategyStateToRight() {
+      const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el && value !== undefined) el.textContent = value;
+      };
+      setText('right-strategy-name', strategyState.strategyName);
+      setText('right-market', strategyState.marketShort);
+      setText('right-timeframe', strategyState.timeframeShort);
+      setText('right-strategy-type', strategyState.strategyTypeShort);
+
+      const completeness = getCompleteness();
+      setText('right-completeness-score', `${completeness}%`);
+      const bar = document.getElementById('right-completeness-bar');
+      if (bar) bar.style.width = `${completeness}%`;
+
+      const structureProgress = Math.round((['market', 'timeframe', 'entryTrigger', 'stopLoss', 'takeProfit'].filter((k) => !!String(strategyState[k] || '').trim()).length / 5) * 100);
+      const dataProgress = Math.round(((strategyState.useOwnData ? 1 : 0) + (strategyState.economicCalendarReady ? 1 : 0)) / 2 * 100);
+      setText('right-structure-progress', `${structureProgress}%`);
+      setText('right-data-progress', `${dataProgress}%`);
+
+      const missing = getMissingItems();
+      const readinessEl = document.getElementById('right-readiness');
+      if (readinessEl) {
+        if (missing.length === 0) {
+          readinessEl.className = 'text-xs mb-3 px-2.5 py-2 rounded-lg border bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300';
+          readinessEl.textContent = '已就绪：可以进入下一步（Refine）';
+        } else {
+          readinessEl.className = 'text-xs mb-3 px-2.5 py-2 rounded-lg border bg-orange-50 dark:bg-orange-900/20 border-orange-100 dark:border-orange-800 text-orange-700 dark:text-orange-300';
+          readinessEl.textContent = `未就绪：缺少 ${missing.map((m) => m.label).join('、')}`;
+        }
+      }
+
+      const nextList = document.getElementById('right-next-steps-list');
+      if (nextList) {
+        const items = missing.slice(0, 3);
+        nextList.innerHTML = items.length ? items.map((item, index) => `
+          <div class="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-dark-border">
+            <div class="flex items-center text-slate-700 dark:text-slate-200">
+              <span class="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-500 dark:text-orange-400 flex items-center justify-center text-xs font-bold mr-2">${index + 1}</span>
+              补全${item.label}
+            </div>
+            <span class="text-xs bg-orange-50 dark:bg-orange-900/20 text-orange-500 dark:text-orange-400 px-2 py-1 rounded font-medium">${item.priority}</span>
+          </div>
+        `).join('') : `
+          <div class="text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-lg p-2.5">
+            所有关键项已完成，建议进入 Refine。
+          </div>
+        `;
+      }
+
+      const deps = document.getElementById('right-data-dependencies-list');
+      if (deps) {
+        deps.innerHTML = `
+          <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-dark-border">
+            <div class="flex items-center">
+              <i data-lucide="${strategyState.useOwnData ? 'check-circle' : 'triangle-alert'}" class="w-3 h-3 ${strategyState.useOwnData ? 'text-emerald-500' : 'text-orange-500'} mr-2"></i>
+              <span class="text-slate-700 dark:text-slate-200">Own Data Source</span>
+            </div>
+            <span class="${strategyState.useOwnData ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30' : 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'} px-2 py-0.5 rounded font-medium">${strategyState.useOwnData ? 'Ready' : 'Missing'}</span>
+          </div>
+          <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-dark-border">
+            <div class="flex items-center">
+              <i data-lucide="${strategyState.economicCalendarReady ? 'check-circle' : 'triangle-alert'}" class="w-3 h-3 ${strategyState.economicCalendarReady ? 'text-emerald-500' : 'text-orange-500'} mr-2"></i>
+              <span class="text-slate-700 dark:text-slate-200">Economic Calendar</span>
+            </div>
+            <span class="${strategyState.economicCalendarReady ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30' : 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'} px-2 py-0.5 rounded font-medium">${strategyState.economicCalendarReady ? 'Ready' : 'Missing'}</span>
+          </div>
+        `;
+      }
+
+      const dynamicRules = document.getElementById('right-dynamic-rules');
+      if (dynamicRules) {
+        const sections = [
+          { title: 'Execution', items: strategyState.executionItems || [] },
+          { title: 'Signal Logic', items: strategyState.signalLogicItems || [] },
+          { title: 'Risk & Money', items: strategyState.riskMoneyItems || [] },
+          { title: 'Data Connection', items: (strategyState.dataConnectionNotes || []).map((n) => ({ title: n })) }
+        ];
+        dynamicRules.innerHTML = sections.map((sec) => {
+          const items = sec.items || [];
+          const rows = items.length ? items.map((item) => `
+            <div class="pl-2 border-l-2 border-purple-100 dark:border-purple-900">
+              <div class="text-slate-700 dark:text-slate-200 text-xs font-medium">${escapeHtml(item.title || item)}</div>
+              ${item.value ? `<div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${escapeHtml(item.value)}</div>` : ''}
+            </div>
+          `).join('') : `<div class="text-[11px] text-slate-400 dark:text-slate-500">Waiting for AI...</div>`;
+          return `
+            <div class="rounded-lg border border-slate-100 dark:border-dark-border p-2.5 bg-slate-50/60 dark:bg-slate-800/30">
+              <div class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">${sec.title}</div>
+              <div class="space-y-2">${rows}</div>
+            </div>
+          `;
+        }).join('');
+      }
+      renderNextActions();
+      setTimeout(() => lucide.createIcons(), 0);
+    }
+
+    function renderStrategyChat() {
+      const box = document.getElementById('strategy-chat-messages');
+      if (!box) return;
+      box.innerHTML = strategyConversation.map((m) => {
+        if (m.role === 'user') {
+          return `
+            <div class="flex flex-col gap-1.5 items-end">
+              <div class="bg-[#F6F0FF] dark:bg-purple-900/30 rounded-2xl rounded-tr-sm p-3.5 shadow-sm border border-purple-100 dark:border-purple-800/40 text-[13.5px] text-slate-700 dark:text-slate-200 max-w-[90%] leading-relaxed inline-block text-left relative">${escapeHtml(m.content)}</div>
+            </div>
+          `;
+        }
+        const updates = Array.isArray(m.updatedModules) && m.updatedModules.length ? `<div class="mt-2 text-[11px] text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-lg px-2 py-1">已更新模块：${m.updatedModules.join('、')}</div>` : '';
+        return `
+          <div class="flex flex-col gap-1.5">
+            <div class="bg-white dark:bg-dark-card rounded-2xl rounded-tl-sm p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-slate-100 dark:border-dark-border text-[13.5px] text-slate-700 dark:text-slate-300 leading-relaxed max-w-[95%]">
+              <div>${escapeHtml(m.content)}</div>
+              ${updates}
+            </div>
+          </div>
+        `;
+      }).join('');
+      const chatArea = box.closest('.overflow-y-auto');
+      if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function normalizeUpdatePayload(payload) {
+      if (!payload || typeof payload !== 'object') return { reply: '', updates: {} };
+      return {
+        reply: String(payload.reply || payload.message || '').trim(),
+        updates: payload.updates && typeof payload.updates === 'object' ? payload.updates : {}
+      };
+    }
+
+    function tryParseJsonFromText(text) {
+      if (!text) return null;
+      const match = text.match(/```json\s*([\s\S]*?)\s*```/i);
+      const raw = match ? match[1] : text.trim();
+      try { return JSON.parse(raw); } catch (_) { return null; }
+    }
+
+    function extractHeuristicUpdates(text) {
+      const t = (text || '').toLowerCase();
+      const updates = {};
+      if (/\bgold\b|xau\/?usd|黄金/.test(t)) { updates.market = 'Gold (XAU/USD)'; updates.marketShort = 'XAU/USD'; }
+      if (/\beur\/?usd\b|欧元/.test(t)) { updates.market = 'EUR/USD'; updates.marketShort = 'EUR/USD'; }
+      if (/\b1h\b|1 hour|h1|1小时/.test(t)) { updates.timeframe = '1H Timeframe'; updates.timeframeShort = '1 Hour'; }
+      if (/\b4h\b|4 hour|h4|4小时/.test(t)) { updates.timeframe = '4H Timeframe'; updates.timeframeShort = '4 Hour'; }
+      if (/\b15m\b|15 min|m15|15分钟/.test(t)) { updates.timeframe = '15M Timeframe'; updates.timeframeShort = '15 Min'; }
+      if (/breakout|突破/.test(t)) { updates.strategyType = 'Breakout Strategy'; updates.strategyTypeShort = 'Breakout'; }
+      if (/mean reversion|均值回归/.test(t)) { updates.strategyType = 'Mean Reversion Strategy'; updates.strategyTypeShort = 'Mean Reversion'; }
+      if (/volatility|atr/.test(t)) updates.volatilityFilter = 'ATR-based Volatility Filter';
+      if (/entry|trigger|入场|突破上轨/.test(t)) updates.entryTrigger = 'close > breakout_high';
+      if (/stop loss|止损/.test(t)) {
+        const m = text.match(/(\d+(\.\d+)?)\s*\*?\s*atr/i);
+        updates.stopLoss = m ? `SL = ${m[1]} * ATR` : 'SL = ATR-based';
+      }
+      if (/take profit|profit target|止盈/.test(t)) {
+        const m = text.match(/(\d+(\.\d+)?)\s*r/i);
+        updates.takeProfit = m ? `TP = ${m[1]}R` : 'TP = rule-based';
+      }
+      if (/own data|csv|自有数据|自己的数据/.test(t)) updates.useOwnData = true;
+      if (/economic calendar|news filter|经济日历|新闻过滤/.test(t)) updates.economicCalendarReady = true;
+      if (!updates.edge && /because|edge|逻辑|假设/.test(t)) updates.edge = text.slice(0, 80);
+      const pick = (label, value) => ({ title: label, value: toFormulaText(value) });
+      if (updates.entryTrigger) updates.signalLogicItems = [pick('Entry Trigger', updates.entryTrigger)];
+      if (updates.stopLoss || updates.takeProfit) {
+        updates.riskMoneyItems = [];
+        if (updates.stopLoss) updates.riskMoneyItems.push(pick('Stop Loss', updates.stopLoss));
+        if (updates.takeProfit) updates.riskMoneyItems.push(pick('Take Profit', updates.takeProfit));
+      }
+      if (updates.useOwnData) updates.dataConnectionNotes = ['Use user-provided CSV/own data source'];
+      return updates;
+    }
+
+    function applyUpdatesAndCollectModules(updates) {
+      const updatedModules = [];
+      Object.keys(updates || {}).forEach((key) => {
+        if (!(key in strategyState) || updates[key] === undefined || updates[key] === null) return;
+        let nextValue = updates[key];
+        if (key === 'useOwnData' || key === 'economicCalendarReady') {
+          if (typeof nextValue === 'string') nextValue = nextValue.toLowerCase() === 'true';
+          nextValue = !!nextValue;
+        }
+        if (strategyState[key] !== nextValue) {
+          if (Array.isArray(nextValue)) {
+            nextValue = nextValue.slice(0, 8);
+          }
+          strategyState[key] = nextValue;
+          if (FIELD_TO_MODULE[key]) updatedModules.push(FIELD_TO_MODULE[key]);
+        }
+      });
+      applyStrategyStateToCenter();
+      applyStrategyStateToRight();
+      return updatedModules;
+    }
+
+    async function callStrategyAI(userText) {
+      const apiKey = (localStorage.getItem('apiKey') || '').trim();
+      const model = localStorage.getItem('model') || 'qwen-plus';
+      const baseUrl = getBaseUrl();
+      if (!apiKey) {
+        return { reply: `⚠️ 请先在设置中配置有效的 API Key。当前模型：${model}；当前Base URL：${baseUrl}`, updates: {} };
+      }
+      if (!apiKey.startsWith('sk-')) {
+        return { reply: '⚠️ API Key 格式不正确，请检查是否以 sk- 或 sk-sp- 开头。', updates: {} };
+      }
+      const systemPrompt = `你是策略构建推进器。你必须只返回一个JSON对象，不要Markdown：{"reply":"给用户的简短回复","updates":{"market":"","marketShort":"","timeframe":"","timeframeShort":"","strategyType":"","strategyTypeShort":"","edge":"","volatilityFilter":"","entryTrigger":"","stopLoss":"","takeProfit":"","useOwnData":true/false,"economicCalendarReady":true/false,"executionItems":[{"title":"","value":"简短公式"}],"signalLogicItems":[{"title":"","value":"简短公式"}],"riskMoneyItems":[{"title":"","value":"简短公式"}],"dataConnectionNotes":[""]}}。优先输出短公式风格，如 close>SMA200, RSI<30, SL=1.5*ATR, TP=2R；避免长句解释。未知字段不要返回。`;
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        ...strategyConversation.slice(-8).map((m) => ({ role: m.role, content: m.content })),
+        { role: 'user', content: userText }
+      ];
+      const doFetch = async (stream) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        try {
+          const requestBody = stream ? { model, messages, stream: true, stream_options: { include_usage: true } } : { model, messages, stream: false };
+          const response = await fetch(`${baseUrl}/chat/completions`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal
+          });
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          if (!stream) {
+            const json = await response.json();
+            return json?.choices?.[0]?.message?.content || '';
+          }
+          if (!response.body) return '';
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          let out = '';
+          const started = Date.now();
+          while (true) {
+            if (Date.now() - started > 30000) throw new Error('Stream timeout');
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+            for (const rawLine of lines) {
+              const line = rawLine.trim();
+              if (!line.startsWith('data:')) continue;
+              const dataStr = line.slice(5).trim();
+              if (dataStr === '[DONE]') return out;
+              try {
+                const data = JSON.parse(dataStr);
+                const delta = data.choices?.[0]?.delta || {};
+                if (delta.content) out += delta.content;
+              } catch (_) {}
+            }
+          }
+          return out;
+        } finally {
+          clearTimeout(timeoutId);
+        }
+      };
+
+      let out = '';
+      try {
+        out = await doFetch(true);
+      } catch (_) {
+        try { out = await doFetch(false); } catch (_) { out = ''; }
+      }
+
+      const parsed = normalizeUpdatePayload(tryParseJsonFromText(out));
+      if (parsed.updates && !parsed.updates.executionItems) {
+        const blocks = tryParseJsonFromText(out);
+        if (blocks && blocks.updates) {
+          if (Array.isArray(blocks.updates.executionItems)) parsed.updates.executionItems = blocks.updates.executionItems;
+          if (Array.isArray(blocks.updates.signalLogicItems)) parsed.updates.signalLogicItems = blocks.updates.signalLogicItems;
+          if (Array.isArray(blocks.updates.riskMoneyItems)) parsed.updates.riskMoneyItems = blocks.updates.riskMoneyItems;
+          if (Array.isArray(blocks.updates.dataConnectionNotes)) parsed.updates.dataConnectionNotes = blocks.updates.dataConnectionNotes;
+        }
+      }
+      const aiUpdates = parsed.updates && Object.keys(parsed.updates).length ? parsed.updates : extractHeuristicUpdates(`${userText}\n${out}`);
+      const aiReply = parsed.reply || out || '我已理解你的补充，并已尝试更新策略结构。请继续补充下一项关键规则。';
+      return { reply: aiReply, updates: aiUpdates };
+    }
     
     function setInput(text) {
       const textarea = document.getElementById('strategy-input') || document.querySelector('textarea');
@@ -337,11 +879,32 @@
       setEmptyState(!isEmptyState);
     }
 
-    function handleStrategySubmit(forceTransition = false) {
+    async function handleStrategySubmit(forceTransition = false) {
       const textarea = document.getElementById('strategy-input') || document.querySelector('textarea');
+      const submitBtn = document.getElementById('strategy-submit-btn');
       const hasInput = textarea && textarea.value.trim().length > 0;
-      if (forceTransition || hasInput) {
-        setEmptyState(false);
+      if (!forceTransition && !hasInput) return;
+      setEmptyState(false);
+      if (!hasInput || isStrategyGenerating) return;
+      const userText = textarea.value.trim();
+      textarea.value = '';
+      strategyConversation.push({ role: 'user', content: userText });
+      strategyConversation.push({ role: 'assistant', content: '思考中...', updatedModules: [] });
+      renderStrategyChat();
+      isStrategyGenerating = true;
+      if (submitBtn) submitBtn.disabled = true;
+      try {
+        const ai = await callStrategyAI(userText);
+        const updatedModules = applyUpdatesAndCollectModules(ai.updates);
+        strategyConversation[strategyConversation.length - 1] = { role: 'assistant', content: ai.reply, updatedModules };
+      } catch (err) {
+        strategyConversation[strategyConversation.length - 1] = { role: 'assistant', content: `❌ 请求失败: ${err.message}`, updatedModules: [] };
+      } finally {
+        isStrategyGenerating = false;
+        if (submitBtn) submitBtn.disabled = false;
+        renderStrategyChat();
+        renderNextActions();
+        setTimeout(() => lucide.createIcons(), 50);
       }
     }
 
@@ -376,6 +939,9 @@
       lucide.createIcons();
       initCanvasEvents();
       initDialogueEvents();
+      applyStrategyStateToCenter();
+      applyStrategyStateToRight();
+      renderStrategyChat();
       
       // Initialize state
       setEmptyState(true);
