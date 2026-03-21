@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ToMoon - AI Strategy Builder</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Config for Dark Mode -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            // Light mode (default)
+            primary: '#7c3aed',
+            success: '#10b981',
+            warning: '#f97316',
+            danger: '#ef4444',
+            
+            // Enhanced Dark mode - Premium deep space theme
+            dark: {
+              bg: '#0a0e1a',
+              surface: '#0f1419',
+              card: 'rgba(20, 25, 35, 0.6)',
+              border: 'rgba(255, 255, 255, 0.08)',
+              accent: '#3b82f6'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    /* Custom scrollbar - Light mode */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    
+    /* Dark mode scrollbar - Enhanced */
+    .dark ::-webkit-scrollbar-track {
+      background: rgba(15, 20, 25, 0.5);
+    }
+    
+    .dark ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3));
+      border-radius: 3px;
+    }
+    
+    .dark ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(59, 130, 246, 0.5), rgba(139, 92, 246, 0.5));
+    }
+    
+    /* Smooth transitions */
+    .transition-all {
+      transition-duration: 200ms;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Glass morphism effect - Light mode */
+    .glass {
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(8px);
+    }
+    
+    /* Enhanced Glass morphism effect - Dark mode (premium deep space) */
+    .dark .glass {
+      background: rgba(10, 14, 26, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    /* Premium dark mode cards with enhanced glass effect */
+    .dark .bg-white {
+      background: rgba(20, 25, 35, 0.6) !important;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .dark .bg-\[\#F8F7FB\] {
+      background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
+    }
+    
+    /* Node connection lines */
+    .connection-line {
+      position: relative;
+    }
+    
+    .connection-line::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(to bottom, #c084fc, #a855f7);
+    }
+    
+    /* Theme toggle animation */
+    .theme-toggle {
+      transition: transform 0.3s ease;
+    }
+    
+    .theme-toggle:hover {
+      transform: rotate(15deg);
+    }
+    
+    /* Enhanced dark mode hover effects */
+    .dark .hover\:bg-slate-100:hover {
+      background: rgba(59, 130, 246, 0.1) !important;
+    }
+    
+    .dark .hover\:bg-slate-700:hover {
+      background: rgba(59, 130, 246, 0.15) !important;
+    }
+    
+    /* Premium gradient borders for dark mode */
+    .dark .gradient-border {
+      position: relative;
+      background: rgba(20, 25, 35, 0.6);
+      backdrop-filter: blur(20px);
+    }
+    
+    .dark .gradient-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    
+    /* Enhanced dark mode glow effects */
+    .dark .glow-purple {
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+    }
+    
+    .dark .glow-blue {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+    }
+  </style>
+</head>
+<body class="h-screen w-full flex bg-[#F8F7FB] dark:bg-dark-bg text-slate-800 dark:text-slate-100 overflow-hidden transition-colors duration-300">
+  
+  <div id="sidebar-placeholder"></div>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col min-w-0">
+    
+    <div id="header-placeholder"></div>
+
+    <!-- Three Column Layout -->
+    <div class="flex-1 flex overflow-hidden relative">
+      
+      <!-- Toggle Show Button (Visible when hidden) -->
+      <button id="show-sidebar-btn" onclick="toggleSidebar()" class="absolute left-0 top-4 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border p-1.5 rounded-r-lg shadow-md hidden hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 z-50 transition-colors">
+        <i data-lucide="chevrons-right" class="w-4 h-4"></i>
+      </button>
+
+      <div id="left-panel-placeholder"></div>
+
+      <div id="canvas-placeholder"></div>
+
+      <!-- Toggle Show Button for Right Panel (Visible when hidden) -->
+      <button id="show-right-sidebar-btn" onclick="toggleRightSidebar()" class="absolute right-0 top-4 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border p-1.5 rounded-l-lg shadow-md hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 z-50 transition-colors hidden">
+        <i data-lucide="chevrons-left" class="w-4 h-4"></i>
+      </button>
+
+      <div id="right-panel-placeholder"></div>
+    </div>
+  </main>
+
+  <!-- Initialize Lucide Icons -->
+  <script>
+    // Theme toggle function
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      
+      // Save preference to localStorage
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      
+      // Refresh icons after theme change
+      setTimeout(() => lucide.createIcons(), 50);
+    }
+    
+    // Check for saved theme preference or default to light mode
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+    
+    // Initialize icons
+    // lucide.createIcons(); // Moved to initApp
+
+    // Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('left-sidebar');
+      const showBtn = document.getElementById('show-sidebar-btn');
+      
+      if (sidebar.classList.contains('-translate-x-full')) {
+        // Show
+        sidebar.classList.remove('-translate-x-full');
+        showBtn.classList.add('hidden');
+      } else {
+        // Hide
+        sidebar.classList.add('-translate-x-full');
+        showBtn.classList.remove('hidden');
+      }
+    }
+
+    // Right Sidebar Toggle
+    function toggleRightSidebar() {
+      const sidebar = document.getElementById('right-sidebar');
+      const showBtn = document.getElementById('show-right-sidebar-btn');
+      
+      if (sidebar.classList.contains('translate-x-full')) {
+        // Show
+        sidebar.classList.remove('translate-x-full');
+        showBtn.classList.add('hidden');
+      } else {
+        // Hide
+        sidebar.classList.add('translate-x-full');
+        showBtn.classList.remove('hidden');
+      }
+    }
+
+    // Empty State Toggle
+    let isEmptyState = true;
+    
+    function setInput(text) {
+      const textarea = document.getElementById('strategy-input') || document.querySelector('textarea');
+      if (textarea) {
+        textarea.value = text;
+        textarea.focus();
+      }
+      handleStrategySubmit(true);
+    }
+
+    function setEmptyState(nextIsEmpty) {
+      isEmptyState = nextIsEmpty;
+
+      const modulePairs = [
+        ['empty-state-view', 'workflow-view'],
+        ['left-panel-empty-state', 'left-panel-workflow'],
+        ['right-panel-empty-state', 'right-panel-workflow'],
+        ['header-empty-state', 'header-workflow'],
+        ['sidebar-empty-state', 'sidebar-workflow']
+      ];
+
+      const switchPair = (emptyId, workflowId, showEmpty) => {
+        const empty = document.getElementById(emptyId);
+        const workflow = document.getElementById(workflowId);
+        if (!empty || !workflow) return;
+
+        if (showEmpty) {
+          workflow.style.opacity = '0';
+          setTimeout(() => {
+            workflow.classList.add('hidden');
+            workflow.classList.remove('flex');
+            empty.classList.remove('hidden');
+            empty.classList.add('flex');
+            void empty.offsetWidth;
+            empty.style.opacity = '1';
+          }, 300);
+        } else {
+          empty.style.opacity = '0';
+          setTimeout(() => {
+            empty.classList.add('hidden');
+            empty.classList.remove('flex');
+            workflow.classList.remove('hidden');
+            workflow.classList.add('flex');
+            void workflow.offsetWidth;
+            workflow.style.opacity = '1';
+          }, 300);
+        }
+      };
+
+      modulePairs.forEach(([emptyId, workflowId]) => switchPair(emptyId, workflowId, isEmptyState));
+
+      const btnText = document.getElementById('empty-state-btn-text');
+      const btn = document.querySelector('button[onclick="toggleEmptyState()"]');
+      const btnIcon = btn ? btn.querySelector('i') : null;
+      if (btnText) btnText.textContent = isEmptyState ? 'Show Workflow' : 'Empty State';
+      if (btnIcon) btnIcon.setAttribute('data-lucide', isEmptyState ? 'layout-dashboard' : 'eraser');
+
+      const rightSidebar = document.getElementById('right-sidebar');
+      const showRightBtn = document.getElementById('show-right-sidebar-btn');
+      if (rightSidebar) {
+        if (isEmptyState) {
+          rightSidebar.classList.add('translate-x-full');
+          if (showRightBtn) showRightBtn.classList.add('hidden');
+        } else {
+          rightSidebar.classList.remove('translate-x-full');
+          if (showRightBtn) showRightBtn.classList.add('hidden');
+        }
+      }
+
+      setTimeout(() => lucide.createIcons(), 50);
+    }
+
+    function toggleEmptyState() {
+      setEmptyState(!isEmptyState);
+    }
+
+    function handleStrategySubmit(forceTransition = false) {
+      const textarea = document.getElementById('strategy-input') || document.querySelector('textarea');
+      const hasInput = textarea && textarea.value.trim().length > 0;
+      if (forceTransition || hasInput) {
+        setEmptyState(false);
+      }
+    }
+
+    // Canvas panning and zooming
+    
+    // --- Dynamic Component Loader ---
+    async function loadComponent(id, url) {
+      try {
+        const response = await fetch(url);
+        if (response.ok) {
+          const html = await response.text();
+          const target = document.getElementById(id);
+          if (target) {
+            target.outerHTML = html;
+          }
+        }
+      } catch (err) {
+        console.error('Error loading ' + url, err);
+      }
+    }
+
+    async function initApp() {
+      await Promise.all([
+        loadComponent('sidebar-placeholder', './components/sidebar.html'),
+        loadComponent('header-placeholder', './components/header.html'),
+        loadComponent('left-panel-placeholder', './components/left-panel.html'),
+        loadComponent('canvas-placeholder', './components/canvas.html'),
+        loadComponent('right-panel-placeholder', './components/right-panel.html')
+      ]);
+      
+      // Re-initialize icons and event listeners AFTER DOM is fully injected
+      lucide.createIcons();
+      initCanvasEvents();
+      initDialogueEvents();
+      
+      // Initialize state
+      setEmptyState(true);
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+
+    function initCanvasEvents() {
+      const container = document.getElementById('canvas-container');
+      const content = document.getElementById('canvas-content');
+
+      if(!container || !content) return;
+
+      let isDragging = false;
+      let startX, startY;
+    let translateX = 0;
+    let translateY = 0;
+    let scale = 1;
+    const ZOOM_SPEED = 0.1;
+    const MIN_ZOOM = 0.1;
+    const MAX_ZOOM = 3;
+
+    function updateTransform() {
+      content.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }
+
+    // Pan
+    container.addEventListener('mousedown', (e) => {
+      // Don't drag if clicking inside cards (optional refinement)
+      if(e.target.closest('.bg-white') && !e.target.closest('.bg-white').id) {
+        // could allow dragging on background only, but let's allow anywhere for simplicity
+      }
+      isDragging = true;
+      startX = e.clientX - translateX;
+      startY = e.clientY - translateY;
+      container.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      translateX = e.clientX - startX;
+      translateY = e.clientY - startY;
+      updateTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      container.style.cursor = 'grab';
+    });
+
+    // Zoom
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      
+      const mouseX = e.clientX - container.getBoundingClientRect().left;
+      const mouseY = e.clientY - container.getBoundingClientRect().top;
+
+      // Calculate wheel direction
+      const delta = -Math.sign(e.deltaY) * ZOOM_SPEED;
+      let newScale = scale + delta;
+      
+      // Clamp zoom
+      newScale = Math.min(Math.max(MIN_ZOOM, newScale), MAX_ZOOM);
+      
+      if(newScale !== scale) {
+        // Adjust translation to zoom towards mouse cursor
+        const ratio = newScale / scale;
+        translateX = mouseX - (mouseX - translateX) * ratio;
+        translateY = mouseY - (mouseY - translateY) * ratio;
+        scale = newScale;
+        updateTransform();
+      }
+    }, { passive: false });
+
+    // Initial transform setup
+    updateTransform();
+  
+    }
+
+    function initDialogueEvents() {
+      const textarea = document.getElementById('strategy-input') || document.querySelector('textarea');
+      if (!textarea) return;
+
+      textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleStrategySubmit();
+        }
+      });
+    }
+    </script>
+</body>
+</html>
