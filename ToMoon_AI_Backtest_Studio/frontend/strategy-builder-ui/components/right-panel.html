@@ -1,5 +1,5 @@
 <!-- 4. Right Panel: Details & Completeness -->
-      <aside id="right-sidebar" class="absolute right-0 top-0 bottom-0 z-40 w-80 overflow-y-auto shrink-0 flex flex-col transition-transform duration-300 translate-x-full pointer-events-none">
+      <aside id="right-sidebar" class="absolute right-0 top-0 bottom-0 z-40 overflow-y-auto shrink-0 flex flex-col transition-transform duration-300 translate-x-full pointer-events-none" style="width: var(--right-sidebar-width, clamp(320px, 24vw, 380px));">
         
         <!-- ================= EMPTY STATE ================= -->
         <div id="right-panel-empty-state" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-300 pointer-events-auto bg-[#F8F7FB] dark:bg-dark-bg">
@@ -13,7 +13,7 @@
         <!-- ================= WORKFLOW STATE ================= -->
         <div id="right-panel-workflow" class="flex flex-col gap-6 p-4 pt-4 pointer-events-auto pb-8 opacity-0 hidden transition-opacity duration-300">
           <!-- Strategy Details -->
-          <div class="bg-white dark:bg-dark-card rounded-xl shadow-lg border border-slate-100 dark:border-dark-border p-4">
+          <div id="right-strategy-details-card" class="sticky top-4 bg-white dark:bg-dark-card rounded-xl shadow-lg border border-slate-100 dark:border-dark-border p-4">
           <div class="flex justify-between items-center mb-4">
             <h3 class="font-semibold text-slate-800 dark:text-slate-100">Strategy Details</h3>
             <div class="flex items-center space-x-2">
