@@ -1,0 +1,82 @@
+<!-- 2. Left Panel: AI Strategy Dialogue -->
+      <aside id="left-sidebar" class="absolute left-0 top-0 bottom-0 z-40 p-4 flex flex-col shrink-0 transition-transform duration-300 translate-x-0 pointer-events-none" style="width: var(--left-sidebar-width, clamp(300px, 25vw, 380px));">
+        
+        <!-- Main Chat Card (Rounded & Floating) -->
+        <div class="flex-1 flex flex-col bg-white dark:bg-dark-card rounded-2xl shadow-xl border border-slate-200 dark:border-dark-border overflow-hidden pointer-events-auto">
+          
+          <!-- Header -->
+          <div class="flex items-center justify-between p-4 border-b border-slate-100 dark:border-dark-border shrink-0 bg-white dark:bg-dark-card">
+            <div class="flex items-center gap-2">
+              <div class="text-purple-600 dark:text-purple-400 flex items-center justify-center bg-purple-50 dark:bg-purple-900/20 w-8 h-8 rounded-lg">
+                <i data-lucide="sparkle" class="w-4 h-4 fill-purple-200 dark:fill-purple-900"></i>
+              </div>
+              <h2 class="font-semibold text-slate-800 dark:text-slate-100 text-[15px]">AI Strategy Dialogue</h2>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="toggleSidebar()" class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300" title="Hide Sidebar">
+                <i data-lucide="chevrons-left" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Chat Area -->
+          <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-6 bg-[#FAFAFA] dark:bg-dark-bg/50 scroll-smooth relative">
+            
+            <!-- ================= EMPTY STATE ================= -->
+            <div id="left-panel-empty-state" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-300">
+              <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4 text-purple-600 dark:text-purple-400">
+                <i data-lucide="sparkles" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-slate-800 dark:text-slate-100 font-semibold mb-2">AI Strategy Assistant</h3>
+              <p class="text-slate-500 dark:text-slate-400 text-sm mb-6">Describe your trading idea, and I'll help you build, backtest, and optimize it.</p>
+              
+              <div class="grid grid-cols-1 gap-2 w-full max-w-[240px]">
+                <button onclick="setInput('Create a breakout strategy for Gold')" class="text-xs text-left p-3 bg-white dark:bg-dark-surface border border-slate-100 dark:border-dark-border rounded-lg hover:border-purple-300 dark:hover:border-purple-700 transition-all text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400">
+                  "Create a breakout strategy for Gold"
+                </button>
+                <button onclick="setInput('Build a mean reversion system for EURUSD')" class="text-xs text-left p-3 bg-white dark:bg-dark-surface border border-slate-100 dark:border-dark-border rounded-lg hover:border-purple-300 dark:hover:border-purple-700 transition-all text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400">
+                  "Build a mean reversion system"
+                </button>
+              </div>
+            </div>
+
+            <!-- ================= WORKFLOW STATE ================= -->
+            <div id="left-panel-workflow" class="flex flex-col gap-4 opacity-0 hidden transition-opacity duration-300 h-full">
+              <div id="strategy-chat-messages" class="flex flex-col gap-3 min-h-0"></div>
+            </div>
+            
+          </div>
+
+          <!-- AI Next Actions (Fixed under conversation) -->
+          <div id="strategy-next-actions" class="px-3 py-2 border-t border-slate-100 dark:border-dark-border bg-white dark:bg-dark-card hidden">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">AI Next Actions</p>
+            <div id="strategy-next-actions-list" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <!-- Input Area (Footer) - Anchored at the bottom -->
+          <div class="p-3 border-t border-slate-100 dark:border-dark-border bg-white dark:bg-dark-card shrink-0">
+            <div class="relative flex flex-col bg-[#FAFAFA] dark:bg-dark-bg/60 rounded-xl border border-slate-200 dark:border-slate-700 overflow-visible focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all">
+              <textarea id="strategy-input" rows="1" placeholder="Reply to AI Strategy..." class="w-full bg-transparent px-3.5 py-3 text-[13.5px] resize-none focus:outline-none text-slate-700 dark:text-slate-200 placeholder-slate-400 leading-normal" style="min-height: 44px;"></textarea>
+              <div class="flex items-center justify-between px-2 pb-2">
+                <div class="flex items-center gap-0.5">
+                  <button class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                  </button>
+                  <button class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+                    <i data-lucide="mic" class="w-4 h-4"></i>
+                  </button>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="openAISettings()" class="flex items-center gap-1.5 text-[11px] font-semibold text-purple-700 dark:text-purple-300 px-2.5 py-1 bg-purple-50 dark:bg-purple-900/40 rounded-md hover:bg-purple-100 transition-colors border border-purple-100/50 dark:border-purple-800/30 shadow-sm">
+                    <i data-lucide="sparkle" class="w-3 h-3 fill-current"></i> <span id="strategy-model-label">qwen-plus AI</span> <i data-lucide="chevron-up" class="w-3 h-3 ml-0.5 opacity-60"></i>
+                  </button>
+                  <button id="strategy-submit-btn" onclick="handleStrategySubmit()" class="flex items-center justify-center w-7 h-7 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors shadow-sm hover:shadow">
+                    <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </aside>

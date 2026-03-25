@@ -1,0 +1,35 @@
+<!-- 1. Main Sidebar (Leftmost Navigation) -->
+<aside class="w-16 bg-white dark:bg-opacity-0 dark:backdrop-blur-xl border-r border-slate-200 dark:border-dark-border shrink-0 z-20 transition-colors duration-300">
+  <div id="sidebar-empty-state" class="hidden h-full w-full flex-col items-center justify-center px-2 text-center">
+    <div class="w-9 h-9 mb-3 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500">
+      <i data-lucide="panel-left" class="w-4 h-4"></i>
+    </div>
+    <p class="text-[10px] text-slate-400 dark:text-slate-500 leading-tight">Waiting</p>
+  </div>
+
+  <div id="sidebar-workflow" class="flex h-full w-full flex-col items-center py-4 space-y-6">
+    <!-- Logo -->
+    <div class="text-rose-500 dark:text-rose-400 mb-4 cursor-pointer hover:scale-110 transition-transform glow-purple">
+      <i data-lucide="box" class="w-8 h-8 fill-current"></i>
+    </div>
+    
+    <!-- Nav Icons -->
+    <nav class="flex flex-col space-y-4 text-slate-400 dark:text-slate-500">
+      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 hover:glow-blue">
+        <i data-lucide="layout-grid" class="w-5 h-5"></i>
+      </button>
+      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 hover:glow-blue">
+        <i data-lucide="link" class="w-5 h-5"></i>
+      </button>
+      <button class="text-purple-600 dark:text-purple-400 p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30 glow-purple">
+        <i data-lucide="layers" class="w-5 h-5"></i>
+      </button>
+      <button onclick="openAISettings()" class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 hover:glow-blue" title="AI Settings">
+        <i data-lucide="settings" class="w-5 h-5"></i>
+      </button>
+      <button class="hover:text-slate-800 dark:hover:text-slate-200 transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 hover:glow-blue">
+        <i data-lucide="message-square" class="w-5 h-5"></i>
+      </button>
+    </nav>
+  </div>
+</aside>
