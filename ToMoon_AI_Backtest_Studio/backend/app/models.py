@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 ConditionOp = Literal["crossAbove", "crossBelow", "gt", "lt"]
@@ -111,3 +112,21 @@ class BacktestResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str
+
+
+class EarlyAccessSubscribeRequest(BaseModel):
+    email: str = Field(..., min_length=5, max_length=254)
+    source: str = Field(default="landingpage")
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        email = v.strip().lower()
+        if not re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", email):
+            raise ValueError("Invalid email format")
+        return email
+
+
+class EarlyAccessSubscribeResponse(BaseModel):
+    success: bool
+    message: str

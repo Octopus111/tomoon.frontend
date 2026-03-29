@@ -183,6 +183,39 @@
     .dark .glow-blue {
       box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
     }
+
+    /* Discover conversation transition states */
+    .discover-header-collapsed {
+      opacity: 0 !important;
+      max-height: 0 !important;
+      transform: translateY(-12px);
+      pointer-events: none;
+      overflow: hidden !important;
+      margin: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    .discover-header-expanded {
+      opacity: 1 !important;
+      max-height: 420px !important;
+      transform: translateY(0);
+    }
+
+    .discover-thread-hidden {
+      opacity: 0;
+      transform: translateY(8px);
+      max-height: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .discover-thread-visible {
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 9999px;
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body class="h-screen w-full flex bg-[#F8F7FB] dark:bg-dark-bg text-slate-800 dark:text-slate-100 overflow-hidden transition-colors duration-300">
@@ -343,10 +376,12 @@
     // Empty State Toggle
     let isEmptyState = true;
     let isStrategyGenerating = false;
-    let isDiscoverBoardsCollapsed = false;
     let strategyConversation = [];
     let isDemoPrefillMode = false;
     let discoverPromptCache = null;
+    let discoverLayoutState = '';
+    let discoverComposerBottom = null;
+    let discoverComposerPositionRaf = 0;
     const recentGuidanceClicks = {};
     const GUIDANCE_ACTION_COOLDOWN_MS = 45000;
     const strategyState = {
@@ -370,6 +405,8 @@
       dataConnectionNotes: []
     };
     let discoverAttachments = [];
+    let quotedModules = [];
+    let hiddenBlueprintCards = new Set();
     const DEFAULT_SYSTEM_PROMPT = `You are a strategy-builder assistant. Reply naturally and contextually to the user's latest message in 1-3 sentences (do not sound like a form bot), then provide structured updates. Return one JSON object only (no markdown): {"reply":"natural user-facing reply","updates":{"market":"","marketShort":"","timeframe":"","timeframeShort":"","strategyType":"","strategyTypeShort":"","edge":"","volatilityFilter":"","entryTrigger":"","stopLoss":"","takeProfit":"","useOwnData":true,"economicCalendarReady":false,"executionItems":[{"title":"","value":"formula"}],"signalLogicItems":[{"title":"","value":"formula"}],"riskMoneyItems":[{"title":"","value":"formula"}],"dataConnectionNotes":[""]}}. Omit unknown fields.`;
     const REQUIRED_ITEMS = [
       { key: 'edge', label: 'Premise / Edge', priority: 'High' },
@@ -423,6 +460,34 @@
     function refreshAIModelBadge() {
       const modelLabel = document.getElementById('strategy-model-label');
       if (modelLabel) modelLabel.textContent = `${getCurrentAIModel()} AI`;
+    }
+
+    function scheduleDiscoverComposerPositionUpdate(force = false) {
+      if (discoverComposerPositionRaf) cancelAnimationFrame(discoverComposerPositionRaf);
+      discoverComposerPositionRaf = requestAnimationFrame(() => {
+        discoverComposerPositionRaf = 0;
+        const welcomeHeader = document.getElementById('discover-welcome-header');
+        const inputContainer = document.getElementById('discover-input-container');
+        if (!welcomeHeader || !inputContainer) return;
+        if (discoverLayoutState === 'active') return;
+
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+        if (!viewportHeight) return;
+        const headerRect = welcomeHeader.getBoundingClientRect();
+        const inputRect = inputContainer.getBoundingClientRect();
+        const gapBelowHeader = 28;
+        const desiredTop = headerRect.bottom + gapBelowHeader;
+        const maxBottom = Math.round(viewportHeight * 0.38);
+        const minBottom = 80;
+        const computedBottom = viewportHeight - desiredTop - inputRect.height;
+        const clampedBottom = Math.max(minBottom, Math.min(maxBottom, computedBottom));
+        const nextBottom = Math.round(clampedBottom);
+
+        if (force || discoverComposerBottom !== nextBottom) {
+          discoverComposerBottom = nextBottom;
+          inputContainer.style.bottom = `${nextBottom}px`;
+        }
+      });
     }
 
     function getAttachmentKind(file) {
@@ -992,14 +1057,18 @@
       const attachmentCountSmall = document.getElementById('discover-attachment-count-small');
       const edgeStatusPill = document.getElementById('discover-edge-status-pill');
       const enterStructureBtn = document.getElementById('discover-enter-structure-btn');
-      const phenomenon = document.getElementById('discover-synthesis-phenomenon');
-      const conditions = document.getElementById('discover-synthesis-conditions');
-      const result = document.getElementById('discover-synthesis-result');
-      const edge = document.getElementById('discover-synthesis-edge');
-      const failure = document.getElementById('discover-synthesis-failure');
+      const premiseSummary = document.getElementById('discover-ai-summary');
+      const stateObservation = document.getElementById('discover-state-observation');
+      const stateContext = document.getElementById('discover-state-context');
+      const stateOutcome = document.getElementById('discover-state-outcome');
+      const stateLogic = document.getElementById('discover-state-logic');
+      const stateFailure = document.getElementById('discover-state-failure');
       const guidanceWrap = document.getElementById('discover-guidance-wrap');
       const guidanceActions = document.getElementById('discover-guidance-actions');
-      if (!modeTag || !completionPill || !edgeStatusPill || !enterStructureBtn || !phenomenon || !conditions || !result || !edge || !failure || !guidanceWrap || !guidanceActions) return;
+      const threadWrap = document.getElementById('discover-thread-wrap');
+      const boardsContainer = document.getElementById('discover-boards-container');
+      const emptyHint = document.getElementById('discover-empty-hint');
+      if (!modeTag || !completionPill || !enterStructureBtn) return;
         if (lastUser) { /* lastUser removed in UI refactor */ }
         if (edgeDraft) { /* edgeDraft removed in UI refactor */ }
         if (modeDesc) { /* modeDesc removed in UI refactor */ }
@@ -1007,11 +1076,16 @@
       const hasRules = !!(String(strategyState.entryTrigger || '').trim() || String(strategyState.stopLoss || '').trim() || String(strategyState.takeProfit || '').trim());
       const hasContext = !!(String(strategyState.market || '').trim() || String(strategyState.timeframe || '').trim() || String(strategyState.strategyType || '').trim());
       const hasValidEdge = isValidEdgeText(strategyState.edge);
-      const synthesis = buildDiscoverSynthesis();
+      const lastUserMessage = [...strategyConversation].reverse().find((m) => m.role === 'user');
+      const lastAssistantMessage = [...strategyConversation].reverse().find((m) => m.role === 'assistant');
+      const hasObservation = !!(lastUserMessage?.content || '').trim();
+      const hasOutcome = !!(String(strategyState.entryTrigger || '').trim() || String(strategyState.takeProfit || '').trim());
+      const hasFailure = !!(String(strategyState.stopLoss || '').trim() || /失效|fail|invalid|regime/i.test(String(strategyState.edge || '')));
+      const assistantSummary = toEdgeSummaryText(lastAssistantMessage?.content || '');
 
       if (hasValidEdge) {
         modeTag.textContent = 'Discover Complete';
-        if (modeDesc) modeDesc.textContent = 'Edge confirmed. You can enter Structure.';
+        if (modeDesc) modeDesc.textContent = 'Edge confirmed. You can enter Blueprint.';
       } else if (hasRules) {
         modeTag.textContent = 'Edge Inference';
         if (modeDesc) modeDesc.textContent = 'Rules detected. Let AI infer and confirm the edge first.';
@@ -1023,14 +1097,13 @@
         if (modeDesc) modeDesc.textContent = 'You are in exploration mode. Start from a testable advantage.';
       }
 
-      const lastUserMessage = [...strategyConversation].reverse().find((m) => m.role === 'user');
-      const lastAssistantMessage = [...strategyConversation].reverse().find((m) => m.role === 'assistant');
       if (lastUser) lastUser.textContent = lastUserMessage ? lastUserMessage.content : 'Waiting for your first observation...';
       if (edgeDraft) edgeDraft.textContent = hasValidEdge ? `Edge: ${toEdgeSummaryText(strategyState.edge)}` : 'Edge incomplete: explain edge source, failure condition, or behavior logic first.';
       
-      const comp = getCompleteness();
-      if (completionPill) completionPill.textContent = `${comp}% complete`;
-      if (completionPillSmall) completionPillSmall.textContent = `${comp}% complete`;
+      const readyStates = [hasObservation, hasContext, hasOutcome, hasValidEdge, hasFailure];
+      const readyCount = readyStates.filter(Boolean).length;
+      if (completionPill) completionPill.textContent = hasValidEdge ? 'Ready to structure' : 'Needs input';
+      if (completionPillSmall) completionPillSmall.textContent = `${readyCount}/5 ready`;
       if (attachmentCountSmall) attachmentCountSmall.textContent = `${discoverAttachments.length || 0}`;
 
       if (edgeStatusPill) {
@@ -1039,30 +1112,306 @@
           ? 'inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-300'
           : 'inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:border-amber-900 dark:bg-amber-900/20 dark:text-amber-300';
       }
-      enterStructureBtn.classList.toggle('hidden', !hasValidEdge);
-      phenomenon.textContent = synthesis.phenomenon;
-      conditions.textContent = synthesis.conditions;
-      result.textContent = synthesis.result;
-      edge.textContent = synthesis.edge;
-      failure.textContent = synthesis.failure;
+      if (enterStructureBtn) enterStructureBtn.classList.toggle('hidden', !hasValidEdge);
+      const enterStructureBtnMinimal = document.getElementById('discover-enter-structure-btn-minimal');
+      if (enterStructureBtnMinimal) enterStructureBtnMinimal.classList.toggle('hidden', !hasValidEdge);
+
+      const premiseTextContent = document.getElementById('discover-premise-text-content');
+      if (premiseTextContent) {
+        if (strategyState.edge && strategyState.edge.trim()) {
+           premiseTextContent.textContent = toEdgeSummaryText(strategyState.edge);
+        } else {
+           premiseTextContent.innerHTML = 'No clear premise captured yet <span class="font-normal text-slate-500 dark:text-slate-400">— describe what you noticed</span>';
+        }
+      }
+
+      if (premiseSummary) {
+        const summaryTextEl = premiseSummary.querySelector('p');
+        const fallbackSummary = assistantSummary || (lastAssistantMessage?.content || '').trim().slice(0, 120);
+        
+        if (fallbackSummary) {
+          if (summaryTextEl) summaryTextEl.textContent = fallbackSummary;
+          premiseSummary.classList.remove('hidden');
+        } else {
+          if (summaryTextEl) summaryTextEl.textContent = 'waiting for enough context...';
+          premiseSummary.classList.add('hidden');
+        }
+      }
+      
+      const applyStateStyle = (el, ready) => {
+        if (!el) return;
+        const dot = el.querySelector('span');
+        if (dot) {
+          dot.className = ready
+            ? 'w-2.5 h-2.5 rounded-full bg-emerald-500'
+            : 'w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600';
+        }
+        el.className = ready
+          ? 'inline-flex items-center gap-1.5 text-xs text-slate-800 dark:text-slate-100'
+          : 'inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300';
+      };
+      applyStateStyle(stateObservation, hasObservation);
+      applyStateStyle(stateContext, hasContext);
+      applyStateStyle(stateOutcome, hasOutcome);
+      applyStateStyle(stateLogic, hasValidEdge);
+      applyStateStyle(stateFailure, hasFailure);
+      renderDiscoverStateDetails();
+
+      const welcomeHeader = document.getElementById('discover-welcome-header');
+      const inputContainer = document.getElementById('discover-input-container');
+      const inputBg = document.getElementById('discover-input-bg');
+      const chatToolbar = document.getElementById('discover-chat-toolbar');
+      const minimalSend = document.getElementById('discover-minimal-send');
+      
+      const hasConversation = strategyConversation.length > 0;
+      const showBoardClasses = ['opacity-100', 'pointer-events-auto'];
+      const hideBoardClasses = ['opacity-0', 'pointer-events-none'];
+      const showHintClasses = ['opacity-100', 'translate-y-0', 'max-h-10', 'pointer-events-auto'];
+      const hideHintClasses = ['opacity-0', 'translate-y-2', 'max-h-0', 'pointer-events-none'];
+      const composerFixedClasses = ['bottom-6'];
+      const composerFlowClasses = [];
+      const layoutState = hasConversation ? 'active' : 'empty';
+
+      if (welcomeHeader && inputContainer && inputBg) {
+        if (discoverLayoutState !== layoutState) {
+          if (!hasConversation) {
+            // Empty state layout (ChatGPT style)
+            welcomeHeader.classList.remove('hidden');
+            welcomeHeader.classList.remove('discover-header-collapsed', 'h-0', 'pointer-events-none', 'overflow-hidden');
+            welcomeHeader.classList.add('discover-header-expanded');
+            inputContainer.classList.remove(...composerFixedClasses);
+            inputContainer.classList.add(...composerFlowClasses);
+            scheduleDiscoverComposerPositionUpdate(true);
+            inputBg.classList.remove('bg-gradient-to-t', 'from-[#F8F7FB]', 'dark:from-dark-bg', 'via-[#F8F7FB]/90', 'dark:via-dark-bg/90', 'to-transparent');
+            inputBg.style.background = 'transparent';
+            if (chatToolbar) chatToolbar.classList.add('hidden');
+            if (minimalSend) minimalSend.classList.remove('hidden');
+            if (boardsContainer) {
+              boardsContainer.classList.remove(...showBoardClasses);
+              boardsContainer.classList.add(...hideBoardClasses);
+            }
+            if (emptyHint) {
+              emptyHint.classList.remove(...showHintClasses);
+              emptyHint.classList.add(...hideHintClasses);
+            }
+          } else {
+            // Active chat layout
+            welcomeHeader.classList.remove('discover-header-expanded');
+            welcomeHeader.classList.add('discover-header-collapsed', 'h-0', 'pointer-events-none', 'overflow-hidden');
+            welcomeHeader.classList.add('hidden');
+            inputContainer.classList.remove(...composerFlowClasses);
+            inputContainer.classList.add(...composerFixedClasses);
+            discoverComposerBottom = null;
+            inputContainer.style.bottom = '';
+            inputBg.classList.remove('bg-gradient-to-t', 'from-[#F8F7FB]', 'dark:from-dark-bg', 'via-[#F8F7FB]/90', 'dark:via-dark-bg/90', 'to-transparent');
+            inputBg.style.background = 'transparent';
+            if (chatToolbar) chatToolbar.classList.remove('hidden');
+            if (minimalSend) minimalSend.classList.add('hidden');
+            if (boardsContainer) {
+              boardsContainer.classList.add(...showBoardClasses);
+              boardsContainer.classList.remove(...hideBoardClasses);
+            }
+            if (emptyHint) {
+              emptyHint.classList.remove(...showHintClasses);
+              emptyHint.classList.add(...hideHintClasses);
+            }
+          }
+          discoverLayoutState = layoutState;
+        } else if (!hasConversation) {
+          scheduleDiscoverComposerPositionUpdate();
+        }
+      }
+
+      if (threadWrap) {
+        threadWrap.classList.add('transition-all', 'duration-500');
+        threadWrap.classList.remove('hidden');
+        threadWrap.classList.toggle('mt-4', hasConversation);
+        threadWrap.classList.toggle('md:mt-6', hasConversation);
+        threadWrap.classList.toggle('mt-8', !hasConversation);
+        threadWrap.classList.toggle('md:mt-10', !hasConversation);
+        threadWrap.classList.toggle('discover-thread-visible', hasConversation);
+        threadWrap.classList.toggle('discover-thread-hidden', !hasConversation);
+        // Keep chat content stable when the top status panel expands/collapses.
+        threadWrap.style.paddingTop = hasConversation ? '116px' : '';
+      }
 
       const structuredActions = normalizeDiscoverActions(lastAssistantMessage?.discoverActions);
-      const dynamicGuidance = hasValidEdge ? [] : (structuredActions.length ? structuredActions : toGuidanceActions(lastAssistantMessage?.content || ''));
-      const skipAction = {
-        label: 'Skip Discover (Demo)',
-        prompt: 'Skip discover and go directly to structure demo.',
-        mode: 'send',
-        placeholders: []
+      const dynamicGuidance = hasConversation && !hasValidEdge
+        ? (structuredActions.length ? structuredActions : toGuidanceActions(lastAssistantMessage?.content || ''))
+        : [];
+      if (hasConversation && !hasValidEdge) {
+        const skipAction = {
+          label: 'Skip to Blueprint',
+          prompt: 'Please skip Discover and enter Blueprint with a demo strategy.',
+          mode: 'send',
+          placeholders: []
+        };
+        const hasSkipAction = dynamicGuidance.some((item) => normalizeActionKey(item.label || item.prompt) === normalizeActionKey(skipAction.label));
+        if (!hasSkipAction) dynamicGuidance.unshift(skipAction);
+      }
+      if (guidanceWrap && guidanceActions) {
+        if (dynamicGuidance.length) {
+          guidanceWrap.classList.remove('hidden');
+          guidanceActions.innerHTML = dynamicGuidance.map((item) => `
+            <button onclick="onGuidanceActionClick('${escapeJsSingleQuoted(item.prompt)}','${escapeJsSingleQuoted(item.label)}','${escapeJsSingleQuoted(item.mode || 'send')}','${escapeJsSingleQuoted((item.placeholders || []).join(';'))}')" class="px-3 py-1.5 rounded-full border ${item.mode === 'compose' ? 'border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300' : 'border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-slate-800 text-purple-700 dark:text-purple-300'} text-[12px] transition-colors">${escapeHtml(item.label)}</button>
+          `).join('');
+        } else {
+          guidanceWrap.classList.add('hidden');
+          guidanceActions.innerHTML = '';
+        }
+      }
+    }
+
+    function getDiscoverStateDrafts() {
+      const synthesis = buildDiscoverSynthesis();
+      return {
+        observation: synthesis.phenomenon || 'Waiting for a clear core idea.',
+        context: synthesis.conditions || 'Waiting for market, timeframe, and regime clues.',
+        outcome: synthesis.result || 'Waiting for entry and expected move definition.',
+        logic: synthesis.edge || 'Waiting for a falsifiable edge explanation.',
+        failure: synthesis.failure || 'Waiting for invalidation or failure condition.'
       };
-      const filteredGuidance = getActionCooldownFiltered([skipAction, ...dynamicGuidance]);
-      if (filteredGuidance.length) {
-        guidanceWrap.classList.remove('hidden');
-        guidanceActions.innerHTML = filteredGuidance.map((item) => `
-          <button onclick="onGuidanceActionClick('${escapeJsSingleQuoted(item.prompt)}','${escapeJsSingleQuoted(item.label)}','${escapeJsSingleQuoted(item.mode || 'send')}','${escapeJsSingleQuoted((item.placeholders || []).join(';'))}')" class="px-3 py-1.5 rounded-full border ${item.mode === 'compose' ? 'border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300' : 'border-purple-200 dark:border-purple-800 bg-purple-50/70 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'} text-[12px] hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors">${escapeHtml(item.label)}</button>
-        `).join('');
+    }
+
+    function setDiscoverDetailBadge(id, ready) {
+      const badge = document.getElementById(id);
+      if (!badge) return;
+      badge.textContent = ready ? 'Ready' : 'Missing';
+      badge.className = ready
+        ? 'rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-300'
+        : 'rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-300';
+    }
+
+    function renderDiscoverStateDetails() {
+      const drafts = getDiscoverStateDrafts();
+      const readiness = {
+        observation: !!String(getLastUserText() || '').trim(),
+        context: !!(String(strategyState.market || '').trim() || String(strategyState.timeframe || '').trim() || String(strategyState.strategyType || '').trim() || String(strategyState.volatilityFilter || '').trim()),
+        outcome: !!(String(strategyState.entryTrigger || '').trim() || String(strategyState.takeProfit || '').trim()),
+        logic: isValidEdgeText(strategyState.edge),
+        failure: !!(String(strategyState.stopLoss || '').trim() || /失效|fail|invalid|regime/i.test(String(strategyState.edge || '')))
+      };
+
+      Object.keys(drafts).forEach((key) => {
+        const detail = document.getElementById(`discover-state-${key}-detail`);
+        if (detail) detail.textContent = drafts[key];
+        setDiscoverDetailBadge(`discover-state-${key}-badge`, !!readiness[key]);
+      });
+    }
+
+    function toggleDiscoverStateDetails() {
+      const details = document.getElementById('discover-state-details');
+      const btn = document.getElementById('discover-state-toggle-btn');
+      const icon = document.getElementById('discover-state-toggle-icon');
+      const text = document.getElementById('discover-state-toggle-text');
+      if (!details) return;
+
+      const willOpen = details.classList.contains('hidden');
+      details.classList.toggle('hidden', !willOpen);
+      if (btn) btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      if (text) text.textContent = willOpen ? 'Hide full status' : 'View full status';
+      if (icon) icon.setAttribute('data-lucide', willOpen ? 'chevron-up' : 'chevron-down');
+      if (willOpen) renderDiscoverStateDetails();
+      setTimeout(() => lucide.createIcons(), 0);
+    }
+
+    function quoteDiscoverStateForEdit(kind) {
+      const drafts = getDiscoverStateDrafts();
+      const textByKind = {
+        observation: `Core idea draft: ${drafts.observation}\nRefine into one falsifiable statement: 【edge premise】`,
+        context: `Current conditions: ${drafts.context}\nAdd exact boundaries (market/timeframe/regime): 【boundaries】`,
+        outcome: `Target move draft: ${drafts.outcome}\nMake it measurable: 【target move + metric】`,
+        logic: `Edge reason draft: ${drafts.logic}\nExplain why this should work: 【causal logic】`,
+        failure: `Failure mode draft: ${drafts.failure}\nDefine strict invalidation: 【failure condition】`
+      };
+      const nextText = textByKind[kind] || `Refine this state item: ${drafts.observation}`;
+      const textarea = getActiveComposerTextarea();
+      if (!textarea) return;
+      textarea.value = nextText;
+      textarea.focus();
+      focusComposeTemplate(textarea, nextText);
+    }
+
+    function toggleDiscoverSummaryEdit() {
+      const summaryText = document.getElementById('discover-summary-text');
+      const editBtn = document.getElementById('discover-summary-edit-btn');
+      const autoBadge = document.getElementById('discover-summary-auto-badge');
+      if (!summaryText || !editBtn) return;
+
+      const isEditing = summaryText.getAttribute('contenteditable') === 'true';
+      if (!isEditing) {
+        summaryText.setAttribute('contenteditable', 'true');
+        summaryText.classList.add('ring-1', 'ring-purple-300', 'rounded', 'px-1');
+        if (autoBadge) autoBadge.textContent = 'Editing';
+        editBtn.title = 'Save summary';
+        const icon = editBtn.querySelector('i');
+        if (icon) icon.setAttribute('data-lucide', 'check');
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.selectNodeContents(summaryText);
+        range.collapse(false);
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+        summaryText.focus();
       } else {
-        guidanceWrap.classList.add('hidden');
-        guidanceActions.innerHTML = '';
+        summaryText.setAttribute('contenteditable', 'false');
+        summaryText.classList.remove('ring-1', 'ring-purple-300', 'rounded', 'px-1');
+        const edited = String(summaryText.textContent || '').trim();
+        if (autoBadge) autoBadge.textContent = edited ? 'Edited' : 'Auto-generated';
+        editBtn.title = 'Edit summary';
+        const icon = editBtn.querySelector('i');
+        if (icon) icon.setAttribute('data-lucide', 'pencil');
+      }
+      setTimeout(() => lucide.createIcons(), 0);
+    }
+
+    function buildDiscoverCategoryChip(label, index) {
+      const styles = [
+        { icon: 'lightbulb', cls: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-100 dark:border-blue-800/30' },
+        { icon: 'target', cls: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800/30' },
+        { icon: 'shield', cls: 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-100 dark:border-orange-800/30' },
+        { icon: 'bar-chart-3', cls: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-800/30' }
+      ];
+      const style = styles[index % styles.length];
+      return `
+        <span class="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium border ${style.cls}">
+          <i data-lucide="${style.icon}" class="w-2.5 h-2.5 mr-1"></i>
+          <span data-discover-category-label="1">${escapeHtml(label)}</span>
+        </span>
+      `;
+    }
+
+    function toggleDiscoverCategoriesEdit() {
+      const list = document.getElementById('discover-categories-list');
+      const editBtn = document.getElementById('discover-categories-edit-btn');
+      if (!list || !editBtn) return;
+
+      const editor = list.querySelector('textarea[data-discover-categories-editor="1"]');
+      if (editor) {
+        const labels = String(editor.value || '')
+          .split(/[\n,，]/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .slice(0, 8);
+        const normalized = labels.length ? labels : ['Hypothesis'];
+        list.innerHTML = normalized.map((label, idx) => buildDiscoverCategoryChip(label, idx)).join('');
+        editBtn.textContent = 'Edit';
+        setTimeout(() => lucide.createIcons(), 0);
+        return;
+      }
+
+      const current = Array.from(list.querySelectorAll('[data-discover-category-label="1"]'))
+        .map((el) => String(el.textContent || '').trim())
+        .filter(Boolean);
+      const seed = current.length ? current.join(', ') : 'Hypothesis, Entry Logic, Risk Rule';
+      list.innerHTML = `<textarea data-discover-categories-editor="1" class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/40 px-2.5 py-2 text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/25" rows="2" placeholder="Comma-separated categories">${escapeHtml(seed)}</textarea>`;
+      editBtn.textContent = 'Save';
+      const nextEditor = list.querySelector('textarea[data-discover-categories-editor="1"]');
+      if (nextEditor) {
+        nextEditor.focus();
+        nextEditor.setSelectionRange(nextEditor.value.length, nextEditor.value.length);
       }
     }
 
@@ -1102,8 +1451,6 @@
       const mode = getWorkflowMode();
       setCanvasMode(mode);
       renderDiscoverCanvasState();
-      const detailsCard = document.getElementById('right-strategy-details-card');
-      if (detailsCard) detailsCard.classList.toggle('hidden', mode === 'discover');
     }
 
     function setTopbarStage() {
@@ -1152,6 +1499,54 @@
       applyWorkflowModeUI();
     }
 
+    function getCardSubtitleText(cardKey) {
+      const executionCount = Array.isArray(strategyState.executionItems) ? strategyState.executionItems.length : 0;
+      const signalCount = Array.isArray(strategyState.signalLogicItems) ? strategyState.signalLogicItems.length : 0;
+      const riskCount = Array.isArray(strategyState.riskMoneyItems) ? strategyState.riskMoneyItems.length : 0;
+      const notesCount = Array.isArray(strategyState.dataConnectionNotes) ? strategyState.dataConnectionNotes.length : 0;
+      const map = {
+        'premise-edge': toEdgeSummaryText(strategyState.edge) || 'Waiting for a testable edge statement.',
+        'strategy-identity': [strategyState.market, strategyState.timeframe, strategyState.strategyType].filter(Boolean).join(' | ') || 'Waiting for market, timeframe, and strategy type.',
+        'market-regime': strategyState.volatilityFilter ? 'Regime filter has been defined by AI.' : 'Waiting for market regime and volatility boundaries.',
+        'signal-logic': strategyState.entryTrigger
+          ? `Signal trigger defined. ${signalCount ? `${signalCount} supporting logic item(s).` : 'Ready for refinement.'}`
+          : 'Waiting for setup, trigger, and invalidation narrative.',
+        execution: executionCount ? `${executionCount} execution rule(s) drafted by AI.` : 'Waiting for execution constraints and order style.',
+        'risk-money': [
+          strategyState.stopLoss ? 'Stop-loss defined' : 'Stop-loss missing',
+          strategyState.takeProfit ? 'Take-profit defined' : 'Take-profit missing',
+          riskCount ? `${riskCount} extra risk item(s)` : ''
+        ].filter(Boolean).join(' | ') || 'Waiting for risk budget and exit logic.',
+        'data-connection': strategyState.useOwnData
+          ? `Data source connected${notesCount ? ` with ${notesCount} note(s).` : '.'}`
+          : 'Waiting for data source and dependency notes.'
+      };
+      return map[cardKey] || 'Waiting for AI summary.';
+    }
+
+    function setModuleCardCollapsedState(card, collapsed) {
+      if (!card) return;
+      const bodyNodes = card.querySelectorAll('[data-module-body]');
+      const extraNodes = card.querySelectorAll('[data-module-extra]');
+      const subtitle = card.querySelector('[data-module-subtitle]');
+      bodyNodes.forEach((node) => node.classList.toggle('hidden', collapsed));
+      extraNodes.forEach((node) => node.classList.toggle('hidden', collapsed));
+      if (subtitle) subtitle.classList.toggle('hidden', !collapsed);
+      card.dataset.collapsed = collapsed ? '1' : '0';
+    }
+
+    function renderModuleCardSubtitles() {
+      const cardKeys = ['premise-edge', 'strategy-identity', 'market-regime', 'signal-logic', 'risk-money', 'execution', 'data-connection'];
+      cardKeys.forEach((cardKey) => {
+        const card = document.querySelector(`[data-module-card="${cardKey}"]`);
+        if (!card) return;
+        if (!card.dataset.collapsed) card.dataset.collapsed = '0';
+        const subtitle = card.querySelector('[data-module-subtitle]');
+        if (subtitle) subtitle.textContent = getCardSubtitleText(cardKey);
+        setModuleCardCollapsedState(card, card.dataset.collapsed === '1');
+      });
+    }
+
     function applyStrategyStateToCenter() {
       const setText = (id, value) => {
         const el = document.getElementById(id);
@@ -1183,8 +1578,55 @@
         if (!card) return;
         card.style.opacity = ready ? '1' : '0.65';
       });
+      syncBlueprintCanvasVisibility();
       renderDynamicModuleLists();
+      renderModuleCardSubtitles();
       applyWorkflowModeUI();
+    }
+
+    function getBlueprintVisibleState() {
+      const visible = (key) => !hiddenBlueprintCards.has(key);
+      return {
+        premise: visible('premise-edge'),
+        identity: visible('strategy-identity'),
+        marketRegime: visible('market-regime'),
+        signalLogic: visible('signal-logic'),
+        riskMoney: visible('risk-money'),
+        execution: visible('execution'),
+        dataConnection: visible('data-connection')
+      };
+    }
+
+    function syncBlueprintCanvasVisibility() {
+      const toggleCard = (key, elId) => {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const shouldHide = hiddenBlueprintCards.has(key);
+        el.classList.toggle('hidden', shouldHide);
+      };
+      toggleCard('premise-edge', 'card-premise-edge');
+      toggleCard('strategy-identity', 'card-strategy-identity');
+      toggleCard('market-regime', 'card-market-regime');
+      toggleCard('signal-logic', 'card-signal-logic');
+      toggleCard('risk-money', 'card-risk-money');
+      toggleCard('execution', 'card-execution');
+      toggleCard('data-connection', 'card-data-connection');
+
+      const visible = getBlueprintVisibleState();
+      const premiseToIdentity = document.getElementById('connector-premise-identity');
+      if (premiseToIdentity) premiseToIdentity.classList.toggle('hidden', !(visible.premise && visible.identity));
+
+      const branchWrap = document.getElementById('connector-identity-bottom');
+      const branchTrunk = document.getElementById('connector-branch-trunk');
+      const branchLeft = document.getElementById('connector-branch-left');
+      const branchMid = document.getElementById('connector-branch-mid');
+      const branchRight = document.getElementById('connector-branch-right');
+      const hasAnyBottom = visible.marketRegime || visible.signalLogic || visible.riskMoney;
+      if (branchWrap) branchWrap.classList.toggle('hidden', !(visible.identity && hasAnyBottom));
+      if (branchTrunk) branchTrunk.classList.toggle('hidden', !(visible.identity && hasAnyBottom));
+      if (branchLeft) branchLeft.classList.toggle('hidden', !(visible.marketRegime && visible.identity));
+      if (branchMid) branchMid.classList.toggle('hidden', !(visible.signalLogic && visible.identity));
+      if (branchRight) branchRight.classList.toggle('hidden', !(visible.riskMoney && visible.identity));
     }
 
     function renderDynamicModuleLists() {
@@ -1245,10 +1687,6 @@
         const el = document.getElementById(id);
         if (el && value !== undefined) el.textContent = value;
       };
-      setText('right-strategy-name', strategyState.strategyName);
-      setText('right-market', strategyState.marketShort);
-      setText('right-timeframe', strategyState.timeframeShort);
-      setText('right-strategy-type', strategyState.strategyTypeShort);
 
       const completeness = getCompleteness();
       setText('right-completeness-score', `${completeness}%`);
@@ -1310,30 +1748,6 @@
         `;
       }
 
-      const dynamicRules = document.getElementById('right-dynamic-rules');
-      if (dynamicRules) {
-        const sections = [
-          { title: 'Execution', items: strategyState.executionItems || [] },
-          { title: 'Signal Logic', items: strategyState.signalLogicItems || [] },
-          { title: 'Risk & Money', items: strategyState.riskMoneyItems || [] },
-          { title: 'Data Connection', items: (strategyState.dataConnectionNotes || []).map((n) => ({ title: n })) }
-        ];
-        dynamicRules.innerHTML = sections.map((sec) => {
-          const items = sec.items || [];
-          const rows = items.length ? items.map((item) => `
-            <div class="pl-2 border-l-2 border-purple-100 dark:border-purple-900">
-              <div class="text-slate-700 dark:text-slate-200 text-xs font-medium">${escapeHtml(item.title || item)}</div>
-              ${item.value ? `<div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${escapeHtml(item.value)}</div>` : ''}
-            </div>
-          `).join('') : `<div class="text-[11px] text-slate-400 dark:text-slate-500">Waiting for AI...</div>`;
-          return `
-            <div class="rounded-lg border border-slate-100 dark:border-dark-border p-2.5 bg-slate-50/60 dark:bg-slate-800/30">
-              <div class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">${sec.title}</div>
-              <div class="space-y-2">${rows}</div>
-            </div>
-          `;
-        }).join('');
-      }
       renderNextActions();
       setTimeout(() => lucide.createIcons(), 0);
     }
@@ -1391,7 +1805,7 @@
         const quickActionHtml = quickActions.length ? `
           <div class="mt-2 flex flex-wrap gap-2">
             ${quickActions.map((item) => `
-              <button onclick="onGuidanceActionClick('${escapeJsSingleQuoted(item.prompt)}','${escapeJsSingleQuoted(item.label)}','${escapeJsSingleQuoted(item.mode || 'send')}','${escapeJsSingleQuoted((item.placeholders || []).join(';'))}')" class="px-3 py-1.5 rounded-full border ${item.mode === 'compose' ? 'border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300' : 'border-purple-200 dark:border-purple-800 bg-purple-50/70 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'} text-[12px] hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors">${escapeHtml(item.label)}</button>
+              <button onclick="onGuidanceActionClick('${escapeJsSingleQuoted(item.prompt)}','${escapeJsSingleQuoted(item.label)}','${escapeJsSingleQuoted(item.mode || 'send')}','${escapeJsSingleQuoted((item.placeholders || []).join(';'))}')" class="px-3 py-1.5 rounded-full border ${item.mode === 'compose' ? 'border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300' : 'border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-slate-800 text-purple-700 dark:text-purple-300'} text-[12px] hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors">${escapeHtml(item.label)}</button>
             `).join('')}
           </div>
         ` : '';
@@ -1542,6 +1956,13 @@
           strategyState[key] = nextValue;
           if (FIELD_TO_MODULE[key]) updatedModules.push(FIELD_TO_MODULE[key]);
         }
+        if (key === 'edge' && isValidEdgeText(nextValue)) hiddenBlueprintCards.delete('premise-edge');
+        if (['market', 'timeframe', 'strategyType'].includes(key) && String(nextValue || '').trim()) hiddenBlueprintCards.delete('strategy-identity');
+        if (key === 'volatilityFilter' && String(nextValue || '').trim()) hiddenBlueprintCards.delete('market-regime');
+        if (key === 'entryTrigger' && String(nextValue || '').trim()) hiddenBlueprintCards.delete('signal-logic');
+        if (key === 'executionItems' && Array.isArray(nextValue) && nextValue.length) hiddenBlueprintCards.delete('execution');
+        if ((key === 'stopLoss' || key === 'takeProfit') && String(nextValue || '').trim()) hiddenBlueprintCards.delete('risk-money');
+        if ((key === 'useOwnData' && !!nextValue) || (key === 'dataConnectionNotes' && Array.isArray(nextValue) && nextValue.length)) hiddenBlueprintCards.delete('data-connection');
       });
       applyStrategyStateToCenter();
       applyStrategyStateToRight();
@@ -1835,6 +2256,352 @@
       handleStrategySubmit(true);
     }
 
+    function composeToStrategyInput(text) {
+      const textarea = document.getElementById('strategy-input') || getActiveComposerTextarea();
+      if (!textarea) return;
+      const prefix = textarea.value.trim() ? `${textarea.value.trim()}\n\n` : '';
+      textarea.value = `${prefix}${text}`;
+      textarea.dataset.composeTemplate = '';
+      textarea.focus();
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      setEmptyState(false);
+    }
+
+    function renderQuotedModulesTray() {
+      const tray = document.getElementById('strategy-quote-tray');
+      if (!tray) return;
+      if (!quotedModules.length) {
+        tray.classList.add('hidden');
+        tray.innerHTML = '';
+        return;
+      }
+      tray.classList.remove('hidden');
+      tray.innerHTML = `
+        <div class="rounded-xl border border-purple-100 dark:border-purple-800/40 bg-[#F8F3FF] dark:bg-purple-900/15 px-2.5 py-2">
+          <div class="flex items-center justify-between mb-1.5">
+            <div class="text-[11px] font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="quote" class="w-3.5 h-3.5"></i> Quoted Blueprint Modules
+            </div>
+            <button onclick="clearQuotedModules()" class="text-[11px] text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 transition-colors">Clear</button>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            ${quotedModules.map((item) => `
+              <div class="max-w-[220px] rounded-lg border border-purple-200 dark:border-purple-800 bg-white dark:bg-slate-900/50 px-2 py-1.5 shadow-sm">
+                <div class="flex items-start justify-between gap-1.5">
+                  <div class="min-w-0">
+                    <div class="text-[11px] font-semibold text-slate-700 dark:text-slate-200 truncate">${escapeHtml(item.title)}</div>
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">${escapeHtml(item.summary)}</div>
+                  </div>
+                  <button onclick="removeQuotedModule('${escapeJsSingleQuoted(item.key)}')" class="shrink-0 p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="Remove quote">
+                    <i data-lucide="x" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      setTimeout(() => lucide.createIcons(), 0);
+    }
+
+    function removeQuotedModule(cardKey) {
+      quotedModules = quotedModules.filter((item) => item.key !== cardKey);
+      renderQuotedModulesTray();
+    }
+
+    function clearQuotedModules() {
+      quotedModules = [];
+      renderQuotedModulesTray();
+    }
+
+    function addQuotedModule(module) {
+      const existingIndex = quotedModules.findIndex((item) => item.key === module.key);
+      if (existingIndex >= 0) quotedModules.splice(existingIndex, 1);
+      quotedModules.unshift(module);
+      quotedModules = quotedModules.slice(0, 4);
+      renderQuotedModulesTray();
+    }
+
+    function animateCardToQuoteTray(cardEl) {
+      const tray = document.getElementById('strategy-quote-tray');
+      if (!cardEl || !tray) return;
+      const source = cardEl.getBoundingClientRect();
+      const target = tray.getBoundingClientRect();
+      if (!source.width || !source.height || !target.width || !target.height) return;
+
+      const ghost = cardEl.cloneNode(true);
+      ghost.style.position = 'fixed';
+      ghost.style.left = `${source.left}px`;
+      ghost.style.top = `${source.top}px`;
+      ghost.style.width = `${source.width}px`;
+      ghost.style.height = `${source.height}px`;
+      ghost.style.margin = '0';
+      ghost.style.zIndex = '120';
+      ghost.style.pointerEvents = 'none';
+      ghost.style.transformOrigin = 'top left';
+      ghost.style.transition = 'transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 420ms ease';
+      document.body.appendChild(ghost);
+
+      requestAnimationFrame(() => {
+        const targetX = target.left + 8;
+        const targetY = target.top + 8;
+        const scale = Math.max(0.2, Math.min(0.5, target.width / Math.max(source.width, 1)));
+        ghost.style.transform = `translate(${targetX - source.left}px, ${targetY - source.top}px) scale(${scale})`;
+        ghost.style.opacity = '0.15';
+      });
+
+      window.setTimeout(() => {
+        if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+      }, 460);
+    }
+
+    function getModuleSnapshot(cardKey) {
+      const executionList = Array.isArray(strategyState.executionItems) ? strategyState.executionItems : [];
+      const signalList = Array.isArray(strategyState.signalLogicItems) ? strategyState.signalLogicItems : [];
+      const riskList = Array.isArray(strategyState.riskMoneyItems) ? strategyState.riskMoneyItems : [];
+      const dataNotes = Array.isArray(strategyState.dataConnectionNotes) ? strategyState.dataConnectionNotes : [];
+      const map = {
+        'premise-edge': {
+          title: 'Premise / Edge',
+          summary: toEdgeSummaryText(strategyState.edge) || 'Waiting for a core edge hypothesis',
+          details: [{ label: 'Edge Hypothesis', value: toEdgeSummaryText(strategyState.edge) || 'Pending' }]
+        },
+        'strategy-identity': {
+          title: 'Strategy Identity',
+          summary: [strategyState.market, strategyState.timeframe, strategyState.strategyType].filter(Boolean).join(' | ') || 'Pending identity inputs',
+          details: [
+            { label: 'Market', value: strategyState.market || 'Pending' },
+            { label: 'Timeframe', value: strategyState.timeframe || 'Pending' },
+            { label: 'Strategy Type', value: strategyState.strategyType || 'Pending' }
+          ]
+        },
+        'market-regime': {
+          title: 'Market & Regime',
+          summary: strategyState.volatilityFilter || 'Pending regime filter',
+          details: [{ label: 'Volatility Filter', value: strategyState.volatilityFilter || 'Pending' }]
+        },
+        execution: {
+          title: 'Execution',
+          summary: executionList.length ? `${executionList.length} execution rule(s)` : 'No execution rules yet',
+          details: executionList.length
+            ? executionList.map((item, idx) => ({ label: `Rule ${idx + 1}: ${item.title || 'Execution'}`, value: toFormulaText(item.value || item.formula || item.title || '') }))
+            : [{ label: 'Execution Rules', value: 'Pending' }]
+        },
+        'signal-logic': {
+          title: 'Signal Logic',
+          summary: strategyState.entryTrigger || (signalList.length ? `${signalList.length} logic item(s)` : 'Pending signal logic'),
+          details: [
+            { label: 'Entry Trigger', value: strategyState.entryTrigger || 'Pending' },
+            ...(signalList.length
+              ? signalList.map((item, idx) => ({ label: `Rule ${idx + 1}: ${item.title || 'Signal'}`, value: toFormulaText(item.value || item.formula || item.title || '') }))
+              : [])
+          ]
+        },
+        'risk-money': {
+          title: 'Risk & Money',
+          summary: [strategyState.stopLoss ? 'SL set' : '', strategyState.takeProfit ? 'TP set' : 'TP missing'].filter(Boolean).join(' · ') || 'Pending risk settings',
+          details: [
+            { label: 'Stop Loss', value: strategyState.stopLoss || 'Pending' },
+            { label: 'Take Profit', value: strategyState.takeProfit || 'Optional' },
+            ...(riskList.length
+              ? riskList.map((item, idx) => ({ label: `Rule ${idx + 1}: ${item.title || 'Risk'}`, value: toFormulaText(item.value || item.formula || item.title || '') }))
+              : [])
+          ]
+        },
+        'data-connection': {
+          title: 'Data Connection',
+          summary: strategyState.useOwnData ? 'Own data source connected' : 'Own data source missing',
+          details: [
+            { label: 'Own Data Source', value: strategyState.useOwnData ? 'Ready' : 'Missing' },
+            { label: 'Economic Calendar', value: strategyState.economicCalendarReady ? 'Ready' : 'Missing' },
+            ...(dataNotes.length
+              ? dataNotes.map((note, idx) => ({ label: `Note ${idx + 1}`, value: note }))
+              : [{ label: 'Notes', value: 'Pending' }])
+          ]
+        }
+      };
+      return map[cardKey] || { title: 'Module', summary: 'No summary', details: [{ label: 'Status', value: 'Pending' }] };
+    }
+
+    function getLatestAssistantNarrativeText() {
+      const item = [...strategyConversation]
+        .reverse()
+        .find((m) => m.role === 'assistant' && m.content && m.content !== 'Thinking...' && !String(m.content).startsWith('Request failed:'));
+      return (item?.content || '').trim();
+    }
+
+    function shrinkNarrativeText(text, maxLen = 180) {
+      const cleaned = String(text || '').replace(/\s+/g, ' ').trim();
+      if (!cleaned) return '';
+      if (cleaned.length <= maxLen) return cleaned;
+      return `${cleaned.slice(0, maxLen).trim()}...`;
+    }
+
+    function buildModuleNarrative(cardKey, snap) {
+      const lastUser = shrinkNarrativeText(getLastUserText(), 160);
+      const lastAssistant = shrinkNarrativeText(getLatestAssistantNarrativeText(), 220);
+      const narratives = {
+        'premise-edge': [
+          `AI interpreted your observation into this edge hypothesis: ${toEdgeSummaryText(strategyState.edge) || 'still pending clear premise'}.`,
+          strategyState.stopLoss ? `Failure boundary already captured: ${strategyState.stopLoss}.` : 'Failure boundary is not explicit yet.'
+        ],
+        'strategy-identity': [
+          `AI translated your dialogue into identity fields: market=${strategyState.market || 'pending'}, timeframe=${strategyState.timeframe || 'pending'}, type=${strategyState.strategyType || 'pending'}.`,
+          'This identity acts as the context layer before formulas are generated.'
+        ],
+        'market-regime': [
+          strategyState.volatilityFilter
+            ? `AI set the regime boundary as a text rule: ${strategyState.volatilityFilter}.`
+            : 'Regime boundary is still being inferred from your conversation.',
+          'This step filters when the strategy should be active.'
+        ],
+        'signal-logic': [
+          strategyState.entryTrigger
+            ? `AI converted entry intent into a trigger narrative: ${strategyState.entryTrigger}.`
+            : 'Entry trigger narrative is missing and needs one concrete condition.',
+          'This is the text stage right before machine-readable formula simplification.'
+        ],
+        execution: [
+          (Array.isArray(strategyState.executionItems) && strategyState.executionItems.length)
+            ? `AI has drafted ${strategyState.executionItems.length} execution instruction(s) from your constraints.`
+            : 'Execution instructions are still pending in the dialogue-to-rules step.',
+          'Execution text defines order behavior, session constraints, and practical fills.'
+        ],
+        'risk-money': [
+          `AI extracted risk narrative: stop-loss=${strategyState.stopLoss || 'pending'}, take-profit=${strategyState.takeProfit || 'pending'}.`,
+          'This layer explains how losses are capped and how profits are realized before formula encoding.'
+        ],
+        'data-connection': [
+          strategyState.useOwnData
+            ? 'AI marked data source as connected and ready for backtest mapping.'
+            : 'Data source is not confirmed yet in the dialogue stage.',
+          strategyState.economicCalendarReady
+            ? 'Economic calendar dependency is already acknowledged by AI.'
+            : 'Economic calendar dependency is still optional/pending.'
+        ]
+      };
+      const moduleLines = narratives[cardKey] || [`AI narrative is pending for ${snap.title}.`];
+      const contextLines = [];
+      if (lastUser) contextLines.push(`Latest user context: ${lastUser}`);
+      if (lastAssistant) contextLines.push(`Latest AI wording: ${lastAssistant}`);
+      return {
+        intro: `This panel shows the AI text interpretation stage for ${snap.title}, before canvas formulas are finalized.`,
+        lines: [...moduleLines, ...contextLines]
+      };
+    }
+
+    function openCanvasDetail(cardKey) {
+      const modal = document.getElementById('canvas-detail-modal');
+      const title = document.getElementById('canvas-detail-title');
+      const subtitle = document.getElementById('canvas-detail-subtitle');
+      const content = document.getElementById('canvas-detail-content');
+      if (!modal || !title || !subtitle || !content) return;
+      const snap = getModuleSnapshot(cardKey);
+      const narrative = buildModuleNarrative(cardKey, snap);
+      title.textContent = snap.title;
+      subtitle.textContent = 'AI text interpretation (pre-formula stage)';
+      content.innerHTML = `
+        <div class="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-4 py-3">
+          <div class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">AI Narrative</div>
+          <p class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">${escapeHtml(narrative.intro)}</p>
+        </div>
+        ${narrative.lines.map((line, idx) => `
+          <div class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/20 px-4 py-3">
+            <div class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Step ${idx + 1}</div>
+            <p class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">${escapeHtml(line)}</p>
+          </div>
+        `).join('')}
+      `;
+      modal.classList.remove('hidden');
+      setTimeout(() => lucide.createIcons(), 0);
+    }
+
+    function closeCanvasDetail() {
+      const modal = document.getElementById('canvas-detail-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function clearModuleState(cardKey) {
+      hiddenBlueprintCards.add(cardKey);
+      if (cardKey === 'premise-edge') strategyState.edge = '';
+      if (cardKey === 'strategy-identity') {
+        strategyState.market = '';
+        strategyState.timeframe = '';
+        strategyState.strategyType = '';
+      }
+      if (cardKey === 'market-regime') strategyState.volatilityFilter = '';
+      if (cardKey === 'signal-logic') {
+        strategyState.entryTrigger = '';
+        strategyState.signalLogicItems = [];
+      }
+      if (cardKey === 'execution') strategyState.executionItems = [];
+      if (cardKey === 'risk-money') {
+        strategyState.stopLoss = '';
+        strategyState.takeProfit = '';
+        strategyState.riskMoneyItems = [];
+      }
+      if (cardKey === 'data-connection') {
+        strategyState.useOwnData = false;
+        strategyState.economicCalendarReady = false;
+        strategyState.dataConnectionNotes = [];
+      }
+      applyStrategyStateToCenter();
+      applyStrategyStateToRight();
+      setTopbarStage();
+    }
+
+    function initBlueprintModuleInteractions() {
+      const content = document.getElementById('canvas-content');
+      const modal = document.getElementById('canvas-detail-modal');
+      if (!content || !modal) return;
+      if (content.dataset.moduleEventsBound === '1') return;
+      content.dataset.moduleEventsBound = '1';
+
+      content.addEventListener('click', (e) => {
+        const actionBtn = e.target.closest('[data-module-action]');
+        if (!actionBtn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (getWorkflowMode() !== 'structure') return;
+
+        const card = actionBtn.closest('[data-module-card]');
+        if (!card) return;
+        const cardKey = card.getAttribute('data-module-card');
+        if (!cardKey) return;
+        const action = actionBtn.getAttribute('data-module-action');
+        const snap = getModuleSnapshot(cardKey);
+
+        if (action === 'quote') {
+          setEmptyState(false);
+          addQuotedModule({ key: cardKey, title: snap.title, summary: snap.summary });
+          composeToStrategyInput('');
+          animateCardToQuoteTray(card);
+          return;
+        }
+        if (action === 'expand') {
+          const collapsed = card.dataset.collapsed === '1';
+          setModuleCardCollapsedState(card, !collapsed);
+          return;
+        }
+        if (action === 'details') {
+          openCanvasDetail(cardKey);
+          return;
+        }
+        if (action === 'delete') {
+          const ok = window.confirm(`Delete current content in "${snap.title}"? This cannot be undone.`);
+          if (!ok) return;
+          clearModuleState(cardKey);
+        }
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target.closest('[data-detail-close]')) closeCanvasDetail();
+      });
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeCanvasDetail();
+      });
+    }
+
     function setEmptyState(nextIsEmpty) {
       isEmptyState = nextIsEmpty;
       if (nextIsEmpty) isDemoPrefillMode = false;
@@ -1875,24 +2642,28 @@
       };
 
       modulePairs.forEach(([emptyId, workflowId]) => switchPair(emptyId, workflowId, isEmptyState));
+      if (!isEmptyState) syncBlueprintCanvasVisibility();
 
       const leftSidebar = document.getElementById('left-sidebar');
       const leftShowBtn = document.getElementById('show-sidebar-btn');
       const rightSidebar = document.getElementById('right-sidebar');
       const showRightBtn = document.getElementById('show-right-sidebar-btn');
       if (leftSidebar) {
+        leftSidebar.classList.toggle('hidden', isEmptyState);
         leftSidebar.classList.toggle('-translate-x-full', isEmptyState);
         leftSidebar.classList.toggle('pointer-events-none', isEmptyState);
         leftSidebar.classList.toggle('opacity-0', isEmptyState);
         if (leftShowBtn) leftShowBtn.classList.add('hidden');
       }
       if (rightSidebar) {
+        rightSidebar.classList.toggle('hidden', isEmptyState);
         rightSidebar.classList.toggle('translate-x-full', isEmptyState);
         rightSidebar.classList.toggle('pointer-events-none', isEmptyState);
         rightSidebar.classList.toggle('opacity-0', isEmptyState);
         if (showRightBtn) showRightBtn.classList.add('hidden');
       }
       syncCanvasSafeArea();
+      if (typeof window.__syncCanvasCursor === 'function') window.__syncCanvasCursor();
 
       // Keep the global left navigation sidebar available in all modes.
       const sidebarEmpty = document.getElementById('sidebar-empty-state');
@@ -1910,35 +2681,10 @@
       const btnText = document.getElementById('empty-state-btn-text');
       const btn = document.querySelector('button[onclick="toggleEmptyState()"]');
       const btnIcon = btn ? btn.querySelector('i') : null;
-      if (btnText) btnText.textContent = isEmptyState ? (isValidEdgeText(strategyState.edge) ? 'Enter Structure' : 'Discover') : 'Back to Discover';
+      if (btnText) btnText.textContent = isEmptyState ? (isValidEdgeText(strategyState.edge) ? 'Enter Blueprint' : 'Discover') : 'Back to Discover';
       if (btnIcon) btnIcon.setAttribute('data-lucide', isEmptyState ? 'arrow-right' : 'compass');
 
       setTimeout(() => lucide.createIcons(), 50);
-    }
-
-    function toggleDiscoverBoards(forceState) {
-      const expanded = document.getElementById('discover-boards-expanded');
-      const collapsed = document.getElementById('discover-boards-collapsed');
-      if (!expanded || !collapsed) return;
-      
-      if (typeof forceState === 'boolean') {
-        isDiscoverBoardsCollapsed = forceState;
-      } else {
-        isDiscoverBoardsCollapsed = !isDiscoverBoardsCollapsed;
-      }
-
-      if (isDiscoverBoardsCollapsed) {
-        expanded.classList.remove('grid');
-        expanded.classList.add('hidden');
-        collapsed.classList.remove('hidden');
-        collapsed.classList.add('flex');
-      } else {
-        expanded.classList.remove('hidden');
-        expanded.classList.add('grid');
-        collapsed.classList.add('hidden');
-        collapsed.classList.remove('flex');
-      }
-      setTimeout(() => lucide.createIcons(), 0);
     }
 
     function toggleEmptyState() {
@@ -1956,13 +2702,14 @@
       if (!forceTransition && !hasInput) return;
       if (!hasInput || isStrategyGenerating) return;
       
-      // Auto-collapse discover boards on first message
-      if (isEmptyState && strategyConversation.length === 0 && !isDiscoverBoardsCollapsed) {
-        toggleDiscoverBoards(true);
-      }
-
-      const userText = textarea.value.trim();
+      const quotedContext = quotedModules.length
+        ? quotedModules.map((item) => `[Quoted Module] ${item.title}: ${item.summary}`).join('\n')
+        : '';
+      const rawText = textarea.value.trim();
+      const userText = quotedContext ? `${quotedContext}\n\n${rawText}` : rawText;
       textarea.value = '';
+      textarea.style.height = 'auto';
+      clearQuotedModules();
       strategyConversation.push({ role: 'user', content: userText });
       if (!isEmptyState && isDemoPrefillMode && !shouldSkipDiscoverIntent(userText) && !isGreetingLikeText(userText)) {
         isDemoPrefillMode = false;
@@ -1974,7 +2721,7 @@
         isDemoPrefillMode = true;
         strategyConversation.push({
           role: 'assistant',
-          content: 'Done. I skipped Discover and prefilled a demo strategy so you can view the full Structure automation flow now.',
+          content: 'Done. I skipped Discover and prefilled a demo strategy so you can view the full Blueprint automation flow now.',
           updatedModules
         });
         setEmptyState(false);
@@ -2044,6 +2791,7 @@
       renderDiscoverAttachments();
       initDiscoverEvents();
       initCanvasEvents();
+      initBlueprintModuleInteractions();
       initDialogueEvents();
       applyStrategyStateToCenter();
       applyStrategyStateToRight();
@@ -2053,6 +2801,15 @@
       
       // Initialize state
       setEmptyState(true);
+      if (!window.__discoverResizeBound) {
+        window.__discoverResizeBound = true;
+        window.addEventListener('resize', () => {
+          if (getWorkflowMode() === 'discover') {
+            scheduleDiscoverComposerPositionUpdate();
+            renderDiscoverCanvasState();
+          }
+        });
+      }
     }
 
     document.addEventListener('DOMContentLoaded', initApp);
@@ -2063,74 +2820,18 @@
 
       if(!container || !content) return;
       syncCanvasSafeArea();
-      let scale = 1;
-      let translateX = 0;
-      let translateY = 0;
-      let isPanning = false;
-      let startX = 0;
-      let startY = 0;
-
-      const minScale = 0.7;
-      const maxScale = 1.8;
-
-      const applyTransform = () => {
-        content.style.transformOrigin = 'top center';
-        content.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-      };
-
-      const canPanZoom = () => getWorkflowMode() === 'structure';
 
       container.style.cursor = 'default';
       container.style.overflowY = 'auto';
       container.style.overflowX = 'hidden';
-
-      container.addEventListener('wheel', (e) => {
-        if (!canPanZoom()) return;
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.06 : 0.06;
-        const nextScale = Math.min(maxScale, Math.max(minScale, scale + delta));
-        if (nextScale === scale) return;
-        scale = nextScale;
-        applyTransform();
-      }, { passive: false });
-
-      container.addEventListener('mousedown', (e) => {
-        if (!canPanZoom()) return;
-        if (e.button !== 0) return;
-        if (e.target.closest('button, input, textarea, select, a')) return;
-        isPanning = true;
-        startX = e.clientX - translateX;
-        startY = e.clientY - translateY;
-        container.style.cursor = 'grabbing';
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        if (!isPanning) return;
-        translateX = e.clientX - startX;
-        translateY = e.clientY - startY;
-        applyTransform();
-      });
-
-      window.addEventListener('mouseup', () => {
-        if (!isPanning) return;
-        isPanning = false;
-        container.style.cursor = canPanZoom() ? 'grab' : 'default';
-      });
-
-      container.addEventListener('dblclick', () => {
-        if (!canPanZoom()) return;
-        scale = 1;
-        translateX = 0;
-        translateY = 0;
-        applyTransform();
-      });
+      content.style.transformOrigin = 'top center';
+      content.style.transform = 'scale(1)';
 
       // Keep cursor consistent when mode changes
       const syncCursor = () => {
-        if (isPanning) return;
-        container.style.cursor = canPanZoom() ? 'grab' : 'default';
+        container.style.cursor = 'default';
       };
-      setInterval(syncCursor, 300);
+      window.__syncCanvasCursor = syncCursor;
       syncCursor();
    
     }
@@ -2140,6 +2841,20 @@
       textareas.forEach((textarea) => {
         if (textarea.dataset.bound === '1') return;
         textarea.dataset.bound = '1';
+
+        const autoResize = () => {
+          textarea.style.height = 'auto';
+          const minHeight = 56;
+          const maxHeight = 240;
+          const nextHeight = Math.max(minHeight, Math.min(maxHeight, textarea.scrollHeight));
+          textarea.style.height = `${nextHeight}px`;
+          textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
+        };
+
+        textarea.addEventListener('input', autoResize);
+        // Initial resize
+        autoResize();
+
         textarea.addEventListener('keydown', (e) => {
           if (e.key === 'Tab' && textarea.dataset.composeTemplate === '1') {
             e.preventDefault();
@@ -2149,6 +2864,8 @@
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleStrategySubmit();
+            // Reset height happens in handleStrategySubmit, but safeguard here too
+            setTimeout(() => { textarea.style.height = 'auto'; }, 0);
           }
         });
       });

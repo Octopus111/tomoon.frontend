@@ -1,0 +1,2936 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToMoon - AI-Powered Quant Strategy Infrastructure</title>
+    <link rel="icon" type="image/png" href="https://tomoon-logo-backet-663970204152-ap-southeast-1-an.s3.ap-southeast-1.amazonaws.com/T-browser.png">
+    <link rel="shortcut icon" type="image/png" href="https://tomoon-logo-backet-663970204152-ap-southeast-1-an.s3.ap-southeast-1.amazonaws.com/T-browser.png">
+    <link rel="apple-touch-icon" href="https://tomoon-logo-backet-663970204152-ap-southeast-1-an.s3.ap-southeast-1.amazonaws.com/T-browser.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #090b10;
+            color: #e5e5e5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+            color-scheme: dark;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                linear-gradient(180deg, rgba(9, 11, 16, 0) 0%, rgba(9, 11, 16, 0.2) 20%, rgba(9, 11, 16, 0.8) 60%, rgba(9, 11, 16, 1) 100%),
+                repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0 1px, transparent 1px 88px),
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0 1px, transparent 1px 88px),
+                url('../logo/ToMoon_Landing_Page_Background.png') center top / cover no-repeat;
+            pointer-events: none;
+            z-index: -2;
+            transform: translate(var(--mouse-x, 0px), var(--mouse-y, 0px)) scale(1.03);
+            transition: transform 0.15s ease-out;
+            will-change: transform;
+        }
+
+        body::after {
+            display: none;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(9, 11, 16, 0.72);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-link {
+            color: #a3a3a3;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: #e5e5e5;
+        }
+
+        .lang-toggle {
+            color: #737373;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .lang-active {
+            color: #e5e5e5;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(180deg, #f8fafc 0%, #dbe4ee 100%);
+            color: #0f172a;
+            padding: 10px 22px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 10px 24px rgba(0, 0, 0, 0.22);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #e8eef6 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 14px 30px rgba(0, 0, 0, 0.28);
+        }
+
+        .btn-secondary {
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s ease, opacity 0.2s ease;
+            border-bottom: 1px solid transparent;
+        }
+
+        .btn-secondary:hover {
+            color: #f3f4f6;
+            border-bottom-color: rgba(243, 244, 246, 0.7);
+        }
+
+        /* Typography */
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #7c8998;
+            margin-bottom: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-label::before {
+            content: '';
+            width: 22px;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0), rgba(148, 163, 184, 0.7));
+        }
+
+        .section-headline {
+            font-size: clamp(40px, 5vw, 56px);
+            font-weight: 650;
+            line-height: 1.02;
+            letter-spacing: -0.04em;
+            color: #f8fafc;
+            margin-bottom: 20px;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 15ch;
+        }
+
+        .hero-section {
+            position: relative;
+            isolation: isolate;
+        }
+
+        .hero-section::before {
+            display: none;
+        }
+
+        :root {
+            --why-stack-max-offset: 15rem;
+        }
+
+        .why-modal-section {
+            position: relative;
+            isolation: isolate;
+            z-index: 0;
+            padding-top: 5rem;
+            padding-bottom: 6rem;
+        }
+
+        #products {
+            position: relative;
+            z-index: 2;
+            margin-top: calc(var(--why-stack-max-offset) + 4rem);
+            padding-top: 5rem;
+        }
+
+        .why-modal-shell {
+            display: grid;
+            grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .why-modal-nav {
+            position: sticky;
+            top: 6rem;
+            align-self: start;
+            padding-top: 0.25rem;
+        }
+
+        .why-modal-title {
+            font-size: 52px;
+            font-weight: 650;
+            line-height: 0.98;
+            letter-spacing: -0.04em;
+            color: #f2f6ff;
+            max-width: 11ch;
+            margin-bottom: 2rem;
+        }
+
+        .why-modal-nav-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .why-modal-nav-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            width: 100%;
+            background: transparent;
+            border: 0;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #7f8b9a;
+            padding: 0.25rem 0;
+            cursor: pointer;
+            transition: color 0.25s ease, transform 0.25s ease;
+        }
+
+        .why-modal-nav-item::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: currentColor;
+            opacity: 0.9;
+            flex-shrink: 0;
+            transition: transform 0.25s ease;
+        }
+
+        .why-modal-nav-item.active {
+            color: #f8fbff;
+            transform: translateX(3px);
+        }
+
+        .why-modal-nav-item.active::before {
+            transform: scale(1.2);
+        }
+
+        .why-modal-stack {
+            display: block;
+            position: relative;
+            padding-bottom: 0;
+        }
+
+        .why-modal-stack::after {
+            content: '';
+            display: block;
+            height: calc(56vh + var(--why-stack-max-offset));
+        }
+
+        .why-modal-panel {
+            position: sticky;
+            display: grid;
+            grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+            gap: 2rem;
+            flex: none;
+            top: 6rem;
+            transform: translateY(var(--stack-offset, 0rem));
+            height: 78vh;
+            padding: 2rem;
+            border-radius: 28px;
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-top: 1px solid rgba(255, 255, 255, 0.15); /* give clearer edge to the stacked cards */
+            background:
+                radial-gradient(circle at top left, rgba(96, 165, 250, 0.12), transparent 34%),
+                linear-gradient(135deg, rgba(8, 11, 16, 0.98), rgba(11, 14, 20, 0.96));
+            box-shadow:
+                0 -24px 48px rgba(0, 0, 0, 0.65), /* strong top shadow so overlapping is clear */
+                0 24px 60px rgba(0, 0, 0, 0.38),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .why-modal-panel:nth-child(1) { --stack-offset: 0rem; z-index: 10; }
+        .why-modal-panel:nth-child(2) { --stack-offset: 5rem; z-index: 11; }
+        .why-modal-panel:nth-child(3) { --stack-offset: 10rem; z-index: 12; }
+        .why-modal-panel:nth-child(4) { --stack-offset: 15rem; z-index: 13; }
+
+        .why-modal-panel + .why-modal-panel {
+            margin-top: 4rem; /* Leave some space between cards in normal scroll flow */
+        }
+
+        .why-modal-panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 34%);
+            pointer-events: none;
+        }
+
+        .why-modal-copy {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            min-width: 0;
+            padding: 1.5rem 0.25rem; /* slightly larger top padding */
+        }
+
+        .why-modal-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #9ec3ff;
+        }
+
+        .why-modal-kicker::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #dbeafe, #60a5fa);
+            box-shadow: 0 0 18px rgba(96, 165, 250, 0.35);
+        }
+
+        .why-modal-panel-title {
+            font-size: 32px;
+            font-weight: 650;
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+            color: #f7fbff;
+            margin-bottom: 1rem;
+            max-width: 12ch;
+        }
+
+        .why-modal-panel-text {
+            font-size: 17px;
+            line-height: 1.7;
+            color: #9ba8b7;
+            max-width: 28rem;
+        }
+
+        .why-modal-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.8rem;
+            margin-top: 2rem;
+            max-width: 28rem;
+        }
+
+        .why-modal-metric {
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.9rem 1rem;
+        }
+
+        .why-modal-metric-value {
+            display: block;
+            font-size: 18px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .why-modal-metric-label {
+            display: block;
+            margin-top: 0.2rem;
+            font-size: 12px;
+            color: #7f8b9a;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .why-modal-visual {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100%;
+            border-radius: 24px;
+            overflow: hidden;
+            background:
+            linear-gradient(135deg, rgba(96, 165, 250, 0.46), rgba(59, 130, 246, 0.34)),
+            radial-gradient(circle at 72% 16%, rgba(255, 255, 255, 0.16), transparent 34%),
+            #101822;
+        }
+
+        .why-modal-visual::before,
+        .why-modal-visual::after {
+            content: '';
+            position: absolute;
+            border-radius: 999px;
+            filter: blur(2px);
+            pointer-events: none;
+        }
+
+        .why-modal-visual::before {
+            width: 24rem;
+            height: 24rem;
+            right: -6rem;
+            top: -7rem;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+            opacity: 0.55;
+        }
+
+        .why-modal-visual::after {
+            width: 28rem;
+            height: 28rem;
+            left: -10rem;
+            bottom: -12rem;
+            background: radial-gradient(circle, rgba(96, 165, 250, 0.2), rgba(96, 165, 250, 0));
+            opacity: 0.65;
+        }
+
+        .why-modal-window {
+            position: relative;
+            z-index: 1;
+            width: min(100%, 34rem);
+            border-radius: 22px;
+            background: rgba(10, 12, 16, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.42);
+            overflow: hidden;
+            transform: translateY(4%);
+        }
+
+        .why-modal-window-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: #dbe8f6;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .why-modal-window-dots {
+            display: flex;
+            gap: 0.35rem;
+        }
+
+        .why-modal-window-dots span {
+            width: 0.55rem;
+            height: 0.55rem;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.7);
+        }
+
+        .why-modal-code {
+            padding: 1rem 1rem 1.05rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            color: #d7e0ea;
+        }
+
+        .why-modal-code .muted {
+            color: #7c8796;
+        }
+
+        .why-modal-code .accent {
+            color: #93c5fd;
+        }
+
+        .why-modal-code-grid {
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.8rem;
+        }
+
+        .why-modal-preview-shell {
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .why-modal-preview-card {
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: rgba(248, 250, 252, 0.98);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            overflow: hidden;
+        }
+
+        .why-modal-preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.8rem 0.95rem;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.95);
+            color: #334155;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+        }
+
+        .why-modal-preview-body {
+            padding: 0.95rem;
+        }
+
+        .preview-chat-thread {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .preview-chat-row {
+            display: flex;
+        }
+
+        .preview-chat-row.user {
+            justify-content: flex-end;
+        }
+
+        .preview-chat-bubble {
+            max-width: 18rem;
+            border-radius: 16px;
+            padding: 0.72rem 0.85rem;
+            font-size: 12px;
+            line-height: 1.55;
+            color: #0f172a;
+            background: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.12);
+        }
+
+        .preview-chat-bubble.user {
+            color: #eff6ff;
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            border-color: rgba(59, 130, 246, 0.18);
+        }
+
+        .preview-chat-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-top: 0.65rem;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .preview-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .preview-chip {
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            color: #475569;
+            padding: 0.42rem 0.68rem;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .preview-chip.accent {
+            background: rgba(59, 130, 246, 0.08);
+            color: #1d4ed8;
+            border-color: rgba(59, 130, 246, 0.16);
+        }
+
+        .preview-composer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.65rem;
+            border-radius: 18px;
+            border: 1px solid rgba(226, 232, 240, 0.92);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.7rem 0.85rem;
+        }
+
+        .preview-composer-input {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .preview-composer-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .preview-circle-button {
+            width: 1.7rem;
+            height: 1.7rem;
+            border-radius: 999px;
+            background: #111827;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-node-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .preview-node {
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.8rem 0.9rem;
+        }
+
+        .preview-node.top {
+            border-color: rgba(59, 130, 246, 0.22);
+            box-shadow: 0 10px 24px rgba(59, 130, 246, 0.08);
+        }
+
+        .preview-node-title {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.45rem;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #334155;
+        }
+
+        .preview-node-line {
+            height: 1px;
+            width: 100%;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.34), rgba(96, 165, 250, 0.34));
+        }
+
+        .preview-node-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-top: 0.55rem;
+            border-radius: 999px;
+            padding: 0.35rem 0.62rem;
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #1d4ed8;
+            background: rgba(236, 253, 245, 0.98);
+            border: 1px solid rgba(59, 130, 246, 0.14);
+        }
+
+        .preview-progress-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .preview-progress-card {
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(255, 255, 255, 0.96);
+            padding: 0.85rem 0.9rem;
+        }
+
+        .preview-progress-track {
+            margin-top: 0.55rem;
+            width: 100%;
+            height: 0.5rem;
+            border-radius: 999px;
+            background: rgba(226, 232, 240, 0.92);
+            overflow: hidden;
+        }
+
+        .preview-progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #60a5fa, #2563eb);
+        }
+
+        .preview-status-list {
+            display: grid;
+            gap: 0.55rem;
+        }
+
+        .preview-status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.65rem;
+            border-radius: 14px;
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            background: #fff;
+            padding: 0.65rem 0.75rem;
+            font-size: 11px;
+            color: #334155;
+        }
+
+        .preview-status-item strong {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 0.12rem;
+            color: #0f172a;
+        }
+
+        .preview-status-pill {
+            border-radius: 999px;
+            padding: 0.28rem 0.56rem;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .preview-status-pill.ready {
+            color: #1d4ed8;
+            background: rgba(236, 253, 245, 0.96);
+            border: 1px solid rgba(59, 130, 246, 0.18);
+        }
+
+        .preview-status-pill.missing {
+            color: #9a3412;
+            background: rgba(255, 247, 237, 0.96);
+            border: 1px solid rgba(251, 146, 60, 0.18);
+        }
+
+        .preview-dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 0.75rem;
+        }
+
+        .preview-chart-card {
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.96));
+            padding: 0.85rem 0.9rem;
+        }
+
+        .preview-sparkline {
+            margin-top: 0.7rem;
+            height: 86px;
+            border-radius: 14px;
+            background:
+                linear-gradient(180deg, rgba(16, 185, 129, 0.11), transparent 55%),
+                linear-gradient(90deg, transparent 0 24%, rgba(148, 163, 184, 0.18) 24% 25%, transparent 25% 49%, rgba(148, 163, 184, 0.18) 49% 50%, transparent 50% 74%, rgba(148, 163, 184, 0.18) 74% 75%, transparent 75% 100%),
+                linear-gradient(180deg, rgba(148, 163, 184, 0.1), rgba(255, 255, 255, 0));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-sparkline::before {
+            content: '';
+            position: absolute;
+            inset: 12px;
+            background: linear-gradient(135deg, transparent 0 17%, rgba(59, 130, 246, 0.18) 17% 35%, transparent 35% 52%, rgba(96, 165, 250, 0.22) 52% 72%, transparent 72% 100%);
+            clip-path: polygon(0 70%, 14% 62%, 28% 68%, 40% 42%, 54% 48%, 67% 28%, 80% 34%, 100% 14%, 100% 100%, 0 100%);
+            opacity: 0.95;
+        }
+
+        .preview-log-card {
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(255, 255, 255, 0.96);
+            padding: 0.85rem 0.9rem;
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .preview-log-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            font-size: 11px;
+            color: #475569;
+        }
+
+        .preview-log-row strong {
+            color: #0f172a;
+        }
+
+        .preview-compact-list {
+            display: grid;
+            gap: 0.45rem;
+            margin-top: 0.7rem;
+        }
+
+        .preview-compact-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            border-radius: 12px;
+            background: rgba(248, 250, 252, 0.98);
+            border: 1px solid rgba(226, 232, 240, 0.98);
+            padding: 0.5rem 0.62rem;
+            font-size: 10.5px;
+            color: #334155;
+        }
+
+        .preview-mini-bar {
+            width: 100%;
+            height: 0.42rem;
+            border-radius: 999px;
+            background: rgba(226, 232, 240, 0.96);
+            overflow: hidden;
+            margin-top: 0.35rem;
+        }
+
+        .preview-mini-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #818cf8, #22c55e);
+        }
+
+        .why-modal-code-chip {
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.08);
+            background: rgba(148, 163, 184, 0.08);
+            padding: 0.8rem 0.9rem;
+            color: #e5eef8;
+            font-size: 12px;
+        }
+
+        .why-modal-code-chip strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 0.15rem;
+        }
+
+        .why-modal-stage {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background:
+                linear-gradient(35deg, rgba(0, 0, 0, 0.24) 25%, transparent 25% 50%, rgba(0, 0, 0, 0.24) 50% 75%, transparent 75%),
+                linear-gradient(130deg, rgba(255, 255, 255, 0.08), transparent 50%);
+            background-size: 220px 220px, cover;
+            opacity: 0.5;
+        }
+
+        .why-modal-hero {
+            position: absolute;
+            right: 7%;
+            bottom: 10%;
+            width: min(70%, 520px);
+            aspect-ratio: 1.45;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(11, 14, 18, 0.9);
+            box-shadow: 0 16px 42px rgba(0, 0, 0, 0.42);
+        }
+
+        .why-modal-hero {
+            display: none;
+        }
+
+        .why-modal-hero::before {
+            content: '';
+            position: absolute;
+            inset: 1rem;
+            border-radius: 14px;
+            background: linear-gradient(150deg, rgba(16, 185, 129, 0.24), rgba(56, 189, 248, 0.12));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .why-modal-panel--performance .why-modal-visual {
+            background:
+                linear-gradient(135deg, rgba(96, 165, 250, 0.46), rgba(59, 130, 246, 0.34)),
+                radial-gradient(circle at 72% 16%, rgba(255, 255, 255, 0.16), transparent 34%),
+                #101822;
+        }
+
+        .why-modal-panel--scaling .why-modal-visual {
+            background:
+                linear-gradient(135deg, rgba(96, 165, 250, 0.46), rgba(59, 130, 246, 0.34)),
+                radial-gradient(circle at 72% 16%, rgba(255, 255, 255, 0.16), transparent 34%),
+                #101822;
+        }
+
+        .why-modal-panel--oversight .why-modal-visual {
+            background:
+                linear-gradient(135deg, rgba(96, 165, 250, 0.46), rgba(59, 130, 246, 0.34)),
+                radial-gradient(circle at 72% 16%, rgba(255, 255, 255, 0.16), transparent 34%),
+                #101822;
+        }
+
+        .hero-headline {
+            font-size: 72px;
+            font-weight: 800;
+            line-height: 1.05;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+        }
+
+        .supporting-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #a3a3a3;
+            max-width: 640px;
+        }
+
+        /* Cards & Bento Grid */
+        .card {
+            position: relative;
+            background: linear-gradient(180deg, rgba(17, 24, 39, 0.78) 0%, rgba(10, 14, 20, 0.94) 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 20px;
+            padding: 30px;
+            overflow: hidden;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: inherit;
+            background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(96, 165, 250, 0.14), transparent 38%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            border-color: rgba(96, 165, 250, 0.28);
+            transform: translateY(-2px);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(96, 165, 250, 0.08);
+            border: 1px solid rgba(96, 165, 250, 0.18);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            color: #93c5fd;
+            transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.05);
+            background: rgba(96, 165, 250, 0.14);
+            color: #dbeafe;
+        }
+
+        .card-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .card-title {
+            font-size: 19px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .card-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #9ca3af;
+        }
+
+        /* Abstract AI Visual inside Card */
+        .card-visual {
+            margin-top: 24px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            height: 100px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-visual::after {
+            content: '';
+            position: absolute;
+            left: -100%;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.12), transparent);
+            animation: none;
+        }
+
+        .card:hover .card-visual::after {
+            animation: scanLine 2s infinite linear;
+        }
+
+        @keyframes scanLine {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        /* Input */
+        .input-field {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 15px;
+            color: #e5e5e5;
+            width: 100%;
+            transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: rgba(96, 165, 250, 0.7);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12);
+        }
+
+        .input-field::placeholder {
+            color: #667085;
+        }
+
+        /* Moon Visual */
+        .moon-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto;
+        }
+
+        .moon-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle at 30% 30%, #111827, #090b10);
+            border-radius: 50%;
+            border: 1px solid rgba(96, 165, 250, 0.18);
+            box-shadow: 0 0 60px rgba(96, 165, 250, 0.12),
+                        inset 0 0 40px rgba(96, 165, 250, 0.04);
+            animation: moonPulse 4s ease-in-out infinite;
+        }
+
+        .moon-grid {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background-image: 
+                linear-gradient(rgba(96, 165, 250, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(96, 165, 250, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            border-radius: 50%;
+            opacity: 0.4;
+        }
+
+        .orbital-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid rgba(96, 165, 250, 0.14);
+            border-radius: 50%;
+            animation: orbitalRotate 20s linear infinite;
+        }
+
+        .ring-1 {
+            width: 280px;
+            height: 280px;
+            animation-duration: 20s;
+        }
+
+        .ring-2 {
+            width: 340px;
+            height: 340px;
+            animation-duration: 30s;
+            animation-direction: reverse;
+        }
+
+        .ring-3 {
+            width: 400px;
+            height: 400px;
+            animation-duration: 40s;
+        }
+
+        .signal-pulse {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: #93c5fd;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.6);
+            animation: signalPulse 2s ease-in-out infinite;
+        }
+
+        .pulse-1 {
+            transform: translate(-50%, -50%) translateY(-100px);
+            animation-delay: 0s;
+        }
+
+        .pulse-2 {
+            transform: translate(-50%, -50%) translateX(100px);
+            animation-delay: 0.5s;
+        }
+
+        .pulse-3 {
+            transform: translate(-50%, -50%) translateY(100px);
+            animation-delay: 1s;
+        }
+
+        .pulse-4 {
+            transform: translate(-50%, -50%) translateX(-100px);
+            animation-delay: 1.5s;
+        }
+
+        .scanning-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 200px;
+            background: linear-gradient(to bottom, transparent, #93c5fd, transparent);
+            transform-origin: center;
+            animation: scanRotate 8s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes moonPulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.02);
+            }
+        }
+
+        @keyframes orbitalRotate {
+            from {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        @keyframes signalPulse {
+            0%, 100% {
+                opacity: 0.3;
+                transform: translate(-50%, -50%) translateY(-100px) scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) translateY(-100px) scale(1.5);
+            }
+        }
+
+        @keyframes scanRotate {
+            from {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Workflow Steps */
+        .workflow-step {
+            position: relative;
+            background: linear-gradient(180deg, rgba(17, 24, 39, 0.74) 0%, rgba(10, 14, 20, 0.94) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 20px;
+            padding: 32px;
+            z-index: 1;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .workflow-step:hover {
+            border-color: rgba(96, 165, 250, 0.24);
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px rgba(0,0,0,0.34);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(96, 165, 250, 0.08);
+            border: 1px solid rgba(96, 165, 250, 0.24);
+            border-radius: 50%;
+            color: #93c5fd;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 10px rgba(96, 165, 250, 0.08);
+        }
+
+        .workflow-step:hover .step-number {
+            background: #dbeafe;
+            color: #0f172a;
+            box-shadow: 0 0 12px rgba(96, 165, 250, 0.25);
+            border-color: #dbeafe;
+        }
+
+        .workflow-connector {
+            position: absolute;
+            top: 52px;
+            right: -30px;
+            width: 60px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .workflow-connector::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, #93c5fd, transparent);
+            animation: moveConnector 2.5s infinite linear;
+        }
+
+        @keyframes moveConnector {
+            from { left: -100%; }
+            to { left: 200%; }
+        }
+
+        /* Quote Marquee */
+        .quote-marquee {
+            overflow: hidden;
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .quote-track {
+            display: flex;
+            gap: 16px;
+            animation: marqueeScroll 40s linear infinite;
+        }
+
+        .quote-track:hover {
+            animation-play-state: paused;
+        }
+
+        .quote-chip {
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 999px;
+            padding: 16px 24px;
+            font-size: 14px;
+            color: #9ca3af;
+            white-space: nowrap;
+            transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .quote-chip:hover {
+            transform: translateY(-1px);
+            border-color: rgba(96, 165, 250, 0.28);
+            color: #f8fafc;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes marqueeScroll {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Waitlist Counter */
+        .waitlist-count {
+            font-size: 15px;
+            color: #8b95a3;
+        }
+
+        .count-number {
+            color: #93c5fd;
+            font-weight: 600;
+        }
+
+        .early-access-feedback {
+            min-height: 1.4rem;
+            margin-top: 0.2rem;
+        }
+
+        .early-access-feedback.success {
+            color: #86efac;
+        }
+
+        .early-access-feedback.error {
+            color: #fca5a5;
+        }
+
+        /* Responsive */
+        
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            width: 28px;
+            height: 28px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+        
+        .mobile-menu-btn span {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: #a3a3a3;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .mobile-menu-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .mobile-menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+        
+        .mobile-nav {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(9, 11, 16, 0.98);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 1rem 1.5rem;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .mobile-nav.active {
+            display: flex;
+        }
+        
+        .mobile-nav a {
+            display: block;
+            padding: 0.75rem 0;
+            color: #a3a3a3;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            transition: color 0.2s ease;
+        }
+        
+        .mobile-nav a:last-child {
+            border-bottom: none;
+        }
+        
+        .mobile-nav a:hover {
+            color: #e5e5e5;
+        }
+        
+        /* Tablet - 1024px */
+        @media (max-width: 1024px) {
+            .why-modal-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .why-modal-section {
+                padding-bottom: 6rem;
+            }
+
+            #products {
+                margin-top: 0;
+                padding-top: 5rem;
+            }
+
+            .why-modal-stack {
+                padding-bottom: 0;
+            }
+
+            .why-modal-stack::after {
+                height: 0;
+            }
+
+            .why-modal-nav {
+                position: relative;
+                top: auto;
+            }
+
+            .why-modal-panel {
+                position: relative;
+                top: auto;
+                transform: none;
+                grid-template-columns: 1fr;
+                height: auto;
+                min-height: auto;
+            }
+
+            .why-modal-panel + .why-modal-panel {
+                margin-top: 1rem;
+            }
+            
+            .why-modal-visual {
+                min-height: 380px;
+            }
+        }
+        
+        /* Tablet and below - 768px */
+        @media (max-width: 768px) {
+            /* Navigation */
+            .mobile-menu-btn {
+                display: flex;
+            }
+            
+            .navbar .hidden.md\:flex {
+                display: none !important;
+            }
+            
+            .navbar .hidden.md\:block {
+                display: none !important;
+            }
+            
+            /* Hero */
+            .hero-headline {
+                font-size: 36px !important;
+                line-height: 1.15;
+            }
+
+            .section-headline {
+                font-size: 28px;
+                max-width: none;
+            }
+            
+            .hero-section {
+                padding-top: 4rem;
+                padding-bottom: 2rem;
+            }
+            
+            .supporting-text {
+                font-size: 16px;
+                width: 100% !important;
+                height: auto !important;
+                max-width: 100%;
+            }
+            
+            .btn-primary {
+                width: 100%;
+                padding: 12px 20px;
+            }
+            
+            .input-field {
+                padding: 12px 14px;
+            }
+            
+            /* Why Modal */
+            .why-modal-nav {
+                text-align: center;
+            }
+            
+            .why-modal-title {
+                font-size: 32px;
+                max-width: none;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+            .why-modal-nav .section-label {
+                justify-content: center;
+            }
+
+            .why-modal-panel-title {
+                font-size: 24px;
+            }
+            
+            .why-modal-panel-text {
+                font-size: 15px;
+            }
+            
+            .why-modal-nav-list {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+            
+            .why-modal-nav-item {
+                font-size: 10px;
+                padding: 0.5rem;
+                background: rgba(255, 255, 255, 0.03);
+                border-radius: 8px;
+                text-align: center;
+                justify-content: center;
+            }
+            
+            .why-modal-nav-item::before {
+                display: none;
+            }
+            
+            .why-modal-visual {
+                min-height: 320px;
+            }
+            
+            .why-modal-window {
+                width: 100%;
+                transform: none;
+            }
+
+            .moon-container {
+                width: 300px;
+                height: 300px;
+            }
+
+            .moon-core, .moon-grid {
+                width: 150px;
+                height: 150px;
+            }
+
+            .ring-1 {
+                width: 210px;
+                height: 210px;
+            }
+
+            .ring-2 {
+                width: 255px;
+                height: 255px;
+            }
+
+            .ring-3 {
+                width: 300px;
+                height: 300px;
+            }
+
+            .workflow-connector {
+                display: none;
+            }
+            
+            /* Cards */
+            .card {
+                padding: 20px;
+            }
+            
+            .card-title {
+                font-size: 17px;
+            }
+            
+            .card-text {
+                font-size: 14px;
+            }
+            
+            /* Workflow */
+            .workflow-step {
+                padding: 20px;
+            }
+            
+            .step-number {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+            
+            /* Footer */
+            footer .grid {
+                gap: 2rem;
+            }
+            
+            /* Products grid */
+            .lg\:col-span-2 {
+                grid-column: span 1;
+            }
+            
+            .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Section padding */
+            section {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .max-w-7xl, .max-w-5xl {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            /* Card visual responsive */
+            .card-visual {
+                height: auto !important;
+                min-height: 100px;
+            }
+            
+            .card-visual .flex.w-full {
+                flex-direction: column;
+            }
+            
+            .card-visual .w-\[54\%\],
+            .card-visual .w-\[46\%\] {
+                width: 100%;
+            }
+            
+            /* Quote marquee */
+            .quote-chip {
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+        }
+        
+        /* Small mobile - 640px */
+        @media (max-width: 640px) {
+            /* Hero */
+            .hero-headline {
+                font-size: 28px !important;
+            }
+            
+            .section-headline {
+                font-size: 24px;
+            }
+            
+            .supporting-text {
+                font-size: 14px;
+            }
+            
+            .section-label {
+                font-size: 10px;
+            }
+            
+            /* Why Modal */
+            .why-modal-title {
+                font-size: 28px;
+            }
+            
+            .why-modal-panel {
+                padding: 1.25rem;
+            }
+
+            .why-modal-code-grid,
+            .why-modal-metrics {
+                grid-template-columns: 1fr;
+            }
+            
+            .why-modal-metric {
+                padding: 0.7rem 0.8rem;
+            }
+            
+            .why-modal-metric-value {
+                font-size: 16px;
+            }
+            
+            .why-modal-metric-label {
+                font-size: 11px;
+            }
+            
+            .why-modal-panel-title {
+                font-size: 22px;
+            }
+            
+            .why-modal-panel-text {
+                font-size: 14px;
+            }
+            
+            .why-modal-visual {
+                min-height: 280px;
+            }
+            
+            .why-modal-nav-list {
+                grid-template-columns: 1fr;
+            }
+
+            .why-modal-preview-header,
+            .preview-composer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .preview-dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-composer-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .preview-chat-bubble {
+                max-width: 100%;
+                font-size: 11px;
+            }
+            
+            .preview-chip {
+                font-size: 10px;
+                padding: 0.35rem 0.55rem;
+            }
+            
+            .why-modal-code-chip {
+                padding: 0.6rem 0.7rem;
+                font-size: 11px;
+            }
+            
+            .why-modal-code-chip strong {
+                font-size: 14px;
+            }
+            
+            /* Input and buttons */
+            .input-field {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+            
+            .btn-primary {
+                padding: 12px 18px;
+                font-size: 13px;
+            }
+            
+            /* CTA sections */
+            .py-32 {
+                padding-top: 4rem;
+                padding-bottom: 4rem;
+            }
+            
+            .py-20 {
+                padding-top: 3rem;
+                padding-bottom: 3rem;
+            }
+            
+            .mb-16 {
+                margin-bottom: 2rem;
+            }
+            
+            .mb-12 {
+                margin-bottom: 2rem;
+            }
+            
+            /* Cards */
+            .card {
+                padding: 16px;
+            }
+            
+            .card-visual {
+                height: 80px !important;
+            }
+            
+            /* Footer */
+            footer .pt-8 {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            footer .flex.gap-6 {
+                justify-content: center;
+            }
+            
+            /* Waitlist */
+            .waitlist-count {
+                font-size: 13px;
+            }
+        }
+        
+        /* Extra small - 480px */
+        @media (max-width: 480px) {
+            .hero-headline {
+                font-size: 24px !important;
+            }
+            
+            .section-headline {
+                font-size: 22px;
+            }
+            
+            .why-modal-title {
+                font-size: 24px;
+            }
+            
+            .why-modal-panel-title {
+                font-size: 20px;
+            }
+            
+            .navbar .px-6 {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .card-title {
+                font-size: 16px;
+            }
+            
+            .card-text {
+                font-size: 13px;
+            }
+            
+            .preview-node-title {
+                font-size: 10px;
+            }
+            
+            .preview-node-pill {
+                font-size: 9px;
+            }
+        }
+        /* --- NEW ANIMATION CLASSES --- */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            will-change: opacity, transform;
+        }
+
+        .animate-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Why section uses sticky cards, so we keep section transform neutral and animate inner blocks instead. */
+        .why-modal-section.animate-on-scroll {
+            transform: none;
+            opacity: 1; /* Ensure section itself is always visible */
+        }
+
+        .why-modal-section.animate-on-scroll .why-modal-nav,
+        .why-modal-section.animate-on-scroll .why-modal-stack {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .why-modal-section.animate-on-scroll.is-visible .why-modal-nav,
+        .why-modal-section.animate-on-scroll.is-visible .why-modal-stack {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .why-modal-section.animate-on-scroll.is-visible .why-modal-stack {
+            transition-delay: 120ms;
+        }
+        
+        /* Fallback: ensure content is visible if JS hasn't loaded or observer fails */
+        @media (prefers-reduced-motion: reduce) {
+            .animate-on-scroll,
+            .why-modal-section.animate-on-scroll .why-modal-nav,
+            .why-modal-section.animate-on-scroll .why-modal-stack {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* Stagger delays for grid items */
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+        .delay-400 { transition-delay: 400ms; }
+
+        /* Trust marquee hover effect adjustments */
+        .quote-chip {
+            transition: all 0.3s ease;
+        }
+        .quote-chip:hover {
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.relative{position:relative}.bottom-6{bottom:1.5rem}.right-6{right:1.5rem}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-12{margin-bottom:3rem}.mb-16{margin-bottom:4rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-20{margin-top:5rem}.mt-8{margin-top:2rem}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-4{height:1rem}.max-w-5xl{max-width:64rem}.max-w-7xl{max-width:80rem}.max-w-md{max-width:28rem}.max-w-xl{max-width:36rem}.flex-1{flex:1 1 0%}.cursor-pointer{cursor:pointer}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-12{gap:3rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.whitespace-nowrap{white-space:nowrap}.rounded-lg{border-radius:0.5rem}.border{border-width:1px}.border-t{border-top-width:1px}.border-white{--tw-border-opacity:1;border-color:rgb(255 255 255 / var(--tw-border-opacity, 1))}.border-opacity-10{--tw-border-opacity:0.1}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-opacity-60{--tw-bg-opacity:0.6}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-16{padding-top:4rem;padding-bottom:4rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-20{padding-top:5rem;padding-bottom:5rem}.py-32{padding-top:8rem;padding-bottom:8rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-16{padding-bottom:4rem}.pt-32{padding-top:8rem}.pt-8{padding-top:2rem}.text-center{text-align:center}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.ring-1{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.ring-2{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.hover\:border-opacity-20:hover{--tw-border-opacity:0.2}.hover\:text-gray-300:hover{--tw-text-opacity:1;color:rgb(209 213 219 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:scale-105{--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@media (min-width: 768px){.md\:col-span-2{grid-column:span 2 / span 2}.md\:flex{display:flex}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}}@media (min-width: 1024px){.lg\:block{display:block}.lg\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}}</style><style id="kgp-selected-style">
+  [data-kgp-selected]::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 100%;
+    height: 100%;
+    box-sizing: content-box;
+    padding: 4px;
+    border-radius: 4px;
+    outline: 3px solid #FF6B35 !important;
+    box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.3), 0 0 10px rgba(255, 107, 53, 0.4) !important;
+    z-index: 10000;
+    pointer-events: none;
+  }
+
+  [data-kgp-selected] {
+    position: relative;
+    outline: none;
+    cursor: default;
+  }
+
+  img[data-kgp-selected],
+  img[data-kgp-hover-selected],
+  [data-kgp-hover-selected],
+  [item-kgp-click-selected],
+  [item-kgp-selected] {
+    border: 3px solid #FF6B35 !important;
+    box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.3), 0 0 15px rgba(255, 107, 53, 0.5) !important;
+    border-radius: 4px;
+  }
+
+  [data-kgp-hover-selected]::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 100%;
+    height: 100%;
+    box-sizing: content-box;
+    padding: 2px;
+    border-radius: 4px;
+    outline: 2px solid #FFA366 !important;
+    box-shadow: 0 0 0 1px rgba(255, 163, 102, 0.3), 0 0 8px rgba(255, 163, 102, 0.4) !important;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  [data-kgp-hover-selected] {
+    position: relative;
+    outline: none;
+  }
+</style></head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-12">
+                    <a href="#" aria-label="ToMoon home" class="block relative h-6 w-[180px] overflow-visible">
+                        <img src="https://tomoon-logo-backet-663970204152-ap-southeast-1-an.s3.ap-southeast-1.amazonaws.com/tomoon_white.svg" alt="ToMoon" class="absolute left-0 top-0 h-6 w-auto origin-left scale-[2]">
+                    </a>
+                    <div class="hidden md:flex items-center gap-8">
+                        <a href="#products" class="nav-link">Products</a>
+                        <a href="#build" class="nav-link">Build with ToMoon</a>
+                        <a href="#platform" class="nav-link">Platform</a>
+                        <a href="#trust" class="nav-link">Trust</a>
+                        <a href="#early-access" class="nav-link">Early Access</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="hidden md:block relative group">
+                        <div class="flex items-center gap-1.5 text-gray-400 hover:text-white transition-all text-sm font-medium cursor-pointer py-2">
+                            <span>EN</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-200 group-hover:-rotate-180"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                        <div class="absolute right-0 top-full w-32 bg-[#1a1625] border border-white/10 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 transition-all duration-200 overflow-hidden z-50 pointer-events-none group-hover:pointer-events-auto">
+                            <div class="py-1.5">
+                                <div class="px-4 py-2.5 text-sm text-white bg-white/5 flex items-center justify-between cursor-pointer transition-colors">
+                                    <span class="font-medium">English</span>
+                                    <div class="w-1.5 h-1.5 rounded-full bg-[#a855f7] shadow-[0_0_8px_rgba(168,85,247,0.6)]"></div>
+                                </div>
+                                <div class="px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5 flex items-center justify-between hover:text-white transition-colors cursor-pointer">
+                                    <span>中文</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary hidden md:block">Join Early Access</button>
+                    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile Navigation -->
+            <div class="mobile-nav" id="mobileNav">
+                <a href="#products">Products</a>
+                <a href="#build">Build with ToMoon</a>
+                <a href="#platform">Platform</a>
+                <a href="#trust">Trust</a>
+                <a href="#early-access">Early Access</a>
+                <button class="btn-primary" style="margin-top: 0.5rem;">Join Early Access</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section max-w-5xl mx-auto px-6 pt-32 pb-16 text-center" style="">
+        <div class="section-label">AI-POWERED QUANT INFRASTRUCTURE</div>
+        <h1 class="hero-headline mb-8" style="font-size: clamp(28px, 6vw, 64px); outline: none;">The AI-powered infrastructure for quant strategy <br class="hidden md:inline">development.</h1>
+        <p class="supporting-text mx-auto mb-12" style="max-width: 100%;">A full-lifecycle platform that turns market observations, trading rules, and external strategy inputs into structured, testable, and executable systems within one connected platform</p>
+        
+        <!-- Hero CTA Block -->
+        <div class="max-w-xl mx-auto">
+            <div class="flex flex-col md:flex-row gap-3 mb-6 early-access-form" data-source="hero">
+                <input type="email" placeholder="Enter your email" class="input-field flex-1 early-access-email-input">
+                <button class="btn-primary whitespace-nowrap early-access-submit-btn">Join Early Access</button>
+            </div>
+            <div class="waitlist-count early-access-feedback" aria-live="polite"></div>
+            
+        </div>
+
+        <!-- Waitlist Count -->
+        <div class="waitlist-count mt-8" style="">
+            Join <span class="count-number">236</span>&nbsp;traders already on the waitlist · No credit card required</div>
+    </section>
+
+    <!-- Moon Motion Visual -->
+    
+
+    <!-- Why ToMoon -->
+    <section id="why" class="why-modal-section animate-on-scroll max-w-7xl mx-auto px-6">
+        <div class="why-modal-shell">
+            <div class="why-modal-nav">
+                <div class="section-label">WHY TOMOON</div>
+                <h2 class="why-modal-title">Designed for how real strategy work actually happens.</h2>
+                <div class="why-modal-nav-list">
+                    <button class="why-modal-nav-item active" data-target="why-start">Start from what you have</button>
+                    <button class="why-modal-nav-item" data-target="why-missing">Discover what's missing</button>
+                    <button class="why-modal-nav-item" data-target="why-connect">Connect the path</button>
+                    <button class="why-modal-nav-item" data-target="why-beyond">Go beyond manual</button>
+                </div>
+            </div>
+
+            <div class="why-modal-stack">
+                <article class="why-modal-panel" id="why-start">
+                    <div class="why-modal-copy">
+                        <div class="why-modal-kicker">Start from what you have</div>
+                        <h3 class="why-modal-panel-title">Most traders do not start with a finished strategy.</h3>
+                        <p class="why-modal-panel-text">They start with observations, instincts, fragments, or partial rules. ToMoon helps turn those starting points into something clearer and more structured.</p>
+                        <div class="why-modal-metrics">
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">Raw Input</span>
+                                <span class="why-modal-metric-label">Observations & notes</span>
+                            </div>
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">Transform</span>
+                                <span class="why-modal-metric-label">Into structure</span>
+                            </div>
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">Clarity</span>
+                                <span class="why-modal-metric-label">Guided formulation</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="why-modal-visual">
+                        <div class="why-modal-stage"></div>
+                        <div class="why-modal-hero"></div>
+                        <div class="why-modal-window">
+                            <div class="why-modal-window-header">
+                                <div class="why-modal-window-dots"><span></span><span></span><span></span></div>
+                                <div>AI strategy dialogue</div>
+                            </div>
+                            <div class="why-modal-code why-modal-preview-shell">
+                                <div class="why-modal-preview-card">
+                                    <div class="why-modal-preview-header">
+                                        <div class="flex items-center gap-2 normal-case tracking-normal text-[11px] font-bold text-slate-700">
+                                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-purple-50 text-purple-600">AI</span>
+                                            Discover thread
+                                        </div>
+                                        <span class="preview-chip accent">Guided Discover</span>
+                                    </div>
+                                    <div class="why-modal-preview-body">
+                                        <div class="preview-chat-thread">
+                                            <div class="preview-chat-row user"><div class="preview-chat-bubble user">I saw repeated breakout reactions after low-volatility compression.</div></div>
+                                            <div class="preview-chat-row"><div class="preview-chat-bubble">That is a good starting premise. We can separate the edge, the boundary, and the failure condition so it becomes testable.</div></div>
+                                        </div>
+                                        <div class="preview-chat-meta">
+                                            <span>Observation -> edge hypothesis</span>
+                                            <span>2 messages</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="preview-chip-row">
+                                    <span class="preview-chip">Paperclip</span>
+                                    <span class="preview-chip">Voice</span>
+                                    <span class="preview-chip">Quick start</span>
+                                    <span class="preview-chip accent">Model selector</span>
+                                </div>
+                                <div class="preview-composer">
+                                    <div>
+                                        <div class="preview-composer-input">Message to discover your edge...</div>
+                                        <div class="preview-chat-meta" style="margin-top:0.3rem;">
+                                            <span>Luna AI</span>
+                                            <span>Enter to send</span>
+                                        </div>
+                                    </div>
+                                    <div class="preview-composer-actions">
+                                        <span class="preview-chip">+</span>
+                                        <span class="preview-circle-button">↑</span>
+                                    </div>
+                                </div>
+                                <div class="why-modal-code-grid">
+                                    <div class="why-modal-code-chip"><strong>Input</strong> Instincts & notes</div>
+                                    <div class="why-modal-code-chip"><strong>Attach</strong> Partial rules</div>
+                                    <div class="why-modal-code-chip"><strong>Guide</strong> ToMoon AI</div>
+                                    <div class="why-modal-code-chip"><strong>Output</strong> Clear structure</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="why-modal-panel why-modal-panel--performance" id="why-missing">
+                    <div class="why-modal-copy">
+                        <div class="why-modal-kicker">Discover what's missing</div>
+                        <h3 class="why-modal-panel-title">Surface what needs to be classified or tested.</h3>
+                        <p class="why-modal-panel-text">When a trader does not yet have a clear edge, ToMoon helps surface what needs to be clarified, defined, or tested before a strategy can truly take shape.</p>
+                        <div class="why-modal-metrics">
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">Clarify</span>
+                                <span class="why-modal-metric-label">Define edge</span>
+                            </div>
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">Surface</span>
+                                <span class="why-modal-metric-label">Missing pieces</span>
+                            </div>
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">Test</span>
+                                <span class="why-modal-metric-label">Validate shaping</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="why-modal-visual">
+                        <div class="why-modal-stage"></div>
+                        <div class="why-modal-hero"></div>
+                        <div class="why-modal-window">
+                            <div class="why-modal-window-header">
+                                <div class="why-modal-window-dots"><span></span><span></span><span></span></div>
+                                <div>Strategy workflow canvas</div>
+                            </div>
+                            <div class="why-modal-code why-modal-preview-shell">
+                                <div class="preview-node-stack">
+                                    <div class="preview-node top">
+                                        <div class="preview-node-title"><span>Initial Premise</span><span>Unclear edge</span></div>
+                                        <div class="preview-node-line"></div>
+                                        <div class="preview-node-pill">Breakout from low-volatility compression</div>
+                                    </div>
+                                    <div class="preview-node">
+                                        <div class="preview-node-title"><span>Missing Defintions</span><span>Required</span></div>
+                                        <div class="preview-chip-row">
+                                            <span class="preview-chip missing">Exit conditions?</span>
+                                            <span class="preview-chip missing">Regime filter?</span>
+                                        </div>
+                                    </div>
+                                    <div class="preview-node">
+                                        <div class="preview-node-title"><span>Structured Logic</span><span>Ready to test</span></div>
+                                        <div class="preview-chip-row">
+                                            <span class="preview-chip accent">Market & Regime</span>
+                                            <span class="preview-chip accent">Signal Logic</span>
+                                            <span class="preview-chip accent">Risk & Money</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="why-modal-code-grid">
+                                    <div class="why-modal-code-chip"><strong>Identify</strong> Weak premises</div>
+                                    <div class="why-modal-code-chip"><strong>Surface</strong> Missing rules</div>
+                                    <div class="why-modal-code-chip"><strong>Structure</strong> Testable logic</div>
+                                    <div class="why-modal-code-chip"><strong>Shape</strong> Clear strategies</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="why-modal-panel why-modal-panel--scaling" id="why-connect">
+                    <div class="why-modal-copy">
+                        <div class="why-modal-kicker">Connect the path</div>
+                        <h3 class="why-modal-panel-title">Connect the full strategy lifecycle.</h3>
+                        <p class="why-modal-panel-text">From discovery and structuring to validation, deployment, and monitoring, ToMoon is built to connect the strategy lifecycle instead of forcing traders to work across disconnected tools.</p>
+                        <div class="why-modal-metrics">
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">Lifecycle</span>
+                                <span class="why-modal-metric-label">Full strategy path</span>
+                            </div>
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">Connected</span>
+                                <span class="why-modal-metric-label">One workspace</span>
+                            </div>
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">Seamless</span>
+                                <span class="why-modal-metric-label">No disconnected tools</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="why-modal-visual">
+                        <div class="why-modal-stage"></div>
+                        <div class="why-modal-hero"></div>
+                        <div class="why-modal-window">
+                            <div class="why-modal-window-header">
+                                <div class="why-modal-window-dots"><span></span><span></span><span></span></div>
+                                <div>Blueprint panel</div>
+                            </div>
+                            <div class="why-modal-code why-modal-preview-shell">
+                                <div class="preview-progress-shell">
+                                    <div class="preview-progress-card">
+                                        <div class="preview-node-title" style="margin-bottom:0;">Completeness <span>72%</span></div>
+                                        <div class="preview-progress-track"><div class="preview-progress-fill" style="width:72%"></div></div>
+                                    </div>
+                                    <div class="preview-status-list">
+                                        <div class="preview-status-item"><div><strong>Blueprint progress</strong>Strategy structure is nearly ready</div><span class="preview-status-pill ready">80%</span></div>
+                                        <div class="preview-status-item"><div><strong>Data readiness</strong>One dependency still missing</div><span class="preview-status-pill missing">Missing</span></div>
+                                        <div class="preview-status-item"><div><strong>Next step</strong>Review profit target and calendar</div><span class="preview-status-pill ready">High</span></div>
+                                    </div>
+                                </div>
+                                <div class="why-modal-code-grid">
+                                    <div class="why-modal-code-chip"><strong>Discovery</strong> Structured ideas</div>
+                                    <div class="why-modal-code-chip"><strong>Validation</strong> Code-free tests</div>
+                                    <div class="why-modal-code-chip"><strong>Deploy</strong> Into production</div>
+                                    <div class="why-modal-code-chip"><strong>Monitor</strong> Live oversight</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="why-modal-panel why-modal-panel--oversight" id="why-beyond">
+                    <div class="why-modal-copy">
+                        <div class="why-modal-kicker">Go beyond manual</div>
+                        <h3 class="why-modal-panel-title">Scale without starting from scratch.</h3>
+                        <p class="why-modal-panel-text">ToMoon helps traders move toward systematic and quantitative development without needing to build the entire workflow, infrastructure, or codebase on their own.</p>
+                        <div class="why-modal-metrics">
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">Systematic</span>
+                                <span class="why-modal-metric-label">Automated execution</span>
+                            </div>
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">No-code</span>
+                                <span class="why-modal-metric-label">Skip building infra</span>
+                            </div>
+                            <div class="why-modal-metric">
+                                <span class="why-modal-metric-value">Scale</span>
+                                <span class="why-modal-metric-label">Quantitative workflow</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="why-modal-visual">
+                        <div class="why-modal-stage"></div>
+                        <div class="why-modal-hero"></div>
+                        <div class="why-modal-window">
+                            <div class="why-modal-window-header">
+                                <div class="why-modal-window-dots"><span></span><span></span><span></span></div>
+                                <div>Live execution oversight</div>
+                            </div>
+                            <div class="why-modal-code why-modal-preview-shell">
+                                <div class="preview-dashboard-grid">
+                                    <div class="preview-chart-card">
+                                        <div class="preview-node-title" style="margin-bottom:0;">Performance <span>+12.4%</span></div>
+                                        <div class="preview-sparkline"></div>
+                                        <div class="preview-chat-meta">
+                                            <span>3 live strategies</span>
+                                            <span>2 accounts</span>
+                                        </div>
+                                    </div>
+                                    <div class="preview-log-card">
+                                        <div class="preview-log-row"><strong>Strategy</strong><span>Breakout v2</span></div>
+                                        <div class="preview-log-row"><strong>Status</strong><span>Running</span></div>
+                                        <div class="preview-log-row"><strong>Risk</strong><span>Controlled</span></div>
+                                        <div class="preview-mini-bar"><div class="preview-mini-fill" style="width:78%"></div></div>
+                                        <div class="preview-compact-list">
+                                            <div class="preview-compact-item"><span>Monitoring</span><span class="preview-status-pill ready">Active</span></div>
+                                            <div class="preview-compact-item"><span>Alerts</span><span class="preview-status-pill missing">1 issue</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="why-modal-code-grid">
+                                    <div class="why-modal-code-chip"><strong>Build</strong> Zero setup</div>
+                                    <div class="why-modal-code-chip"><strong>Infra</strong> Fully handled</div>
+                                    <div class="why-modal-code-chip"><strong>Scale</strong> Systematic logic</div>
+                                    <div class="why-modal-code-chip"><strong>Deploy</strong> Quant ready</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products -->
+    <section id="products" class="max-w-7xl mx-auto px-6 py-20 relative">
+        <div class="text-center mb-16 relative z-10 animate-on-scroll">
+            <div class="section-label">PRODUCTS</div>
+            <h2 class="section-headline">Infrastructure across the full strategy lifecycle.</h2>
+            <p class="supporting-text mx-auto">ToMoon is not a single feature. It is a connected system for strategy development, validation, deployment, and ongoing oversight.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+            <!-- Card 1 (Spans 2 cols on lg) -->
+            <div class="card lg:col-span-2 animate-on-scroll delay-100">
+                <h3 class="card-title">Strategy Discovery</h3>
+                <p class="card-text max-w-md">Turn market observations, videos, code, and raw inputs into clear strategy edges with AI.</p>
+                <div class="card-visual mt-auto" style="height: 140px; padding: 14px; align-items: stretch; flex-direction: column; justify-content: flex-start; gap: 10px;">
+                    <div class="flex items-center justify-between text-[10px] uppercase tracking-[0.18em] font-semibold text-gray-500">
+                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_6px_rgba(16,185,129,0.4)]"></span> Discovery</span>
+                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.4)]"></span> Blueprint</span>
+                    </div>
+                    <div class="flex w-full gap-3 flex-1">
+                        <div class="w-[54%] rounded-t-2xl border border-gray-700/60 bg-gray-900/55 p-3 flex flex-col gap-2 relative overflow-hidden">
+                            <div class="h-2.5 w-3/4 rounded bg-gray-600/40"></div>
+                            <div class="h-2.5 w-5/6 rounded bg-gray-600/30"></div>
+                            <div class="h-2.5 w-2/3 rounded bg-gray-600/20"></div>
+                            <div class="mt-auto flex items-center justify-between">
+                                <span class="text-[8px] text-gray-500 uppercase tracking-[0.18em]">raw notes</span>
+                                <span class="text-[8px] text-[#10b981] px-2 py-0.5 rounded-full border border-[#10b981]/20 bg-[#10b981]/10">AI parsing</span>
+                            </div>
+                        </div>
+                        <div class="w-[46%] rounded-t-2xl border border-blue-500/20 bg-blue-900/10 p-3 flex flex-col gap-2 justify-end">
+                            <div class="flex items-center justify-between text-[9px] text-gray-400 uppercase tracking-[0.16em] font-semibold">
+                                <span>Signal</span><span>Structured</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="rounded-xl border border-gray-700/60 bg-gray-900/55 px-2 py-2">
+                                    <div class="text-[8px] text-gray-500 uppercase">edge</div>
+                                    <div class="text-[10px] text-gray-200 mt-1">mean reversion</div>
+                                </div>
+                                <div class="rounded-xl border border-blue-500/30 bg-blue-900/20 px-2 py-2">
+                                    <div class="text-[8px] text-gray-500 uppercase">market</div>
+                                    <div class="text-[10px] text-blue-300 mt-1">BTCUSDT</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 2 -->
+            <div class="card animate-on-scroll delay-200">
+                <h3 class="card-title">Strategy Structuring</h3>
+                <p class="card-text">Transform trading logic into structured blueprints and executable code.</p>
+                <div class="card-visual mt-auto" style="height: 120px; padding: 14px 18px; justify-content: center; gap: 0; flex-direction: column;">
+                    <div class="w-full flex items-center justify-between mb-3">
+                        <div class="text-[10px] uppercase tracking-[0.18em] text-gray-500 font-semibold">Blueprint</div>
+                        <div class="text-[10px] text-[#10b981] uppercase tracking-[0.18em] font-semibold">Ready 3/4</div>
+                    </div>
+                    <div class="relative w-full flex items-center justify-between">
+                        <div class="absolute left-8 right-8 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-gray-700/0 via-gray-700/60 to-gray-700/0"></div>
+                        <div class="z-10 w-[31%] rounded-2xl border border-gray-700/60 bg-gray-900/55 p-2.5">
+                            <div class="text-[8px] uppercase tracking-[0.16em] text-gray-500 mb-2">Premise</div>
+                            <div class="h-1.5 w-full rounded bg-gray-500/70"></div>
+                            <div class="mt-2 h-1.5 w-4/5 rounded bg-gray-600/40"></div>
+                        </div>
+                        <div class="z-10 w-[30%] rounded-2xl border border-blue-500/40 bg-blue-900/25 p-2.5 shadow-[0_0_16px_rgba(59,130,246,0.12)]">
+                            <div class="text-[8px] uppercase tracking-[0.16em] text-blue-300 mb-2">Canvas</div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="h-2 w-2 rounded-full bg-blue-400"></span>
+                                <div class="flex-1 h-1 rounded bg-blue-400/50"></div>
+                            </div>
+                            <div class="mt-2 flex gap-1.5">
+                                <span class="px-1.5 py-0.5 rounded-full border border-blue-400/20 bg-blue-400/10 text-[8px] text-blue-300">rule</span>
+                                <span class="px-1.5 py-0.5 rounded-full border border-blue-400/20 bg-blue-400/10 text-[8px] text-blue-300">logic</span>
+                            </div>
+                        </div>
+                        <div class="z-10 w-[31%] rounded-2xl border border-gray-700/60 bg-gray-900/55 p-2.5">
+                            <div class="text-[8px] uppercase tracking-[0.16em] text-gray-500 mb-2">Execution</div>
+                            <div class="h-1.5 w-full rounded bg-[#10b981]/60"></div>
+                            <div class="mt-2 h-1.5 w-2/3 rounded bg-gray-600/40"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="card animate-on-scroll delay-300">
+                <h3 class="card-title">Strategy Validation</h3>
+                <p class="card-text">Run large-scale backtests across years of data to validate whether an edge truly holds.</p>
+                <div class="card-visual mt-auto" style="height: 120px; padding: 14px; align-items: stretch; flex-direction: column; justify-content: flex-start; gap: 10px;">
+                    <div class="flex items-center justify-between">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-[0.18em] font-semibold">Validation</div>
+                        <div class="bg-[#10b981]/10 border border-[#10b981]/20 text-[#10b981] text-[10px] px-2 py-0.5 rounded uppercase font-bold tracking-wider">Sharpe 2.1</div>
+                    </div>
+                    <div class="flex-1 rounded-2xl border border-gray-700/60 bg-gray-900/55 p-3 relative overflow-hidden">
+                        <div class="absolute inset-3 rounded-xl border border-dashed border-gray-700/50"></div>
+                        <div class="absolute left-3 right-3 top-[30%] h-px bg-gray-700/40"></div>
+                        <div class="absolute left-3 right-3 top-[60%] h-px bg-gray-700/30"></div>
+                        <svg viewBox="0 0 200 70" class="absolute left-4 right-4 bottom-4 h-[48%] w-auto opacity-90" preserveAspectRatio="none">
+                            <path d="M0 55 L20 48 L40 50 L60 34 L80 39 L100 23 L120 29 L150 12 L170 18 L200 14 L200 70 L0 70 Z" fill="rgba(16,185,129,0.12)" />
+                            <path d="M0 55 L20 48 L40 50 L60 34 L80 39 L100 23 L120 29 L150 12 L170 18 L200 14" fill="none" stroke="#10b981" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="absolute right-3 bottom-3 rounded-xl border border-gray-700/60 bg-gray-950/70 px-2 py-1 text-[9px] text-gray-400">
+                            <div class="text-gray-200 font-semibold">1,208</div>
+                            <div>trades</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4 (Spans 2 cols on lg) -->
+            <div class="card lg:col-span-2 animate-on-scroll delay-100">
+                <h3 class="card-title">Live Deployment</h3>
+                <p class="card-text max-w-md">Move validated strategies into real-market execution seamlessly.</p>
+                <div class="card-visual mt-auto relative overflow-hidden" style="height: 148px; padding: 16px; flex-direction: column; justify-content: flex-start; gap: 12px; align-items: stretch;">
+                    <!-- Ambient Glow -->
+                    <div class="absolute -right-4 -top-12 w-32 h-32 bg-blue-500/10 rounded-full blur-[30px] pointer-events-none"></div>
+
+                    <!-- Simulated Top Bar -->
+                    <div class="flex items-center justify-between border-b border-gray-700/60 pb-3 relative z-10 w-full">
+                        <div class="flex items-center gap-2.5">
+                            <span class="relative flex h-2 w-2">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10b981] opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2 w-2 bg-[#10b981] shadow-[0_0_6px_#10b981]"></span>
+                            </span>
+                            <div class="text-[11px] font-bold text-gray-200 tracking-widest uppercase">Deployment Active</div>
+                        </div>
+                        <div class="flex items-center gap-2 text-[9px] font-semibold text-gray-400">
+                            <span class="px-2 py-0.5 rounded border border-blue-500/30 bg-blue-500/10 text-blue-300 uppercase tracking-wider">Binance Spot</span>
+                            <span class="px-2 py-0.5 rounded border border-gray-700/60 bg-gray-900/80 uppercase tracking-wider">0.1ms ping</span>
+                        </div>
+                    </div>
+
+                    <!-- Deployment Flow Nodes -->
+                    <div class="flex gap-4 items-stretch flex-1 relative z-10 w-full">
+                        <!-- Left Node: Strategy Engine -->
+                        <div class="flex-1 rounded-xl border border-gray-700/60 bg-gray-900/55 p-3 flex flex-col justify-center relative">
+                            <div class="text-[9px] text-gray-500 uppercase font-semibold tracking-[0.16em] mb-1.5 flex items-center gap-1.5">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                                Signal Engine
+                            </div>
+                            <div class="text-[11px] font-medium text-gray-300">Mean Reversion Alpha</div>
+                            <div class="text-[9px] text-gray-500 mt-1">v2.4.1 (Stable)</div>
+                            <!-- Connector Line right -->
+                            <div class="absolute right-0 top-1/2 w-4 h-px bg-gray-600/60 translate-x-full"></div>
+                        </div>
+
+                        <!-- Arrow/Connection Icon -->
+                        <div class="text-gray-500 flex items-center justify-center -mx-2 z-10">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
+
+                        <!-- Right Node: Real-time Execution -->
+                        <div class="flex-1 rounded-xl border border-blue-500/40 bg-blue-900/20 shadow-[0_0_15px_rgba(59,130,246,0.1)] p-3 flex flex-col justify-center relative">
+                            <div class="text-[9px] text-blue-400 uppercase font-semibold tracking-[0.16em] mb-1.5 flex items-center gap-1.5">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                                Execution
+                            </div>
+                            <div class="text-[11px] font-medium text-blue-200 flex items-center gap-1.5">
+                                Market Routing
+                            </div>
+                            <div class="text-[9px] text-[#10b981] mt-1 flex items-center gap-1">
+                                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                Receiving Signals
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="card animate-on-scroll delay-200">
+                <h3 class="card-title">Performance Monitoring</h3>
+                <p class="card-text">Track how strategies perform after going live.</p>
+                <div class="card-visual mt-auto" style="height: 148px; padding: 12px; flex-direction: column; justify-content: flex-start; gap: 8px; align-items: stretch;">
+                    <div class="flex items-center justify-between">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-[0.18em] font-semibold">Monitoring</div>
+                        <div class="text-[10px] text-blue-300 uppercase tracking-[0.18em] font-semibold">Live</div>
+                    </div>
+                    <div class="w-full flex-1 flex flex-wrap gap-2 content-between">
+                        <div class="w-[calc(50%-4px)] bg-gray-900/55 border border-gray-700/50 rounded-lg p-2.5 flex flex-col justify-center">
+                            <div class="text-[9px] text-gray-500 mb-1 leading-none uppercase tracking-wider">Net PnL</div>
+                            <div class="text-xs text-[#10b981] font-bold leading-none">+$12.4K</div>
+                        </div>
+                        <div class="w-[calc(50%-4px)] bg-gray-900/55 border border-gray-700/50 rounded-lg p-2.5 flex flex-col justify-center">
+                            <div class="text-[9px] text-gray-500 mb-1 leading-none uppercase tracking-wider">Win Rate</div>
+                            <div class="text-xs text-gray-200 font-bold leading-none">64.2%</div>
+                        </div>
+                        <div class="w-[calc(50%-4px)] bg-gray-900/55 border border-gray-700/50 rounded-lg p-2.5 flex flex-col justify-center">
+                            <div class="text-[9px] text-gray-500 mb-1 leading-none uppercase tracking-wider">Max DD</div>
+                            <div class="text-xs text-red-400 font-bold leading-none">-4.8%</div>
+                        </div>
+                        <div class="w-[calc(50%-4px)] bg-gray-900/55 border border-gray-700/50 rounded-lg p-2.5 flex flex-col justify-center">
+                            <div class="text-[9px] text-gray-500 mb-1 leading-none uppercase tracking-wider">Trades</div>
+                            <div class="text-xs text-gray-200 font-bold leading-none">1,208</div>
+                        </div>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-gray-800/70 overflow-hidden">
+                        <div class="h-full w-[72%] rounded-full bg-gradient-to-r from-blue-500 to-[#10b981]"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="card animate-on-scroll delay-300">
+                <h3 class="card-title">Portfolio &amp; Accounts</h3>
+                <p class="card-text">Manage strategies across multiple accounts centrally.</p>
+                <div class="card-visual mt-auto" style="height: 148px; padding: 14px; flex-direction: column; justify-content: center; gap: 10px; align-items: stretch;">
+                    <div class="flex items-center justify-between">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-[0.18em] font-semibold">Accounts</div>
+                        <div class="text-[10px] text-[#10b981] uppercase tracking-[0.18em] font-semibold">Synced</div>
+                    </div>
+                    <div class="w-full rounded-xl border border-gray-700/60 bg-gray-900/55 p-2.5 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_6px_#10b981]"></div>
+                            <span class="text-[11px] text-gray-200 font-medium">Binance Main</span>
+                        </div>
+                        <span class="text-[11px] font-mono text-gray-400">1.24 BTC</span>
+                    </div>
+                    <div class="w-full rounded-xl border border-gray-700/60 bg-gray-900/55 p-2.5 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_6px_#10b981]"></div>
+                            <span class="text-[11px] text-gray-200 font-medium">Bybit Sub_2</span>
+                        </div>
+                        <span class="text-[11px] font-mono text-gray-400">14.2K USDT</span>
+                    </div>
+                    <div class="w-full rounded-xl border border-gray-700/60 bg-gray-900/55 p-2.5 flex items-center justify-between opacity-55">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-500"></div>
+                            <span class="text-[11px] text-gray-300 font-medium">Kraken Test</span>
+                        </div>
+                        <span class="text-[11px] font-mono text-gray-400">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 7 -->
+            <div class="card animate-on-scroll delay-400">
+                <h3 class="card-title">Strategy Oversight</h3>
+                <p class="card-text">Capture issues, decisions, and evolving context over time.</p>
+                <div class="card-visual mt-auto" style="height: 148px; padding: 14px; flex-direction: column; justify-content: center; gap: 10px; align-items: stretch;">
+                    <div class="flex items-center justify-between">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-[0.18em] font-semibold">Oversight</div>
+                        <div class="text-[10px] text-blue-300 uppercase tracking-[0.18em] font-semibold">Timeline</div>
+                    </div>
+                    <div class="relative pl-5">
+                        <div class="absolute left-2.5 top-0 bottom-0 w-px bg-gray-700/60"></div>
+                        <div class="space-y-2.5">
+                            <div class="relative">
+                                <div class="absolute -left-[0.05rem] top-1.5 h-3 w-3 rounded-full bg-blue-500 border-2 border-blue-300 shadow-[0_0_8px_rgba(59,130,246,0.35)]"></div>
+                                <div class="rounded-xl border border-blue-500/20 bg-blue-900/15 px-3 py-2.5">
+                                    <div class="text-[10px] text-blue-300 font-bold">10:42 AM - Strategy Updated</div>
+                                    <div class="text-[9px] text-gray-400 mt-0.5">Risk limits adjusted to 2% max DD</div>
+                                </div>
+                            </div>
+                            <div class="relative opacity-85">
+                                <div class="absolute -left-[0.05rem] top-1.5 h-3 w-3 rounded-full bg-gray-900 border-2 border-gray-600"></div>
+                                <div class="rounded-xl border border-gray-700/60 bg-gray-900/55 px-3 py-2.5">
+                                    <div class="text-[10px] text-gray-200 font-bold">09:15 AM - Validation Passed</div>
+                                    <div class="text-[9px] text-gray-500 mt-0.5">Backtest #409 completed</div>
+                                </div>
+                            </div>
+                            <div class="relative opacity-55">
+                                <div class="absolute -left-[0.05rem] top-1.5 h-3 w-3 rounded-full bg-gray-900 border-2 border-gray-600"></div>
+                                <div class="rounded-xl border border-gray-700/60 bg-gray-900/45 px-3 py-2.5">
+                                    <div class="text-[10px] text-gray-300 font-bold">08:00 AM - Data Synced</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Build with ToMoon -->
+    <section id="build" class="max-w-7xl mx-auto px-6 py-20 relative">
+        <div class="text-center mb-16 relative z-10 animate-on-scroll">
+            <div class="section-label">BUILD WITH TOMOON</div>
+            <h2 class="section-headline">Move from raw idea to live strategy workflow.</h2>
+            <p class="supporting-text mx-auto" style="">ToMoon helps users move through strategy work with more structure and less friction.</p>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+            <div class="workflow-step animate-on-scroll delay-100">
+                <div class="step-number">1</div>
+                <h3 class="card-title">Capture the Starting Point</h3>
+                <p class="card-text">Bring in observations, chart logic, code, videos, or fragmented research inputs.</p>
+                <div class="workflow-connector hidden lg:block"></div>
+            </div>
+            <div class="workflow-step animate-on-scroll delay-200">
+                <div class="step-number">2</div>
+                <h3 class="card-title">Structure the Strategy</h3>
+                <p class="card-text">Turn raw input into clearer assumptions, strategy logic, blueprints, and executable structure.</p>
+                <div class="workflow-connector hidden lg:block"></div>
+            </div>
+            <div class="workflow-step animate-on-scroll delay-300">
+                <div class="step-number">3</div>
+                <h3 class="card-title">Validate What Holds</h3>
+                <p class="card-text">Backtest across broader market history, review weaknesses, and refine what deserves to move forward.</p>
+                <div class="workflow-connector hidden lg:block"></div>
+            </div>
+            <div class="workflow-step animate-on-scroll delay-400">
+                <div class="step-number">4</div>
+                <h3 class="card-title">Deploy and Oversee</h3>
+                <p class="card-text">Push validated strategies toward live execution, monitor performance, and track the strategy as it evolves.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platform -->
+    <section id="platform" class="max-w-7xl mx-auto px-6 py-20 relative">
+        <div class="text-center mb-16 relative z-10 animate-on-scroll">
+            <div class="section-label">PLATFORM</div>
+            <h2 class="section-headline">Built on a stronger foundation for strategy work.</h2>
+            <p class="supporting-text mx-auto">ToMoon is designed to support more than isolated notes or one-off backtests. It is built to support structured strategy development across research, validation, execution, and oversight.</p>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6 relative z-10">
+            <div class="card animate-on-scroll delay-100">
+                <h3 class="card-title">AI-assisted strategy formation</h3>
+                <p class="card-text">Help translate raw ideas into clearer strategic structure without requiring users to begin from code.</p>
+            </div>
+            <div class="card animate-on-scroll delay-200">
+                <h3 class="card-title">Structured strategy blueprints</h3>
+                <p class="card-text">Move from vague concepts toward strategy specifications that are clearer, more testable, and easier to refine.</p>
+            </div>
+            <div class="card animate-on-scroll delay-300">
+                <h3 class="card-title">Validation and execution continuity</h3>
+                <p class="card-text">Reduce the gap between "interesting idea" and "strategy ready for testing or deployment."</p>
+            </div>
+            <div class="card animate-on-scroll delay-400">
+                <h3 class="card-title">Ongoing oversight and portfolio visibility</h3>
+                <p class="card-text">Track strategy performance, issues, decisions, and evolving context over time.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Built For -->
+    <section class="max-w-7xl mx-auto px-6 py-20 relative">
+        <div class="text-center mb-16 relative z-10 animate-on-scroll">
+            <div class="section-label">BUILT FOR</div>
+            <h2 class="section-headline">For traders building toward more serious systems.</h2>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+            <div class="card animate-on-scroll delay-100" style="border-top: 3px solid rgba(16, 185, 129, 0.5);">
+                <h3 class="card-title">Early Traders</h3>
+                <p class="card-text">For discretionary traders trying to turn repeated observations into something more structured and testable.</p>
+            </div>
+            <div class="card animate-on-scroll delay-200" style="border-top: 3px solid rgba(16, 185, 129, 0.7);">
+                <h3 class="card-title">Quant Builders</h3>
+                <p class="card-text">For users shaping strategy logic that can move toward validation, automation, and live execution.</p>
+            </div>
+            <div class="card animate-on-scroll delay-300" style="border-top: 3px solid rgba(16, 185, 129, 0.9);">
+                <h3 class="card-title">Strategy Researchers</h3>
+                <p class="card-text">For people who need a better environment for organizing, refining, and challenging strategic ideas.</p>
+            </div>
+            <div class="card animate-on-scroll delay-400" style="border-top: 3px solid rgba(16, 185, 129, 1);">
+                <h3 class="card-title">Systematic Teams</h3>
+                <p class="card-text">For teams that want clearer visibility across strategy development, validation, deployment, and ongoing oversight.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Layer -->
+    <section id="trust" class="max-w-7xl mx-auto px-6 py-20 animate-on-scroll">
+        <div class="text-center mb-16">
+            <div class="section-label">EARLY SIGNALS</div>
+            <h2 class="section-headline">What early users are already seeing.</h2>
+        </div>
+        <div class="quote-marquee">
+            <div class="quote-track">
+                <div class="quote-chip">Feels like a real bridge between trading ideas and quant workflow.</div>
+                <div class="quote-chip">More structured than a note-taking tool, more approachable than a full engineering stack.</div>
+                <div class="quote-chip">What stands out is the connected path from discovery to deployment.</div>
+                <div class="quote-chip">It feels like infrastructure, not another trading feature page.</div>
+                <div class="quote-chip">This is the kind of system strategy builders actually need.</div>
+                <div class="quote-chip">Feels like a real bridge between trading ideas and quant workflow.</div>
+                <div class="quote-chip">More structured than a note-taking tool, more approachable than a full engineering stack.</div>
+                <div class="quote-chip">What stands out is the connected path from discovery to deployment.</div>
+                <div class="quote-chip">It feels like infrastructure, not another trading feature page.</div>
+                <div class="quote-chip">This is the kind of system strategy builders actually need.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section id="early-access" class="max-w-5xl mx-auto px-6 py-32 text-center animate-on-scroll">
+        <div class="section-label">EARLY ACCESS</div>
+        <h2 class="section-headline mb-6" style="">Build quant strategies through one connected workflow.</h2>
+        <p class="supporting-text mx-auto mb-12">Join the early group exploring a more connected way to discover, validate, deploy, and manage strategy systems.</p>
+        
+        <div class="max-w-xl mx-auto">
+            <div class="flex flex-col md:flex-row gap-3 mb-6 early-access-form" data-source="final-cta">
+                <input type="email" placeholder="Enter your email" class="input-field flex-1 hover:border-opacity-20 focus:border-[#10b981] transition-colors early-access-email-input">
+                <button class="btn-primary whitespace-nowrap hover:scale-105 transition-transform duration-300 early-access-submit-btn">Join Early Access</button>
+            </div>
+            <div class="waitlist-count early-access-feedback" aria-live="polite"></div>
+            <div class="waitlist-count">
+                Join <span class="count-number">236</span> early users exploring ToMoon
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white border-opacity-8 mt-20">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+            <div class="grid md:grid-cols-4 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <a href="#" aria-label="ToMoon home" class="block relative mb-4 h-6 w-[180px] overflow-visible">
+                        <img src="https://tomoon-logo-backet-663970204152-ap-southeast-1-an.s3.ap-southeast-1.amazonaws.com/tomoon_white.svg" alt="ToMoon" class="absolute left-0 top-0 h-6 w-auto origin-left scale-[2]">
+                    </a>
+                    <p class="text-sm text-gray-500 max-w-md">AI-powered quant strategy infrastructure for the full strategy lifecycle.</p>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold text-white mb-4">Platform</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#products" class="text-sm text-gray-500 hover:text-gray-300">Products</a></li>
+                        <li><a href="#build" class="text-sm text-gray-500 hover:text-gray-300">Build with ToMoon</a></li>
+                        <li><a href="#platform" class="text-sm text-gray-500 hover:text-gray-300">Platform</a></li>
+                        <li><a href="#trust" class="text-sm text-gray-500 hover:text-gray-300">Trust</a></li>
+                        <li><a href="#early-access" class="text-sm text-gray-500 hover:text-gray-300">Early Access</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold text-white mb-4">Connect</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-sm text-gray-500 hover:text-gray-300">X</a></li>
+                        <li><a href="#" class="text-sm text-gray-500 hover:text-gray-300">Discord</a></li>
+                        <li><a href="#" class="text-sm text-gray-500 hover:text-gray-300">YouTube</a></li>
+                        <li><a href="#" class="text-sm text-gray-500 hover:text-gray-300">LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-white border-opacity-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-sm text-gray-500">© 2026 ToMoon. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="text-sm text-gray-500 hover:text-gray-300">Privacy</a>
+                    <a href="#" class="text-sm text-gray-500 hover:text-gray-300">Terms</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            // Mobile menu toggle
+            var mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            var mobileNav = document.getElementById('mobileNav');
+            
+            if (mobileMenuBtn && mobileNav) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    mobileMenuBtn.classList.toggle('active');
+                    mobileNav.classList.toggle('active');
+                });
+                
+                // Close mobile menu when clicking on a link
+                var mobileNavLinks = mobileNav.querySelectorAll('a');
+                mobileNavLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        mobileMenuBtn.classList.remove('active');
+                        mobileNav.classList.remove('active');
+                    });
+                });
+            }
+            
+            // Existing why-modal navigation script
+            var navItems = Array.from(document.querySelectorAll('.why-modal-nav-item[data-target]'));
+            if (navItems.length) {
+                var panels = navItems
+                    .map(function (item) {
+                        return document.getElementById(item.dataset.target);
+                    })
+                    .filter(Boolean);
+
+                function setActive(panelId) {
+                    navItems.forEach(function (item) {
+                        item.classList.toggle('active', item.dataset.target === panelId);
+                    });
+                }
+
+                navItems.forEach(function (item) {
+                    item.addEventListener('click', function () {
+                        var panel = document.getElementById(item.dataset.target);
+                        if (!panel) {
+                            return;
+                        }
+                        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                });
+
+                var observer = new IntersectionObserver(
+                    function (entries) {
+                        entries.forEach(function (entry) {
+                            if (entry.isIntersecting) {
+                                setActive(entry.target.id);
+                            }
+                        });
+                    },
+                    {
+                        root: null,
+                        rootMargin: '-40% 0px -45% 0px',
+                        threshold: 0
+                    }
+                );
+
+                panels.forEach(function (panel) {
+                    observer.observe(panel);
+                });
+            }
+
+            // Interactive Hover Effect for Cards
+            var glowingCards = document.querySelectorAll('.card, .workflow-step');
+            glowingCards.forEach(function(card) {
+                card.addEventListener('mousemove', function(e) {
+                    var rect = card.getBoundingClientRect();
+                    var x = e.clientX - rect.left;
+                    var y = e.clientY - rect.top;
+                    card.style.setProperty('--mouse-x', x + 'px');
+                    card.style.setProperty('--mouse-y', y + 'px');
+                });
+            });
+
+            // Scroll Animation Observer
+            var scrollObserver = new IntersectionObserver(
+                function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            // Optional: If you only want it to animate once, uncomment the line below
+                            // scrollObserver.unobserve(entry.target);
+                        }
+                    });
+                },
+                {
+                    root: null,
+                    rootMargin: '0px 0px -10% 0px',
+                    threshold: 0.1
+                }
+            );
+
+            var animatedElements = document.querySelectorAll('.animate-on-scroll');
+            animatedElements.forEach(function(el) {
+                scrollObserver.observe(el);
+            });
+            
+            // Fallback: Make all elements visible after a short delay if observer fails
+            setTimeout(function() {
+                animatedElements.forEach(function(el) {
+                    el.classList.add('is-visible');
+                });
+            }, 1500);
+
+            // Early access email subscribe
+            var earlyAccessForms = document.querySelectorAll('.early-access-form');
+            earlyAccessForms.forEach(function(form) {
+                var input = form.querySelector('.early-access-email-input');
+                var button = form.querySelector('.early-access-submit-btn');
+                var feedback = form.parentElement.querySelector('.early-access-feedback');
+                var source = form.getAttribute('data-source') || 'landingpage';
+
+                if (!input || !button || !feedback) {
+                    return;
+                }
+
+                function setFeedback(message, kind) {
+                    feedback.textContent = message;
+                    feedback.classList.remove('success', 'error');
+                    if (kind) {
+                        feedback.classList.add(kind);
+                    }
+                }
+
+                function isValidEmail(email) {
+                    return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email);
+                }
+
+                function setLoading(isLoading) {
+                    button.disabled = isLoading;
+                    button.style.opacity = isLoading ? '0.7' : '1';
+                    button.textContent = isLoading ? 'Sending...' : 'Join Early Access';
+                }
+
+                function submitEmail() {
+                    var email = (input.value || '').trim();
+                    if (!isValidEmail(email)) {
+                        setFeedback('Please enter a valid email address.', 'error');
+                        return;
+                    }
+
+                    setFeedback('', null);
+                    setLoading(true);
+
+                    fetch('/api/early-access/subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, source: source })
+                    })
+                        .then(function(response) {
+                            return response.json().catch(function() { return {}; }).then(function(data) {
+                                if (!response.ok) {
+                                    var detail = data.detail || 'Failed to subscribe. Please try again later.';
+                                    throw new Error(detail);
+                                }
+                                return data;
+                            });
+                        })
+                        .then(function() {
+                            setFeedback('Success! Please check your inbox for the early access email.', 'success');
+                            input.value = '';
+                        })
+                        .catch(function(error) {
+                            setFeedback(error.message || 'Failed to subscribe. Please try again later.', 'error');
+                        })
+                        .finally(function() {
+                            setLoading(false);
+                        });
+                }
+
+                button.addEventListener('click', submitEmail);
+                input.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        submitEmail();
+                    }
+                });
+            });
+
+            // Make the background follow the mouse gently (parallax)
+            document.addEventListener('mousemove', function(e) {
+                const x = (e.clientX / window.innerWidth - 0.5) * -15; 
+                const y = (e.clientY / window.innerHeight - 0.5) * -15;
+                document.body.style.setProperty('--mouse-x', x + 'px');
+                document.body.style.setProperty('--mouse-y', y + 'px');
+            });
+        })();
+    </script>
+
+    <script src="https://cdn.kuse.ai/sdk.prd.js"></script>
+
+</body></html>

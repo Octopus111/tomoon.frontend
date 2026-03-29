@@ -1,487 +1,780 @@
-<!-- 3. Center Canvas: Strategy Workflow -->
-      <section id="canvas-container" class="absolute inset-0 z-10 bg-[#F8F7FB] dark:bg-dark-bg overflow-y-auto overflow-x-hidden cursor-default transition-colors duration-300">
-        <div id="canvas-content" class="canvas-safe-area relative left-0 top-0 w-full min-h-full flex flex-col items-center p-8 transition-opacity duration-300" style="padding-left: calc(2rem + var(--canvas-left-safe-area)); padding-right: calc(2rem + var(--canvas-right-safe-area));">
-        
-        <!-- ================= EMPTY STATE CONTAINER ================= -->
-        <div id="empty-state-view" class="hidden flex-col w-full max-w-4xl mx-auto opacity-0 transition-opacity duration-500 relative min-h-[calc(100vh-140px)] pb-40">
-          
-          <!-- Welcome Header -->
-          <div class="text-center pt-8 md:pt-14 pb-10">
-            <div id="discover-mode-tag" class="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-wider uppercase bg-slate-900 text-white dark:bg-white dark:text-slate-900 mb-5 shadow-sm">
-              <i data-lucide="compass" class="w-3.5 h-3.5 mr-1.5 flex-shrink-0"></i> Guided Discover
-            </div>
-            <h2 class="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 mb-5">Shape the edge before the structure.</h2>
-            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">Collect observations, confirm conditions, and let AI compress the evidence into a clear strategy premise.</p>
-          </div>
-
-          <!-- Modules grid (Synthesis & Evidence) layout naturally in the document flow -->
-          <div id="discover-boards-container" class="w-full mb-10 transition-all duration-500 relative">
-            <!-- Collapsed Header -->
-            <div id="discover-boards-collapsed" class="hidden justify-between items-center bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-dark-border rounded-2xl p-4 shadow-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors max-w-xl mx-auto" onclick="toggleDiscoverBoards()">
-              <div class="flex items-center gap-4">
-                <div class="p-2 rounded-xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
-                  <i data-lucide="brain-circuit" class="w-5 h-5"></i>
-                </div>
-                <div class="flex flex-col text-left">
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Synthesis & Evidence</span>
-                    <span id="discover-completion-pill-small" class="rounded-full border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-slate-800/50 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300">0% complete</span>
-                  </div>
-                  <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Click to expand • <span id="discover-attachment-count-small">0</span> items attached</span>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 text-slate-400">
-                <span class="text-[10px] uppercase tracking-widest font-semibold hidden sm:inline">Expand</span>
-                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-              </div>
-            </div>
-
-            <!-- Expanded View -->
-            <div id="discover-boards-expanded" class="grid grid-cols-1 md:grid-cols-2 gap-5 relative opacity-100 transition-opacity duration-300 mt-2">
-              <button id="discover-boards-close-btn" onclick="toggleDiscoverBoards()" class="hidden absolute -top-3 -right-3 md:flex items-center justify-center w-7 h-7 bg-white dark:bg-slate-800 border border-slate-200 dark:border-dark-border rounded-full shadow-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 z-10 transition-colors" title="Collapse Boards">
-                <i data-lucide="minus" class="w-4 h-4"></i>
-              </button>
-              
-              <!-- Synthesis Board -->
-            <div class="rounded-3xl border border-slate-200/80 dark:border-dark-border bg-white dark:bg-slate-900/30 p-5 sm:p-6 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col group">
-              <div class="flex items-center justify-between gap-3 mb-5">
-                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100 flex items-center">
-                  <div class="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/30 mr-2 text-purple-600 dark:text-purple-400">
-                    <i data-lucide="brain-circuit" class="w-4 h-4"></i>
-                  </div>
-                  Synthesis Board
-                </h3>
-                <span id="discover-completion-pill" class="rounded-full border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-slate-800/50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300">0% complete</span>
-              </div>
-              <div class="grid grid-cols-2 gap-3 mb-3 flex-1">
-                <div class="rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 p-3.5 border border-transparent hover:border-purple-200 dark:hover:border-purple-800/50 transition-colors">
-                  <div class="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-400 mb-2 font-semibold">
-                    <i data-lucide="eye" class="w-3 h-3"></i> Phenomenon
-                  </div>
-                  <p id="discover-synthesis-phenomenon" class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed pl-1 border-l-2 border-slate-200 dark:border-slate-700">Waiting for observation...</p>
-                </div>
-                <div class="rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 p-3.5 border border-transparent hover:border-blue-200 dark:hover:border-blue-800/50 transition-colors">
-                  <div class="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-400 mb-2 font-semibold">
-                    <i data-lucide="sliders" class="w-3 h-3"></i> Condition
-                  </div>
-                  <p id="discover-synthesis-conditions" class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed pl-1 border-l-2 border-slate-200 dark:border-slate-700">Waiting for clues...</p>
-                </div>
-                <div class="rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 p-3.5 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800/50 transition-colors">
-                  <div class="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-400 mb-2 font-semibold">
-                    <i data-lucide="crosshair" class="w-3 h-3"></i> Target
-                  </div>
-                  <p id="discover-synthesis-result" class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed pl-1 border-l-2 border-slate-200 dark:border-slate-700">Waiting for goal...</p>
-                </div>
-                <div class="rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 p-3.5 border border-transparent hover:border-amber-200 dark:hover:border-amber-800/50 transition-colors">
-                  <div class="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-400 mb-2 font-semibold">
-                    <i data-lucide="zap" class="w-3 h-3"></i> Edge
-                  </div>
-                  <p id="discover-synthesis-edge" class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed pl-1 border-l-2 border-slate-200 dark:border-slate-700">Waiting for premise...</p>
-                </div>
-              </div>
-              <div class="rounded-[20px] border border-rose-100 dark:border-rose-900/30 bg-rose-50/50 dark:bg-rose-900/10 p-3.5 mt-2">
-                <div class="text-[10px] uppercase tracking-widest text-rose-500/80 dark:text-rose-400/80 mb-1 font-semibold">Failure Mode</div>
-                <p id="discover-synthesis-failure" class="text-xs text-slate-700 dark:text-slate-300">Unidentified. When does the logic break?</p>
-              </div>
-            </div>
-
-            <!-- Evidence Tray -->
-            <div class="rounded-3xl border border-slate-200/80 dark:border-dark-border bg-white dark:bg-slate-900/30 p-5 sm:p-6 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col group">
-              <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100 flex items-center mb-5">
-                <div class="p-1.5 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 mr-2 text-cyan-600 dark:text-cyan-400">
-                  <i data-lucide="paperclip" class="w-4 h-4"></i>
-                </div>
-                Evidence Tray
-              </h3>
-              <label for="discover-upload-input" id="discover-upload-dropzone" class="flex-1 group flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/20 px-4 py-8 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-50/30 transition-colors mb-4">
-                <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
-                  <i data-lucide="cloud-upload" class="w-5 h-5 text-purple-500"></i>
-                </div>
-                <span class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">Click to add evidence</span>
-                <span class="text-xs text-slate-500">Screenshots, PDFs, charts, notes</span>
-              </label>
-              <div>
-                <div class="flex justify-between items-center mb-2">
-                  <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Attached Files</span>
-                  <span id="discover-attachment-count" class="text-xs text-slate-500 font-medium">0 items</span>
-                </div>
-                <div id="discover-attachment-list" class="space-y-1.5 max-h-[80px] overflow-y-auto pr-2 scroll-smooth"></div>
-              </div>
-            </div>
-          </div><!-- End Expanded View -->
-          </div><!-- End Container -->
-
-          <!-- AI Conversation Feed -->
-          <div class="w-full relative mt-4">
-            <div class="flex items-center gap-3 mb-6 justify-center">
-              <div class="h-px bg-slate-200 dark:bg-dark-border flex-1"></div>
-              <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Conversation started</span>
-              <div class="h-px bg-slate-200 dark:bg-dark-border flex-1"></div>
-            </div>
-            
-            <div id="discover-thread" class="space-y-6"></div>
-          </div>
-
-          <!-- FIXED BOTTOM INPUT -->
-          <!-- We use fixed position to stick cleanly to bottom of viewport -->
-          <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl z-50 pointer-events-none">
-            <div class="w-full bg-gradient-to-t from-[#F8F7FB] dark:from-dark-bg via-[#F8F7FB]/90 dark:via-dark-bg/90 to-transparent pt-12 pb-6 px-4">
-              <div class="pointer-events-auto relative">
-                
-                <!-- Quick Guides / Hints (Floats right above input) -->
-                <div id="discover-guidance-wrap" class="hidden absolute bottom-[100%] left-0 w-full mb-3 flex flex-wrap justify-center gap-2 items-center">
-                  <div id="discover-guidance-actions" class="flex flex-wrap justify-center gap-2"></div>
-                </div>
-
-                <!-- Chat Box -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-dark-border shadow-[0_8px_40px_rgba(0,0,0,0.08)] dark:shadow-none rounded-3xl overflow-hidden focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all">
-                  
-                  <textarea id="discover-input" rows="1" placeholder="Message to discover your edge..." class="w-full bg-transparent px-5 py-4 text-[15px] leading-relaxed text-slate-700 dark:text-slate-100 placeholder-slate-400 focus:outline-none resize-none max-h-[240px] overflow-y-auto block"></textarea>
-                  
-                  <div class="flex justify-between items-center px-4 pb-3 pt-1">
-                    <div class="flex items-center gap-1">
-                      <label for="discover-upload-input" class="p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" title="Upload Evidence (All)">
-                        <i data-lucide="paperclip" class="w-5 h-5"></i>
-                      </label>
-                      <input id="discover-upload-input" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.txt,.csv,.xlsx,.xls,.json" class="hidden" onchange="handleDiscoverAttachmentFiles(this.files)" />
-
-                      <!-- Specialized Upload Buttons -->
-                      <button onclick="document.getElementById('discover-upload-image').click()" class="p-2 rounded-full text-slate-400 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors" title="Upload Image">
-                        <i data-lucide="image" class="w-5 h-5"></i>
-                      </button>
-                      <input id="discover-upload-image" type="file" multiple accept="image/*" class="hidden" onchange="handleDiscoverAttachmentFiles(this.files)" />
-
-                      <button onclick="document.getElementById('discover-upload-video').click()" class="p-2 rounded-full text-slate-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors" title="Upload Video">
-                        <i data-lucide="video" class="w-5 h-5"></i>
-                      </button>
-                      <input id="discover-upload-video" type="file" multiple accept="video/*" class="hidden" onchange="handleDiscoverAttachmentFiles(this.files)" />
-
-                      <button onclick="document.getElementById('discover-upload-chart').click()" class="p-2 rounded-full text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Upload Chart/Data">
-                        <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
-                      </button>
-                      <input id="discover-upload-chart" type="file" multiple accept=".csv,.xlsx,.xls,.json" class="hidden" onchange="handleDiscoverAttachmentFiles(this.files)" />
-
-                      <button onclick="document.getElementById('discover-upload-doc').click()" class="p-2 rounded-full text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors" title="Upload Document">
-                        <i data-lucide="file-text" class="w-5 h-5"></i>
-                      </button>
-                      <input id="discover-upload-doc" type="file" multiple accept=".pdf,.doc,.docx,.txt,.md" class="hidden" onchange="handleDiscoverAttachmentFiles(this.files)" />
-                      
-                      <button onclick="clearDiscoverAttachments()" class="p-2 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="Clear All Attachments">
-                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                      </button>
-                      
-                      <span id="discover-edge-status-pill" class="ml-2 hidden sm:inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">Edge incomplete</span>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                      <button id="discover-enter-structure-btn" onclick="enterStructureFromDiscover()" class="hidden items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-emerald-700 transition-colors">
-                        Structure <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                      </button>
-
-                      <button onclick="handleStrategySubmit()" class="p-2 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:opacity-90 transition-opacity flex items-center justify-center w-10 h-10 shadow-md">
-                        <i data-lucide="arrow-up" class="w-5 h-5"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="mt-2 text-center text-[10.5px] text-slate-400 dark:text-slate-500 mb-1">
-                  AI synthesis depends on clear empirical evidence. Make sure your observations have boundaries.
-                </div>
-              </div>
-            </div>
-          </div>
-
+﻿<!-- 3. Center Canvas: Strategy Workflow -->
+<section
+  class="relative z-10 flex-1 min-w-0 h-full bg-[#F8F7FB] dark:bg-dark-bg overflow-y-auto overflow-x-hidden transition-colors duration-300"
+  id="canvas-container"
+>
+  <div
+    class="canvas-safe-area relative left-0 top-0 w-full min-h-full flex flex-col items-center px-4 py-6 md:px-7 transition-opacity duration-300"
+    id="canvas-content"
+  >
+    <!-- ================= EMPTY STATE CONTAINER ================= -->
+    <div
+      class="hidden flex-col w-full max-w-4xl mx-auto opacity-0 transition-opacity duration-500 relative min-h-[calc(100vh-140px)] pb-40"
+      id="empty-state-view"
+    >
+      <!-- Welcome Header -->
+      <div
+        class="text-center pt-8 md:pt-[18vh] pb-10 transition-all duration-700 opacity-100"
+        id="discover-welcome-header"
+      >
+        <div
+          class="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-wider uppercase bg-slate-900 text-white dark:bg-white dark:text-slate-900 mb-5 shadow-sm"
+          id="discover-mode-tag"
+        >
+          <i class="w-3.5 h-3.5 mr-1.5 flex-shrink-0" data-lucide="compass"></i>
+          Guided Discover
         </div>
-        <!-- ================= END EMPTY STATE ================= -->
-
-
-        <!-- ================= ACTIVE WORKFLOW CONTAINER ================= -->
-        <div id="workflow-view" class="w-full flex-col items-center flex transition-opacity duration-300">
-        
-        <!-- Title -->
-        <div class="text-center mb-8 mt-10">
-          <h2 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">Strategy Workflow</h2>
-          <p class="text-sm text-purple-500 dark:text-purple-400 mt-1 flex items-center justify-center">
-            <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i>
-            Auto-generated based on your input
-          </p>
-        </div>
-
-        <!-- Nodes Container -->
-        <div class="w-full max-w-4xl flex flex-col items-center space-y-4 relative">
-          
-          <!-- Node 1: Strategy Identity -->
-          <div class="w-[500px] bg-white dark:bg-dark-card rounded-xl shadow-sm border border-emerald-200 dark:border-emerald-800 p-4 hover:shadow-lg transition-all cursor-pointer group">
-            <div class="flex justify-between items-center mb-3">
-              <div class="flex items-center font-medium text-slate-800 dark:text-slate-100">
-                <i data-lucide="badge-check" class="w-4 h-4 text-emerald-500 mr-2"></i>
-                Strategy Identity
-              </div>
-              <span class="text-xs bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded font-medium border border-emerald-100 dark:border-emerald-800">CONFIRMED</span>
-            </div>
-            <div class="flex flex-wrap gap-2 text-xs">
-              <span class="bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-dark-border px-2 py-1.5 rounded text-slate-600 dark:text-slate-300 flex items-center group-hover:border-emerald-200 dark:group-hover:border-emerald-700 transition-colors">
-                <i data-lucide="coins" class="w-3 h-3 mr-1"></i> Gold (XAU/USD)
+        <h2
+          class="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 mb-5"
+        >
+          Start with what you've noticed.
+        </h2>
+        <p
+          class="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed transition-opacity duration-300"
+        >
+          Upload charts, notes, code, videos, or rough ideas. AI will help shape
+          them into a clearer trading edge.
+        </p>
+      </div>
+      <div
+        class="w-full mb-4 relative overflow-visible transition-all duration-500 opacity-0 pointer-events-none"
+        id="discover-boards-container"
+      >
+        <div
+          class="absolute top-0 left-1/2 -translate-x-1/2 z-30 w-full max-w-4xl rounded-2xl border border-slate-200/90 dark:border-dark-border bg-white/92 dark:bg-slate-900/75 backdrop-blur shadow-sm px-4 py-3 transition-shadow pointer-events-auto"
+          data-discover-floating-panel="1"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <p
+              class="text-sm sm:text-[15px] font-semibold text-slate-800 dark:text-slate-100 leading-snug flex items-center min-w-0 flex-1"
+              id="discover-premise-title"
+            >
+              <span
+                class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 mr-2 text-slate-500 dark:text-slate-300"
+              >
+                <i class="w-3 h-3" data-lucide="lightbulb"></i>
               </span>
-              <span class="bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-dark-border px-2 py-1.5 rounded text-slate-600 dark:text-slate-300 flex items-center group-hover:border-emerald-200 dark:group-hover:border-emerald-700 transition-colors">
-                <i data-lucide="clock" class="w-3 h-3 mr-1"></i> 1H Timeframe
+              <span id="discover-premise-text-content">
+                No clear premise captured yet
+                <span class="font-normal text-slate-500 dark:text-slate-400"
+                  >- describe what you noticed</span
+                >
               </span>
-              <span class="bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-dark-border px-2 py-1.5 rounded text-slate-600 dark:text-slate-300 flex items-center group-hover:border-emerald-200 dark:group-hover:border-emerald-700 transition-colors">
-                <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i> Breakout Strategy
-              </span>
+            </p>
+            <div class="shrink-0 flex items-center gap-2">
+              <span
+                class="rounded-full border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-300"
+                id="discover-completion-pill"
+                >Needs input</span
+              >
             </div>
           </div>
-
-          <!-- Connection Line -->
-          <div class="w-px h-8 bg-gradient-to-b from-emerald-300 dark:from-emerald-600 to-purple-300 dark:to-purple-600"></div>
-
-          <!-- Node 2: Premise / Edge -->
-          <div class="w-[500px] bg-white dark:bg-dark-card rounded-xl shadow-sm border-2 border-purple-200 dark:border-purple-700 p-4 hover:shadow-lg transition-all cursor-pointer relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-20 h-20 bg-purple-50 dark:bg-purple-900/20 rounded-bl-full opacity-50"></div>
-            <div class="relative">
-              <div class="flex justify-between items-center mb-2">
-                <div class="flex items-center font-medium text-purple-700 dark:text-purple-400">
-                  <i data-lucide="lightbulb" class="w-4 h-4 mr-2"></i> Premise / Edge
-                </div>
-                <span class="text-xs text-orange-500 dark:text-orange-400 font-medium flex items-center">
-                  <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i> Drafted by AI
-                </span>
-              </div>
-              <p class="text-sm text-slate-600 dark:text-slate-300 pl-6">Breakout from low volatility consolidation</p>
-            </div>
-          </div>
-
-          <!-- Connection Lines to Bottom Nodes -->
-          <div class="relative w-full max-w-3xl h-8 flex justify-center">
-            <svg class="absolute w-full h-full" viewBox="0 0 800 32">
-              <!-- Center line splitting into three -->
-              <path d="M 400 0 L 400 16" stroke="#a855f7" stroke-width="2" fill="none"/>
-              <path d="M 400 16 C 400 24, 267 24, 267 32" stroke="#a855f7" stroke-width="2" fill="none"/>
-              <path d="M 400 16 L 400 32" stroke="#a855f7" stroke-width="2" fill="none"/>
-              <path d="M 400 16 C 400 24, 533 24, 533 32" stroke="#a855f7" stroke-width="2" fill="none"/>
-            </svg>
-          </div>
-
-          <!-- Bottom Three Columns Container -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl pt-2 relative items-start">
-            
-            <!-- Column 1: Market & Regime + Execution -->
-            <div class="flex flex-col gap-6 w-full">
-              <!-- Logic Node 1: Market & Regime -->
-              <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-200 dark:border-dark-border p-4 hover:shadow-lg transition-all cursor-pointer group relative">
-                <div class="absolute top-0 left-0 w-full h-1 bg-purple-400 rounded-t-xl"></div>
-                <div class="flex justify-between items-start mb-4 mt-1">
-                  <h4 class="font-semibold text-sm flex items-center text-slate-800 dark:text-slate-100">
-                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-500 mr-2"></i>
-                    Market & Regime
-                  </h4>
-                  <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors opacity-0 group-hover:opacity-100"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-                </div>
-                
-                <ul class="space-y-4">
-                  <li class="relative pl-5">
-                    <div class="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-purple-500"></div>
-                    <div class="flex justify-between items-center mb-1.5">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-medium">Volatility Filter</span>
-                      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+          <!-- AI Summary & Content Categorization (Editable) -->
+          <div
+            class="mt-3 mb-1 space-y-2 hidden"
+            id="discover-ai-summary-container"
+          >
+            <!-- AI Generated Summary -->
+            <div
+              class="px-3 py-2.5 bg-purple-50/50 dark:bg-purple-900/10 rounded-lg border border-purple-100 dark:border-purple-800/30"
+              id="discover-ai-summary"
+            >
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-start gap-2 flex-1 min-w-0">
+                  <i
+                    class="w-3.5 h-3.5 text-purple-500 mt-0.5 shrink-0"
+                    data-lucide="sparkles"
+                  ></i>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-[10px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">AI Summary</span>
+                      <span class="text-[10px] text-slate-400 dark:text-slate-500" id="discover-summary-auto-badge">Auto-generated</span>
                     </div>
-                    <div>
-                      <span class="bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-xs px-2 py-1 rounded font-medium border border-rose-100 dark:border-rose-800">ATR(14) &lt; Threshold</span>
-                    </div>
-                  </li>
-                  <li class="relative pl-5">
-                    <div class="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <div class="flex justify-between items-center mb-1.5">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-medium">Trend Filter</span>
-                      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
-                    </div>
-                    <div>
-                      <span class="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs px-2 py-1 rounded font-medium border border-emerald-100 dark:border-emerald-800">Above SMA(200)</span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-
-              <!-- Logic Node 4: Execution -->
-              <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-200 dark:border-dark-border p-4 hover:shadow-lg transition-all cursor-pointer group relative">
-                <div class="absolute top-0 left-0 w-full h-1 bg-orange-400 rounded-t-xl"></div>
-                <div class="flex justify-between items-start mb-4 mt-1">
-                  <h4 class="font-semibold text-sm flex items-center text-slate-800 dark:text-slate-100">
-                    <i data-lucide="zap" class="w-4 h-4 text-orange-500 mr-2"></i>
-                    Execution
-                  </h4>
-                  <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors opacity-0 group-hover:opacity-100"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-                </div>
-                
-                <ul class="space-y-4">
-                  <li class="relative pl-5">
-                    <div class="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-purple-500"></div>
-                    <div class="flex justify-between items-center mb-1.5">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-medium">Trading Session</span>
-                      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
-                    </div>
-                    <div>
-                      <span class="bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs px-2 py-1 rounded font-medium border border-slate-200 dark:border-slate-600">London + NY</span>
-                    </div>
-                  </li>
-                  <li class="relative pl-5">
-                    <div class="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <div class="flex justify-between items-center mb-1.5">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-medium">Max Spread</span>
-                      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
-                    </div>
-                    <div>
-                      <span class="bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs px-2 py-1 rounded font-medium border border-slate-200 dark:border-slate-600">&lt; 2.0 pips</span>
-                    </div>
-                  </li>
-                  <li class="relative pl-5">
-                    <div class="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-orange-400"></div>
-                    <div class="flex justify-between items-center mb-1.5">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-medium">News Filter</span>
-                    </div>
-                    <div>
-                      <span class="bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs px-2 py-1 rounded font-medium border border-slate-200 dark:border-slate-600">High Impact Filter</span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Column 2: Signal Logic + Data Dependencies -->
-            <div class="flex flex-col gap-6 w-full">
-              <!-- Logic Node 2: Signal Logic -->
-              <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-200 dark:border-dark-border p-4 hover:shadow-lg transition-all cursor-pointer group relative">
-                <div class="absolute top-0 left-0 w-full h-1 bg-blue-400 rounded-t-xl"></div>
-                <div class="flex justify-between items-start mb-4 mt-1">
-                  <h4 class="font-semibold text-sm flex items-center text-slate-800 dark:text-slate-100">
-                    <i data-lucide="activity" class="w-4 h-4 text-blue-500 mr-2"></i>
-                    Signal Logic
-                  </h4>
-                  <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors opacity-0 group-hover:opacity-100"><i data-lucide="x" class="w-4 h-4"></i></button>
-                </div>
-                
-                <ul class="space-y-4">
-                  <li class="relative pl-4 border-l-2 border-slate-100 dark:border-slate-700 ml-1 pb-2">
-                    <div class="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-blue-500"></div>
-                    <div class="flex justify-between items-center mb-1">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-semibold pl-2">Setup</span>
-                    </div>
-                    <div class="text-slate-600 dark:text-slate-400 text-xs pl-2 font-medium">Price in Consolidation</div>
-                  </li>
-                  <li class="relative pl-4 border-l-2 border-slate-100 dark:border-slate-700 ml-1 pb-2">
-                    <div class="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <div class="flex justify-between items-center mb-1.5">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-semibold pl-2">Entry Trigger</span>
-                      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
-                    </div>
-                    <div class="pl-2">
-                      <span class="bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs px-2 py-1 rounded font-medium border border-orange-100 dark:border-orange-800">Breakout Above High</span>
-                    </div>
-                  </li>
-                  <li class="relative pl-4 border-l-2 border-slate-100 dark:border-slate-700 ml-1 pb-2">
-                    <div class="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <div class="flex justify-between items-center mb-1.5">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-semibold pl-2">Confirmation</span>
-                      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
-                    </div>
-                    <div class="pl-2">
-                      <span class="bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs px-2 py-1 rounded font-medium border border-slate-200 dark:border-slate-600">Volume &gt; SMA(20)</span>
-                    </div>
-                  </li>
-                  <li class="relative pl-4 ml-1">
-                    <div class="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-orange-400"></div>
-                    <div class="flex justify-between items-center mb-1.5">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-semibold pl-2">Invalidation</span>
-                      <i data-lucide="check-circle-2" class="w-4 h-4 text-orange-400"></i>
-                    </div>
-                    <div class="pl-2">
-                      <span class="bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs px-2 py-1 rounded font-medium border border-orange-100 dark:border-orange-800">Breakdown Below Range</span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Column 3: Risk & Money + Connect Data -->
-            <div class="flex flex-col gap-6 w-full">
-              <!-- Logic Node 3: Risk & Money -->
-              <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-200 dark:border-dark-border p-4 hover:shadow-lg transition-all cursor-pointer group relative">
-                <div class="absolute top-0 left-0 w-full h-1 bg-emerald-400 rounded-t-xl"></div>
-                <div class="flex justify-between items-start mb-4 mt-1">
-                  <h4 class="font-semibold text-sm flex items-center text-slate-800 dark:text-slate-100">
-                    <i data-lucide="shield" class="w-4 h-4 text-emerald-500 mr-2"></i>
-                    Risk & Money
-                  </h4>
-                  <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors opacity-0 group-hover:opacity-100"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-                </div>
-                
-                <ul class="space-y-4">
-                  <li class="relative pl-5">
-                    <i data-lucide="triangle" class="w-3 h-3 absolute left-0 top-1 text-emerald-500 fill-emerald-500"></i>
-                    <div class="flex justify-between items-center mb-1">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-medium">Position Size</span>
-                      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
-                    </div>
-                    <div class="text-slate-500 dark:text-slate-400 text-xs font-medium">1% Risk / Trade</div>
-                  </li>
-                  <li class="relative pl-5">
-                    <div class="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-orange-400"></div>
-                    <div class="flex justify-between items-center mb-1.5">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-medium">Stop Loss</span>
-                      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
-                    </div>
-                    <div>
-                      <span class="bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs px-2 py-1 rounded font-medium border border-slate-200 dark:border-slate-600">1.5 * ATR</span>
-                    </div>
-                  </li>
-                  <li class="relative pl-5">
-                    <i data-lucide="circle-dashed" class="w-3 h-3 absolute left-0 top-1 text-orange-400"></i>
-                    <div class="flex justify-between items-start mb-1.5">
-                      <span class="text-slate-700 dark:text-slate-200 text-sm font-medium">Take Profit</span>
-                      <div class="flex flex-col items-end leading-none">
-                        <span class="text-[10px] text-red-500 font-semibold mb-0.5">Incomplete</span>
-                        <span class="text-[10px] text-slate-400">needs attention</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span class="bg-[#F8F7FB] dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs px-2 py-1 rounded font-medium border border-slate-200 dark:border-slate-700">Optional</span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-
-              <!-- Connect Data (Optimized) -->
-              <div class="bg-indigo-50/70 dark:bg-indigo-900/20 rounded-xl shadow-sm border border-indigo-200 dark:border-indigo-800 p-4 relative group cursor-pointer hover:shadow-md transition-all">
-                <div class="absolute top-0 left-0 w-full h-1 bg-indigo-500 rounded-t-xl opacity-80"></div>
-                <h4 class="font-semibold text-sm flex items-center mb-3 mt-1 text-indigo-700 dark:text-indigo-400">
-                  <i data-lucide="plug" class="w-4 h-4 mr-2"></i> Data Connection
-                  <span class="ml-auto text-[10px] bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 px-2 py-0.5 rounded-full font-medium">Auto-Sync</span>
-                </h4>
-                
-                <div class="bg-white/80 dark:bg-slate-800/80 rounded-lg p-3 border border-indigo-100 dark:border-indigo-800/50 text-xs">
-                  <div class="flex items-start mb-2">
-                    <i data-lucide="info" class="w-3.5 h-3.5 text-indigo-500 mt-0.5 mr-2 shrink-0"></i>
-                    <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-                      Timezone & Overlap Handling
+                    <p
+                      class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed"
+                      id="discover-summary-text"
+                      contenteditable="false"
+                    >
+                      waiting for enough context...
                     </p>
                   </div>
-                  <p class="text-slate-500 dark:text-slate-400 pl-5.5 leading-relaxed">
-                    London + NY session data is automatically synchronized and stitched for backtesting.
-                  </p>
                 </div>
-                
-                <button class="w-full mt-3 flex items-center justify-center text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-700 rounded-md py-1.5 transition-colors group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/30">
-                  View Data Source <i data-lucide="arrow-right" class="w-3 h-3 ml-1"></i>
+                <button
+                  onclick="toggleDiscoverSummaryEdit()"
+                  class="shrink-0 p-1.5 rounded-md text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                  title="Edit summary"
+                  id="discover-summary-edit-btn"
+                >
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
             </div>
             
+            <!-- Content Categories (Extracted by AI, Editable) -->
+            <div
+              class="px-3 py-2.5 bg-slate-50/80 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-700"
+              id="discover-categories-panel"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <i data-lucide="tags" class="w-3 h-3"></i>
+                  Content Categories
+                </span>
+                <button
+                  onclick="toggleDiscoverCategoriesEdit()"
+                  class="text-[10px] text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium"
+                  id="discover-categories-edit-btn"
+                >
+                  Edit
+                </button>
+              </div>
+              <div class="flex flex-wrap gap-1.5" id="discover-categories-list">
+                <span class="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/30">
+                  <i data-lucide="lightbulb" class="w-2.5 h-2.5 mr-1"></i>
+                  Hypothesis
+                </span>
+                <span class="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/30">
+                  <i data-lucide="target" class="w-2.5 h-2.5 mr-1"></i>
+                  Entry Logic
+                </span>
+                <span class="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border border-orange-100 dark:border-orange-800/30">
+                  <i data-lucide="shield" class="w-2.5 h-2.5 mr-1"></i>
+                  Risk Rule
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="mt-2.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2"
+            id="discover-state-chip-row"
+          >
+            <button
+              class="inline-flex items-center gap-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-2.5 py-2 bg-slate-50/80 dark:bg-slate-800/40 text-left"
+              id="discover-state-observation"
+              type="button"
+              title="What is the core idea here?"
+              onclick="quoteDiscoverStateForEdit('observation')"
+            >
+              <span
+                class="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600"
+              ></span>
+              <span data-state-short-label="1">Core idea</span>
+            </button>
+            <button
+              class="inline-flex items-center gap-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-2.5 py-2 bg-slate-50/80 dark:bg-slate-800/40 text-left"
+              id="discover-state-context"
+              type="button"
+              title="Under what conditions does this usually appear?"
+              onclick="quoteDiscoverStateForEdit('context')"
+            >
+              <span
+                class="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600"
+              ></span>
+              <span data-state-short-label="1">Conditions</span>
+            </button>
+            <button
+              class="inline-flex items-center gap-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-2.5 py-2 bg-slate-50/80 dark:bg-slate-800/40 text-left"
+              id="discover-state-outcome"
+              type="button"
+              title="What move is this idea trying to capture?"
+              onclick="quoteDiscoverStateForEdit('outcome')"
+            >
+              <span
+                class="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600"
+              ></span>
+              <span data-state-short-label="1">Target move</span>
+            </button>
+            <button
+              class="inline-flex items-center gap-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-2.5 py-2 bg-slate-50/80 dark:bg-slate-800/40 text-left"
+              id="discover-state-logic"
+              type="button"
+              title="Why might it have an edge?"
+              onclick="quoteDiscoverStateForEdit('logic')"
+            >
+              <span
+                class="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600"
+              ></span>
+              <span data-state-short-label="1">Edge reason</span>
+            </button>
+            <button
+              class="inline-flex items-center gap-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-2.5 py-2 bg-slate-50/80 dark:bg-slate-800/40 text-left"
+              id="discover-state-failure"
+              type="button"
+              title="When does that edge disappear?"
+              onclick="quoteDiscoverStateForEdit('failure')"
+            >
+              <span
+                class="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600"
+              ></span>
+              <span data-state-short-label="1">Failure mode</span>
+            </button>
+          </div>
+          <div class="mt-2.5 flex items-center justify-end relative z-10">
+            <button
+              class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-200 hover:border-purple-300 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+              id="discover-state-toggle-btn"
+              aria-expanded="false"
+              title="Open detailed status synthesis"
+              onclick="toggleDiscoverStateDetails()"
+            >
+              <i class="w-3.5 h-3.5" id="discover-state-toggle-icon" data-lucide="chevron-down"></i>
+              <span id="discover-state-toggle-text">View full status</span>
+            </button>
+          </div>
+          <div
+            class="hidden mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-700/80 space-y-2 max-h-[48vh] overflow-y-auto pr-1"
+            id="discover-state-details"
+          >
+            <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/55 px-3 py-2.5">
+              <div class="flex items-start justify-between gap-2">
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">What is the core idea here?</p>
+                <span id="discover-state-observation-badge" class="rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-300">Missing</span>
+              </div>
+              <p id="discover-state-observation-detail" class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-300">Waiting for a clear core idea.</p>
+              <button type="button" onclick="quoteDiscoverStateForEdit('observation')" class="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-purple-600 hover:text-purple-700 dark:text-purple-300 dark:hover:text-purple-200">
+                <i class="w-3 h-3" data-lucide="quote"></i>
+                Quote for targeted edit
+              </button>
+            </div>
+            <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/55 px-3 py-2.5">
+              <div class="flex items-start justify-between gap-2">
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Under what conditions does this usually appear?</p>
+                <span id="discover-state-context-badge" class="rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-300">Missing</span>
+              </div>
+              <p id="discover-state-context-detail" class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-300">Waiting for market, timeframe, and regime clues.</p>
+              <button type="button" onclick="quoteDiscoverStateForEdit('context')" class="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-purple-600 hover:text-purple-700 dark:text-purple-300 dark:hover:text-purple-200">
+                <i class="w-3 h-3" data-lucide="quote"></i>
+                Quote for targeted edit
+              </button>
+            </div>
+            <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/55 px-3 py-2.5">
+              <div class="flex items-start justify-between gap-2">
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">What move is this idea trying to capture?</p>
+                <span id="discover-state-outcome-badge" class="rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-300">Missing</span>
+              </div>
+              <p id="discover-state-outcome-detail" class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-300">Waiting for entry and expected move definition.</p>
+              <button type="button" onclick="quoteDiscoverStateForEdit('outcome')" class="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-purple-600 hover:text-purple-700 dark:text-purple-300 dark:hover:text-purple-200">
+                <i class="w-3 h-3" data-lucide="quote"></i>
+                Quote for targeted edit
+              </button>
+            </div>
+            <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/55 px-3 py-2.5">
+              <div class="flex items-start justify-between gap-2">
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Why might it have an edge?</p>
+                <span id="discover-state-logic-badge" class="rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-300">Missing</span>
+              </div>
+              <p id="discover-state-logic-detail" class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-300">Waiting for a falsifiable edge explanation.</p>
+              <button type="button" onclick="quoteDiscoverStateForEdit('logic')" class="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-purple-600 hover:text-purple-700 dark:text-purple-300 dark:hover:text-purple-200">
+                <i class="w-3 h-3" data-lucide="quote"></i>
+                Quote for targeted edit
+              </button>
+            </div>
+            <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/55 px-3 py-2.5">
+              <div class="flex items-start justify-between gap-2">
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">When does that edge disappear?</p>
+                <span id="discover-state-failure-badge" class="rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-300">Missing</span>
+              </div>
+              <p id="discover-state-failure-detail" class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-300">Waiting for invalidation or failure condition.</p>
+              <button type="button" onclick="quoteDiscoverStateForEdit('failure')" class="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-purple-600 hover:text-purple-700 dark:text-purple-300 dark:hover:text-purple-200">
+                <i class="w-3 h-3" data-lucide="quote"></i>
+                Quote for targeted edit
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hidden w-full relative mt-6" id="discover-thread-wrap">
+        <div class="space-y-6" id="discover-thread"></div>
+      </div>
+      <!-- Composer area -->
+      <div
+        class="fixed bottom-[35%] left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-4xl transition-all duration-700"
+        id="discover-input-container"
+      >
+        <div
+          class="w-full px-4 transition-all duration-700"
+          id="discover-input-bg"
+        >
+          <div class="pointer-events-auto relative">
+            <!-- Quick Guides / Hints (Floats right above input) -->
+            <div
+              class="hidden absolute bottom-[100%] left-0 w-full mb-3 flex flex-wrap justify-center gap-2 items-center"
+              id="discover-guidance-wrap"
+            >
+              <div
+                class="flex flex-wrap justify-center gap-2"
+                id="discover-guidance-actions"
+              ></div>
+            </div>
+            <!-- Chat Box -->
+            <div
+              class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-dark-border shadow-[0_8px_40px_rgba(0,0,0,0.08)] dark:shadow-none rounded-3xl overflow-hidden focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all relative"
+              id="discover-chat-box"
+            >
+              <textarea
+                class="w-full min-h-[56px] bg-transparent pl-5 pr-14 py-4 text-[15px] leading-relaxed text-slate-700 dark:text-slate-100 placeholder-slate-400 focus:outline-none resize-none max-h-[240px] overflow-y-auto block"
+                id="discover-input"
+                placeholder="Message to discover your edge..."
+                rows="1"
+              ></textarea>
+              <!-- Absolute Send Button for minimal state -->
+              <div
+                class="absolute right-2 bottom-2 flex items-center gap-2"
+                id="discover-minimal-send"
+              >
+                <button
+                  class="hidden items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white shadow-md transition-colors"
+                  id="discover-enter-structure-btn-minimal"
+                  onclick="enterStructureFromDiscover()"
+                >
+                  Blueprint
+                  <i class="w-3.5 h-3.5" data-lucide="arrow-right"></i>
+                </button>
+                <button
+                  class="p-2 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 transition-opacity flex items-center justify-center w-8 h-8 shadow-sm"
+                  onclick="handleStrategySubmit()"
+                >
+                  <i class="w-4 h-4" data-lucide="arrow-up"></i>
+                </button>
+              </div>
+              <div class="hidden flex-col" id="discover-chat-toolbar">
+                <div
+                  class="h-px w-full bg-slate-100 dark:bg-slate-800/50 mb-2"
+                ></div>
+                <div class="flex justify-between items-center px-4 pb-3">
+                  <div class="flex items-center gap-1">
+                    <label
+                      class="p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                      for="discover-upload-input"
+                      title="Upload Evidence (All)"
+                    >
+                      <i class="w-5 h-5" data-lucide="paperclip"></i>
+                    </label>
+                    <input
+                      accept="image/*,video/*,.pdf,.doc,.docx,.txt,.csv,.xlsx,.xls,.json"
+                      class="hidden"
+                      id="discover-upload-input"
+                      multiple=""
+                      onchange="handleDiscoverAttachmentFiles(this.files)"
+                      type="file"
+                    />
+                    <!-- Specialized Upload Buttons removed -->
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button
+                      class="hidden items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-emerald-700 transition-colors"
+                      id="discover-enter-structure-btn"
+                      onclick="enterStructureFromDiscover()"
+                    >
+                      Blueprint
+                      <i class="w-4 h-4" data-lucide="arrow-right"></i>
+                    </button>
+                    <button
+                      class="p-2 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:opacity-90 transition-opacity flex items-center justify-center w-10 h-10 shadow-md"
+                      onclick="handleStrategySubmit()"
+                    >
+                      <i class="w-5 h-5" data-lucide="arrow-up"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="mt-2 text-center text-[10.5px] text-slate-400 dark:text-slate-500 mb-1 transition-all duration-500 opacity-100 translate-y-0 max-h-10 overflow-hidden"
+              id="discover-empty-hint"
+            >
+              AI synthesis depends on clear empirical evidence. Make sure your
+              observations have boundaries.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ================= END EMPTY STATE ================= -->
+        <!-- ================= ACTIVE WORKFLOW CONTAINER ================= -->
+    <div id="workflow-view" class="w-full flex flex-col items-center transition-opacity duration-300">
+      <div id="canvas-detail-modal" class="hidden fixed inset-0 z-[90]">
+        <div class="absolute inset-0 bg-black/40" data-detail-close=""></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+          <div class="w-full max-w-2xl bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-2xl shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-dark-border">
+              <div>
+                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100" id="canvas-detail-title">Module Details</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" id="canvas-detail-subtitle">Current module snapshot</p>
+              </div>
+              <button class="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800" data-detail-close="">
+                <i class="w-4 h-4" data-lucide="x"></i>
+              </button>
+            </div>
+            <div class="p-5 space-y-3 text-sm text-slate-700 dark:text-slate-200 max-h-[60vh] overflow-y-auto" id="canvas-detail-content"></div>
+            <div class="px-5 py-4 border-t border-slate-100 dark:border-dark-border flex items-center justify-end gap-2">
+              <button class="px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800" data-detail-close="">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full max-w-6xl mt-2 mb-4 px-2">
+        <div class="rounded-[2.5rem] border border-slate-200/60 dark:border-slate-700/50 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xl shadow-sm p-8 md:p-12 mb-8 relative overflow-hidden flex flex-col items-center text-center">
+          <div class="absolute -top-32 -left-32 w-64 h-64 bg-purple-400/20 dark:bg-purple-900/20 rounded-full blur-[80px] pointer-events-none"></div>
+          <div class="absolute -bottom-32 -right-32 w-64 h-64 bg-sky-400/20 dark:bg-sky-900/20 rounded-full blur-[80px] pointer-events-none"></div>
+          <div class="flex flex-col items-center justify-center gap-6 z-10 w-full max-w-3xl mx-auto">
+            <div>
+              <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 font-semibold">Blueprint Workspace</p>
+              <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50 mt-3"><span class="bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-purple-800 to-slate-900 dark:from-white dark:via-purple-200 dark:to-white"><span class="bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-purple-800 to-slate-900 dark:from-white dark:via-purple-200 dark:to-white">From Edge Hypothesis to Research-Ready Blueprint</span></span></h2>
+              <p class="text-sm text-slate-600 dark:text-slate-300 mt-2 max-w-3xl">This is a guided writing workspace, not a freeform graph canvas. Read down the module chain, refine with chat, and close the loop for first backtest.</p>
+            </div>
+            <div class="w-full max-w-sm rounded-[1.25rem] border border-slate-200/80 dark:border-slate-700/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 py-4 shadow-sm relative overflow-hidden">
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Loop Status</span>
+                <span id="blueprint-loop-state" class="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/25 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">Partial loop</span>
+              </div>
+              <p id="blueprint-loop-progress-text" class="mt-2 text-[12px] text-slate-600 dark:text-slate-300">0 / 8 modules ready</p>
+              <div class="mt-2 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                <div id="blueprint-loop-progress-bar" class="h-full bg-gradient-to-r from-cyan-500 via-emerald-500 to-amber-500 transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+          <div id="blueprint-next-focus" class="mt-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-600 dark:text-slate-300 flex items-start gap-2">
+            <i class="w-4 h-4 text-cyan-600 dark:text-cyan-400 mt-0.5" data-lucide="navigation"></i>
+            <span>AI next focus will appear here after updates are parsed.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full max-w-6xl mb-5 px-2">
+        <div class="rounded-3xl border border-slate-200/60 dark:border-slate-700/60 bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl px-4 py-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/30 to-purple-50/30 dark:from-indigo-900/10 dark:to-purple-900/10 pointer-events-none"></div>
+
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 font-semibold">Module Navigator</p>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400">Jump to a section</span>
+          </div>
+          <div class="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs relative z-10">
+            <button type="button" onclick="document.getElementById('card-premise-edge')?.scrollIntoView({ behavior: 'smooth', block: 'start' })" class="px-4 py-2 rounded-full border border-slate-200/80 dark:border-slate-700/80 bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 hover:scale-105 hover:shadow-sm transition-all text-slate-700 dark:text-slate-200 font-medium tracking-wide flex-shrink-0 backdrop-blur-md">1. Edge</button>
+            <button type="button" onclick="document.getElementById('card-strategy-identity')?.scrollIntoView({ behavior: 'smooth', block: 'start' })" class="px-4 py-2 rounded-full border border-slate-200/80 dark:border-slate-700/80 bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 hover:scale-105 hover:shadow-sm transition-all text-slate-700 dark:text-slate-200 font-medium tracking-wide flex-shrink-0 backdrop-blur-md">2. Identity</button>
+            <button type="button" onclick="document.getElementById('card-market-regime')?.scrollIntoView({ behavior: 'smooth', block: 'start' })" class="px-4 py-2 rounded-full border border-slate-200/80 dark:border-slate-700/80 bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 hover:scale-105 hover:shadow-sm transition-all text-slate-700 dark:text-slate-200 font-medium tracking-wide flex-shrink-0 backdrop-blur-md">3. Context</button>
+            <button type="button" onclick="document.getElementById('card-signal-logic')?.scrollIntoView({ behavior: 'smooth', block: 'start' })" class="px-4 py-2 rounded-full border border-slate-200/80 dark:border-slate-700/80 bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 hover:scale-105 hover:shadow-sm transition-all text-slate-700 dark:text-slate-200 font-medium tracking-wide flex-shrink-0 backdrop-blur-md">4. Signal</button>
+            <button type="button" onclick="document.getElementById('card-execution')?.scrollIntoView({ behavior: 'smooth', block: 'start' })" class="px-4 py-2 rounded-full border border-slate-200/80 dark:border-slate-700/80 bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 hover:scale-105 hover:shadow-sm transition-all text-slate-700 dark:text-slate-200 font-medium tracking-wide flex-shrink-0 backdrop-blur-md">5. Construction</button>
+            <button type="button" onclick="document.getElementById('card-risk-money')?.scrollIntoView({ behavior: 'smooth', block: 'start' })" class="px-4 py-2 rounded-full border border-slate-200/80 dark:border-slate-700/80 bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 hover:scale-105 hover:shadow-sm transition-all text-slate-700 dark:text-slate-200 font-medium tracking-wide flex-shrink-0 backdrop-blur-md">6. Risk</button>
+            <button type="button" onclick="document.getElementById('card-data-connection')?.scrollIntoView({ behavior: 'smooth', block: 'start' })" class="px-4 py-2 rounded-full border border-slate-200/80 dark:border-slate-700/80 bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 hover:scale-105 hover:shadow-sm transition-all text-slate-700 dark:text-slate-200 font-medium tracking-wide flex-shrink-0 backdrop-blur-md">7. Data</button>
+            <button type="button" onclick="document.getElementById('card-validation-priority')?.scrollIntoView({ behavior: 'smooth', block: 'start' })" class="px-4 py-2 rounded-full border border-slate-200/80 dark:border-slate-700/80 bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 hover:scale-105 hover:shadow-sm transition-all text-slate-700 dark:text-slate-200 font-medium tracking-wide flex-shrink-0 backdrop-blur-md">8. Validation</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full px-2 pb-20 flex justify-center">
+        <div class="flex flex-col gap-6 w-full max-w-4xl mx-auto relative">
+            <!-- Decorative Vertical Timeline Pipeline -->
+            <div id="blueprint-timeline-line" class="absolute left-[38px] top-[40px] bottom-10 w-0.5 bg-gradient-to-b from-indigo-200 via-purple-200 to-slate-200 dark:from-indigo-800/50 dark:via-purple-800/50 dark:to-slate-800/50 hidden md:block z-0 pointer-events-none"></div>
+
+          <div id="card-premise-edge" data-module-card="premise-edge" data-module-title="Strategy Edge" class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] border border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-500 p-5 md:p-7 relative overflow-hidden group w-full mb-2">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-400/60 to-transparent dark:via-purple-400/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2 text-purple-700 dark:text-purple-300 font-semibold">
+                  <span class="w-5 h-5 rounded bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center text-[10px] font-bold text-purple-700 dark:text-purple-300 ring-1 ring-purple-200 dark:ring-purple-800/50 mr-1">1</span><i class="w-4 h-4" data-lucide="lightbulb"></i>
+                  Strategy Edge
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Thesis layer defining why this strategy deserves to exist.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="module-status-premise-edge" class="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/25 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">Blocked</span>
+                <div class="inline-flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-1">
+                  <button data-module-action="quote" class="p-1 rounded text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20" title="Quote"><i class="w-3.5 h-3.5" data-lucide="message-square-plus"></i></button>
+                  <button data-module-action="expand" class="p-1 rounded text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-900/20" title="Collapse"><i class="w-3.5 h-3.5" data-lucide="chevrons-up-down"></i></button>
+                  <button data-module-action="details" class="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20" title="Details"><i class="w-3.5 h-3.5" data-lucide="info"></i></button>
+                  <button data-module-action="delete" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" title="Delete"><i class="w-3.5 h-3.5" data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+            <p data-module-subtitle="" class="hidden mt-3 text-xs text-slate-500 dark:text-slate-400">Waiting for edge summary.</p>
+            <div data-module-body="" class="mt-3 space-y-3">
+              <p id="module-edge" class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">Waiting for a core edge hypothesis</p>
+              <div class="flex flex-wrap gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Core Edge</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Why It May Work</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Expected Behavior</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Failure Conditions</span>
+              </div>
+            </div>
           </div>
 
-        </div>
-        </div>
-        <!-- ================= END ACTIVE WORKFLOW ================= -->
-        
-        </div>
-      </section>
+          <div id="card-strategy-identity" data-module-card="strategy-identity" data-module-title="Strategy Identity" class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] border border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-500 p-5 md:p-7 relative overflow-hidden group w-full mb-2">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent dark:via-cyan-400/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2 text-cyan-700 dark:text-cyan-300 font-semibold">
+                  <span class="w-5 h-5 rounded bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center text-[10px] font-bold text-cyan-700 dark:text-cyan-300 ring-1 ring-cyan-200 dark:ring-cyan-800/50 mr-1">2</span><i class="w-4 h-4" data-lucide="badge-check"></i>
+                  Strategy Identity
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Identity context consumed by all downstream modules.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="module-status-identity" class="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/25 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">Blocked</span>
+                <div class="inline-flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-1">
+                  <button data-module-action="quote" class="p-1 rounded text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20" title="Quote"><i class="w-3.5 h-3.5" data-lucide="message-square-plus"></i></button>
+                  <button data-module-action="expand" class="p-1 rounded text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-900/20" title="Collapse"><i class="w-3.5 h-3.5" data-lucide="chevrons-up-down"></i></button>
+                  <button data-module-action="details" class="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20" title="Details"><i class="w-3.5 h-3.5" data-lucide="info"></i></button>
+                  <button data-module-action="delete" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" title="Delete"><i class="w-3.5 h-3.5" data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+            <p data-module-subtitle="" class="hidden mt-3 text-xs text-slate-500 dark:text-slate-400">Waiting for identity summary.</p>
+            <div data-module-body="" class="mt-3 space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-2.5 py-2">
+                  <p class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Market / Instrument</p>
+                  <p id="module-market" class="mt-1 text-slate-700 dark:text-slate-200 font-medium">Pending</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-2.5 py-2">
+                  <p class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Timeframe</p>
+                  <p id="module-timeframe" class="mt-1 text-slate-700 dark:text-slate-200 font-medium">Pending</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-2.5 py-2">
+                  <p class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Strategy Type</p>
+                  <p id="module-strategy-type" class="mt-1 text-slate-700 dark:text-slate-200 font-medium">Pending</p>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Directionality</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Blueprint Status</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Source Provenance</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="card-market-regime" data-module-card="market-regime" data-module-title="Market Context" class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] border border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-500 p-5 md:p-7 relative overflow-hidden group w-full mb-2">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400/60 to-transparent dark:via-blue-400/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-semibold">
+                  <span class="w-5 h-5 rounded bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-[10px] font-bold text-blue-700 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800/50 mr-1">3</span><i class="w-4 h-4" data-lucide="activity"></i>
+                  Market Context
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Gating layer: when this strategy should and should not run.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="module-status-market-regime" class="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/25 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">Blocked</span>
+                <div class="inline-flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-1">
+                  <button data-module-action="quote" class="p-1 rounded text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20" title="Quote"><i class="w-3.5 h-3.5" data-lucide="message-square-plus"></i></button>
+                  <button data-module-action="expand" class="p-1 rounded text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-900/20" title="Collapse"><i class="w-3.5 h-3.5" data-lucide="chevrons-up-down"></i></button>
+                  <button data-module-action="details" class="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20" title="Details"><i class="w-3.5 h-3.5" data-lucide="info"></i></button>
+                  <button data-module-action="delete" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" title="Delete"><i class="w-3.5 h-3.5" data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+            <p data-module-subtitle="" class="hidden mt-3 text-xs text-slate-500 dark:text-slate-400">Waiting for context summary.</p>
+            <div data-module-body="" class="mt-3 space-y-3">
+              <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 py-2.5">
+                <p class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Regime / Volatility Condition</p>
+                <p id="module-volatility-filter" class="mt-1 text-sm text-slate-700 dark:text-slate-200">Pending</p>
+              </div>
+              <div class="flex flex-wrap gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Trend / Balance</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Session Dependency</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Event Sensitivity</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Disallowed Environments</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="card-signal-logic" data-module-card="signal-logic" data-module-title="Signal Logic" class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] border border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-500 p-5 md:p-7 relative overflow-hidden group w-full mb-2">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-400/60 to-transparent dark:via-sky-400/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2 text-sky-700 dark:text-sky-300 font-semibold">
+                  <span class="w-5 h-5 rounded bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center text-[10px] font-bold text-sky-700 dark:text-sky-300 ring-1 ring-sky-200 dark:ring-sky-800/50 mr-1">4</span>
+                  <i class="w-4 h-4" data-lucide="radar"></i>
+                  Signal Logic
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Opportunity recognition structure, not just a single entry rule.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="module-status-signal-logic" class="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/25 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">Blocked</span>
+                <div class="inline-flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-1">
+                  <button data-module-action="quote" class="p-1 rounded text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20" title="Quote"><i class="w-3.5 h-3.5" data-lucide="message-square-plus"></i></button>
+                  <button data-module-action="expand" class="p-1 rounded text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-900/20" title="Collapse"><i class="w-3.5 h-3.5" data-lucide="chevrons-up-down"></i></button>
+                  <button data-module-action="details" class="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20" title="Details"><i class="w-3.5 h-3.5" data-lucide="info"></i></button>
+                  <button data-module-action="delete" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" title="Delete"><i class="w-3.5 h-3.5" data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+            <p data-module-subtitle="" class="hidden mt-3 text-xs text-slate-500 dark:text-slate-400">Waiting for signal summary.</p>
+            <div data-module-body="" class="mt-3 space-y-3">
+              <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 py-2.5">
+                <p class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Primary Trigger</p>
+                <p id="module-entry-trigger" class="mt-1 text-sm text-slate-700 dark:text-slate-200">Pending</p>
+              </div>
+              <ul id="module-list-signal-logic" class="space-y-2"></ul>
+              <div class="flex flex-wrap gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Setup</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Trigger</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Confirmation</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Invalidation</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Signal Strength</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Alternate Branch</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="card-execution" data-module-card="execution" data-module-title="Trade Construction" class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] border border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-500 p-5 md:p-7 relative overflow-hidden group w-full mb-2">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-400/60 to-transparent dark:via-orange-400/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2 text-orange-700 dark:text-orange-300 font-semibold">
+                  <span class="w-5 h-5 rounded bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-[10px] font-bold text-orange-700 dark:text-orange-300 ring-1 ring-orange-200 dark:ring-orange-800/50 mr-1">5</span>
+                  <i class="w-4 h-4" data-lucide="workflow"></i>
+                  Trade Construction
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Translate signal into executable trade behavior and position expression.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="module-status-execution" class="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/25 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">Blocked</span>
+                <div class="inline-flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-1">
+                  <button data-module-action="quote" class="p-1 rounded text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20" title="Quote"><i class="w-3.5 h-3.5" data-lucide="message-square-plus"></i></button>
+                  <button data-module-action="expand" class="p-1 rounded text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-900/20" title="Collapse"><i class="w-3.5 h-3.5" data-lucide="chevrons-up-down"></i></button>
+                  <button data-module-action="details" class="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20" title="Details"><i class="w-3.5 h-3.5" data-lucide="info"></i></button>
+                  <button data-module-action="delete" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" title="Delete"><i class="w-3.5 h-3.5" data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+            <p data-module-subtitle="" class="hidden mt-3 text-xs text-slate-500 dark:text-slate-400">Waiting for construction summary.</p>
+            <div data-module-body="" class="mt-3 space-y-3">
+              <ul id="module-list-execution" class="space-y-2"></ul>
+              <div class="flex flex-wrap gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Direction / Position Expression</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Entry Style</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Scaling / Layering</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Order Expression</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Allocation Basis</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Holding Intent</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="card-risk-money" data-module-card="risk-money" data-module-title="Risk Framework" class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] border border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-500 p-5 md:p-7 relative overflow-hidden group w-full mb-2">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent dark:via-emerald-400/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-semibold">
+                  <span class="w-5 h-5 rounded bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-[10px] font-bold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800/50 mr-1">6</span>
+                  <i class="w-4 h-4" data-lucide="shield"></i>
+                  Risk Framework
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Constraint layer for risk budget, exposure, and kill conditions.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="module-status-risk-money" class="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/25 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">Blocked</span>
+                <div class="inline-flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-1">
+                  <button data-module-action="quote" class="p-1 rounded text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20" title="Quote"><i class="w-3.5 h-3.5" data-lucide="message-square-plus"></i></button>
+                  <button data-module-action="expand" class="p-1 rounded text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-900/20" title="Collapse"><i class="w-3.5 h-3.5" data-lucide="chevrons-up-down"></i></button>
+                  <button data-module-action="details" class="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20" title="Details"><i class="w-3.5 h-3.5" data-lucide="info"></i></button>
+                  <button data-module-action="delete" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" title="Delete"><i class="w-3.5 h-3.5" data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+            <p data-module-subtitle="" class="hidden mt-3 text-xs text-slate-500 dark:text-slate-400">Waiting for risk framework summary.</p>
+            <div data-module-body="" class="mt-3 space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 py-2.5">
+                  <p class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Stop / Invalidation</p>
+                  <p id="module-stop-loss" class="mt-1 text-slate-700 dark:text-slate-200 font-medium">Pending</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 py-2.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Profit Lock</p>
+                    <span id="module-take-profit-status" class="text-[10px] text-amber-600 dark:text-amber-300 font-semibold">Incomplete</span>
+                  </div>
+                  <p id="module-take-profit" class="mt-1 text-slate-700 dark:text-slate-200 font-medium">Optional</p>
+                </div>
+              </div>
+              <ul id="module-list-risk-money" class="space-y-2"></ul>
+              <div class="flex flex-wrap gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Per-trade Risk</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Daily / Weekly Limit</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Exposure Cap</span>
+                <span class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">Kill / Pause Conditions</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="card-data-connection" data-module-card="data-connection" data-module-title="Data Readiness" class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] border border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-500 p-5 md:p-7 relative overflow-hidden group w-full mb-2">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent dark:via-indigo-400/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-semibold">
+                  <span class="w-5 h-5 rounded bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-[10px] font-bold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-800/50 mr-1">7</span><i class="w-4 h-4" data-lucide="database"></i>
+                  Data Readiness
+                </div>
+                <p class="text-xs text-indigo-700/80 dark:text-indigo-300 mt-1">Non-logic module that determines whether research can actually start.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="module-status-data-connection" class="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/25 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">Blocked</span>
+                <div class="inline-flex items-center gap-1 rounded-lg border border-indigo-200 dark:border-indigo-700 bg-white/90 dark:bg-slate-900/60 p-1">
+                  <button data-module-action="quote" class="p-1 rounded text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20" title="Quote"><i class="w-3.5 h-3.5" data-lucide="message-square-plus"></i></button>
+                  <button data-module-action="expand" class="p-1 rounded text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-900/20" title="Collapse"><i class="w-3.5 h-3.5" data-lucide="chevrons-up-down"></i></button>
+                  <button data-module-action="details" class="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20" title="Details"><i class="w-3.5 h-3.5" data-lucide="info"></i></button>
+                  <button data-module-action="delete" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" title="Delete"><i class="w-3.5 h-3.5" data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+            <p data-module-subtitle="" class="hidden mt-3 text-xs text-indigo-700/80 dark:text-indigo-300">Waiting for data readiness summary.</p>
+            <div data-module-body="" class="mt-3 space-y-3">
+              <div id="module-list-data-connection" class="rounded-xl border border-indigo-200/70 dark:border-indigo-700/50 bg-white/80 dark:bg-slate-900/50 px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300">Waiting for AI to add data connection notes...</div>
+              <div class="flex flex-wrap gap-1.5 text-[11px] text-indigo-700/80 dark:text-indigo-300">
+                <span class="px-2 py-1 rounded-md border border-indigo-200/70 dark:border-indigo-700/50 bg-white/80 dark:bg-slate-900/50">Required Data Type</span>
+                <span class="px-2 py-1 rounded-md border border-indigo-200/70 dark:border-indigo-700/50 bg-white/80 dark:bg-slate-900/50">Granularity Fit</span>
+                <span class="px-2 py-1 rounded-md border border-indigo-200/70 dark:border-indigo-700/50 bg-white/80 dark:bg-slate-900/50">Session / Timezone</span>
+                <span class="px-2 py-1 rounded-md border border-indigo-200/70 dark:border-indigo-700/50 bg-white/80 dark:bg-slate-900/50">Missing Data Warning</span>
+                <span class="px-2 py-1 rounded-md border border-indigo-200/70 dark:border-indigo-700/50 bg-white/80 dark:bg-slate-900/50">Historical Coverage</span>
+              </div>
+              <button data-module-extra="" class="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-indigo-200 dark:border-indigo-700 bg-white dark:bg-slate-900/50 px-3 py-2 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
+                Review Data Readiness
+                <i class="w-3 h-3" data-lucide="arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="card-validation-priority" data-module-card="validation-priority" data-module-title="Validation Priority" class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] border border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-500 p-5 md:p-7 relative overflow-hidden group w-full mb-2">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-400/60 to-transparent dark:via-amber-400/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2 text-amber-700 dark:text-amber-300 font-semibold">
+                  <span class="w-5 h-5 rounded bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-[10px] font-bold text-amber-700 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-800/50 mr-1">8</span>
+                  <i class="w-4 h-4" data-lucide="flask-conical"></i>
+                  Validation Priority
+                </div>
+                <p class="text-xs text-amber-700/80 dark:text-amber-300 mt-1">Bridge between Blueprint and first meaningful backtest iteration.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="module-status-validation-priority" class="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/25 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">Blocked</span>
+                <div class="inline-flex items-center gap-1 rounded-lg border border-amber-200 dark:border-amber-700 bg-white/90 dark:bg-slate-900/60 p-1">
+                  <button data-module-action="quote" class="p-1 rounded text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20" title="Quote"><i class="w-3.5 h-3.5" data-lucide="message-square-plus"></i></button>
+                  <button data-module-action="expand" class="p-1 rounded text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-900/20" title="Collapse"><i class="w-3.5 h-3.5" data-lucide="chevrons-up-down"></i></button>
+                  <button data-module-action="details" class="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20" title="Details"><i class="w-3.5 h-3.5" data-lucide="info"></i></button>
+                  <button data-module-action="delete" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" title="Delete"><i class="w-3.5 h-3.5" data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+            <p data-module-subtitle="" class="hidden mt-3 text-xs text-amber-700/80 dark:text-amber-300">Waiting for validation summary.</p>
+            <div data-module-body="" class="mt-3 space-y-3">
+              <ul id="module-list-validation-priority" class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                <li class="text-slate-500 dark:text-slate-400">Waiting for AI to prioritize first validation tests...</li>
+              </ul>
+              <div class="flex flex-wrap gap-1.5 text-[11px] text-amber-700/80 dark:text-amber-300">
+                <span class="px-2 py-1 rounded-md border border-amber-200/70 dark:border-amber-700/60 bg-white/80 dark:bg-slate-900/50">First Test Priority</span>
+                <span class="px-2 py-1 rounded-md border border-amber-200/70 dark:border-amber-700/60 bg-white/80 dark:bg-slate-900/50">Regime Split Priority</span>
+                <span class="px-2 py-1 rounded-md border border-amber-200/70 dark:border-amber-700/60 bg-white/80 dark:bg-slate-900/50">Cost / Slippage Sensitivity</span>
+                <span class="px-2 py-1 rounded-md border border-amber-200/70 dark:border-amber-700/60 bg-white/80 dark:bg-slate-900/50">Parameter Sensitivity</span>
+                <span class="px-2 py-1 rounded-md border border-amber-200/70 dark:border-amber-700/60 bg-white/80 dark:bg-slate-900/50">Failure Mode Focus</span>
+                <span class="px-2 py-1 rounded-md border border-amber-200/70 dark:border-amber-700/60 bg-white/80 dark:bg-slate-900/50">Robustness Check</span>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+    <!-- ================= END ACTIVE WORKFLOW ================= -->
+  </div>
+</section>
+

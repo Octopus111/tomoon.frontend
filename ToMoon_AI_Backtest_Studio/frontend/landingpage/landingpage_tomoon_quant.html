@@ -1,0 +1,1806 @@
+<html lang="en"><head><meta property="og:title" content="ToMoon Quant | Quant Factory Kuse AI Kuse AI -  Kuse AI"><meta property="og:description" content="ToMoon Quant | Quant Factory Kuse AI Kuse AI"><meta property="og:url" content="https://www.kuse.ai/pages/ToMoon-Quant-%7C-Quant-Factory-Kuse-AI-Kuse-AI/nD2BfwG3qRXEvYqNBSPk3q"><meta property="og:type" content="article"><meta property="og:site_name" content="Kuse AI"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="ToMoon Quant | Quant Factory Kuse AI Kuse AI -  Kuse AI"><meta name="twitter:description" content="ToMoon Quant | Quant Factory Kuse AI Kuse AI"><meta name="twitter:site" content="@kuseHQ"><meta property="og:title" content="ToMoon Quant | Quant Factory Kuse AI -  Kuse AI"><meta property="og:description" content="ToMoon Quant | Quant Factory Kuse AI"><meta property="og:url" content="https://www.kuse.ai/pages/ToMoon-Quant-%7C-Quant-Factory-Kuse-AI/QGH4rnXw8Snf6hUaTRAawJ"><meta property="og:type" content="article"><meta property="og:site_name" content="Kuse AI"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="ToMoon Quant | Quant Factory Kuse AI -  Kuse AI"><meta name="twitter:description" content="ToMoon Quant | Quant Factory Kuse AI"><meta name="twitter:site" content="@kuseHQ"><meta property="og:title" content="ToMoon Quant | Quant Factory -  Kuse AI"><meta property="og:description" content="ToMoon Quant | Quant Factory"><meta property="og:url" content="https://www.kuse.ai/pages/ToMoon-Quant-%7C-Quant-Factory/L2YvcF7QGkJ6dEz2fDW74B"><meta property="og:type" content="article"><meta property="og:site_name" content="Kuse AI"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="ToMoon Quant | Quant Factory -  Kuse AI"><meta name="twitter:description" content="ToMoon Quant | Quant Factory"><meta name="twitter:site" content="@kuseHQ"><link rel="canonical" href="https://www.kuse.ai/pages/ToMoon-Quant-%7C-Quant-Factory-Kuse-AI-Kuse-AI/nD2BfwG3qRXEvYqNBSPk3q"><meta name="description" content="ToMoon Quant | Quant Factory Kuse AI Kuse AI">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToMoon Quant | Quant Factory Kuse AI Kuse AI -  Kuse AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0f1419;
+            --bg-card: rgba(20, 25, 35, 0.6);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .bg-noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            z-index: 1;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .nav-sticky {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid var(--accent-blue);
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-glass);
+            cursor: pointer;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .section-fade {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .section-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hero-gradient {
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+        }
+
+        .hero-section {
+            position: relative;
+            background-image: url('https://api.kuse.ai/api/folder/v1/file/19dae1b9f46fb4f8d92c7da8ee7553a28f2cabcffa47118e6ca99ffd042029d6_1655045.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(10, 14, 26, 0.3) 0%, rgba(10, 14, 26, 0.7) 100%);
+            z-index: 1;
+        }
+
+        .hero-section > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 32px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--text-primary);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            margin-top: 8px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .country-chip {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 20px;
+            margin: 4px;
+            font-size: 14px;
+            color: var(--accent-blue);
+        }
+
+        .architecture-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 32px;
+            background: rgba(20, 25, 35, 0.4);
+            border-radius: 12px;
+            border: 1px solid var(--border-glass);
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .flow-step:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: var(--accent-blue);
+            font-size: 24px;
+        }
+
+        .lang-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .lang-button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lang-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            min-width: 160px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .lang-menu.active {
+            display: block;
+        }
+
+        .lang-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            color: var(--text-primary);
+        }
+
+        .lang-option:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .lang-option.selected {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-blue);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .modal-content {
+                padding: 24px;
+            }
+
+            .architecture-flow {
+                padding: 16px;
+            }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-links.mobile-active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--bg-secondary);
+                border-top: 1px solid var(--border-glass);
+                padding: 20px;
+                gap: 16px;
+            }
+        }
+    </style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"ToMoon Quant | Quant Factory -  Kuse AI","description":"ToMoon Quant | Quant Factory","url":"https://www.kuse.ai/pages/ToMoon-Quant-%7C-Quant-Factory/L2YvcF7QGkJ6dEz2fDW74B","author":{"@type":"Organization","name":"Kuse AI"},"publisher":{"@type":"Organization","name":"Kuse AI","url":"https://www.kuse.ai"},"inLanguage":"en","alternateName":"ToMoon Quant | Quant Factory"}</script><style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.relative{position:relative}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-12{margin-bottom:3rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-1{margin-top:0.25rem}.mt-8{margin-top:2rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.min-h-screen{min-height:100vh}.w-full{width:100%}.max-w-3xl{max-width:48rem}.max-w-4xl{max-width:56rem}.max-w-6xl{max-width:72rem}.max-w-7xl{max-width:80rem}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.rounded-lg{border-radius:0.5rem}.border{border-width:1px}.border-y{border-top-width:1px;border-bottom-width:1px}.border-t{border-top-width:1px}.border-blue-500\/30{border-color:rgb(59 130 246 / 0.3)}.border-gray-800{--tw-border-opacity:1;border-color:rgb(31 41 55 / var(--tw-border-opacity, 1))}.bg-blue-900\/20{background-color:rgb(30 58 138 / 0.2)}.bg-gradient-to-b{background-image:linear-gradient(to bottom, var(--tw-gradient-stops))}.from-transparent{--tw-gradient-from:transparent var(--tw-gradient-from-position);--tw-gradient-to:rgb(0 0 0 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-blue-900\/5{--tw-gradient-to:rgb(30 58 138 / 0.05) var(--tw-gradient-to-position)}.to-purple-900\/5{--tw-gradient-to:rgb(88 28 135 / 0.05) var(--tw-gradient-to-position)}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-24{padding-top:6rem;padding-bottom:6rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pt-20{padding-top:5rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-6xl{font-size:3.75rem;line-height:1}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-semibold{font-weight:600}.leading-relaxed{line-height:1.625}.text-blue-400{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}.text-cyan-400{--tw-text-opacity:1;color:rgb(34 211 238 / var(--tw-text-opacity, 1))}.text-gray-300{--tw-text-opacity:1;color:rgb(209 213 219 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-purple-400{--tw-text-opacity:1;color:rgb(192 132 252 / var(--tw-text-opacity, 1))}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:text-blue-300:hover{--tw-text-opacity:1;color:rgb(147 197 253 / var(--tw-text-opacity, 1))}.hover\:text-blue-400:hover{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}.md\:text-7xl{font-size:4.5rem;line-height:1}}@media (min-width: 1024px){.lg\:col-span-2{grid-column:span 2 / span 2}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}}</style><style id="kgp-selected-style">
+  [data-kgp-selected]::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 100%;
+    height: 100%;
+    box-sizing: content-box;
+    padding: 4px;
+    border-radius: 4px;
+    outline: 3px solid #FF6B35 !important;
+    box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.3), 0 0 10px rgba(255, 107, 53, 0.4) !important;
+    z-index: 10000;
+    pointer-events: none;
+  }
+
+  [data-kgp-selected] {
+    position: relative;
+    outline: none;
+    cursor: default;
+  }
+
+  img[data-kgp-selected],
+  img[data-kgp-hover-selected],
+  [data-kgp-hover-selected],
+  [item-kgp-click-selected],
+  [item-kgp-selected] {
+    border: 3px solid #FF6B35 !important;
+    box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.3), 0 0 15px rgba(255, 107, 53, 0.5) !important;
+    border-radius: 4px;
+  }
+
+  [data-kgp-hover-selected]::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 100%;
+    height: 100%;
+    box-sizing: content-box;
+    padding: 2px;
+    border-radius: 4px;
+    outline: 2px solid #FFA366 !important;
+    box-shadow: 0 0 0 1px rgba(255, 163, 102, 0.3), 0 0 8px rgba(255, 163, 102, 0.4) !important;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  [data-kgp-hover-selected] {
+    position: relative;
+    outline: none;
+  }
+</style><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"ToMoon Quant | Quant Factory Kuse AI -  Kuse AI","description":"ToMoon Quant | Quant Factory Kuse AI","url":"https://www.kuse.ai/pages/ToMoon-Quant-%7C-Quant-Factory-Kuse-AI/QGH4rnXw8Snf6hUaTRAawJ","author":{"@type":"Organization","name":"Kuse AI"},"publisher":{"@type":"Organization","name":"Kuse AI","url":"https://www.kuse.ai"},"inLanguage":"en","alternateName":"ToMoon Quant | Quant Factory Kuse AI"}</script><style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.relative{position:relative}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-12{margin-bottom:3rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-1{margin-top:0.25rem}.mt-8{margin-top:2rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.min-h-screen{min-height:100vh}.w-full{width:100%}.max-w-3xl{max-width:48rem}.max-w-4xl{max-width:56rem}.max-w-6xl{max-width:72rem}.max-w-7xl{max-width:80rem}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.rounded-lg{border-radius:0.5rem}.border{border-width:1px}.border-y{border-top-width:1px;border-bottom-width:1px}.border-t{border-top-width:1px}.border-blue-500\/30{border-color:rgb(59 130 246 / 0.3)}.border-gray-800{--tw-border-opacity:1;border-color:rgb(31 41 55 / var(--tw-border-opacity, 1))}.bg-blue-900\/20{background-color:rgb(30 58 138 / 0.2)}.bg-gradient-to-b{background-image:linear-gradient(to bottom, var(--tw-gradient-stops))}.from-transparent{--tw-gradient-from:transparent var(--tw-gradient-from-position);--tw-gradient-to:rgb(0 0 0 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-blue-900\/5{--tw-gradient-to:rgb(30 58 138 / 0.05) var(--tw-gradient-to-position)}.to-purple-900\/5{--tw-gradient-to:rgb(88 28 135 / 0.05) var(--tw-gradient-to-position)}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-24{padding-top:6rem;padding-bottom:6rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pt-20{padding-top:5rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-6xl{font-size:3.75rem;line-height:1}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-semibold{font-weight:600}.leading-relaxed{line-height:1.625}.text-blue-400{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}.text-cyan-400{--tw-text-opacity:1;color:rgb(34 211 238 / var(--tw-text-opacity, 1))}.text-gray-300{--tw-text-opacity:1;color:rgb(209 213 219 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-purple-400{--tw-text-opacity:1;color:rgb(192 132 252 / var(--tw-text-opacity, 1))}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:text-blue-300:hover{--tw-text-opacity:1;color:rgb(147 197 253 / var(--tw-text-opacity, 1))}.hover\:text-blue-400:hover{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}.md\:text-7xl{font-size:4.5rem;line-height:1}}@media (min-width: 1024px){.lg\:col-span-2{grid-column:span 2 / span 2}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}}</style><style id="kgp-selected-style">
+  [data-kgp-selected]::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 100%;
+    height: 100%;
+    box-sizing: content-box;
+    padding: 4px;
+    border-radius: 4px;
+    outline: 3px solid #FF6B35 !important;
+    box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.3), 0 0 10px rgba(255, 107, 53, 0.4) !important;
+    z-index: 10000;
+    pointer-events: none;
+  }
+
+  [data-kgp-selected] {
+    position: relative;
+    outline: none;
+    cursor: default;
+  }
+
+  img[data-kgp-selected],
+  img[data-kgp-hover-selected],
+  [data-kgp-hover-selected],
+  [item-kgp-click-selected],
+  [item-kgp-selected] {
+    border: 3px solid #FF6B35 !important;
+    box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.3), 0 0 15px rgba(255, 107, 53, 0.5) !important;
+    border-radius: 4px;
+  }
+
+  [data-kgp-hover-selected]::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 100%;
+    height: 100%;
+    box-sizing: content-box;
+    padding: 2px;
+    border-radius: 4px;
+    outline: 2px solid #FFA366 !important;
+    box-shadow: 0 0 0 1px rgba(255, 163, 102, 0.3), 0 0 8px rgba(255, 163, 102, 0.4) !important;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  [data-kgp-hover-selected] {
+    position: relative;
+    outline: none;
+  }
+</style><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"ToMoon Quant | Quant Factory Kuse AI Kuse AI -  Kuse AI","description":"ToMoon Quant | Quant Factory Kuse AI Kuse AI","url":"https://www.kuse.ai/pages/ToMoon-Quant-%7C-Quant-Factory-Kuse-AI-Kuse-AI/nD2BfwG3qRXEvYqNBSPk3q","author":{"@type":"Organization","name":"Kuse AI"},"publisher":{"@type":"Organization","name":"Kuse AI","url":"https://www.kuse.ai"},"inLanguage":"en","alternateName":"ToMoon Quant | Quant Factory Kuse AI Kuse AI"}</script></head>
+<body>
+    <div class="bg-noise"></div>
+
+    <nav class="nav-sticky">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="text-2xl font-bold" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                <span style="background: linear-gradient(135deg, #3b82f6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ToMoon</span> Quant
+            </div>
+            
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+            
+            <div class="nav-links flex items-center gap-8">
+                <a href="#who-we-are" class="text-sm hover:text-blue-400 transition-colors" data-i18n="nav.whoWeAre">Who We Are</a>
+                <a href="#regional-focus" class="text-sm hover:text-blue-400 transition-colors" data-i18n="nav.regionalFocus">Regional Focus</a>
+                <a href="#platform" class="text-sm hover:text-blue-400 transition-colors" data-i18n="nav.platform">Platform Architecture</a>
+                <a href="#integration" class="text-sm hover:text-blue-400 transition-colors" data-i18n="nav.integration">Integration</a>
+                <a href="#careers" class="text-sm hover:text-blue-400 transition-colors" data-i18n="nav.careers">Get Started</a>
+                
+                <div class="lang-dropdown">
+                    <button class="lang-button" onclick="toggleLangMenu()">
+                        <span id="current-lang">EN</span>
+                        <span>▼</span>
+                    </button>
+                    <div class="lang-menu" id="lang-menu">
+                        <div class="lang-option" onclick="switchLanguage('en')">English</div>
+                        <div class="lang-option" onclick="switchLanguage('zh')">中文</div>
+                        <div class="lang-option" onclick="switchLanguage('ms')">Bahasa Melayu</div>
+                        <div class="lang-option" onclick="switchLanguage('id')">Bahasa Indonesia</div>
+                        <div class="lang-option" onclick="switchLanguage('th')">ไทย</div>
+                        <div class="lang-option" onclick="switchLanguage('vi')">Tiếng Việt</div>
+                    </div>
+                </div>
+                
+                <button class="btn-primary" onclick="openModal('contact')" data-i18n="nav.contact">Contact Us</button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="min-h-screen flex items-center justify-center relative pt-20 px-6 hero-gradient">
+        <div class="max-w-6xl mx-auto text-center section-fade">
+            <h1 class="hero-title text-6xl md:text-7xl font-bold mb-6" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                <span style="background: linear-gradient(135deg, #3b82f6, #06b6d4, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ToMoon Quant</span>
+            </h1>
+            <h2 class="text-2xl md:text-3xl font-semibold mb-4 text-gray-300" data-i18n="hero.subtitle">
+                From Idea → Strategy → Live Execution, all in one platform
+            </h2>
+            <p class="text-lg text-gray-400 mb-12 max-w-3xl mx-auto" data-i18n="hero.description">
+                ToMoon turns trading ideas into backtestable strategies, validates them with realistic simulations, and deploys to real accounts with risk controls.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto">
+                <div class="glass-card p-6">
+                    <h3 class="font-semibold text-lg mb-2" data-i18n="hero.value1.title">Idea → Strategy Blueprint</h3>
+                    <p class="text-sm text-gray-400" data-i18n="hero.value1.desc">问题拆解、结构化、规则化</p>
+                </div>
+                <div class="glass-card p-6">
+                    <h3 class="font-semibold text-lg mb-2" data-i18n="hero.value2.title">Backtest → Edge Validation</h3>
+                    <p class="text-sm text-gray-400" data-i18n="hero.value2.desc">回测 → 验证 → 压力测试</p>
+                </div>
+                <div class="glass-card p-6">
+                    <h3 class="font-semibold text-lg mb-2" data-i18n="hero.value3.title">Live → Risk Guarded</h3>
+                    <p class="text-sm text-gray-400" data-i18n="hero.value3.desc">实盘 → 风控 → 监控</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+                <button class="btn-primary" onclick="openModal('personal')" data-i18n="hero.btnPersonal">Personal Integration</button>
+                <button class="btn-secondary" onclick="openModal('institutional')" data-i18n="hero.btnInstitutional">Institutional Integration</button>
+                <button class="btn-outline" onclick="scrollToSection('careers')" data-i18n="hero.btnCareers">Careers</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-12 px-6 border-y border-gray-800">
+        <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+                <div class="mb-2">
+                    <svg class="w-10 h-10 mx-auto text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                </div>
+                <p class="text-sm font-semibold" data-i18n="trust.systematic">Systematic R&amp;D</p>
+            </div>
+            <div>
+                <div class="mb-2">
+                    <svg class="w-10 h-10 mx-auto text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 2v2"/><path d="M12 22v-2"/><path d="m17 20.66-1-1.73"/><path d="M11 10.27 7 3.34"/><path d="m20.66 17-1.73-1"/><path d="m3.34 7 1.73 1"/><path d="M14 12h8"/><path d="M2 12h2"/><path d="m20.66 7-1.73 1"/><path d="m3.34 17 1.73-1"/><path d="m17 3.34-1 1.73"/><path d="m11 13.73-4 6.93"/></svg>
+                </div>
+                <p class="text-sm font-semibold" data-i18n="trust.engineering">Engineering Discipline</p>
+            </div>
+            <div>
+                <div class="mb-2">
+                    <svg class="w-10 h-10 mx-auto text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+                </div>
+                <p class="text-sm font-semibold" data-i18n="trust.risk">Risk Governance</p>
+            </div>
+            <div>
+                <div class="mb-2">
+                    <svg class="w-10 h-10 mx-auto text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                </div>
+                <p class="text-sm font-semibold" data-i18n="trust.monitoring">Monitoring &amp; Ops</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="who-we-are" class="py-24 px-6">
+        <div class="max-w-6xl mx-auto section-fade">
+            <h2 class="text-4xl font-bold mb-6 text-center" data-i18n="who.title">Why ToMoon</h2>
+            <p class="text-lg text-gray-400 text-center mb-12 max-w-3xl mx-auto" data-i18n="who.intro">
+                ToMoon is a strategy factory that converts human trading ideas into executable, testable, and deployable systems.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-card p-8">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3" data-i18n="who.card1.title">AI Strategy Builder</h3>
+                    <p class="text-gray-400" data-i18n="who.card1.desc">Break down ideas into rules, signals, and execution logic.</p>
+                </div>
+                <div class="glass-card p-8">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3" data-i18n="who.card2.title">Backtest + QA</h3>
+                    <p class="text-gray-400" data-i18n="who.card2.desc">Realistic backtests, stress tests, and deployment-ready reports.</p>
+                </div>
+                <div class="glass-card p-8">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-purple-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3" data-i18n="who.card3.title">Live Execution</h3>
+                    <p class="text-gray-400" data-i18n="who.card3.desc">Connect real accounts with guardrails, monitoring, and rollback.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="regional-focus" class="py-24 px-6 bg-gradient-to-b from-transparent to-blue-900/5">
+        <div class="max-w-6xl mx-auto section-fade">
+            <h2 class="text-4xl font-bold mb-4 text-center" data-i18n="regional.title">Workflow</h2>
+            <p class="text-lg text-gray-400 text-center mb-12" data-i18n="regional.subtitle">
+                A clear path from idea capture to live trading execution.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div class="glass-card p-8">
+                    <h3 class="text-2xl font-bold mb-4 text-blue-400" data-i18n="regional.eastAsia">Discover</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="country-chip" data-i18n="regional.china">Idea intake</span>
+                        <span class="country-chip" data-i18n="regional.japan">Edge hypothesis</span>
+                        <span class="country-chip" data-i18n="regional.korea">Data needs</span>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <h3 class="text-2xl font-bold mb-4 text-cyan-400" data-i18n="regional.seAsia">Blueprint</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="country-chip" data-i18n="regional.singapore">Signal logic</span>
+                        <span class="country-chip" data-i18n="regional.malaysia">Risk rules</span>
+                        <span class="country-chip" data-i18n="regional.thailand">Execution plan</span>
+                        <span class="country-chip" data-i18n="regional.indonesia">Backtest setup</span>
+                        <span class="country-chip" data-i18n="regional.vietnam">QA gates</span>
+                        <span class="country-chip" data-i18n="regional.philippines">Report pack</span>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <h3 class="text-2xl font-bold mb-4 text-purple-400" data-i18n="regional.oceania">Deploy</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="country-chip" data-i18n="regional.australia">Live accounts</span>
+                        <span class="country-chip" data-i18n="regional.vietnam">Monitoring</span>
+                        <span class="country-chip" data-i18n="regional.indonesia">Kill switches</span>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-center text-sm text-gray-500" data-i18n="regional.note">
+                Built for retail and institutional workflows with full traceability.
+            </p>
+        </div>
+    </section>
+
+    <section class="py-24 px-6">
+        <div class="max-w-6xl mx-auto section-fade">
+            <h2 class="text-4xl font-bold mb-12 text-center" data-i18n="what.title">Core Capabilities</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass-card p-8">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3" data-i18n="what.factory.title">Idea-to-Strategy</h3>
+                    <p class="text-gray-400" data-i18n="what.factory.desc">Convert ideas into structured rules, signals, and execution logic.</p>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3" data-i18n="what.engineering.title">Backtest &amp; Experiment</h3>
+                    <p class="text-gray-400" data-i18n="what.engineering.desc">Test with realistic costs, slippage, and walk-forward evaluation.</p>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-purple-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3" data-i18n="what.risk.title">Risk &amp; Governance</h3>
+                    <p class="text-gray-400" data-i18n="what.risk.desc">Risk limits, failure rules, execution anomalies, circuit breakers &amp; rollback.</p>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3" data-i18n="what.monitoring.title">Live Execution &amp; Ops</h3>
+                    <p class="text-gray-400" data-i18n="what.monitoring.desc">Connect brokers, automate execution, and monitor performance in real time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="platform" class="py-24 px-6 bg-gradient-to-b from-transparent to-purple-900/5">
+        <div class="max-w-6xl mx-auto section-fade">
+            <h2 class="text-4xl font-bold mb-4 text-center" data-i18n="platform.title">End-to-End Strategy Pipeline</h2>
+            <p class="text-lg text-gray-400 text-center mb-12" data-i18n="platform.subtitle">
+                One workflow: idea intake → strategy blueprint → backtest → risk gates → live execution.
+            </p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <div class="architecture-flow">
+                        <div class="flow-step">
+                            <div class="text-2xl">①</div>
+                            <div>
+                                <h4 class="font-semibold mb-1" data-i18n="platform.step1.title">Idea Intake</h4>
+                                <p class="text-sm text-gray-400" data-i18n="platform.step1.desc">Capture the edge and intent</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flow-arrow">↓</div>
+                        
+                        <div class="flow-step">
+                            <div class="text-2xl">②</div>
+                            <div>
+                                <h4 class="font-semibold mb-1" data-i18n="platform.step2.title">Strategy Blueprint</h4>
+                                <p class="text-sm text-gray-400" data-i18n="platform.step2.desc">Rules, signals, and execution logic</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flow-arrow">↓</div>
+                        
+                        <div class="flow-step">
+                            <div class="text-2xl">③</div>
+                            <div>
+                                <h4 class="font-semibold mb-1" data-i18n="platform.step3.title">Data &amp; Connectors</h4>
+                                <p class="text-sm text-gray-400" data-i18n="platform.step3.desc">Market data, symbols, broker/API mapping</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flow-arrow">↓</div>
+                        
+                        <div class="flow-step">
+                            <div class="text-2xl">④</div>
+                            <div>
+                                <h4 class="font-semibold mb-1" data-i18n="platform.step4.title">Backtest Engine</h4>
+                                <p class="text-sm text-gray-400" data-i18n="platform.step4.desc">Realistic simulation with costs and slippage</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flow-arrow">↓</div>
+                        
+                        <div class="flow-step">
+                            <div class="text-2xl">⑤</div>
+                            <div>
+                                <h4 class="font-semibold mb-1" data-i18n="platform.step5.title">QA &amp; Risk Gates</h4>
+                                <p class="text-sm text-gray-400" data-i18n="platform.step5.desc">Overfitting checks, stress tests, and limits</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flow-arrow">↓</div>
+                        
+                        <div class="flow-step">
+                            <div class="text-2xl">⑥</div>
+                            <div>
+                                <h4 class="font-semibold mb-1" data-i18n="platform.step6.title">Live Execution + Monitoring</h4>
+                                <p class="text-sm text-gray-400" data-i18n="platform.step6.desc">Broker execution, alerts, and rollback controls</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <h3 class="text-xl font-semibold mb-4" data-i18n="platform.deliverables.title">Deliverables Checklist</h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-start gap-2">
+                            <span class="text-blue-400 mt-1">✓</span>
+                            <span data-i18n="platform.deliverables.spec">Strategy Spec</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-blue-400 mt-1">✓</span>
+                            <span data-i18n="platform.deliverables.backtest">Backtest Report</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-blue-400 mt-1">✓</span>
+                            <span data-i18n="platform.deliverables.risk">Risk Profile</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-blue-400 mt-1">✓</span>
+                            <span data-i18n="platform.deliverables.deploy">Execution Playbook</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-blue-400 mt-1">✓</span>
+                            <span data-i18n="platform.deliverables.monitoring">Monitoring Dashboard</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="integration" class="py-24 px-6">
+        <div class="max-w-6xl mx-auto section-fade">
+            <h2 class="text-4xl font-bold mb-12 text-center" data-i18n="integration.title">Execution &amp; Integrations</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass-card p-8">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-3" data-i18n="integration.personal.title">Personal Execution</h3>
+                    <p class="text-gray-400 mb-4" data-i18n="integration.personal.subtitle">Traders / Small Teams</p>
+                    <p class="text-gray-400 mb-4" data-i18n="integration.personal.desc">Connect your broker, automate execution, and monitor risk in one place.</p>
+                    <p class="text-sm text-gray-500 mb-6" data-i18n="integration.personal.output">Output: Strategy + Backtest + Live deployment</p>
+                    <button class="btn-primary w-full" onclick="openModal('personal')" data-i18n="integration.personal.btn">Personal Execution</button>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M9 8h1"/><path d="M9 12h1"/><path d="M9 16h1"/><path d="M14 8h1"/><path d="M14 12h1"/><path d="M14 16h1"/><path d="M6 21V3h12v18"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-3" data-i18n="integration.institutional.title">Institutional Integrations</h3>
+                    <p class="text-gray-400 mb-4" data-i18n="integration.institutional.subtitle">Brokers / Data Vendors / Platforms / Prop / Funds</p>
+                    <p class="text-gray-400 mb-4" data-i18n="integration.institutional.desc">API, data, and execution partnerships for scalable deployment.</p>
+                    <p class="text-sm text-gray-500 mb-6" data-i18n="integration.institutional.support">Support: White-label, API integration, joint solutions</p>
+                    <button class="btn-secondary w-full" onclick="openModal('institutional')" data-i18n="integration.institutional.btn">Institutional Integrations</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="careers" class="py-24 px-6 bg-gradient-to-b from-transparent to-blue-900/5">
+        <div class="max-w-4xl mx-auto section-fade text-center">
+            <h2 class="text-4xl font-bold mb-6" data-i18n="careers.title">Get Started with ToMoon</h2>
+            <p class="text-lg text-gray-400 mb-12" data-i18n="careers.subtitle">Choose how you want to begin:</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="glass-card p-6">
+                    <div class="mb-3">
+                        <svg class="w-10 h-10 mx-auto text-blue-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                    </div>
+                    <h3 class="font-semibold" data-i18n="careers.research">Submit Strategy Idea</h3>
+                </div>
+                <div class="glass-card p-6">
+                    <div class="mb-3">
+                        <svg class="w-10 h-10 mx-auto text-cyan-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="8" x="5" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 18h2"/><path d="M12 18h6"/></svg>
+                    </div>
+                    <h3 class="font-semibold" data-i18n="careers.engineer">Request Demo</h3>
+                </div>
+                <div class="glass-card p-6">
+                    <div class="mb-3">
+                        <svg class="w-10 h-10 mx-auto text-purple-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+                    </div>
+                    <h3 class="font-semibold" data-i18n="careers.systems">Connect Live Account</h3>
+                </div>
+            </div>
+            
+            <button class="btn-primary inline-block" onclick="openModal('contact')" data-i18n="careers.btn">Talk to ToMoon</button>
+        </div>
+    </section>
+
+    <footer class="py-12 px-6 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="mb-6">
+                <div class="text-2xl font-bold mb-2" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                    <span style="background: linear-gradient(135deg, #3b82f6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ToMoon</span> Quant
+                </div>
+                <a href="/cdn-cgi/l/email-protection#731a1d151c33071c1e1c1c1d5d1a1c" class="text-blue-400 hover:text-blue-300 transition-colors"><span class="__cf_email__" data-cfemail="6900070f06291d0604060607470006">[email&nbsp;protected]</span></a>
+            </div>
+            
+            <div class="text-sm text-gray-500 mb-4" data-i18n="footer.copyright">ToMoon Quant © 2026</div>
+            
+            <div class="text-xs text-gray-600 max-w-3xl mx-auto leading-relaxed" data-i18n="footer.disclaimer">
+                Risk Disclaimer: Trading involves high risk and may not be suitable for everyone. This website is for informational purposes only and does not constitute investment advice or profit guarantees.
+            </div>
+            
+            <div class="mt-8 text-xs text-gray-600">
+                <a href="https://kuse.ai" target="_blank" class="inline-flex items-center gap-2 hover:text-blue-400 transition-colors kuse-branding" style="cursor: pointer;">
+                    <span>made with</span>
+                    <svg viewBox="0,0,160,44" xmlns="http://www.w3.org/2000/svg" style="height: 1em; width: auto;"><path d="m.01,20.65C-.43,8.25,9.3-2.03,22.04.34,34.78,2.72,43.29,8.32,43.29,22.9s-8.66,19.01-22.03,20.3C7.9,44.5.46,33.05.01,20.65z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="m146.76,7.94c8.07,0,13.24,6.15,13.24,14.58v1.39h-20.75c.45,4.05,3.51,7.37,8.57,7.37,2.62,0,5.73-1.05,7.62-2.94l2.67,3.83c-2.67,2.55-6.62,3.88-10.9,3.88-8.07,0-14.08-5.6-14.08-14.08,0-7.76,5.67-14.02,13.63-14.02zm0,4.77c-5.01,0-7.29,3.83-7.57,7.1h15.13c-.11-3.16-2.28-7.1-7.57-7.1z" fill="currentColor"></path><path d="m86.64,24.49c0,4.15,2.39,6.84,6.84,6.84,4.4,0,6.84-2.69,6.84-6.84V8.55h5.37v16.33c0,6.7-4.06,11.14-12.21,11.14-8.21,0-12.21-4.5-12.21-11.09V8.55h5.37v15.94zm32.99-16.55c4.49,0,8.06,1.47,10.6,3.86l-2.59,3.81c-2.05-2-5.28-3.08-8.06-3.08-2.88,0-4.84,1.37-4.84,3.32,0,1.91,2.64,2.54,5.81,3.27,4.59,1.08,10.26,2.4,10.26,8.46,0,4.94-3.76,8.41-11.14,8.41-4.98,0-8.94-1.76-11.24-4.11l2.54-4.11c1.86,1.91,5.18,3.67,8.84,3.67,3.91,0,5.57-1.66,5.57-3.62,0-2.3-2.88-2.98-6.21-3.76-4.54-1.08-9.87-2.3-9.87-8.06,0-4.5,4.2-8.06,10.31-8.06zM60.79,20.82,71.44,8.55h6.5L66.46,21.26,78.82,35.44h-6.5l-9.28-11.1-2.25,2.49v8.6h-5.33V8.55h5.33v12.27z" fill="currentColor"></path></svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <div id="modal-personal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('personal')">×</button>
+            <h2 class="text-2xl font-bold mb-6" data-i18n="modal.personal.title">Personal Integration</h2>
+            <form onsubmit="handleFormSubmit(event, 'personal')">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="modal.personal.name">Name</label>
+                    <input type="text" required="" placeholder="">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="modal.personal.country">Country/Region</label>
+                    <input type="text" required="" placeholder="">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="modal.personal.background">Background</label>
+                    <input type="text" placeholder="">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="modal.personal.interest">Integration Interest</label>
+                    <textarea rows="3" placeholder=""></textarea>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="modal.personal.notes">Notes</label>
+                    <textarea rows="3" placeholder=""></textarea>
+                </div>
+                <div class="mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                    <p class="text-sm mb-2" data-i18n="modal.contact">Contact Email:</p>
+                    <a href="/cdn-cgi/l/email-protection#97fef9f1f8d7e3f8faf8f8f9b9fef8a8e4e2f5fdf2f4e3aac3f8daf8f8f9b2a5a7c6e2f6f9e3b2a5a7c7f2e5e4f8f9f6fbb2a5a7def9e3f2f0e5f6e3fef8f9b2a5a7def9e6e2fee5ee" class="text-blue-400 hover:text-blue-300 font-semibold"><span class="__cf_email__" data-cfemail="5f363139301f2b3032303031713630">[email&nbsp;protected]</span></a>
+                </div>
+                <button type="submit" class="btn-primary w-full" data-i18n="modal.submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-institutional" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('institutional')">×</button>
+            <h2 class="text-2xl font-bold mb-6" data-i18n="modal.institutional.title">Institutional Integration</h2>
+            <form onsubmit="handleFormSubmit(event, 'institutional')">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="modal.institutional.institution">Institution Name</label>
+                    <input type="text" required="" placeholder="">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="modal.institutional.role">Role</label>
+                    <input type="text" required="" placeholder="">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="modal.institutional.country">Country/Region</label>
+                    <input type="text" required="" placeholder="">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="modal.institutional.direction">Partnership Direction</label>
+                    <select required="">
+                        <option value="" data-i18n="modal.institutional.selectOption">Select...</option>
+                        <option value="data" data-i18n="modal.institutional.data">Data</option>
+                        <option value="api" data-i18n="modal.institutional.api">API</option>
+                        <option value="execution" data-i18n="modal.institutional.execution">Execution</option>
+                        <option value="risk" data-i18n="modal.institutional.risk">Risk</option>
+                        <option value="whitelabel" data-i18n="modal.institutional.whitelabel">White-label</option>
+                        <option value="other" data-i18n="modal.institutional.other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="modal.institutional.notes">Notes</label>
+                    <textarea rows="3" placeholder=""></textarea>
+                </div>
+                <div class="mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                    <p class="text-sm mb-2" data-i18n="modal.contact">Contact Email:</p>
+                    <a href="/cdn-cgi/l/email-protection#2841464e47685c4745474746064147175b5d4a424d4b5c157c47654747460d1a18795d49465c0d1a1861465b5c415c5d5c41474649440d1a1861465c4d4f5a495c4147460d1a186146595d415a51" class="text-blue-400 hover:text-blue-300 font-semibold"><span class="__cf_email__" data-cfemail="50393e363f10243f3d3f3f3e7e393f">[email&nbsp;protected]</span></a>
+                </div>
+                <button type="submit" class="btn-primary w-full" data-i18n="modal.submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-contact" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('contact')">×</button>
+            <h2 class="text-2xl font-bold mb-6" data-i18n="modal.contact.title">Contact Us</h2>
+            <p class="text-gray-400 mb-6" data-i18n="modal.contact.desc">Choose your integration type:</p>
+            <div class="space-y-4">
+                <button class="btn-primary w-full" onclick="closeModal('contact'); openModal('personal')" data-i18n="modal.contact.personal">Personal Integration</button>
+                <button class="btn-secondary w-full" onclick="closeModal('contact'); openModal('institutional')" data-i18n="modal.contact.institutional">Institutional Integration</button>
+            </div>
+            <div class="mt-8 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg text-center">
+                <p class="text-sm mb-2" data-i18n="modal.contact.email">Or email us directly:</p>
+                <a href="/cdn-cgi/l/email-protection#6b02050d042b1f0406040405450204" class="text-blue-400 hover:text-blue-300 font-semibold text-lg"><span class="__cf_email__" data-cfemail="eb82858d84ab9f8486848485c58284">[email&nbsp;protected]</span></a>
+            </div>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        const i18n = {
+            en: {
+                'nav.whoWeAre': `Who We Are`,
+                'nav.regionalFocus': `Regional Focus`,
+                'nav.platform': `Platform Architecture`,
+                'nav.integration': `Integration`,
+                'nav.careers': `Get Started`,
+                'nav.contact': `Contact Us`,
+                'hero.subtitle': `From Idea → Strategy → Live Execution, all in one platform`,
+                'hero.description': `ToMoon turns trading ideas into backtestable strategies, validates them with realistic simulations, and deploys to real accounts with risk controls.`,
+                'hero.value1.title': `Idea → Strategy Blueprint`,
+                'hero.value1.desc': `Problem framing → Structure → Rules`,
+                'hero.value2.title': `Backtest → Edge Validation`,
+                'hero.value2.desc': `Backtest → QA → Stress`,
+                'hero.value3.title': `Live → Risk Guarded`,
+                'hero.value3.desc': `Live execution → Risk → Monitoring`,
+                'hero.btnPersonal': `Personal Integration`,
+                'hero.btnInstitutional': `Institutional Integration`,
+                'hero.btnCareers': `Careers`,
+                'trust.systematic': `Systematic R&D`,
+                'trust.engineering': `Engineering Discipline`,
+                'trust.risk': `Risk Governance`,
+                'trust.monitoring': `Monitoring & Ops`,
+                'who.title': `Why ToMoon`,
+                'who.intro': `ToMoon is a strategy factory that converts human trading ideas into executable, testable, and deployable systems.`,
+                'who.card1.title': `AI Strategy Builder`,
+                'who.card1.desc': `Break down ideas into rules, signals, and execution logic.`,
+                'who.card2.title': `Backtest + QA`,
+                'who.card2.desc': `Realistic backtests, stress tests, and deployment-ready reports.`,
+                'who.card3.title': `Live Execution`,
+                'who.card3.desc': `Connect real accounts with guardrails, monitoring, and rollback.`,
+                'regional.title': `Workflow`,
+                'regional.subtitle': `A clear path from idea capture to live trading execution.`,
+                'regional.eastAsia': `Discover`,
+                'regional.seAsia': `Blueprint`,
+                'regional.oceania': `Deploy`,
+                'regional.china': `Idea intake`,
+                'regional.japan': `Edge hypothesis`,
+                'regional.korea': `Data needs`,
+                'regional.singapore': `Signal logic`,
+                'regional.malaysia': `Risk rules`,
+                'regional.thailand': `Execution plan`,
+                'regional.indonesia': `Backtest setup`,
+                'regional.vietnam': `QA gates`,
+                'regional.philippines': `Report pack`,
+                'regional.australia': `Live accounts`,
+                'regional.note': `Built for retail and institutional workflows with full traceability.`,
+                'what.title': `Core Capabilities`,
+                'what.factory.title': `Idea-to-Strategy`,
+                'what.factory.desc': `Convert ideas into structured rules, signals, and execution logic.`,
+                'what.engineering.title': `Backtest & Experiment`,
+                'what.engineering.desc': `Test with realistic costs, slippage, and walk-forward evaluation.`,
+                'what.risk.title': `Risk & Governance`,
+                'what.risk.desc': `Risk limits, failure rules, execution anomalies, circuit breakers & rollback.`,
+                'what.monitoring.title': `Live Execution & Ops`,
+                'what.monitoring.desc': `Connect brokers, automate execution, and monitor performance in real time.`,
+                'platform.title': `End-to-End Strategy Pipeline`,
+                'platform.subtitle': `One workflow: idea intake → strategy blueprint → backtest → risk gates → live execution.`,
+                'platform.step1.title': `Idea Intake`,
+                'platform.step1.desc': `Capture the edge and intent`,
+                'platform.step2.title': `Strategy Blueprint`,
+                'platform.step2.desc': `Rules, signals, and execution logic`,
+                'platform.step3.title': `Data & Connectors`,
+                'platform.step3.desc': `Market data, symbols, broker/API mapping`,
+                'platform.step4.title': `Backtest Engine`,
+                'platform.step4.desc': `Realistic simulation with costs and slippage`,
+                'platform.step5.title': `QA & Risk Gates`,
+                'platform.step5.desc': `Overfitting checks, stress tests, and limits`,
+                'platform.step6.title': `Live Execution + Monitoring`,
+                'platform.step6.desc': `Broker execution, alerts, and rollback controls`,
+                'platform.deliverables.title': `Deliverables Checklist`,
+                'platform.deliverables.spec': `Strategy Spec`,
+                'platform.deliverables.backtest': `Backtest Report`,
+                'platform.deliverables.risk': `Risk Profile`,
+                'platform.deliverables.deploy': `Execution Playbook`,
+                'platform.deliverables.monitoring': `Monitoring Dashboard`,
+                'integration.title': `Execution & Integrations`,
+                'integration.personal.title': `Personal Execution`,
+                'integration.personal.subtitle': `Traders / Small Teams`,
+                'integration.personal.desc': `Connect your broker, automate execution, and monitor risk in one place.`,
+                'integration.personal.output': `Output: Strategy + Backtest + Live deployment`,
+                'integration.personal.btn': `Personal Execution`,
+                'integration.institutional.title': `Institutional Integrations`,
+                'integration.institutional.subtitle': `Brokers / Data Vendors / Platforms / Prop / Funds`,
+                'integration.institutional.desc': `API, data, and execution partnerships for scalable deployment.`,
+                'integration.institutional.support': `Support: White-label, API integration, joint solutions`,
+                'integration.institutional.btn': `Institutional Integrations`,
+                'careers.title': `Get Started with ToMoon`,
+                'careers.subtitle': `Choose how you want to begin:`,
+                'careers.research': `Submit Strategy Idea`,
+                'careers.engineer': `Request Demo`,
+                'careers.systems': `Connect Live Account`,
+                'careers.btn': `Talk to ToMoon`,
+                'footer.copyright': `ToMoon Quant © 2026`,
+                'footer.disclaimer': `Risk Disclaimer: Trading involves high risk and may not be suitable for everyone. This website is for informational purposes only and does not constitute investment advice or profit guarantees.`,
+                'modal.personal.title': `Personal Integration`,
+                'modal.personal.name': `Name`,
+                'modal.personal.country': `Country/Region`,
+                'modal.personal.background': `Background`,
+                'modal.personal.interest': `Integration Interest`,
+                'modal.personal.notes': `Notes`,
+                'modal.institutional.title': `Institutional Integration`,
+                'modal.institutional.institution': `Institution Name`,
+                'modal.institutional.role': `Role`,
+                'modal.institutional.country': `Country/Region`,
+                'modal.institutional.direction': `Partnership Direction`,
+                'modal.institutional.selectOption': `Select...`,
+                'modal.institutional.data': `Data`,
+                'modal.institutional.api': `API`,
+                'modal.institutional.execution': `Execution`,
+                'modal.institutional.risk': `Risk`,
+                'modal.institutional.whitelabel': `White-label`,
+                'modal.institutional.other': `Other`,
+                'modal.institutional.notes': `Notes`,
+                'modal.contact': `Contact Email:`,
+                'modal.submit': `Submit`,
+                'modal.contact.title': `Contact Us`,
+                'modal.contact.desc': `Choose your integration type:`,
+                'modal.contact.personal': `Personal Integration`,
+                'modal.contact.institutional': `Institutional Integration`,
+                'modal.contact.email': `Or email us directly:`
+            },
+            zh: {
+                'nav.whoWeAre': `我们是谁`,
+                'nav.regionalFocus': `服务区域`,
+                'nav.platform': `平台架构`,
+                'nav.integration': `合作对接`,
+                'nav.careers': `开始使用`,
+                'nav.contact': `联系我们`,
+                'hero.subtitle': `从想法 → 策略 → 实盘执行，一站式平台`,
+                'hero.description': `ToMoon 将交易想法转化为可回测策略，用真实环境校验，然后对接实盘账户并进行风控执行。`,
+                'hero.value1.title': `想法 → 策略蓝图`,
+                'hero.value1.desc': `问题拆解 → 结构化 → 规则化`,
+                'hero.value2.title': `回测 → 验证优势`,
+                'hero.value2.desc': `回测 → 验证 → 压力测试`,
+                'hero.value3.title': `实盘 → 风控护航`,
+                'hero.value3.desc': `实盘执行 → 风控 → 监控`,
+                'hero.btnPersonal': `个人对接`,
+                'hero.btnInstitutional': `机构对接`,
+                'hero.btnCareers': `加入我们`,
+                'trust.systematic': `系统化研发`,
+                'trust.engineering': `工程化纪律`,
+                'trust.risk': `风险治理`,
+                'trust.monitoring': `监控运维`,
+                'who.title': `为什么是 ToMoon`,
+                'who.intro': `ToMoon 是一个策略工厂，把人的交易想法变成可执行、可回测、可上线的系统。`,
+                'who.card1.title': `AI 策略构建`,
+                'who.card1.desc': `将想法拆成规则、信号与执行逻辑。`,
+                'who.card2.title': `回测与 QA`,
+                'who.card2.desc': `真实回测、压力测试、上线报告。`,
+                'who.card3.title': `实盘执行`,
+                'who.card3.desc': `对接实盘账户，提供风控与监控。`,
+                'regional.title': `流程概览`,
+                'regional.subtitle': `从想法到实盘的清晰路径。`,
+                'regional.eastAsia': `发现`,
+                'regional.seAsia': `蓝图`,
+                'regional.oceania': `上线`,
+                'regional.china': `想法输入`,
+                'regional.japan': `优势假设`,
+                'regional.korea': `数据需求`,
+                'regional.singapore': `信号逻辑`,
+                'regional.malaysia': `风控规则`,
+                'regional.thailand': `执行计划`,
+                'regional.indonesia': `回测配置`,
+                'regional.vietnam': `质量门控`,
+                'regional.philippines': `报告交付`,
+                'regional.australia': `实盘账户`,
+                'regional.note': `面向个人与机构的全链路可追踪流程。`,
+                'what.title': `核心能力`,
+                'what.factory.title': `想法到策略`,
+                'what.factory.desc': `把想法转化为结构化规则、信号与执行逻辑。`,
+                'what.engineering.title': `回测与实验`,
+                'what.engineering.desc': `加入真实成本、滑点与走样验证。`,
+                'what.risk.title': `风控与治理`,
+                'what.risk.desc': `风险限额、失效规则、执行异常、熔断与回滚。`,
+                'what.monitoring.title': `实盘执行与运维`,
+                'what.monitoring.desc': `对接券商、自动执行、实时监控与复盘。`,
+                'platform.title': `端到端策略产线`,
+                'platform.subtitle': `一条流程：想法输入 → 策略蓝图 → 回测 → 风控门控 → 实盘执行。`,
+                'platform.step1.title': `想法输入`,
+                'platform.step1.desc': `捕捉优势与意图`,
+                'platform.step2.title': `策略蓝图`,
+                'platform.step2.desc': `规则、信号与执行逻辑`,
+                'platform.step3.title': `数据与连接`,
+                'platform.step3.desc': `行情数据、标的与 API 对接`,
+                'platform.step4.title': `回测引擎`,
+                'platform.step4.desc': `包含成本与滑点的真实模拟`,
+                'platform.step5.title': `质量与风控门控`,
+                'platform.step5.desc': `过拟合检查、压力测试与限额`,
+                'platform.step6.title': `实盘执行与监控`,
+                'platform.step6.desc': `执行、告警与版本回滚`,
+                'platform.deliverables.title': `交付物清单`,
+                'platform.deliverables.spec': `策略规格书`,
+                'platform.deliverables.backtest': `回测报告`,
+                'platform.deliverables.risk': `风险画像`,
+                'platform.deliverables.deploy': `执行手册`,
+                'platform.deliverables.monitoring': `监控仪表板`,
+                'integration.title': `执行与对接`,
+                'integration.personal.title': `个人实盘`,
+                'integration.personal.subtitle': `交易员 / 小团队`,
+                'integration.personal.desc': `对接券商账户，自动执行与风险监控。`,
+                'integration.personal.output': `输出：策略 + 回测 + 实盘上线`,
+                'integration.personal.btn': `个人实盘`,
+                'integration.institutional.title': `机构集成`,
+                'integration.institutional.subtitle': `券商 / 数据商 / 平台 / Prop / 基金`,
+                'integration.institutional.desc': `API、数据与执行通道合作，支持规模化部署。`,
+                'integration.institutional.support': `支持：白标、API 集成、联合方案`,
+                'integration.institutional.btn': `机构集成`,
+                'careers.title': `开始使用 ToMoon`,
+                'careers.subtitle': `选择你想要的开始方式：`,
+                'careers.research': `提交策略想法`,
+                'careers.engineer': `申请演示`,
+                'careers.systems': `连接实盘账户`,
+                'careers.btn': `联系 ToMoon`,
+                'footer.copyright': `ToMoon Quant © 2026`,
+                'footer.disclaimer': `风险提示：交易存在高风险，可能不适合所有人。本网站仅作信息展示，不构成投资建议或收益承诺。`,
+                'modal.personal.title': `个人对接`,
+                'modal.personal.name': `姓名`,
+                'modal.personal.country': `国家/地区`,
+                'modal.personal.background': `背景`,
+                'modal.personal.interest': `想对接的内容`,
+                'modal.personal.notes': `备注`,
+                'modal.institutional.title': `机构对接`,
+                'modal.institutional.institution': `机构名称`,
+                'modal.institutional.role': `职位`,
+                'modal.institutional.country': `国家/地区`,
+                'modal.institutional.direction': `合作方向`,
+                'modal.institutional.selectOption': `请选择...`,
+                'modal.institutional.data': `数据`,
+                'modal.institutional.api': `API`,
+                'modal.institutional.execution': `执行`,
+                'modal.institutional.risk': `风控`,
+                'modal.institutional.whitelabel': `白标`,
+                'modal.institutional.other': `其他`,
+                'modal.institutional.notes': `备注`,
+                'modal.contact': `联系邮箱：`,
+                'modal.submit': `提交`,
+                'modal.contact.title': `联系我们`,
+                'modal.contact.desc': `选择您的对接类型：`,
+                'modal.contact.personal': `个人对接`,
+                'modal.contact.institutional': `机构对接`,
+                'modal.contact.email': `或直接发送邮件：`
+            },
+            ms: {
+                'nav.whoWeAre': `Tentang Kami`,
+                'nav.regionalFocus': `Fokus Serantau`,
+                'nav.platform': `Seni Bina Platform`,
+                'nav.integration': `Integrasi`,
+                'nav.careers': `Kerjaya`,
+                'nav.contact': `Hubungi Kami`,
+                'hero.subtitle': `Kilang Kuantitatif · Saluran R&D & Pelaksanaan Strategi Sistematik`,
+                'hero.description': `Mengubah strategi daripada "idea" kepada sistem kuantitatif yang "boleh diuji balik, boleh diaudit, boleh dilaksanakan, boleh dipantau"`,
+                'hero.value1.title': `Penyelidikan → Peraturan`,
+                'hero.value1.desc': `研究 → 规则化`,
+                'hero.value2.title': `Ujian Balik → Realiti Bersih`,
+                'hero.value2.desc': `回测 → 真实化`,
+                'hero.value3.title': `Pelaksanaan → Ditadbir`,
+                'hero.value3.desc': `上线 → 可治理`,
+                'hero.btnPersonal': `Integrasi Peribadi`,
+                'hero.btnInstitutional': `Integrasi Institusi`,
+                'hero.btnCareers': `Kerjaya`,
+                'trust.systematic': `R&D Sistematik`,
+                'trust.engineering': `Disiplin Kejuruteraan`,
+                'trust.risk': `Tadbir Urus Risiko`,
+                'trust.monitoring': `Pemantauan & Ops`,
+                'who.title': `Tentang Kami`,
+                'who.intro': `ToMoon Quant adalah pasukan kuantitatif kecil tetapi fokus kejuruteraan yang pakar dalam mengubah "idea perdagangan" menjadi sistem boleh laksana`,
+                'who.card1.title': `Apa Yang Kami Lakukan`,
+                'who.card1.desc': `R&D & pelaksanaan strategi kuantitatif (bukan panggilan isyarat)`,
+                'who.card2.title': `Apa Yang Kami Sampaikan`,
+                'who.card2.desc': `Spesifikasi + Laporan Ujian Balik + Pintu Risiko + Pelan Pemantauan & Pelaksanaan`,
+                'who.card3.title': `Mengapa Percaya Kami`,
+                'who.card3.desc': `Proses boleh dihasilkan semula, dijejaki versi, keutamaan risiko, pelaksanaan boleh diaudit`,
+                'regional.title': `Pasaran Yang Kami Layani`,
+                'regional.subtitle': `Kini fokus pada pasaran Asia dan Australia (kerjasama merentas zon masa dan integrasi tempatan)`,
+                'regional.eastAsia': `Asia Timur`,
+                'regional.seAsia': `Asia Tenggara`,
+                'regional.oceania': `Oceania`,
+                'regional.china': `China`,
+                'regional.japan': `Jepun`,
+                'regional.korea': `Korea Selatan`,
+                'regional.singapore': `Singapura`,
+                'regional.malaysia': `Malaysia`,
+                'regional.thailand': `Thailand`,
+                'regional.indonesia': `Indonesia`,
+                'regional.vietnam': `Vietnam`,
+                'regional.philippines': `Filipina`,
+                'regional.australia': `Australia`,
+                'regional.note': `Menyokong komunikasi berbilang bahasa dan integrasi teknikal merentas wilayah (peribadi dan institusi)`,
+                'what.title': `Apa Yang Kami Lakukan`,
+                'what.factory.title': `Kilang Kuantitatif`,
+                'what.factory.desc': `Saluran strategi 0→1: pengumpulan idea, kontrak data, peraturan, pintu, pelaksanaan`,
+                'what.engineering.title': `Kejuruteraan Strategi`,
+                'what.engineering.desc': `Mengubah logik manual kepada peraturan mesin: Penapis/Pencetus/Masuk/Keluar/Pelaksanaan`,
+                'what.risk.title': `Risiko & Tadbir Urus`,
+                'what.risk.desc': `Risiko portfolio, peraturan kegagalan strategi, anomali pelaksanaan, pemutus litar & rollback`,
+                'what.monitoring.title': `Pemantauan & Ops`,
+                'what.monitoring.desc': `Amaran, log, versi, retrospektif, iterasi berterusan (bukan projek sekali)`,
+                'platform.title': `Seni Bina Platform ToMoon Quant`,
+                'platform.subtitle': `Satu saluran strategi = Kontrak input + Pintu ujian + Tadbir urus pelaksanaan + Kebolehkesanan penuh`,
+                'platform.step1.title': `Pengambilan Penyelidikan`,
+                'platform.step1.desc': `Idea/hipotesis strategi`,
+                'platform.step2.title': `Kontrak Data`,
+                'platform.step2.desc': `Medan/zon masa/pembersihan/andaian kelewatan`,
+                'platform.step3.title': `Komponen Alpha`,
+                'platform.step3.desc': `Perpustakaan komponen: Penapis/Pencetus/Setup`,
+                'platform.step4.title': `Enjin Ujian Balik`,
+                'platform.step4.desc': `Ujian balik realistik: kos/gelincir/pengisian separa/andaian impak`,
+                'platform.step5.title': `Pintu QA`,
+                'platform.step5.desc': `Pemeriksaan overfitting/ujian walk-forward/tekanan senario/kestabilan`,
+                'platform.step6.title': `Pelaksanaan + Pemantauan`,
+                'platform.step6.desc': `Had/pemutus litar/amaran/log/rollback versi`,
+                'platform.deliverables.title': `Senarai Semak Penghantaran`,
+                'platform.deliverables.spec': `Spesifikasi Strategi`,
+                'platform.deliverables.backtest': `Laporan Ujian Balik`,
+                'platform.deliverables.risk': `Peraturan Risiko`,
+                'platform.deliverables.deploy': `Pelan Pelaksanaan`,
+                'platform.deliverables.monitoring': `Papan Pemuka Pemantauan`,
+                'integration.title': `Integrasi & Perkongsian`,
+                'integration.personal.title': `Integrasi Peribadi`,
+                'integration.personal.subtitle': `Pedagang / Pasukan Kecil`,
+                'integration.personal.desc': `Anda ada idea strategi, kami bantu anda kejuruteraan dan sahkan`,
+                'integration.personal.output': `Output: Spesifikasi + Ujian Balik + QA + Pelan Kertas/Pelaksanaan`,
+                'integration.personal.btn': `Integrasi Peribadi`,
+                'integration.institutional.title': `Integrasi Institusi`,
+                'integration.institutional.subtitle': `Broker / Vendor Data / Platform / Prop / Dana`,
+                'integration.institutional.desc': `Perkongsian data/API/saluran pelaksanaan/modul risiko`,
+                'integration.institutional.support': `Sokongan: Label putih/Integrasi teknikal/Penyelesaian bersama`,
+                'integration.institutional.btn': `Integrasi Institusi`,
+                'careers.title': `Sertai ToMoon Quant`,
+                'careers.subtitle': `Kami mencari individu berbakat dalam:`,
+                'careers.research': `Penyelidikan Kuantitatif`,
+                'careers.engineer': `Jurutera Kuantitatif`,
+                'careers.systems': `Sistem Perdagangan / Data`,
+                'careers.btn': `Hantar Resume`,
+                'footer.copyright': `ToMoon Quant © 2026`,
+                'footer.disclaimer': `Penafian Risiko: Perdagangan melibatkan risiko tinggi dan mungkin tidak sesuai untuk semua orang. Laman web ini adalah untuk tujuan maklumat sahaja dan tidak merupakan nasihat pelaburan atau jaminan keuntungan.`,
+                'modal.personal.title': `Integrasi Peribadi`,
+                'modal.personal.name': `Nama`,
+                'modal.personal.country': `Negara/Wilayah`,
+                'modal.personal.background': `Latar Belakang`,
+                'modal.personal.interest': `Minat Integrasi`,
+                'modal.personal.notes': `Nota`,
+                'modal.institutional.title': `Integrasi Institusi`,
+                'modal.institutional.institution': `Nama Institusi`,
+                'modal.institutional.role': `Peranan`,
+                'modal.institutional.country': `Negara/Wilayah`,
+                'modal.institutional.direction': `Arah Perkongsian`,
+                'modal.institutional.selectOption': `Pilih...`,
+                'modal.institutional.data': `Data`,
+                'modal.institutional.api': `API`,
+                'modal.institutional.execution': `Pelaksanaan`,
+                'modal.institutional.risk': `Risiko`,
+                'modal.institutional.whitelabel': `Label Putih`,
+                'modal.institutional.other': `Lain-lain`,
+                'modal.institutional.notes': `Nota`,
+                'modal.contact': `E-mel Hubungi:`,
+                'modal.submit': `Hantar`,
+                'modal.contact.title': `Hubungi Kami`,
+                'modal.contact.desc': `Pilih jenis integrasi anda:`,
+                'modal.contact.personal': `Integrasi Peribadi`,
+                'modal.contact.institutional': `Integrasi Institusi`,
+                'modal.contact.email': `Atau e-mel kami secara langsung:`
+            },
+            id: {
+                'nav.whoWeAre': `Tentang Kami`,
+                'nav.regionalFocus': `Fokus Regional`,
+                'nav.platform': `Arsitektur Platform`,
+                'nav.integration': `Integrasi`,
+                'nav.careers': `Karir`,
+                'nav.contact': `Hubungi Kami`,
+                'hero.subtitle': `Pabrik Kuantitatif · Jalur R&D & Deployment Strategi Sistematis`,
+                'hero.description': `Mengubah strategi dari "ide" menjadi sistem kuantitatif yang "dapat diuji ulang, dapat diaudit, dapat diterapkan, dapat dipantau"`,
+                'hero.value1.title': `Penelitian → Aturan`,
+                'hero.value1.desc': `研究 → 规则化`,
+                'hero.value2.title': `Backtest → Realitas Bersih`,
+                'hero.value2.desc': `回测 → 真实化`,
+                'hero.value3.title': `Deploy → Diatur`,
+                'hero.value3.desc': `上线 → 可治理`,
+                'hero.btnPersonal': `Integrasi Pribadi`,
+                'hero.btnInstitutional': `Integrasi Institusional`,
+                'hero.btnCareers': `Karir`,
+                'trust.systematic': `R&D Sistematis`,
+                'trust.engineering': `Disiplin Teknik`,
+                'trust.risk': `Tata Kelola Risiko`,
+                'trust.monitoring': `Pemantauan & Ops`,
+                'who.title': `Tentang Kami`,
+                'who.intro': `ToMoon Quant adalah tim kuantitatif kecil namun fokus pada teknik yang mengkhususkan diri dalam mengubah "ide perdagangan" menjadi sistem yang dapat dieksekusi`,
+                'who.card1.title': `Apa Yang Kami Lakukan`,
+                'who.card1.desc': `R&D & deployment strategi kuantitatif (bukan panggilan sinyal)`,
+                'who.card2.title': `Apa Yang Kami Berikan`,
+                'who.card2.desc': `Spesifikasi + Laporan Backtest + Gerbang Risiko + Rencana Pemantauan & Deployment`,
+                'who.card3.title': `Mengapa Percaya Kami`,
+                'who.card3.desc': `Proses dapat direproduksi, dilacak versi, prioritas risiko, deployment dapat diaudit`,
+                'regional.title': `Pasar Yang Kami Layani`,
+                'regional.subtitle': `Saat ini fokus pada pasar Asia dan Australia (kolaborasi lintas zona waktu dan integrasi lokal)`,
+                'regional.eastAsia': `Asia Timur`,
+                'regional.seAsia': `Asia Tenggara`,
+                'regional.oceania': `Oseania`,
+                'regional.china': `Tiongkok`,
+                'regional.japan': `Jepang`,
+                'regional.korea': `Korea Selatan`,
+                'regional.singapore': `Singapura`,
+                'regional.malaysia': `Malaysia`,
+                'regional.thailand': `Thailand`,
+                'regional.indonesia': `Indonesia`,
+                'regional.vietnam': `Vietnam`,
+                'regional.philippines': `Filipina`,
+                'regional.australia': `Australia`,
+                'regional.note': `Mendukung komunikasi multibahasa dan integrasi teknis lintas wilayah (pribadi dan institusional)`,
+                'what.title': `Apa Yang Kami Lakukan`,
+                'what.factory.title': `Pabrik Kuantitatif`,
+                'what.factory.desc': `Jalur strategi 0→1: pengumpulan ide, kontrak data, aturan, gerbang, deployment`,
+                'what.engineering.title': `Teknik Strategi`,
+                'what.engineering.desc': `Mengubah logika manual menjadi aturan mesin: Filter/Trigger/Entry/Exit/Execution`,
+                'what.risk.title': `Risiko & Tata Kelola`,
+                'what.risk.desc': `Risiko portofolio, aturan kegagalan strategi, anomali eksekusi, pemutus sirkuit & rollback`,
+                'what.monitoring.title': `Pemantauan & Ops`,
+                'what.monitoring.desc': `Peringatan, log, versi, retrospektif, iterasi berkelanjutan (bukan proyek satu kali)`,
+                'platform.title': `Arsitektur Platform ToMoon Quant`,
+                'platform.subtitle': `Satu jalur strategi = Kontrak input + Gerbang pengujian + Tata kelola eksekusi + Ketertelusuran penuh`,
+                'platform.step1.title': `Asupan Penelitian`,
+                'platform.step1.desc': `Ide/hipotesis strategi`,
+                'platform.step2.title': `Kontrak Data`,
+                'platform.step2.desc': `Bidang/zona waktu/pembersihan/asumsi latensi`,
+                'platform.step3.title': `Komponen Alpha`,
+                'platform.step3.desc': `Perpustakaan komponen: Filter/Trigger/Setup`,
+                'platform.step4.title': `Mesin Backtest`,
+                'platform.step4.desc': `Backtest realistis: biaya/slippage/pengisian parsial/asumsi dampak`,
+                'platform.step5.title': `Gerbang QA`,
+                'platform.step5.desc': `Pemeriksaan overfitting/uji walk-forward/stres skenario/stabilitas`,
+                'platform.step6.title': `Eksekusi + Pemantauan`,
+                'platform.step6.desc': `Batas/pemutus sirkuit/peringatan/log/rollback versi`,
+                'platform.deliverables.title': `Daftar Periksa Deliverable`,
+                'platform.deliverables.spec': `Spesifikasi Strategi`,
+                'platform.deliverables.backtest': `Laporan Backtest`,
+                'platform.deliverables.risk': `Aturan Risiko`,
+                'platform.deliverables.deploy': `Rencana Deploy`,
+                'platform.deliverables.monitoring': `Dashboard Pemantauan`,
+                'integration.title': `Integrasi & Kemitraan`,
+                'integration.personal.title': `Integrasi Pribadi`,
+                'integration.personal.subtitle': `Trader / Tim Kecil`,
+                'integration.personal.desc': `Anda punya ide strategi, kami bantu Anda teknik dan validasi`,
+                'integration.personal.output': `Output: Spesifikasi + Backtest + QA + Rencana Paper/Deployment`,
+                'integration.personal.btn': `Integrasi Pribadi`,
+                'integration.institutional.title': `Integrasi Institusional`,
+                'integration.institutional.subtitle': `Broker / Vendor Data / Platform / Prop / Dana`,
+                'integration.institutional.desc': `Kemitraan data/API/saluran eksekusi/modul risiko`,
+                'integration.institutional.support': `Dukungan: Label putih/Integrasi teknis/Solusi bersama`,
+                'integration.institutional.btn': `Integrasi Institusional`,
+                'careers.title': `Bergabung dengan ToMoon Quant`,
+                'careers.subtitle': `Kami mencari individu berbakat dalam:`,
+                'careers.research': `Penelitian Kuantitatif`,
+                'careers.engineer': `Insinyur Kuantitatif`,
+                'careers.systems': `Sistem Perdagangan / Data`,
+                'careers.btn': `Kirim Resume`,
+                'footer.copyright': `ToMoon Quant © 2026`,
+                'footer.disclaimer': `Penafian Risiko: Trading melibatkan risiko tinggi dan mungkin tidak cocok untuk semua orang. Situs web ini hanya untuk tujuan informasi dan tidak merupakan saran investasi atau jaminan keuntungan.`,
+                'modal.personal.title': `Integrasi Pribadi`,
+                'modal.personal.name': `Nama`,
+                'modal.personal.country': `Negara/Wilayah`,
+                'modal.personal.background': `Latar Belakang`,
+                'modal.personal.interest': `Minat Integrasi`,
+                'modal.personal.notes': `Catatan`,
+                'modal.institutional.title': `Integrasi Institusional`,
+                'modal.institutional.institution': `Nama Institusi`,
+                'modal.institutional.role': `Peran`,
+                'modal.institutional.country': `Negara/Wilayah`,
+                'modal.institutional.direction': `Arah Kemitraan`,
+                'modal.institutional.selectOption': `Pilih...`,
+                'modal.institutional.data': `Data`,
+                'modal.institutional.api': `API`,
+                'modal.institutional.execution': `Eksekusi`,
+                'modal.institutional.risk': `Risiko`,
+                'modal.institutional.whitelabel': `Label Putih`,
+                'modal.institutional.other': `Lainnya`,
+                'modal.institutional.notes': `Catatan`,
+                'modal.contact': `Email Kontak:`,
+                'modal.submit': `Kirim`,
+                'modal.contact.title': `Hubungi Kami`,
+                'modal.contact.desc': `Pilih jenis integrasi Anda:`,
+                'modal.contact.personal': `Integrasi Pribadi`,
+                'modal.contact.institutional': `Integrasi Institusional`,
+                'modal.contact.email': `Atau email kami langsung:`
+            },
+            th: {
+                'nav.whoWeAre': `เราคือใคร`,
+                'nav.regionalFocus': `โฟกัสภูมิภาค`,
+                'nav.platform': `สถาปัตยกรรมแพลตฟอร์ม`,
+                'nav.integration': `การบูรณาการ`,
+                'nav.careers': `อาชีพ`,
+                'nav.contact': `ติดต่อเรา`,
+                'hero.subtitle': `โรงงานเชิงปริมาณ · ไปป์ไลน์การวิจัยและการปรับใช้กลยุทธ์อย่างเป็นระบบ`,
+                'hero.description': `แปลงกลยุทธ์จาก "ไอเดีย" เป็นระบบเชิงปริมาณที่ "สามารถทดสอบย้อนกลับได้ ตรวจสอบได้ ปรับใช้ได้ ตรวจสอบได้"`,
+                'hero.value1.title': `การวิจัย → กฎ`,
+                'hero.value1.desc': `研究 → 规则化`,
+                'hero.value2.title': `การทดสอบย้อนกลับ → ความเป็นจริงสุทธิ`,
+                'hero.value2.desc': `回测 → 真实化`,
+                'hero.value3.title': `การปรับใช้ → การกำกับ`,
+                'hero.value3.desc': `上线 → 可治理`,
+                'hero.btnPersonal': `การบูรณาการส่วนบุคคล`,
+                'hero.btnInstitutional': `การบูรณาการสถาบัน`,
+                'hero.btnCareers': `อาชีพ`,
+                'trust.systematic': `การวิจัยและพัฒนาอย่างเป็นระบบ`,
+                'trust.engineering': `วินัยทางวิศวกรรม`,
+                'trust.risk': `การกำกับดูแลความเสี่ยง`,
+                'trust.monitoring': `การตรวจสอบและการดำเนินงาน`,
+                'who.title': `เราคือใคร`,
+                'who.intro': `ToMoon Quant เป็นทีมเชิงปริมาณขนาดเล็กแต่มุ่งเน้นด้านวิศวกรรมที่เชี่ยวชาญในการแปลง "ไอเดียการซื้อขาย" เป็นระบบที่สามารถดำเนินการได้`,
+                'who.card1.title': `เราทำอะไร`,
+                'who.card1.desc': `การวิจัยและพัฒนาและการปรับใช้กลยุทธ์เชิงปริมาณ (ไม่ใช่การเรียกสัญญาณ)`,
+                'who.card2.title': `เราส่งมอบอะไร`,
+                'who.card2.desc': `ข้อกำหนด + รายงานการทดสอบย้อนกลับ + ประตูความเสี่ยง + แผนการตรวจสอบและการปรับใช้`,
+                'who.card3.title': `ทำไมต้องเชื่อถือเรา`,
+                'who.card3.desc': `กระบวนการที่สามารถทำซ้ำได้ ติดตามเวอร์ชันได้ ความเสี่ยงเป็นอันดับแรก การปรับใช้ที่สามารถตรวจสอบได้`,
+                'regional.title': `ตลาดที่เราให้บริการ`,
+                'regional.subtitle': `ปัจจุบันมุ่งเน้นที่ตลาดเอเชียและออสเตรเลีย (ความร่วมมือข้ามเขตเวลาและการบูรณาการในท้องถิ่น)`,
+                'regional.eastAsia': `เอเชียตะวันออก`,
+                'regional.seAsia': `เอเชียตะวันออกเฉียงใต้`,
+                'regional.oceania': `โอเชียเนีย`,
+                'regional.china': `จีน`,
+                'regional.japan': `ญี่ปุ่น`,
+                'regional.korea': `เกาหลีใต้`,
+                'regional.singapore': `สิงคโปร์`,
+                'regional.malaysia': `มาเลเซีย`,
+                'regional.thailand': `ไทย`,
+                'regional.indonesia': `อินโดนีเซีย`,
+                'regional.vietnam': `เวียดนาม`,
+                'regional.philippines': `ฟิลิปปินส์`,
+                'regional.australia': `ออสเตรเลีย`,
+                'regional.note': `รองรับการสื่อสารหลายภาษาและการบูรณาการทางเทคนิคข้ามภูมิภาค (ทั้งส่วนบุคคลและสถาบัน)`,
+                'what.title': `เราทำอะไร`,
+                'what.factory.title': `โรงงานเชิงปริมาณ`,
+                'what.factory.desc': `ไปป์ไลน์กลยุทธ์ 0→1: การรวบรวมไอเดีย สัญญาข้อมูล การกำหนดกฎ ประตู การปรับใช้`,
+                'what.engineering.title': `วิศวกรรมกลยุทธ์`,
+                'what.engineering.desc': `แปลงตรรกะด้วยตนเองเป็นกฎของเครื่อง: ตัวกรอง/ทริกเกอร์/เข้า/ออก/การดำเนินการ`,
+                'what.risk.title': `ความเสี่ยงและการกำกับดูแล`,
+                'what.risk.desc': `ความเสี่ยงของพอร์ตโฟลิโอ กฎการล้มเหลวของกลยุทธ์ ความผิดปกติในการดำเนินการ เบรกเกอร์วงจรและการย้อนกลับ`,
+                'what.monitoring.title': `การตรวจสอบและการดำเนินงาน`,
+                'what.monitoring.desc': `การแจ้งเตือน บันทึก เวอร์ชัน การทบทวน การทำซ้ำอย่างต่อเนื่อง (ไม่ใช่โครงการครั้งเดียว)`,
+                'platform.title': `สถาปัตยกรรมแพลตฟอร์ม ToMoon Quant`,
+                'platform.subtitle': `ไปป์ไลน์กลยุทธ์หนึ่ง = สัญญาอินพุต + ประตูการทดสอบ + การกำกับดูแลการดำเนินการ + ความสามารถในการติดตามเต็มรูปแบบ`,
+                'platform.step1.title': `การรับเข้าการวิจัย`,
+                'platform.step1.desc': `ไอเดีย/สมมติฐานกลยุทธ์`,
+                'platform.step2.title': `สัญญาข้อมูล`,
+                'platform.step2.desc': `ฟิลด์/เขตเวลา/การทำความสะอาด/สมมติฐานความล่าช้า`,
+                'platform.step3.title': `คอมโพเนนต์อัลฟา`,
+                'platform.step3.desc': `ไลบรารีคอมโพเนนต์: ตัวกรอง/ทริกเกอร์/การตั้งค่า`,
+                'platform.step4.title': `เครื่องมือทดสอบย้อนกลับ`,
+                'platform.step4.desc': `การทดสอบย้อนกลับที่สมจริง: ต้นทุน/การลื่นไถล/การเติมบางส่วน/สมมติฐานผลกระทบ`,
+                'platform.step5.title': `ประตู QA`,
+                'platform.step5.desc': `การตรวจสอบการปรับมากเกินไป/การทดสอบเดินไปข้างหน้า/ความเครียดสถานการณ์/ความเสถียร`,
+                'platform.step6.title': `การดำเนินการ + การตรวจสอบ`,
+                'platform.step6.desc': `ขด จำกัด/เบรกเกอร์วงจร/การแจ้งเตือน/บันทึก/การย้อนกลับเวอร์ชัน`,
+                'platform.deliverables.title': `รายการตรวจสอบการส่งมอบ`,
+                'platform.deliverables.spec': `ข้อกำหนดกลยุทธ์`,
+                'platform.deliverables.backtest': `รายงานการทดสอบย้อนกลับ`,
+                'platform.deliverables.risk': `กฎความเสี่ยง`,
+                'platform.deliverables.deploy': `แผนการปรับใช้`,
+                'platform.deliverables.monitoring': `แดชบอร์ดการตรวจสอบ`,
+                'integration.title': `การบูรณาการและความร่วมมือ`,
+                'integration.personal.title': `การบูรณาการส่วนบุคคล`,
+                'integration.personal.subtitle': `เทรดเดอร์ / ทีมเล็ก`,
+                'integration.personal.desc': `คุณมีไอเดียกลยุทธ์ เราช่วยคุณวิศวกรรมและตรวจสอบ`,
+                'integration.personal.output': `เอาต์พุต: ข้อกำหนด + การทดสอบย้อนกลับ + QA + แผนกระดาษ/การปรับใช้`,
+                'integration.personal.btn': `การบูรณาการส่วนบุคคล`,
+                'integration.institutional.title': `การบูรณาการสถาบัน`,
+                'integration.institutional.subtitle': `โบรกเกอร์ / ผู้จำหน่ายข้อมูล / แพลตฟอร์ม / Prop / กองทุน`,
+                'integration.institutional.desc': `ความร่วมมือด้านข้อมูล/API/ช่องทางการดำเนินการ/โมดูลความเสี่ยง`,
+                'integration.institutional.support': `การสนับสนุน: ฉลากสีขาว/การบูรณาการทางเทคนิค/โซลูชันร่วม`,
+                'integration.institutional.btn': `การบูรณาการสถาบัน`,
+                'careers.title': `เข้าร่วม ToMoon Quant`,
+                'careers.subtitle': `เรากำลังมองหาบุคคลที่มีความสามารถใน:`,
+                'careers.research': `การวิจัยเชิงปริมาณ`,
+                'careers.engineer': `วิศวกรเชิงปริมาณ`,
+                'careers.systems': `ระบบการซื้อขาย / ข้อมูล`,
+                'careers.btn': `ส่งประวัติ`,
+                'footer.copyright': `ToMoon Quant © 2026`,
+                'footer.disclaimer': `คำเตือนความเสี่ยง: การซื้อขายมีความเสี่ยงสูงและอาจไม่เหมาะสำหรับทุกคน เว็บไซต์นี้มีไว้เพื่อวัตถุประสงค์ด้านข้อมูลเท่านั้นและไม่ถือเป็นคำแนะนำในการลงทุนหรือการรับประกันผลกำไร`,
+                'modal.personal.title': `การบูรณาการส่วนบุคคล`,
+                'modal.personal.name': `ชื่อ`,
+                'modal.personal.country': `ประเทศ/ภูมิภาค`,
+                'modal.personal.background': `ประวัติ`,
+                'modal.personal.interest': `ความสนใจในการบูรณาการ`,
+                'modal.personal.notes': `หมายเหตุ`,
+                'modal.institutional.title': `การบูรณาการสถาบัน`,
+                'modal.institutional.institution': `ชื่อสถาบัน`,
+                'modal.institutional.role': `บทบาท`,
+                'modal.institutional.country': `ประเทศ/ภูมิภาค`,
+                'modal.institutional.direction': `ทิศทางความร่วมมือ`,
+                'modal.institutional.selectOption': `เลือก...`,
+                'modal.institutional.data': `ข้อมูล`,
+                'modal.institutional.api': `API`,
+                'modal.institutional.execution': `การดำเนินการ`,
+                'modal.institutional.risk': `ความเสี่ยง`,
+                'modal.institutional.whitelabel': `ฉลากสีขาว`,
+                'modal.institutional.other': `อื่นๆ`,
+                'modal.institutional.notes': `หมายเหตุ`,
+                'modal.contact': `อีเมลติดต่อ:`,
+                'modal.submit': `ส่ง`,
+                'modal.contact.title': `ติดต่อเรา`,
+                'modal.contact.desc': `เลือกประเภทการบูรณาการของคุณ:`,
+                'modal.contact.personal': `การบูรณาการส่วนบุคคล`,
+                'modal.contact.institutional': `การบูรณาการสถาบัน`,
+                'modal.contact.email': `หรืออีเมลเราโดยตรง:`
+            },
+            vi: {
+                'nav.whoWeAre': `Chúng Tôi Là Ai`,
+                'nav.regionalFocus': `Tập Trung Khu Vực`,
+                'nav.platform': `Kiến Trúc Nền Tảng`,
+                'nav.integration': `Tích Hợp`,
+                'nav.careers': `Nghề Nghiệp`,
+                'nav.contact': `Liên Hệ`,
+                'hero.subtitle': `Nhà Máy Định Lượng · Đường Ống R&D & Triển Khai Chiến Lược Có Hệ Thống`,
+                'hero.description': `Chuyển đổi chiến lược từ "ý tưởng" thành hệ thống định lượng "có thể kiểm tra lại, có thể kiểm toán, có thể triển khai, có thể giám sát"`,
+                'hero.value1.title': `Nghiên Cứu → Quy Tắc`,
+                'hero.value1.desc': `研究 → 规则化`,
+                'hero.value2.title': `Kiểm Tra Lại → Thực Tế Ròng`,
+                'hero.value2.desc': `回测 → 真实化`,
+                'hero.value3.title': `Triển Khai → Được Quản Lý`,
+                'hero.value3.desc': `上线 → 可治理`,
+                'hero.btnPersonal': `Tích Hợp Cá Nhân`,
+                'hero.btnInstitutional': `Tích Hợp Tổ Chức`,
+                'hero.btnCareers': `Nghề Nghiệp`,
+                'trust.systematic': `R&D Có Hệ Thống`,
+                'trust.engineering': `Kỷ Luật Kỹ Thuật`,
+                'trust.risk': `Quản Trị Rủi Ro`,
+                'trust.monitoring': `Giám Sát & Vận Hành`,
+                'who.title': `Chúng Tôi Là Ai`,
+                'who.intro': `ToMoon Quant là một đội ngũ định lượng nhỏ nhưng tập trung vào kỹ thuật chuyên về chuyển đổi "ý tưởng giao dịch" thành hệ thống có thể thực thi`,
+                'who.card1.title': `Chúng Tôi Làm Gì`,
+                'who.card1.desc': `R&D & triển khai chiến lược định lượng (không phải gọi tín hiệu)`,
+                'who.card2.title': `Chúng Tôi Giao Gì`,
+                'who.card2.desc': `Đặc tả + Báo cáo Kiểm tra Lại + Cổng Rủi Ro + Kế hoạch Giám sát & Triển khai`,
+                'who.card3.title': `Tại Sao Tin Tưởng Chúng Tôi`,
+                'who.card3.desc': `Quy trình có thể tái tạo, theo dõi phiên bản, ưu tiên rủi ro, triển khai có thể kiểm toán`,
+                'regional.title': `Thị Trường Chúng Tôi Phục Vụ`,
+                'regional.subtitle': `Hiện tập trung vào thị trường châu Á và Úc (hợp tác xuyên múi giờ và tích hợp địa phương)`,
+                'regional.eastAsia': `Đông Á`,
+                'regional.seAsia': `Đông Nam Á`,
+                'regional.oceania': `Châu Đại Dương`,
+                'regional.china': `Trung Quốc`,
+                'regional.japan': `Nhật Bản`,
+                'regional.korea': `Hàn Quốc`,
+                'regional.singapore': `Singapore`,
+                'regional.malaysia': `Malaysia`,
+                'regional.thailand': `Thái Lan`,
+                'regional.indonesia': `Indonesia`,
+                'regional.vietnam': `Việt Nam`,
+                'regional.philippines': `Philippines`,
+                'regional.australia': `Úc`,
+                'regional.note': `Hỗ trợ giao tiếp đa ngôn ngữ và tích hợp kỹ thuật xuyên khu vực (cả cá nhân và tổ chức)`,
+                'what.title': `Chúng Tôi Làm Gì`,
+                'what.factory.title': `Nhà Máy Định Lượng`,
+                'what.factory.desc': `Đường ống chiến lược 0→1: thu thập ý tưởng, hợp đồng dữ liệu, quy tắc hóa, cổng, triển khai`,
+                'what.engineering.title': `Kỹ Thuật Chiến Lược`,
+                'what.engineering.desc': `Chuyển đổi logic thủ công thành quy tắc máy: Bộ lọc/Kích hoạt/Vào/Ra/Thực thi`,
+                'what.risk.title': `Rủi Ro & Quản Trị`,
+                'what.risk.desc': `Rủi ro danh mục đầu tư, quy tắc thất bại chiến lược, bất thường thực thi, bộ ngắt mạch & hoàn nguyên`,
+                'what.monitoring.title': `Giám Sát & Vận Hành`,
+                'what.monitoring.desc': `Cảnh báo, nhật ký, phiên bản, hồi tưởng, lặp lại liên tục (không phải dự án một lần)`,
+                'platform.title': `Kiến Trúc Nền Tảng ToMoon Quant`,
+                'platform.subtitle': `Một đường ống chiến lược = Hợp đồng đầu vào + Cổng kiểm tra + Quản trị thực thi + Khả năng truy xuất đầy đủ`,
+                'platform.step1.title': `Tiếp Nhận Nghiên Cứu`,
+                'platform.step1.desc': `Ý tưởng/giả thuyết chiến lược`,
+                'platform.step2.title': `Hợp Đồng Dữ Liệu`,
+                'platform.step2.desc': `Trường/múi giờ/làm sạch/giả định độ trễ`,
+                'platform.step3.title': `Thành Phần Alpha`,
+                'platform.step3.desc': `Thư viện thành phần: Bộ lọc/Kích hoạt/Thiết lập`,
+                'platform.step4.title': `Động Cơ Kiểm Tra Lại`,
+                'platform.step4.desc': `Kiểm tra lại thực tế: chi phí/trượt giá/điền một phần/giả định tác động`,
+                'platform.step5.title': `Cổng QA`,
+                'platform.step5.desc': `Kiểm tra quá khớp/kiểm tra đi về phía trước/căng thẳng kịch bản/ổn định`,
+                'platform.step6.title': `Thực Thi + Giám Sát`,
+                'platform.step6.desc': `Giới hạn/bộ ngắt mạch/cảnh báo/nhật ký/hoàn nguyên phiên bản`,
+                'platform.deliverables.title': `Danh Sách Kiểm Tra Giao Hàng`,
+                'platform.deliverables.spec': `Đặc Tả Chiến Lược`,
+                'platform.deliverables.backtest': `Báo Cáo Kiểm Tra Lại`,
+                'platform.deliverables.risk': `Quy Tắc Rủi Ro`,
+                'platform.deliverables.deploy': `Kế Hoạch Triển Khai`,
+                'platform.deliverables.monitoring': `Bảng Điều Khiển Giám Sát`,
+                'integration.title': `Tích Hợp & Đối Tác`,
+                'integration.personal.title': `Tích Hợp Cá Nhân`,
+                'integration.personal.subtitle': `Nhà Giao Dịch / Đội Nhỏ`,
+                'integration.personal.desc': `Bạn có ý tưởng chiến lược, chúng tôi giúp bạn kỹ thuật và xác thực`,
+                'integration.personal.output': `Đầu ra: Đặc tả + Kiểm tra Lại + QA + Kế hoạch Giấy/Triển khai`,
+                'integration.personal.btn': `Tích Hợp Cá Nhân`,
+                'integration.institutional.title': `Tích Hợp Tổ Chức`,
+                'integration.institutional.subtitle': `Môi Giới / Nhà Cung Cấp Dữ Liệu / Nền Tảng / Prop / Quỹ`,
+                'integration.institutional.desc': `Đối tác dữ liệu/API/kênh thực thi/mô-đun rủi ro`,
+                'integration.institutional.support': `Hỗ trợ: Nhãn trắng/Tích hợp kỹ thuật/Giải pháp chung`,
+                'integration.institutional.btn': `Tích Hợp Tổ Chức`,
+                'careers.title': `Tham Gia ToMoon Quant`,
+                'careers.subtitle': `Chúng tôi đang tìm kiếm những cá nhân tài năng trong:`,
+                'careers.research': `Nghiên Cứu Định Lượng`,
+                'careers.engineer': `Kỹ Sư Định Lượng`,
+                'careers.systems': `Hệ Thống Giao Dịch / Dữ Liệu`,
+                'careers.btn': `Gửi Sơ Yếu Lý Lịch`,
+                'footer.copyright': `ToMoon Quant © 2026`,
+                'footer.disclaimer': `Tuyên Bố Từ Chối Rủi Ro: Giao dịch liên quan đến rủi ro cao và có thể không phù hợp với tất cả mọi người. Trang web này chỉ nhằm mục đích thông tin và không cấu thành lời khuyên đầu tư hoặc đảm bảo lợi nhuận.`,
+                'modal.personal.title': `Tích Hợp Cá Nhân`,
+                'modal.personal.name': `Tên`,
+                'modal.personal.country': `Quốc Gia/Khu Vực`,
+                'modal.personal.background': `Lý Lịch`,
+                'modal.personal.interest': `Quan Tâm Tích Hợp`,
+                'modal.personal.notes': `Ghi Chú`,
+                'modal.institutional.title': `Tích Hợp Tổ Chức`,
+                'modal.institutional.institution': `Tên Tổ Chức`,
+                'modal.institutional.role': `Vai Trò`,
+                'modal.institutional.country': `Quốc Gia/Khu Vực`,
+                'modal.institutional.direction': `Hướng Đối Tác`,
+                'modal.institutional.selectOption': `Chọn...`,
+                'modal.institutional.data': `Dữ Liệu`,
+                'modal.institutional.api': `API`,
+                'modal.institutional.execution': `Thực Thi`,
+                'modal.institutional.risk': `Rủi Ro`,
+                'modal.institutional.whitelabel': `Nhãn Trắng`,
+                'modal.institutional.other': `Khác`,
+                'modal.institutional.notes': `Ghi Chú`,
+                'modal.contact': `Email Liên Hệ:`,
+                'modal.submit': `Gửi`,
+                'modal.contact.title': `Liên Hệ Chúng Tôi`,
+                'modal.contact.desc': `Chọn loại tích hợp của bạn:`,
+                'modal.contact.personal': `Tích Hợp Cá Nhân`,
+                'modal.contact.institutional': `Tích Hợp Tổ Chức`,
+                'modal.contact.email': `Hoặc email chúng tôi trực tiếp:`
+            }
+        };
+
+        let currentLang = localStorage.getItem(`language`) || `en`;
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem(`language`, lang);
+            updateContent();
+            updateLangDisplay();
+            closeLangMenu();
+        }
+
+        function updateContent() {
+            const elements = document.querySelectorAll(`[data-i18n]`);
+            elements.forEach(element => {
+                const key = element.getAttribute(`data-i18n`);
+                if (i18n[currentLang] && i18n[currentLang][key]) {
+                    element.textContent = i18n[currentLang][key];
+                }
+            });
+        }
+
+        function updateLangDisplay() {
+            const langMap = {
+                en: `EN`,
+                zh: `中文`,
+                ms: `MS`,
+                id: `ID`,
+                th: `ไทย`,
+                vi: `VI`
+            };
+            document.getElementById(`current-lang`).textContent = langMap[currentLang];
+            
+            document.querySelectorAll(`.lang-option`).forEach(option => {
+                option.classList.remove(`selected`);
+            });
+            
+            const langOptions = [`en`, `zh`, `ms`, `id`, `th`, `vi`];
+            const selectedIndex = langOptions.indexOf(currentLang);
+            if (selectedIndex !== -1) {
+                document.querySelectorAll(`.lang-option`)[selectedIndex].classList.add(`selected`);
+            }
+        }
+
+        function toggleLangMenu() {
+            document.getElementById(`lang-menu`).classList.toggle(`active`);
+        }
+
+        function closeLangMenu() {
+            document.getElementById(`lang-menu`).classList.remove(`active`);
+        }
+
+        function openModal(type) {
+            const modalId = `modal-` + type;
+            document.getElementById(modalId).classList.add(`active`);
+            document.body.style.overflow = `hidden`;
+        }
+
+        function closeModal(type) {
+            const modalId = `modal-` + type;
+            document.getElementById(modalId).classList.remove(`active`);
+            document.body.style.overflow = `auto`;
+        }
+
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: `smooth`, block: `start` });
+            }
+        }
+
+        function handleFormSubmit(event, type) {
+            event.preventDefault();
+            const subject = type === `personal` 
+                ? `ToMoon%20Quant%20Personal%20Integration%20Inquiry`
+                : `ToMoon%20Quant%20Institutional%20Integration%20Inquiry`;
+            window.location.href = `mailto:info@tomoon.io?subject=${subject}`;
+            closeModal(type);
+        }
+
+        function toggleMobileMenu() {
+            const navLinks = document.querySelector(`.nav-links`);
+            navLinks.classList.toggle(`mobile-active`);
+        }
+
+        document.addEventListener(`click`, (e) => {
+            const langDropdown = document.querySelector(`.lang-dropdown`);
+            if (langDropdown && !langDropdown.contains(e.target)) {
+                closeLangMenu();
+            }
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add(`visible`);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.addEventListener(`DOMContentLoaded`, () => {
+            updateContent();
+            updateLangDisplay();
+            
+            document.querySelectorAll(`.section-fade`).forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+    <script src="https://cdn.kuse.ai/sdk.prd.js"></script>
+
+</body></html>

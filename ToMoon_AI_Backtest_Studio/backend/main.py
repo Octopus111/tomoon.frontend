@@ -9,15 +9,23 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from dotenv import load_dotenv
 
 from app.backtest_engine import run_condition_backtest
 from app.code_backtest_engine import run_code_backtest
 from app.data_provider import fetch_ohlcv_bars
+from app.email_service import send_early_access_email
 from app.llm_client import generate_strategy_code_artifacts, parse_strategy_with_llm
+from app.subscriber_repository import (
+    check_early_access_db_connection,
+    record_early_access_subscriber,
+)
 from app.models import (
     BacktestRequest,
     BacktestResponse,
     CodeBacktestRequest,
+    EarlyAccessSubscribeRequest,
+    EarlyAccessSubscribeResponse,
     GenerateCodeRequest,
     GenerateCodeResponse,
     HealthResponse,
@@ -27,6 +35,15 @@ from app.models import (
 
 app = FastAPI(title="ToMoon AI Backtest Studio", version="0.1.0")
 
+BACKEND_DIR = Path(__file__).resolve().parent
+ROOT = BACKEND_DIR.parent
+
+# Support both deployment layouts:
+# - backend/.env (recommended by project docs)
+# - project-root/.env (legacy)
+load_dotenv(BACKEND_DIR / ".env")
+load_dotenv(ROOT / ".env")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,7 +52,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ROOT = Path(__file__).resolve().parents[1]
 FRONTEND_DIR = ROOT / "frontend"
 
 if FRONTEND_DIR.exists():
@@ -45,6 +61,29 @@ if FRONTEND_DIR.exists():
 @app.get("/api/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     return HealthResponse(status="ok")
+
+
+@app.post("/api/early-access/subscribe", response_model=EarlyAccessSubscribeResponse)
+def early_access_subscribe(req: EarlyAccessSubscribeRequest) -> EarlyAccessSubscribeResponse:
+    try:
+        send_early_access_email(req.email)
+    except Exception as exc:
+        raise HTTPException(500, f"Failed to send early access email: {exc}") from exc
+
+    try:
+        record_early_access_subscriber(req.email, req.source)
+    except Exception as exc:
+        raise HTTPException(500, f"Email sent, but failed to persist subscriber: {exc}") from exc
+
+    return EarlyAccessSubscribeResponse(success=True, message="Early access email sent successfully.")
+
+
+@app.get("/api/early-access/db-health")
+def early_access_db_health() -> dict[str, str]:
+    ok, detail = check_early_access_db_connection()
+    if not ok:
+        raise HTTPException(500, f"Database check failed: {detail}")
+    return {"status": "ok", "detail": detail}
 
 
 @app.post("/api/agent/parse", response_model=ParseStrategyResponse)
