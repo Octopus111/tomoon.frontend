@@ -475,10 +475,10 @@
         if (!viewportHeight) return;
         const headerRect = welcomeHeader.getBoundingClientRect();
         const inputRect = inputContainer.getBoundingClientRect();
-        const gapBelowHeader = 28;
+        const gapBelowHeader = viewportHeight < 760 ? 44 : 56;
         const desiredTop = headerRect.bottom + gapBelowHeader;
-        const maxBottom = Math.round(viewportHeight * 0.38);
-        const minBottom = 80;
+        const maxBottom = Math.round(viewportHeight * 0.26);
+        const minBottom = viewportHeight < 760 ? 48 : 72;
         const computedBottom = viewportHeight - desiredTop - inputRect.height;
         const clampedBottom = Math.max(minBottom, Math.min(maxBottom, computedBottom));
         const nextBottom = Math.round(clampedBottom);
@@ -2801,6 +2801,11 @@
       
       // Initialize state
       setEmptyState(true);
+      scheduleDiscoverComposerPositionUpdate(true);
+      setTimeout(() => scheduleDiscoverComposerPositionUpdate(true), 120);
+      if (document.fonts?.ready) {
+        document.fonts.ready.then(() => scheduleDiscoverComposerPositionUpdate(true));
+      }
       if (!window.__discoverResizeBound) {
         window.__discoverResizeBound = true;
         window.addEventListener('resize', () => {
